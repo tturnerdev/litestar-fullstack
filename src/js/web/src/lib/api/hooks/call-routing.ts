@@ -39,6 +39,8 @@ export interface TimeCondition {
   noMatchDestination: string
   overrideMode: string
   scheduleId: string | null
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface TimeConditionCreate {
@@ -96,6 +98,8 @@ export interface IvrMenu {
   timeoutDestination: string | null
   invalidDestination: string | null
   options: IvrMenuOption[]
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface IvrMenuCreate {
@@ -157,6 +161,8 @@ export interface CallQueue {
   announceFrequency: number | null
   timeoutDestination: string | null
   members: CallQueueMember[]
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface CallQueueCreate {
@@ -218,6 +224,8 @@ export interface RingGroup {
   ringTime: number
   noAnswerDestination: string | null
   members: RingGroupMember[]
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface RingGroupCreate {

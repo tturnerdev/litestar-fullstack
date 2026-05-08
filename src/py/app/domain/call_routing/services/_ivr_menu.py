@@ -28,3 +28,4 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
         model_type = m.IvrMenuOption
 
     repository_type = Repo
+    match_fields = ["ivr_menu_id", "digit"]

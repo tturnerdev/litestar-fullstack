@@ -14,3 +14,4 @@ class ForwardingRuleService(service.SQLAlchemyAsyncRepositoryService[m.Forwardin
         model_type = m.ForwardingRule
 
     repository_type = Repo
+    match_fields = ["extension_id", "rule_type"]

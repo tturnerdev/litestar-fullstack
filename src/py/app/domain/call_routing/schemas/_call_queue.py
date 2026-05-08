@@ -1,5 +1,6 @@
 """Call queue schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -61,6 +62,8 @@ class CallQueue(CamelizedBaseStruct):
     announce_frequency: int | None = None
     timeout_destination: str | None = None
     members: list[CallQueueMember] = []
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class CallQueueCreate(CamelizedBaseStruct):

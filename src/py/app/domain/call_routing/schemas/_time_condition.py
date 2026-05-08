@@ -1,5 +1,6 @@
 """Time condition schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -17,6 +18,8 @@ class TimeCondition(CamelizedBaseStruct):
     no_match_destination: str
     override_mode: str
     schedule_id: UUID | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class TimeConditionCreate(CamelizedBaseStruct):

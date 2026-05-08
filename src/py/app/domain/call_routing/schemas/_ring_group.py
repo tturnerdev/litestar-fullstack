@@ -1,5 +1,6 @@
 """Ring group schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -44,6 +45,8 @@ class RingGroup(CamelizedBaseStruct):
     ring_time: int
     no_answer_destination: str | None = None
     members: list[RingGroupMember] = []
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class RingGroupCreate(CamelizedBaseStruct):

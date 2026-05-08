@@ -14,3 +14,4 @@ class UserRoleService(service.SQLAlchemyAsyncRepositoryService[m.UserRole]):
         model_type = m.UserRole
 
     repository_type = Repo
+    match_fields = ["user_id", "role_id"]

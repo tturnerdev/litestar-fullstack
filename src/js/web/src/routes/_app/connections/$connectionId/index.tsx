@@ -477,8 +477,13 @@ function ConnectionDetailPage() {
   }
 
   const handleDelete = async () => {
-    await deleteConnection.mutateAsync(connectionId)
-    router.navigate({ to: "/connections" })
+    try {
+      await deleteConnection.mutateAsync(connectionId)
+      toast.success("Connection deleted")
+      router.navigate({ to: "/connections" })
+    } catch {
+      toast.error("Failed to delete connection")
+    }
   }
 
   const currentSettingsText = settingsText ?? (data.settings ? JSON.stringify(data.settings, null, 2) : "")

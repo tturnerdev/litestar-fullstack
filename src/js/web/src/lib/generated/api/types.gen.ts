@@ -558,6 +558,7 @@ export type CallAnalyticsSummary = {
 export type CallQueue = {
   announceFrequency?: number | null;
   announceHoldtime: boolean;
+  createdAt?: string | null;
   id: string;
   joinEmpty: boolean;
   leaveWhenEmpty: boolean;
@@ -571,6 +572,7 @@ export type CallQueue = {
   strategy: string;
   teamId: string;
   timeoutDestination?: string | null;
+  updatedAt?: string | null;
   wrapupTime: number;
 };
 
@@ -1456,6 +1458,7 @@ export type GreetingType = "default" | "custom" | "name_only";
  * IvrMenu
  */
 export type IvrMenu = {
+  createdAt?: string | null;
   greetingFileUrl?: string | null;
   greetingText?: string | null;
   greetingType: string;
@@ -1467,6 +1470,7 @@ export type IvrMenu = {
   teamId: string;
   timeoutDestination?: string | null;
   timeoutSeconds: number;
+  updatedAt?: string | null;
 };
 
 /**
@@ -1998,6 +2002,7 @@ export type ResetTokenValidation = {
  * RingGroup
  */
 export type RingGroup = {
+  createdAt?: string | null;
   id: string;
   members?: Array<RingGroupMember>;
   name: string;
@@ -2006,6 +2011,7 @@ export type RingGroup = {
   ringTime: number;
   strategy: string;
   teamId: string;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2518,6 +2524,7 @@ export type TicketUser = {
  * TimeCondition
  */
 export type TimeCondition = {
+  createdAt?: string | null;
   id: string;
   matchDestination: string;
   name: string;
@@ -2525,6 +2532,7 @@ export type TimeCondition = {
   overrideMode: string;
   scheduleId?: string | null;
   teamId: string;
+  updatedAt?: string | null;
 };
 
 /**
@@ -3363,10 +3371,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3442,10 +3450,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3510,10 +3518,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3590,10 +3598,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from litestar import Controller, get
+from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException
 
@@ -28,7 +29,11 @@ class DeviceTemplateLookupController(Controller):
         "template_service": Provide(provide_device_template_service),
     }
 
-    @get(operation_id="LookupDeviceTemplate", path="/lookup")
+    @get(
+        operation_id="LookupDeviceTemplate",
+        path="/lookup",
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def lookup_template(
         self,
         template_service: DeviceTemplateService,

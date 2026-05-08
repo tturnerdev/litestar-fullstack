@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   type IvrMenu,
@@ -40,6 +41,7 @@ import {
   useReorderIvrMenuOptions,
   useUpdateIvrMenu,
 } from "@/lib/api/hooks/call-routing"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/call-routing/ivr-menus/$ivrMenuId")({
   component: IvrMenuDetailPage,
@@ -798,6 +800,25 @@ function IvrMenuDetailPage() {
                       <span className="font-mono text-xs break-all">{data.teamId}</span>
                       <CopyButton value={data.teamId} label="team ID" />
                     </div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">Created</p>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs">{formatRelativeTimeShort(data.createdAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatDateTime(data.createdAt)}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">Updated</p>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs">{formatRelativeTimeShort(data.updatedAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatDateTime(data.updatedAt)}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </CardContent>
               </Card>

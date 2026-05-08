@@ -14,3 +14,4 @@ class FaxEmailRouteService(service.SQLAlchemyAsyncRepositoryService[m.FaxEmailRo
         model_type = m.FaxEmailRoute
 
     repository_type = Repo
+    match_fields = ["fax_number_id", "email_address"]

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Literal, TypeVar
 
 import structlog
 from litestar import Controller, MediaType, get
+from litestar.datastructures import CacheControlHeader
 from litestar.response import Response
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -34,6 +35,7 @@ class SystemController(Controller):
         summary="Health Check",
         exclude_from_auth=True,
         security=[],  # Public endpoint - no auth required
+        cache_control=CacheControlHeader(no_store=True),
     )
     async def check_system_health(
         self,
@@ -81,6 +83,7 @@ class SystemController(Controller):
         summary="Get OAuth Configuration",
         exclude_from_auth=True,
         security=[],  # Public endpoint - no auth required
+        cache_control=CacheControlHeader(private=True, max_age=300),
     )
     async def get_oauth_config(self, settings: AppSettings) -> s.OAuthConfig:
         """Get OAuth provider configuration for frontend.

@@ -1,5 +1,6 @@
 """IVR menu schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -50,6 +51,8 @@ class IvrMenu(CamelizedBaseStruct):
     timeout_destination: str | None = None
     invalid_destination: str | None = None
     options: list[IvrMenuOption] = []
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class IvrMenuCreate(CamelizedBaseStruct):

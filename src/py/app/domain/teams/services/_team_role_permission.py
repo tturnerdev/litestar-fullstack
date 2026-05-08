@@ -14,3 +14,4 @@ class TeamRolePermissionService(service.SQLAlchemyAsyncRepositoryService[m.TeamR
         model_type = m.TeamRolePermission
 
     repository_type = Repo
+    match_fields = ["team_id", "role", "feature_area"]

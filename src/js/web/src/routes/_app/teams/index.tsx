@@ -203,7 +203,7 @@ function TeamsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Query
-  const { data, isLoading, isError, refetch } = useTeams({
+  const { data, isLoading, isError, refetch, isRefetching } = useTeams({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -533,7 +533,7 @@ function TeamsPage() {
 
               {/* Table */}
               <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-                <Table aria-label="Teams" aria-busy={isLoading}>
+                <Table aria-label="Teams" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead className="w-10">

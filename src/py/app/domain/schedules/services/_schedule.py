@@ -102,6 +102,7 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
         model_type = m.ScheduleEntry
 
     repository_type = Repo
+    match_fields = ["schedule_id", "day_of_week", "start_time"]
 
 
 def _entry_to_schema(entry: m.ScheduleEntry) -> ScheduleEntryDetail:

@@ -14,3 +14,4 @@ class TeamMemberService(service.SQLAlchemyAsyncRepositoryService[m.TeamMember]):
         model_type = m.TeamMember
 
     repository_type = Repo
+    match_fields = ["user_id", "team_id"]

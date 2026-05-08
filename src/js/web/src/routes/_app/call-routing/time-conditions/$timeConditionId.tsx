@@ -28,9 +28,11 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type TimeCondition, useDeleteTimeCondition, useSetTimeConditionOverride, useTimeCondition, useUpdateTimeCondition } from "@/lib/api/hooks/call-routing"
 import { useSchedules } from "@/lib/api/hooks/schedules"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/call-routing/time-conditions/$timeConditionId")({
   component: TimeConditionDetailPage,
@@ -459,6 +461,25 @@ function TimeConditionDetailPage() {
                       <span className="font-mono text-xs break-all">{data.teamId}</span>
                       <CopyButton value={data.teamId} label="team ID" />
                     </div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">Created</p>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs">{formatRelativeTimeShort(data.createdAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatDateTime(data.createdAt)}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">Updated</p>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs">{formatRelativeTimeShort(data.updatedAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatDateTime(data.updatedAt)}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </CardContent>
               </Card>

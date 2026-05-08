@@ -9,6 +9,7 @@ import { StatsCards } from "@/components/admin/stats-cards"
 import { SystemHealthCard } from "@/components/admin/system-health-card"
 import { TopUsersCard } from "@/components/admin/top-users-card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/admin/")({
@@ -22,23 +23,37 @@ function AdminDashboardPage() {
       <PageHeader eyebrow="Administration" title="Admin Console" description="Review activity, manage users, and oversee teams." breadcrumbs={<AdminBreadcrumbs />} />
       <AdminNav />
       <PageSection>
-        <AdminSummaryStats />
+        <SectionErrorBoundary name="Summary Stats">
+          <AdminSummaryStats />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.05}>
-        <StatsCards />
+        <SectionErrorBoundary name="Stats Cards">
+          <StatsCards />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.1}>
-        <AdminCharts />
+        <SectionErrorBoundary name="Charts">
+          <AdminCharts />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.2}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <RecentActivity />
+            <SectionErrorBoundary name="Recent Activity">
+              <RecentActivity />
+            </SectionErrorBoundary>
           </div>
           <div className="space-y-6">
-            <AdminQuickActions />
-            <TopUsersCard />
-            <SystemHealthCard />
+            <SectionErrorBoundary name="Quick Actions">
+              <AdminQuickActions />
+            </SectionErrorBoundary>
+            <SectionErrorBoundary name="Top Users">
+              <TopUsersCard />
+            </SectionErrorBoundary>
+            <SectionErrorBoundary name="System Health">
+              <SystemHealthCard />
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

@@ -14,6 +14,7 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
         model_type = m.TeamInvitation
 
     repository_type = Repo
+    match_fields = ["team_id", "email"]
 
     async def to_model_on_create(
         self, data: service.ModelDictT[m.TeamInvitation]

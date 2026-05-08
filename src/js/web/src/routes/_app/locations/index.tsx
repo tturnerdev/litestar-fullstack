@@ -8,6 +8,7 @@ import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -235,14 +236,16 @@ function LocationsPage() {
       </PageSection>
 
       <PageSection delay={0.1}>
-        <LocationList
-          searchParams={resolvedSearchParams}
-          navigate={navigate}
-          cellClass={cellClass}
-          isColumnVisible={isColumnVisible}
-          onSearchInputChange={setSearchInput}
-          onFreshnessChange={setFreshness}
-        />
+        <SectionErrorBoundary name="Location List">
+          <LocationList
+            searchParams={resolvedSearchParams}
+            navigate={navigate}
+            cellClass={cellClass}
+            isColumnVisible={isColumnVisible}
+            onSearchInputChange={setSearchInput}
+            onFreshnessChange={setFreshness}
+          />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

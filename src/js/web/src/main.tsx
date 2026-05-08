@@ -22,7 +22,15 @@ declare global {
   }
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
 
 const apiUrl = import.meta.env.VITE_API_URL ?? ""
 

@@ -2120,6 +2120,17 @@ export const CallQueueSchema = {
     announceHoldtime: {
       type: "boolean",
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     id: {
       format: "uuid",
       type: "string",
@@ -2171,6 +2182,17 @@ export const CallQueueSchema = {
     timeoutDestination: {
       oneOf: [
         {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {
@@ -5664,6 +5686,17 @@ export const GreetingTypeSchema = {
 
 export const IvrMenuSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     greetingFileUrl: {
       oneOf: [
         {
@@ -5729,6 +5762,17 @@ export const IvrMenuSchema = {
     },
     timeoutSeconds: {
       type: "integer",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: [
@@ -7709,6 +7753,17 @@ export const ResetTokenValidationSchema = {
 
 export const RingGroupSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     id: {
       format: "uuid",
       type: "string",
@@ -7744,6 +7799,17 @@ export const RingGroupSchema = {
     teamId: {
       format: "uuid",
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "name", "number", "ringTime", "strategy", "teamId"],
@@ -9343,6 +9409,17 @@ export const TicketUserSchema = {
 
 export const TimeConditionSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     id: {
       format: "uuid",
       type: "string",
@@ -9373,6 +9450,17 @@ export const TimeConditionSchema = {
     teamId: {
       format: "uuid",
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: [

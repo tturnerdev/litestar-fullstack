@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency, Parameter
 
 from app.domain.accounts.guards import requires_superuser
@@ -88,7 +89,12 @@ class WebhookEndpointController(Controller):
     ) -> None:
         _ = await webhook_service.delete(endpoint_id)
 
-    @get(operation_id="ListWebhookEventTypes", path="/event-types")
+    @get(
+        operation_id="ListWebhookEventTypes",
+        path="/event-types",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def list_event_types(self) -> list[WebhookEventTypeInfo]:
         event_types = get_all_event_types()
         return [WebhookEventTypeInfo(event=et["event"], description=et["description"]) for et in event_types]

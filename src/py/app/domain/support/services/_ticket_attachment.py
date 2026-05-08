@@ -14,3 +14,4 @@ class TicketAttachmentService(service.SQLAlchemyAsyncRepositoryService[m.TicketA
         model_type = m.TicketAttachment
 
     repository_type = Repo
+    match_fields = ["ticket_message_id", "file_path"]

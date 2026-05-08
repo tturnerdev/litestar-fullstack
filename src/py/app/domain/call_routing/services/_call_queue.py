@@ -34,6 +34,7 @@ class CallQueueMemberService(service.SQLAlchemyAsyncRepositoryService[m.CallQueu
         model_type = m.CallQueueMember
 
     repository_type = Repo
+    match_fields = ["call_queue_id", "extension_id"]
 
     async def to_model_on_create(self, data: ModelDictT[m.CallQueueMember]) -> ModelDictT[m.CallQueueMember]:
         data = service.schema_dump(data)
