@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.269.0 (2026-05-07)
+
+### Added
+- **QueryClient defaults** — Global staleTime (30s), refetchOnWindowFocus disabled, retry count (1) for consistent query behavior across all pages
+- **Admin/locations error boundaries** — SectionErrorBoundary wrapping all admin dashboard sections and locations list to prevent full-page crashes
+- **Call-routing timestamps** — Ring groups, call queues, IVR menus, and time conditions now expose and display created_at/updated_at in detail pages
+- **Service match_fields** — Added natural-key upsert dedup on 10 services: team members, team invitations, team role permissions, user roles, fax email routes, forwarding rules, ticket attachments, schedule entries, IVR menu options, call queue members
+- **Cache-control headers** — Health endpoint (no-store), OAuth config, event types, and device templates (private, max-age=300)
+- **Accessibility** — aria-label on gateway table, aria-busy with isRefetching on teams and webhooks tables
+
+### Fixed
+- **Connection delete feedback** — Wrapped deleteConnection.mutateAsync in try/catch with toast success/error
+
 ## v0.268.0 (2026-05-07)
 
 ### Added
