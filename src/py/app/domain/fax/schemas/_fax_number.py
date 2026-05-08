@@ -29,5 +29,5 @@ class FaxNumberCreate(CamelizedBaseStruct):
 
 
 class FaxNumberUpdate(CamelizedBaseStruct, omit_defaults=True):
-    label: str | msgspec.UnsetType | None = msgspec.UNSET
+    label: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

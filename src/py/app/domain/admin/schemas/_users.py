@@ -1,9 +1,10 @@
 """Admin user schemas."""
 
 from datetime import date, datetime
+from typing import Annotated
 from uuid import UUID
 
-from msgspec import UNSET, UnsetType
+from msgspec import UNSET, Meta, UnsetType
 
 from app.domain.accounts.schemas import OauthAccount, UserRole, UserTeam
 from app.lib.schema import CamelizedBaseStruct
@@ -49,9 +50,9 @@ class AdminUserDetail(CamelizedBaseStruct, kw_only=True):
 class AdminUserUpdate(CamelizedBaseStruct, gc=False, omit_defaults=True):
     """Update payload for admin user management."""
 
-    name: str | UnsetType | None = UNSET
-    username: str | UnsetType | None = UNSET
-    phone: str | UnsetType | None = UNSET
+    name: Annotated[str, Meta(max_length=255)] | UnsetType | None = UNSET
+    username: Annotated[str, Meta(max_length=30)] | UnsetType | None = UNSET
+    phone: Annotated[str, Meta(max_length=20)] | UnsetType | None = UNSET
     is_active: bool | UnsetType = UNSET
     is_superuser: bool | UnsetType = UNSET
     is_verified: bool | UnsetType = UNSET

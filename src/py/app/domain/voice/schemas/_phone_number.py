@@ -42,6 +42,6 @@ class PhoneNumberCreate(CamelizedBaseStruct):
 class PhoneNumberUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Phone number update properties."""
 
-    label: str | msgspec.UnsetType | None = msgspec.UNSET
-    caller_id_name: str | msgspec.UnsetType | None = msgspec.UNSET
+    label: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    caller_id_name: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

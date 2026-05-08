@@ -73,8 +73,8 @@ class DeviceUpdate(CamelizedBaseStruct, omit_defaults=True):
     mac_address: Annotated[str, Meta(max_length=17)] | msgspec.UnsetType | None = msgspec.UNSET
     device_model: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     manufacturer: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    firmware_version: str | msgspec.UnsetType | None = msgspec.UNSET
-    ip_address: str | msgspec.UnsetType | None = msgspec.UNSET
+    firmware_version: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    ip_address: Annotated[str, Meta(max_length=45)] | msgspec.UnsetType | None = msgspec.UNSET
     config_json: dict | msgspec.UnsetType | None = msgspec.UNSET
     location_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     connection_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
