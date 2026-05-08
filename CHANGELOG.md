@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.255.0 (2026-05-07)
+
+### Added
+- **Real session management** — Settings "Active Sessions" section now uses real API data instead of stubs, with working sign-out and sign-out-all functionality
+- **Extension cross-domain links** — Extension detail page shows navigable links to E911 registrations, assigned devices, and forwarding destination extensions
+- **Fax messages URL-persisted date filters** — Start/end date filters now stored in URL params for link-sharing and back-navigation
+- **Webhook endpoint migration** — `webhook_endpoint` table created in database
+
+### Fixed
+- **Reverted unsafe Python TC001/TC003 changes** — Moving SQLAlchemy model enum imports and Litestar schema types into `TYPE_CHECKING` blocks broke runtime type resolution
+
 ## v0.254.0 (2026-05-07)
 
 ### Added
