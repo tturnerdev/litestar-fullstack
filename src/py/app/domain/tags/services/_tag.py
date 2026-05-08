@@ -55,3 +55,12 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
             if "description" in data and data["description"]:
                 data["description"] = data["description"].strip()
         return data
+
+    async def to_model_on_upsert(self, data: service.ModelDictT[m.Tag]) -> service.ModelDictT[m.Tag]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "name" in data:
+                data["name"] = data["name"].strip()
+            if "description" in data and data["description"]:
+                data["description"] = data["description"].strip()
+        return await super().to_model_on_upsert(data)

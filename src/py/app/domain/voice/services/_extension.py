@@ -57,6 +57,15 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
                     raise ValidationException("An extension with this extension number already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.Extension]) -> ModelDictT[m.Extension]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "extension_number" in data:
+                data["extension_number"] = data["extension_number"].strip()
+            if "display_name" in data:
+                data["display_name"] = data["display_name"].strip()
+        return data
+
     @staticmethod
     def _enrich_schema(db_obj: m.Extension) -> dict[str, Any]:
         """Extract E911 status from loaded phone_number relationship.
