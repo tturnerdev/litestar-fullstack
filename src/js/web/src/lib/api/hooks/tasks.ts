@@ -10,24 +10,12 @@ import { sseStatus } from "./events"
 // ---------------------------------------------------------------------------
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const config = client.getConfig()
-  const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-  const response = await fetch(`${baseUrl}${url}`, {
-    credentials: "include",
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
+  const response = await client.request({
+    method: (options?.method as "GET") ?? "GET",
+    url,
+    body: options?.body ? JSON.parse(options.body as string) : undefined,
   })
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail ?? `Request failed (${response.status})`)
-  }
-  if (response.status === 204) return undefined as unknown as T
-  return response.json()
+  return response.data as T
 }
 
 // ---------------------------------------------------------------------------
