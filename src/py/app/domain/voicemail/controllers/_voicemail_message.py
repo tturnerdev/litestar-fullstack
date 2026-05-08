@@ -173,6 +173,7 @@ class VoicemailMessageController(Controller):
     )
     async def toggle_read_status(
         self,
+        request: Request[m.User, Token, Any],
         voicemail_messages_service: VoicemailMessageService,
         message_id: Annotated[UUID, Parameter(title="Message ID", description="The voicemail message.")],
         data: VoicemailReadToggle,
@@ -180,6 +181,7 @@ class VoicemailMessageController(Controller):
         """Toggle the read status of a voicemail message.
 
         Args:
+            request: The current request
             voicemail_messages_service: Voicemail Message Service
             message_id: Message ID
             data: Read toggle payload
@@ -191,6 +193,7 @@ class VoicemailMessageController(Controller):
             db_obj = await voicemail_messages_service.mark_read(message_id)
         else:
             db_obj = await voicemail_messages_service.mark_unread(message_id)
+        request.app.emit(event_id="voicemail_message_updated", message_id=message_id)
         return voicemail_messages_service.to_schema(db_obj, schema_type=VoicemailMessage)
 
     @delete(

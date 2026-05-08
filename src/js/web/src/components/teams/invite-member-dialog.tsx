@@ -13,8 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createTeamInvitation, type TeamRoles } from "@/lib/generated/api"
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import { emailRegex } from "@/lib/validation"
 
 const inviteSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

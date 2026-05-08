@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreateExtension, usePhoneNumbers } from "@/lib/api/hooks/voice"
+import { extensionNumberRegex } from "@/lib/validation"
 
 const PHONE_NONE = "__none__"
 
@@ -40,7 +41,7 @@ const createExtensionSchema = z.object({
     .min(1, "Extension number is required")
     .min(2, "Extension number must be at least 2 digits")
     .max(6, "Extension number must be at most 6 digits")
-    .regex(/^\d+$/, "Extension number must contain only digits"),
+    .regex(extensionNumberRegex, "Extension number must contain only digits"),
   displayName: z.string().max(100, "Display name must be 100 characters or fewer").optional(),
   isActive: z.boolean(),
   phoneNumberId: z.string().optional(),

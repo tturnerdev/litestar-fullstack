@@ -28,6 +28,7 @@ import { useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { formatMacAddress } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
+import { ipv4Regex, macAddressRegex } from "@/lib/validation"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -47,8 +48,8 @@ const deviceTypes: { value: string; label: string; icon: LucideIcon }[] = [
 // Validation helpers
 // ---------------------------------------------------------------------------
 
-const MAC_REGEX = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/
-const IPV4_REGEX = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
+const MAC_REGEX = macAddressRegex
+const IPV4_REGEX = ipv4Regex
 
 // ---------------------------------------------------------------------------
 // Schema
