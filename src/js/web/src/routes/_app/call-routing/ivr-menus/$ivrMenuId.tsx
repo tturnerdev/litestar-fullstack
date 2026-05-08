@@ -224,6 +224,50 @@ function OptionRow({
   )
 }
 
+// -- Validation ---------------------------------------------------------------
+
+interface IvrMenuFieldErrors {
+  name?: string
+  timeout?: string
+  maxRetries?: string
+  timeoutDestination?: string
+  invalidDestination?: string
+}
+
+function validateIvrMenuField(field: keyof IvrMenuFieldErrors, value: string | number): string | undefined {
+  switch (field) {
+    case "name": {
+      const s = String(value).trim()
+      if (s === "") return "Name is required"
+      if (s.length < 2) return "Name must be at least 2 characters"
+      return undefined
+    }
+    case "timeout": {
+      const n = Number(value)
+      if (!Number.isFinite(n) || n < 1 || n > 300) return "Timeout must be between 1 and 300"
+      return undefined
+    }
+    case "maxRetries": {
+      const n = Number(value)
+      if (!Number.isFinite(n) || n < 1 || n > 10) return "Retries must be between 1 and 10"
+      return undefined
+    }
+    case "timeoutDestination": {
+      if (String(value).trim() === "") return "Timeout destination is required"
+      return undefined
+    }
+    case "invalidDestination": {
+      if (String(value).trim() === "") return "Invalid destination is required"
+      return undefined
+    }
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Info Field ---------------------------------------------------------------
 
 function InfoField({ label, value }: { label: string; value?: string | number | null }) {
@@ -255,6 +299,45 @@ function IvrMenuDetailPage() {
   const [editTimeoutDest, setEditTimeoutDest] = useState("")
   const [editInvalidDest, setEditInvalidDest] = useState("")
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<IvrMenuFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof IvrMenuFieldErrors, value: string | number) => {
+    const error = validateIvrMenuField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof IvrMenuFieldErrors, value: string | number) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof IvrMenuFieldErrors, value: string | number, setter: (v: never) => void) => {
+      setter(value as never)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const handleDestinationChange = useCallback(
+    (field: keyof IvrMenuFieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   useDocumentTitle(data ? `${data.name} - IVR Menus` : "IVR Menu Detail")
 
   function startEditing(ivr: IvrMenu) {
@@ -265,24 +348,50 @@ function IvrMenuDetailPage() {
     setEditMaxRetries(ivr.maxRetries)
     setEditTimeoutDest(ivr.timeoutDestination ?? "")
     setEditInvalidDest(ivr.invalidDestination ?? "")
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(true)
   }
 
   function handleSave() {
+    if (!data) return
+
+    // Validate all required fields before submit
+    const nameErr = validateField("name", editName)
+    const timeoutErr = validateField("timeout", editTimeout)
+    const retriesErr = validateField("maxRetries", editMaxRetries)
+    const timeoutDestErr = validateField("timeoutDestination", editTimeoutDest)
+    const invalidDestErr = validateField("invalidDestination", editInvalidDest)
+    // Mark all as touched so errors display
+    for (const f of ["name", "timeout", "maxRetries", "timeoutDestination", "invalidDestination"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || timeoutErr || retriesErr || timeoutDestErr || invalidDestErr) return
+
     const payload: Record<string, unknown> = {}
-    if (editName !== data?.name) payload.name = editName
-    if (editGreetingType !== data?.greetingType) payload.greetingType = editGreetingType
-    if (editGreetingText !== (data?.greetingText ?? "")) payload.greetingText = editGreetingText || null
-    if (editTimeout !== data?.timeoutSeconds) payload.timeoutSeconds = editTimeout
-    if (editMaxRetries !== data?.maxRetries) payload.maxRetries = editMaxRetries
-    if (editTimeoutDest !== (data?.timeoutDestination ?? "")) payload.timeoutDestination = editTimeoutDest || null
-    if (editInvalidDest !== (data?.invalidDestination ?? "")) payload.invalidDestination = editInvalidDest || null
-    updateMutation.mutate(payload, { onSuccess: () => setEditing(false) })
+    if (editName !== data.name) payload.name = editName
+    if (editGreetingType !== data.greetingType) payload.greetingType = editGreetingType
+    if (editGreetingText !== (data.greetingText ?? "")) payload.greetingText = editGreetingText || null
+    if (editTimeout !== data.timeoutSeconds) payload.timeoutSeconds = editTimeout
+    if (editMaxRetries !== data.maxRetries) payload.maxRetries = editMaxRetries
+    if (editTimeoutDest !== (data.timeoutDestination ?? "")) payload.timeoutDestination = editTimeoutDest || null
+    if (editInvalidDest !== (data.invalidDestination ?? "")) payload.invalidDestination = editInvalidDest || null
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+        setFieldErrors({})
+        touchedRef.current = {}
+      },
+    })
   }
 
   const handleDelete = async () => {
-    await deleteMutation.mutateAsync(ivrMenuId)
-    router.navigate({ to: "/call-routing", search: { tab: "ivr-menus" } })
+    try {
+      await deleteMutation.mutateAsync(ivrMenuId)
+      router.navigate({ to: "/call-routing", search: { tab: "ivr-menus" } })
+    } catch (err) {
+      toast.error(`Failed to delete IVR menu: ${err instanceof Error ? err.message : "Unknown error"}`)
+    }
   }
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
@@ -478,10 +587,18 @@ function IvrMenuDetailPage() {
                   </CardTitle>
                   {editing && (
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditing(false)
+                          setFieldErrors({})
+                          touchedRef.current = {}
+                        }}
+                      >
                         Cancel
                       </Button>
-                      <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+                      <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || hasValidationErrors}>
                         {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Save
                       </Button>
@@ -492,8 +609,16 @@ function IvrMenuDetailPage() {
                   {editing ? (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        <Label>
+                          Name <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          value={editName}
+                          onChange={(e) => handleFieldChange("name", e.target.value, setEditName)}
+                          onBlur={() => handleFieldBlur("name", editName)}
+                          aria-invalid={!!fieldErrors.name}
+                        />
+                        <FieldError message={fieldErrors.name} />
                       </div>
                       <div className="space-y-2">
                         <Label>Greeting Type</Label>
@@ -517,15 +642,47 @@ function IvrMenuDetailPage() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label>Timeout (seconds)</Label>
-                          <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(Number(e.target.value))} min={1} max={60} />
+                          <Input
+                            type="number"
+                            value={editTimeout}
+                            onChange={(e) => handleFieldChange("timeout", Number(e.target.value), setEditTimeout)}
+                            onBlur={() => handleFieldBlur("timeout", editTimeout)}
+                            min={1}
+                            max={300}
+                            aria-invalid={!!fieldErrors.timeout}
+                          />
+                          <FieldError message={fieldErrors.timeout} />
                         </div>
                         <div className="space-y-2">
                           <Label>Max Retries</Label>
-                          <Input type="number" value={editMaxRetries} onChange={(e) => setEditMaxRetries(Number(e.target.value))} min={0} max={10} />
+                          <Input
+                            type="number"
+                            value={editMaxRetries}
+                            onChange={(e) => handleFieldChange("maxRetries", Number(e.target.value), setEditMaxRetries)}
+                            onBlur={() => handleFieldBlur("maxRetries", editMaxRetries)}
+                            min={1}
+                            max={10}
+                            aria-invalid={!!fieldErrors.maxRetries}
+                          />
+                          <FieldError message={fieldErrors.maxRetries} />
                         </div>
                       </div>
-                      <DestinationPicker label="Timeout Destination" value={editTimeoutDest} onChange={setEditTimeoutDest} />
-                      <DestinationPicker label="Invalid Destination" value={editInvalidDest} onChange={setEditInvalidDest} />
+                      <div className="space-y-2">
+                        <DestinationPicker
+                          label="Timeout Destination *"
+                          value={editTimeoutDest}
+                          onChange={(v) => handleDestinationChange("timeoutDestination", v, setEditTimeoutDest)}
+                        />
+                        <FieldError message={fieldErrors.timeoutDestination} />
+                      </div>
+                      <div className="space-y-2">
+                        <DestinationPicker
+                          label="Invalid Destination *"
+                          value={editInvalidDest}
+                          onChange={(v) => handleDestinationChange("invalidDestination", v, setEditInvalidDest)}
+                        />
+                        <FieldError message={fieldErrors.invalidDestination} />
+                      </div>
                     </div>
                   ) : (
                     <div className="grid gap-4 text-sm md:grid-cols-2">

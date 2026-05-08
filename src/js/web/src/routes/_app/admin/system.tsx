@@ -807,7 +807,11 @@ function ExternalConnectionsCard() {
     setTestingAll(true)
     try {
       for (const conn of connections) {
-        await testConnection.mutateAsync(conn.id)
+        try {
+          await testConnection.mutateAsync(conn.id)
+        } catch {
+          // Individual test failure is already toasted by the hook's onError
+        }
       }
     } finally {
       setTestingAll(false)

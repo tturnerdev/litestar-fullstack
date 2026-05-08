@@ -90,6 +90,44 @@ function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: (
   )
 }
 
+// -- Validation ---------------------------------------------------------------
+
+interface CallQueueFieldErrors {
+  name?: string
+  strategy?: string
+  maxWaitTime?: string
+  ringTime?: string
+}
+
+function validateCallQueueField(field: keyof CallQueueFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "strategy":
+      if (!value) return "Strategy is required"
+      return undefined
+    case "maxWaitTime": {
+      if (value === "") return undefined
+      const n = Number(value)
+      if (Number.isNaN(n) || n <= 0) return "Max wait time must be a positive number"
+      return undefined
+    }
+    case "ringTime": {
+      if (value === "") return undefined
+      const n = Number(value)
+      if (Number.isNaN(n) || n <= 0) return "Ring time must be a positive number"
+      return undefined
+    }
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Edit Dialog --------------------------------------------------------------
 
 interface EditCallQueueDialogProps {
@@ -112,6 +150,36 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
   const [timeoutDestination, setTimeoutDestination] = useState(queue.timeoutDestination ?? "")
   const updateMutation = useUpdateCallQueue(queue.id)
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<CallQueueFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof CallQueueFieldErrors, value: string) => {
+    const error = validateCallQueueField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof CallQueueFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof CallQueueFieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   // Reset form state when the dialog opens or the queue data changes
   useEffect(() => {
     if (open) {
@@ -126,6 +194,8 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
       setLeaveWhenEmpty(queue.leaveWhenEmpty)
       setAnnounceHoldtime(queue.announceHoldtime)
       setTimeoutDestination(queue.timeoutDestination ?? "")
+      setFieldErrors({})
+      touchedRef.current = {}
     }
   }, [open, queue])
 
@@ -147,6 +217,17 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate all required fields before submit
+    const nameErr = validateField("name", name)
+    const strategyErr = validateField("strategy", strategy)
+    const maxWaitErr = validateField("maxWaitTime", String(maxWaitTime))
+    const ringTimeErr = validateField("ringTime", String(ringTime))
+    // Mark all as touched so errors display
+    for (const f of ["name", "strategy", "maxWaitTime", "ringTime"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || strategyErr || maxWaitErr || ringTimeErr) return
 
     const payload: Record<string, unknown> = {}
     if (name !== queue.name) payload.name = name
@@ -170,6 +251,8 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
     updateMutation.mutate(payload, {
       onSuccess: () => {
         onOpenChange(false)
+        setFieldErrors({})
+        touchedRef.current = {}
       },
     })
   }
@@ -191,8 +274,18 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
           <div className="space-y-4 py-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="edit-cq-name">Name</Label>
-                <Input id="edit-cq-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Sales Queue" required />
+                <Label htmlFor="edit-cq-name">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="edit-cq-name"
+                  value={name}
+                  onChange={(e) => handleFieldChange("name", e.target.value, setName)}
+                  onBlur={() => handleFieldBlur("name", name)}
+                  placeholder="Sales Queue"
+                  aria-invalid={!!fieldErrors.name}
+                />
+                <FieldError message={fieldErrors.name} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-number">Number</Label>
@@ -201,9 +294,19 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
             </div>
 
             <div className="space-y-2">
-              <Label>Strategy</Label>
-              <Select value={strategy} onValueChange={setStrategy}>
-                <SelectTrigger>
+              <Label>
+                Strategy <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={strategy}
+                onValueChange={(v) => {
+                  setStrategy(v)
+                  if (touchedRef.current.strategy) {
+                    validateField("strategy", v)
+                  }
+                }}
+              >
+                <SelectTrigger aria-invalid={!!fieldErrors.strategy}>
                   <SelectValue placeholder="Select strategy" />
                 </SelectTrigger>
                 <SelectContent>
@@ -214,6 +317,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                   ))}
                 </SelectContent>
               </Select>
+              <FieldError message={fieldErrors.strategy} />
             </div>
 
             <Separator />
@@ -221,11 +325,41 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-ring-time">Ring Time (s)</Label>
-                <Input id="edit-cq-ring-time" type="number" value={ringTime} onChange={(e) => setRingTime(Number(e.target.value))} min={5} />
+                <Input
+                  id="edit-cq-ring-time"
+                  type="number"
+                  value={ringTime}
+                  onChange={(e) => {
+                    const val = Number(e.target.value)
+                    setRingTime(val)
+                    if (touchedRef.current.ringTime) {
+                      validateField("ringTime", e.target.value)
+                    }
+                  }}
+                  onBlur={(e) => handleFieldBlur("ringTime", e.target.value)}
+                  min={5}
+                  aria-invalid={!!fieldErrors.ringTime}
+                />
+                <FieldError message={fieldErrors.ringTime} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-max-wait">Max Wait (s)</Label>
-                <Input id="edit-cq-max-wait" type="number" value={maxWaitTime} onChange={(e) => setMaxWaitTime(Number(e.target.value))} min={0} />
+                <Input
+                  id="edit-cq-max-wait"
+                  type="number"
+                  value={maxWaitTime}
+                  onChange={(e) => {
+                    const val = Number(e.target.value)
+                    setMaxWaitTime(val)
+                    if (touchedRef.current.maxWaitTime) {
+                      validateField("maxWaitTime", e.target.value)
+                    }
+                  }}
+                  onBlur={(e) => handleFieldBlur("maxWaitTime", e.target.value)}
+                  min={0}
+                  aria-invalid={!!fieldErrors.maxWaitTime}
+                />
+                <FieldError message={fieldErrors.maxWaitTime} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-max-callers">Max Callers</Label>
@@ -282,7 +416,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || !isDirty || updateMutation.isPending}>
+            <Button type="submit" disabled={!isDirty || hasValidationErrors || updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {updateMutation.isPending ? "Saving..." : "Save changes"}
             </Button>
@@ -481,8 +615,12 @@ function CallQueueDetailPage() {
   useDocumentTitle(data ? `${data.name} - Call Queues` : "Call Queue Detail")
 
   const handleDelete = async () => {
-    await deleteMutation.mutateAsync(callQueueId)
-    router.navigate({ to: "/call-routing", search: { tab: "call-queues" } })
+    try {
+      await deleteMutation.mutateAsync(callQueueId)
+      router.navigate({ to: "/call-routing", search: { tab: "call-queues" } })
+    } catch (err) {
+      toast.error(`Failed to delete call queue: ${err instanceof Error ? err.message : "Unknown error"}`)
+    }
   }
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null)

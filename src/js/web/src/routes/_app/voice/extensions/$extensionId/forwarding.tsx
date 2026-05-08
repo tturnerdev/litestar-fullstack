@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertTriangle, ArrowLeft, Loader2, PhoneForwarded, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,6 +62,41 @@ const CONDITION_VARIANTS: Record<string, "default" | "secondary" | "outline"> = 
   busy: "secondary",
   no_answer: "outline",
   unreachable: "outline",
+}
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+interface ForwardingFieldErrors {
+  destinationValue?: string
+  ringTimeoutSeconds?: string
+  priority?: string
+}
+
+function validateForwardingField(field: keyof ForwardingFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "destinationValue":
+      if (value.trim() === "") return "Destination is required"
+      return undefined
+    case "ringTimeoutSeconds": {
+      if (value === "") return undefined
+      const num = Number(value)
+      if (Number.isNaN(num) || num <= 0) return "Timeout must be a positive number"
+      return undefined
+    }
+    case "priority": {
+      if (value === "") return undefined
+      const num = Number(value)
+      if (!Number.isInteger(num) || num < 0) return "Priority must be a non-negative integer"
+      return undefined
+    }
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
 }
 
 // ---------------------------------------------------------------------------
@@ -297,16 +332,61 @@ function AddRuleDialog({ extensionId, open, onOpenChange }: { extensionId: strin
   const [timeout, setTimeout] = useState("")
   const [priority, setPriority] = useState("0")
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<ForwardingFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof ForwardingFieldErrors, value: string) => {
+    const error = validateForwardingField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof ForwardingFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof ForwardingFieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   function resetForm() {
     setRuleType("no_answer")
     setDestType("voicemail")
     setDestValue("")
     setTimeout("")
     setPriority("0")
+    setFieldErrors({})
+    touchedRef.current = {}
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    // Validate all fields before submit
+    const destErr = validateField("destinationValue", destValue)
+    const timeoutErr = ruleType === "no_answer" ? validateField("ringTimeoutSeconds", timeout) : undefined
+    const priorityErr = validateField("priority", priority)
+
+    // Mark all as touched so errors display
+    touchedRef.current.destinationValue = true
+    if (ruleType === "no_answer") touchedRef.current.ringTimeoutSeconds = true
+    touchedRef.current.priority = true
+
+    if (destErr || timeoutErr || priorityErr) return
+
     createMutation.mutate(
       {
         ruleType,
@@ -370,24 +450,48 @@ function AddRuleDialog({ extensionId, open, onOpenChange }: { extensionId: strin
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dest-value">Destination</Label>
+              <Label htmlFor="dest-value">
+                Destination <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="dest-value"
                 value={destValue}
-                onChange={(e) => setDestValue(e.target.value)}
+                onChange={(e) => handleFieldChange("destinationValue", e.target.value, setDestValue)}
+                onBlur={() => handleFieldBlur("destinationValue", destValue)}
+                aria-invalid={!!fieldErrors.destinationValue}
                 placeholder={destType === "voicemail" ? "Voicemail box ID" : destType === "extension" ? "Extension number" : "Phone number (e.g. +15551234567)"}
               />
+              <FieldError message={fieldErrors.destinationValue} />
             </div>
             {ruleType === "no_answer" && (
               <div className="space-y-2">
                 <Label htmlFor="ring-timeout">Ring timeout (seconds)</Label>
-                <Input id="ring-timeout" type="number" value={timeout} onChange={(e) => setTimeout(e.target.value)} placeholder="e.g. 20" min={5} max={120} />
+                <Input
+                  id="ring-timeout"
+                  type="number"
+                  value={timeout}
+                  onChange={(e) => handleFieldChange("ringTimeoutSeconds", e.target.value, setTimeout)}
+                  onBlur={() => handleFieldBlur("ringTimeoutSeconds", timeout)}
+                  aria-invalid={!!fieldErrors.ringTimeoutSeconds}
+                  placeholder="e.g. 20"
+                  min={5}
+                  max={120}
+                />
+                <FieldError message={fieldErrors.ringTimeoutSeconds} />
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
-              <Input id="priority" type="number" value={priority} onChange={(e) => setPriority(e.target.value)} min={0} />
-              <p className="text-xs text-muted-foreground">Lower numbers are evaluated first.</p>
+              <Input
+                id="priority"
+                type="number"
+                value={priority}
+                onChange={(e) => handleFieldChange("priority", e.target.value, setPriority)}
+                onBlur={() => handleFieldBlur("priority", priority)}
+                aria-invalid={!!fieldErrors.priority}
+                min={0}
+              />
+              {fieldErrors.priority ? <FieldError message={fieldErrors.priority} /> : <p className="text-xs text-muted-foreground">Lower numbers are evaluated first.</p>}
             </div>
           </div>
           <DialogFooter className="mt-6">
@@ -402,7 +506,7 @@ function AddRuleDialog({ extensionId, open, onOpenChange }: { extensionId: strin
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!destValue.trim() || createMutation.isPending}>
+            <Button type="submit" disabled={!destValue.trim() || hasValidationErrors || createMutation.isPending}>
               {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add Rule
             </Button>

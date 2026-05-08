@@ -85,6 +85,37 @@ function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: (
   )
 }
 
+// -- Validation ---------------------------------------------------------------
+
+interface RingGroupFieldErrors {
+  name?: string
+  strategy?: string
+  ringTime?: string
+}
+
+function validateRingGroupField(field: keyof RingGroupFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "strategy":
+      if (!value) return "Strategy is required"
+      return undefined
+    case "ringTime": {
+      if (value === "") return undefined
+      const n = Number(value)
+      if (Number.isNaN(n) || n <= 0) return "Ring time must be a positive number"
+      return undefined
+    }
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Edit Dialog --------------------------------------------------------------
 
 interface EditRingGroupDialogProps {
@@ -101,6 +132,36 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
   const [noAnswerDest, setNoAnswerDest] = useState(ringGroup.noAnswerDestination ?? "")
   const updateMutation = useUpdateRingGroup(ringGroup.id)
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<RingGroupFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof RingGroupFieldErrors, value: string) => {
+    const error = validateRingGroupField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof RingGroupFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof RingGroupFieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   // Reset form state when the dialog opens or the ring group changes
   useEffect(() => {
     if (open) {
@@ -109,6 +170,8 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
       setStrategy(ringGroup.strategy)
       setRingTime(ringGroup.ringTime)
       setNoAnswerDest(ringGroup.noAnswerDestination ?? "")
+      setFieldErrors({})
+      touchedRef.current = {}
     }
   }, [open, ringGroup])
 
@@ -124,6 +187,16 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate all required fields before submit
+    const nameErr = validateField("name", name)
+    const strategyErr = validateField("strategy", strategy)
+    const ringTimeErr = validateField("ringTime", String(ringTime))
+    // Mark all as touched so errors display
+    for (const f of ["name", "strategy", "ringTime"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || strategyErr || ringTimeErr) return
 
     const payload: Record<string, unknown> = {}
     if (name !== ringGroup.name) payload.name = name
@@ -141,6 +214,8 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
     updateMutation.mutate(payload, {
       onSuccess: () => {
         onOpenChange(false)
+        setFieldErrors({})
+        touchedRef.current = {}
       },
     })
   }
@@ -162,8 +237,18 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
           <div className="space-y-4 py-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="edit-rg-name">Name</Label>
-                <Input id="edit-rg-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ring group name" required />
+                <Label htmlFor="edit-rg-name">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="edit-rg-name"
+                  value={name}
+                  onChange={(e) => handleFieldChange("name", e.target.value, setName)}
+                  onBlur={() => handleFieldBlur("name", name)}
+                  placeholder="Ring group name"
+                  aria-invalid={!!fieldErrors.name}
+                />
+                <FieldError message={fieldErrors.name} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-rg-number">Number</Label>
@@ -174,9 +259,19 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
             <Separator />
 
             <div className="space-y-2">
-              <Label htmlFor="edit-rg-strategy">Strategy</Label>
-              <Select value={strategy} onValueChange={setStrategy}>
-                <SelectTrigger id="edit-rg-strategy">
+              <Label htmlFor="edit-rg-strategy">
+                Strategy <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={strategy}
+                onValueChange={(v) => {
+                  setStrategy(v)
+                  if (touchedRef.current.strategy) {
+                    validateField("strategy", v)
+                  }
+                }}
+              >
+                <SelectTrigger id="edit-rg-strategy" aria-invalid={!!fieldErrors.strategy}>
                   <SelectValue placeholder="Select strategy" />
                 </SelectTrigger>
                 <SelectContent>
@@ -187,12 +282,29 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
                   ))}
                 </SelectContent>
               </Select>
+              <FieldError message={fieldErrors.strategy} />
               <p className="text-xs text-muted-foreground">How incoming calls are distributed to group members.</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-rg-ringtime">Ring Time (seconds)</Label>
-              <Input id="edit-rg-ringtime" type="number" value={ringTime} onChange={(e) => setRingTime(Number(e.target.value))} min={5} max={300} />
+              <Input
+                id="edit-rg-ringtime"
+                type="number"
+                value={ringTime}
+                onChange={(e) => {
+                  const val = Number(e.target.value)
+                  setRingTime(val)
+                  if (touchedRef.current.ringTime) {
+                    validateField("ringTime", e.target.value)
+                  }
+                }}
+                onBlur={(e) => handleFieldBlur("ringTime", e.target.value)}
+                min={5}
+                max={300}
+                aria-invalid={!!fieldErrors.ringTime}
+              />
+              <FieldError message={fieldErrors.ringTime} />
               <p className="text-xs text-muted-foreground">How long each member rings before moving on (5-300 seconds).</p>
             </div>
 
@@ -209,7 +321,7 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!isDirty || !name.trim() || updateMutation.isPending}>
+            <Button type="submit" disabled={!isDirty || hasValidationErrors || updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {updateMutation.isPending ? "Saving..." : "Save changes"}
             </Button>
@@ -409,8 +521,12 @@ function RingGroupDetailPage() {
   useDocumentTitle(data ? `${data.name} - Ring Groups` : "Ring Group Detail")
 
   const handleDelete = async () => {
-    await deleteMutation.mutateAsync(ringGroupId)
-    router.navigate({ to: "/call-routing", search: { tab: "ring-groups" } })
+    try {
+      await deleteMutation.mutateAsync(ringGroupId)
+      router.navigate({ to: "/call-routing", search: { tab: "ring-groups" } })
+    } catch (err) {
+      toast.error(`Failed to delete ring group: ${err instanceof Error ? err.message : "Unknown error"}`)
+    }
   }
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
