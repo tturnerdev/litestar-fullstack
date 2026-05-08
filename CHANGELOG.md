@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.345.0 (2026-05-08)
+
+### Security
+- **Device actions authorization** — Added `requires_feature_permission` guards to all device action endpoints (reboot, reprovision, line management, screenshot, key press) — previously only protected by `requires_active_user`
+
+### Fixed
+- **Fax email route duplicate bypass** — Email uniqueness check now works when only `email_address` is updated without `fax_number_id` in the payload, by fetching the current record's fax_number_id
+
 ## v0.344.0 (2026-05-08)
 
 ### Fixed

@@ -35,9 +35,13 @@ class FaxEmailRouteService(service.SQLAlchemyAsyncRepositoryService[m.FaxEmailRo
 
     async def to_model_on_update(self, data: ModelDictT[m.FaxEmailRoute], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.FaxEmailRoute]:
         data = service.schema_dump(data)
-        if service.is_dict(data) and "fax_number_id" in data and "email_address" in data:
+        if service.is_dict(data) and "email_address" in data and item_id is not None:
+            fax_number_id = data.get("fax_number_id")
+            if fax_number_id is None:
+                current = await self.get(item_id)
+                fax_number_id = current.fax_number_id
             existing = await self.repository.list(
-                m.FaxEmailRoute.fax_number_id == data["fax_number_id"],
+                m.FaxEmailRoute.fax_number_id == fax_number_id,
                 m.FaxEmailRoute.email_address == data["email_address"],
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):

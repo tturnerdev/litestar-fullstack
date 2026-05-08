@@ -16,6 +16,7 @@ from litestar.params import Parameter
 from app.db import models as m
 from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.devices.deps import provide_devices_service
 from app.domain.devices.jobs import device_reboot_job, device_reprovision_job
 from app.domain.devices.schemas import (
@@ -67,7 +68,7 @@ class DeviceActionsController(Controller):
         "task_service": Provide(provide_background_tasks_service),
     }
 
-    @post(operation_id="RebootDevice", summary="Reboot a device", path="/api/devices/{device_id:uuid}/reboot")
+    @post(operation_id="RebootDevice", summary="Reboot a device", path="/api/devices/{device_id:uuid}/reboot", guards=[requires_feature_permission("devices", "edit")])
     async def reboot_device(
         self,
         request: Request[m.User, Token, Any],
@@ -105,7 +106,7 @@ class DeviceActionsController(Controller):
         )
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
-    @post(operation_id="ReprovisionDevice", summary="Reprovision a device", path="/api/devices/{device_id:uuid}/reprovision")
+    @post(operation_id="ReprovisionDevice", summary="Reprovision a device", path="/api/devices/{device_id:uuid}/reprovision", guards=[requires_feature_permission("devices", "edit")])
     async def reprovision_device(
         self,
         request: Request[m.User, Token, Any],
@@ -143,7 +144,7 @@ class DeviceActionsController(Controller):
         )
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
-    @get(operation_id="ListDeviceLines", summary="List device line assignments", path="/api/devices/{device_id:uuid}/lines")
+    @get(operation_id="ListDeviceLines", summary="List device line assignments", path="/api/devices/{device_id:uuid}/lines", guards=[requires_feature_permission("devices", "view")])
     async def list_device_lines(
         self,
         devices_service: DeviceService,
@@ -157,7 +158,7 @@ class DeviceActionsController(Controller):
             schemas.append(schema)
         return schemas
 
-    @put(operation_id="SetDeviceLines", summary="Set device line assignments", path="/api/devices/{device_id:uuid}/lines")
+    @put(operation_id="SetDeviceLines", summary="Set device line assignments", path="/api/devices/{device_id:uuid}/lines", guards=[requires_feature_permission("devices", "edit")])
     async def set_device_lines(
         self,
         request: Request[m.User, Token, Any],
@@ -193,6 +194,7 @@ class DeviceActionsController(Controller):
         path="/api/devices/{device_id:uuid}/screenshot",
         media_type="image/bmp",
         include_in_schema=False,
+        guards=[requires_feature_permission("devices", "view")],
     )
     async def get_device_screenshot(
         self,
@@ -228,6 +230,7 @@ class DeviceActionsController(Controller):
         operation_id="SendDeviceAction",
         path="/api/devices/{device_id:uuid}/action",
         include_in_schema=False,
+        guards=[requires_feature_permission("devices", "edit")],
     )
     async def send_device_action(
         self,
