@@ -24,7 +24,7 @@ class RingGroupMemberCreate(CamelizedBaseStruct):
     """Schema for creating a ring group member."""
 
     extension_id: UUID | None = None
-    external_number: str | None = None
+    external_number: Annotated[str, Meta(max_length=20)] | None = None
     sort_order: int = 0
 
 
@@ -32,7 +32,7 @@ class RingGroupMemberUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a ring group member."""
 
     extension_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
-    external_number: str | msgspec.UnsetType | None = msgspec.UNSET
+    external_number: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
     sort_order: int | msgspec.UnsetType = msgspec.UNSET
 
 
@@ -56,9 +56,9 @@ class RingGroupCreate(CamelizedBaseStruct):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
     number: Annotated[str, Meta(min_length=1, max_length=50)]
-    strategy: str = "ring_all"
+    strategy: Annotated[str, Meta(max_length=50)] = "ring_all"
     ring_time: Annotated[int, Meta(ge=1, le=600)] = 20
-    no_answer_destination: str | None = None
+    no_answer_destination: Annotated[str, Meta(max_length=255)] | None = None
 
 
 class RingGroupUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -66,6 +66,6 @@ class RingGroupUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     number: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    strategy: str | msgspec.UnsetType = msgspec.UNSET
+    strategy: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     ring_time: Annotated[int, Meta(ge=1, le=600)] | msgspec.UnsetType = msgspec.UNSET
-    no_answer_destination: str | msgspec.UnsetType | None = msgspec.UNSET
+    no_answer_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET

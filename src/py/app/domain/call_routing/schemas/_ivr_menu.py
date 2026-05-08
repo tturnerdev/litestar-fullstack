@@ -61,23 +61,23 @@ class IvrMenuCreate(CamelizedBaseStruct):
     """Schema for creating an IVR menu."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    greeting_type: str = "none"
-    greeting_text: str | None = None
-    greeting_file_url: str | None = None
+    greeting_type: Annotated[str, Meta(max_length=50)] = "none"
+    greeting_text: Annotated[str, Meta(max_length=2000)] | None = None
+    greeting_file_url: Annotated[str, Meta(max_length=500)] | None = None
     timeout_seconds: Annotated[int, Meta(ge=1, le=120)] = 5
     max_retries: Annotated[int, Meta(ge=0, le=10)] = 3
-    timeout_destination: str | None = None
-    invalid_destination: str | None = None
+    timeout_destination: Annotated[str, Meta(max_length=255)] | None = None
+    invalid_destination: Annotated[str, Meta(max_length=255)] | None = None
 
 
 class IvrMenuUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating an IVR menu."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    greeting_type: str | msgspec.UnsetType = msgspec.UNSET
-    greeting_text: str | msgspec.UnsetType | None = msgspec.UNSET
-    greeting_file_url: str | msgspec.UnsetType | None = msgspec.UNSET
+    greeting_type: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    greeting_text: Annotated[str, Meta(max_length=2000)] | msgspec.UnsetType | None = msgspec.UNSET
+    greeting_file_url: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     timeout_seconds: Annotated[int, Meta(ge=1, le=120)] | msgspec.UnsetType = msgspec.UNSET
     max_retries: Annotated[int, Meta(ge=0, le=10)] | msgspec.UnsetType = msgspec.UNSET
-    timeout_destination: str | msgspec.UnsetType | None = msgspec.UNSET
-    invalid_destination: str | msgspec.UnsetType | None = msgspec.UNSET
+    timeout_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    invalid_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET

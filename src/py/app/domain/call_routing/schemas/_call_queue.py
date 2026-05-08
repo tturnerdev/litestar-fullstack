@@ -79,10 +79,10 @@ class CallQueueCreate(CamelizedBaseStruct):
     max_callers: Annotated[int, Meta(ge=1, le=100)] = 10
     join_empty: bool = False
     leave_when_empty: bool = True
-    music_on_hold_class: str | None = None
+    music_on_hold_class: Annotated[str, Meta(max_length=100)] | None = None
     announce_frequency: int | None = None
     announce_holdtime: bool = False
-    timeout_destination: str | None = None
+    timeout_destination: Annotated[str, Meta(max_length=255)] | None = None
     wrapup_time: Annotated[int, Meta(ge=0, le=300)] = 0
 
 
@@ -97,8 +97,8 @@ class CallQueueUpdate(CamelizedBaseStruct, omit_defaults=True):
     max_callers: Annotated[int, Meta(ge=1, le=100)] | msgspec.UnsetType = msgspec.UNSET
     join_empty: bool | msgspec.UnsetType = msgspec.UNSET
     leave_when_empty: bool | msgspec.UnsetType = msgspec.UNSET
-    music_on_hold_class: str | msgspec.UnsetType | None = msgspec.UNSET
+    music_on_hold_class: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     announce_frequency: int | msgspec.UnsetType | None = msgspec.UNSET
     announce_holdtime: bool | msgspec.UnsetType = msgspec.UNSET
-    timeout_destination: str | msgspec.UnsetType | None = msgspec.UNSET
+    timeout_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     wrapup_time: Annotated[int, Meta(ge=0, le=300)] | msgspec.UnsetType = msgspec.UNSET
