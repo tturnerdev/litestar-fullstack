@@ -43,8 +43,8 @@ import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
 
-const SUBJECT_MAX = 200
-const DESC_MAX = 2000
+const SUBJECT_MAX = 255
+const DESC_MAX = 50000
 
 // ── Schema ──────────────────────────────────────────────────────────────
 

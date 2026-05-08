@@ -33,9 +33,9 @@ export const Route = createFileRoute("/_app/connections/new")({
 
 // ── Field limits ────────────────────────────────────────────────────────
 
-const NAME_MAX = 100
+const NAME_MAX = 255
 const PROVIDER_MAX = 100
-const DESC_MAX = 500
+const DESC_MAX = 1000
 
 // ── Static data ──────────────────────────────────────────────────────────
 

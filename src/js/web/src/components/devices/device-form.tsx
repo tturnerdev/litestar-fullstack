@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils"
 // Constants
 // ---------------------------------------------------------------------------
 
-const NAME_MAX = 100
+const NAME_MAX = 255
 
 const deviceTypes: { value: string; label: string; icon: LucideIcon }[] = [
   { value: "desk_phone", label: "Desk Phone", icon: Phone },
@@ -55,7 +55,7 @@ const IPV4_REGEX = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?
 // ---------------------------------------------------------------------------
 
 const createDeviceSchema = z.object({
-  name: z.string().min(1, "Device name is required").max(NAME_MAX, "Name must be 100 characters or fewer"),
+  name: z.string().min(1, "Device name is required").max(NAME_MAX, `Name must be ${NAME_MAX} characters or fewer`),
   deviceType: z.string().min(1, "Device type is required"),
   macAddress: z
     .string()
