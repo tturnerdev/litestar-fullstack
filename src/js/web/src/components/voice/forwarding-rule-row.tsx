@@ -94,11 +94,11 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label className="text-xs">Timeout</Label>
-              <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(e.target.value)} className="h-8" placeholder="--" />
+              <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(e.target.value)} className="h-8" placeholder="--" min={1} max={300} />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Priority</Label>
-              <Input type="number" value={editPriority} onChange={(e) => setEditPriority(e.target.value)} className="h-8" />
+              <Input type="number" value={editPriority} onChange={(e) => setEditPriority(e.target.value)} className="h-8" min={1} max={99} />
             </div>
           </div>
         </div>

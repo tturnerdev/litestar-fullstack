@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
@@ -11,8 +11,6 @@ from litestar.exceptions import ValidationException
 from app.db import models as m
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from advanced_alchemy.service import ModelDictT
 
 
@@ -58,3 +56,27 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
 
     repository_type = Repo
     match_fields = ["ivr_menu_id", "digit"]
+
+    async def to_model_on_create(self, data: ModelDictT[m.IvrMenuOption]) -> ModelDictT[m.IvrMenuOption]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                m.IvrMenuOption.ivr_menu_id == data["ivr_menu_id"],
+                m.IvrMenuOption.digit == data["digit"],
+            )
+            if existing:
+                raise ValidationException("This digit is already assigned in this IVR menu.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.IvrMenuOption], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.IvrMenuOption]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "digit" in data:
+            ivr_menu_id = data.get("ivr_menu_id")
+            if ivr_menu_id:
+                existing = await self.repository.list(
+                    m.IvrMenuOption.ivr_menu_id == ivr_menu_id,
+                    m.IvrMenuOption.digit == data["digit"],
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("This digit is already assigned in this IVR menu.")
+        return data

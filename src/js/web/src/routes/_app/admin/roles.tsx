@@ -33,7 +33,7 @@ import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -444,8 +444,39 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center py-6">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div className="overflow-x-auto rounded-md border">
+            <Table aria-label="Loading permissions">
+              <TableHeader>
+                <TableRow>
+                  <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                  {ROLES.map((role) => (
+                    <Fragment key={`skel-hdr-${role}`}>
+                      <TableHead className="w-[100px] text-center"><Skeleton className="mx-auto h-4 w-14" /></TableHead>
+                      <TableHead className="w-[100px] text-center"><Skeleton className="mx-auto h-4 w-14" /></TableHead>
+                    </Fragment>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                  <TableRow key={`skel-row-${i}`}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </TableCell>
+                    {ROLES.map((role) => (
+                      <Fragment key={`skel-cell-${role}-${i}`}>
+                        <TableCell className="text-center"><Skeleton className="mx-auto h-4 w-4 rounded" /></TableCell>
+                        <TableCell className="text-center"><Skeleton className="mx-auto h-4 w-4 rounded" /></TableCell>
+                      </Fragment>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-md border">

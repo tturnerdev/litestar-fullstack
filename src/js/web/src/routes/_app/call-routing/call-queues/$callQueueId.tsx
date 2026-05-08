@@ -340,6 +340,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                   }}
                   onBlur={(e) => handleFieldBlur("ringTime", e.target.value)}
                   min={5}
+                  max={300}
                   aria-invalid={!!fieldErrors.ringTime}
                 />
                 <FieldError message={fieldErrors.ringTime} />
@@ -359,6 +360,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                   }}
                   onBlur={(e) => handleFieldBlur("maxWaitTime", e.target.value)}
                   min={0}
+                  max={3600}
                   aria-invalid={!!fieldErrors.maxWaitTime}
                 />
                 <FieldError message={fieldErrors.maxWaitTime} />

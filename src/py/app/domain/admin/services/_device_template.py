@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
@@ -22,6 +23,28 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
 
     repository_type = Repo
     match_fields = ["manufacturer", "model"]
+
+    async def to_model_on_create(self, data: ModelDictT[m.DeviceTemplate]) -> ModelDictT[m.DeviceTemplate]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                m.DeviceTemplate.manufacturer == data["manufacturer"],
+                m.DeviceTemplate.model == data["model"],
+            )
+            if existing:
+                raise ValidationException("A device template for this manufacturer and model already exists.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.DeviceTemplate], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.DeviceTemplate]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and ("manufacturer" in data or "model" in data):
+            existing = await self.repository.list(
+                m.DeviceTemplate.manufacturer == data["manufacturer"],
+                m.DeviceTemplate.model == data["model"],
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
+                raise ValidationException("A device template for this manufacturer and model already exists.")
+        return data
 
     async def to_model(
         self,

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.294.0 (2026-05-08)
+
+### Added
+- **Duplicate validation on 7 more services** — DeviceTemplate, MusicOnHold, Organization, TeamRolePermission, E911Registration, ForwardingRule, and IvrMenuOption services now validate uniqueness on both create and update operations
+- **Number input bounds** — Forwarding rule timeout (1–300s), priority (1–99), call queue ring time (max 300s), and max wait time (max 3600s) inputs now enforce min/max constraints
+- **Loading skeletons** — Replaced spinner loading states with skeleton placeholders in active sessions list (settings) and permissions matrix (admin roles)
+
 ## v0.293.0 (2026-05-08)
 
 ### Added

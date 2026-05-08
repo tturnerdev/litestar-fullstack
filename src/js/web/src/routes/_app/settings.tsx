@@ -44,6 +44,7 @@ import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib
 import { useNotificationPreferencesStore } from "@/lib/notification-preferences-store"
 import { useSettingsStore } from "@/lib/settings-store"
 import { useTheme } from "@/lib/theme-context"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/settings")({
@@ -623,8 +624,20 @@ function ActiveSessionsSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+              <div key={`session-skeleton-${i}`} className="flex items-center justify-between rounded-lg border border-border/60 p-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-16 rounded-md" />
+              </div>
+            ))}
           </div>
         ) : isError ? (
           <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">

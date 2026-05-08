@@ -5,13 +5,18 @@ from __future__ import annotations
 import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 from sqlalchemy import select
 
 from app.db import models as m
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 logger = logging.getLogger(__name__)
 from app.domain.e911.schemas import E911Registration as E911RegistrationSchema
@@ -27,6 +32,26 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
 
     repository_type = Repo
     match_fields = ["phone_number_id"]
+
+    async def to_model_on_create(self, data: ModelDictT[m.E911Registration]) -> ModelDictT[m.E911Registration]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="phone_number_id", values=[data["phone_number_id"]]),
+            )
+            if existing:
+                raise ValidationException("An E911 registration already exists for this phone number.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.E911Registration], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.E911Registration]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "phone_number_id" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="phone_number_id", values=[data["phone_number_id"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
+                raise ValidationException("An E911 registration already exists for this phone number.")
+        return data
 
     @staticmethod
     def _enrich_schema(db_obj: m.E911Registration) -> dict[str, Any]:
