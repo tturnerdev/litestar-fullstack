@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.270.0 (2026-05-07)
+
+### Added
+- **Backend search filtering** — Notifications (title), fax numbers (number, label), fax messages (remote_number, remote_name), extensions (extension_number, display_name), and voicemail boxes (email_address) now support server-side search
+- **DataFreshness on schedules & teams** — List pages show last-updated timestamp with refresh state indicator
+- **Duplicate validation** — Team invitations (team+email), fax email routes (fax_number+email), team members (user+team), and user roles (user+role) now reject duplicates on create
+
 ## v0.269.0 (2026-05-07)
 
 ### Added
