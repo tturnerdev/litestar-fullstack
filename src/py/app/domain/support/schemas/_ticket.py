@@ -41,7 +41,7 @@ class Ticket(CamelizedBaseStruct):
 class TicketCreate(CamelizedBaseStruct):
     subject: Annotated[str, Meta(min_length=1, max_length=255)]
     body_markdown: Annotated[str, Meta(min_length=1, max_length=50000)]
-    priority: Annotated[str, Meta(max_length=50)] = "medium"
+    priority: Annotated[str, Meta(min_length=1, max_length=50)] = "medium"
     category: Annotated[str, Meta(max_length=100)] | None = None
     team_id: UUID | None = None
 

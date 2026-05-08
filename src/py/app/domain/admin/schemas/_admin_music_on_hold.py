@@ -43,7 +43,7 @@ class MusicOnHoldCreate(CamelizedBaseStruct):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
     description: Annotated[str, Meta(max_length=1000)] = ""
-    category: str = "custom"
+    category: Annotated[str, Meta(min_length=1, max_length=50)] = "custom"
     is_default: bool = False
     is_active: bool = True
     random_order: bool = False
@@ -55,7 +55,7 @@ class MusicOnHoldUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType = msgspec.UNSET
-    category: str | msgspec.UnsetType = msgspec.UNSET
+    category: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     is_default: bool | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     random_order: bool | msgspec.UnsetType = msgspec.UNSET

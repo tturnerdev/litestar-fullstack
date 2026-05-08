@@ -28,8 +28,8 @@ export const Route = createFileRoute("/_app/tags/new")({
   component: NewTagPage,
 })
 
-const NAME_MAX = 50
-const DESC_MAX = 200
+const NAME_MAX = 100
+const DESC_MAX = 255
 
 const TAG_COLORS = [
   { name: "Red", value: "#ef4444" },

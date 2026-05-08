@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils"
 // ── Field limits ──────────────────────────────────────────────────────
 
 const NAME_MAX = 100
-const DESC_MAX = 500
+const DESC_MAX = 1000
 
 // ── Validation ────────────────────────────────────────────────────────
 

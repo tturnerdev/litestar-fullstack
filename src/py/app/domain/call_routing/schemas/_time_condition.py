@@ -31,7 +31,7 @@ class TimeConditionCreate(CamelizedBaseStruct):
     match_destination: Annotated[str, Meta(min_length=1, max_length=255)]
     no_match_destination: Annotated[str, Meta(min_length=1, max_length=255)]
     schedule_id: UUID | None = None
-    override_mode: Annotated[str, Meta(max_length=50)] = "none"
+    override_mode: Annotated[str, Meta(min_length=1, max_length=50)] = "none"
 
 
 class TimeConditionUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -41,10 +41,10 @@ class TimeConditionUpdate(CamelizedBaseStruct, omit_defaults=True):
     match_destination: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     no_match_destination: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     schedule_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
-    override_mode: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    override_mode: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
 
 
 class TimeConditionOverride(CamelizedBaseStruct):
     """Schema for setting override mode on a time condition."""
 
-    override_mode: Annotated[str, Meta(max_length=50)]
+    override_mode: Annotated[str, Meta(min_length=1, max_length=50)]
