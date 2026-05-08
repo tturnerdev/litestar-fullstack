@@ -2307,6 +2307,7 @@ export type SystemHealth = {
  */
 export type Tag = {
   createdAt: string;
+  description?: string | null;
   id: string;
   name: string;
   slug: string;
@@ -2317,6 +2318,7 @@ export type Tag = {
  * TagCreate
  */
 export type TagCreate = {
+  description?: string | null;
   name: string;
 };
 
@@ -2324,6 +2326,7 @@ export type TagCreate = {
  * TagUpdate
  */
 export type TagUpdate = {
+  description?: string | null;
   name?: string | null;
 };
 
@@ -3423,10 +3426,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3502,10 +3505,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3570,10 +3573,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3650,10 +3653,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

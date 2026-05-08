@@ -34,3 +34,10 @@ class TicketMessageService(service.SQLAlchemyAsyncRepositoryService[m.TicketMess
             data["body_markdown"] = data["body_markdown"].strip()
             data["body_html"] = render_markdown(data["body_markdown"])
         return data
+
+    async def to_model_on_upsert(self, data: ModelDictT[m.TicketMessage]) -> ModelDictT[m.TicketMessage]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "body_markdown" in data:
+            data["body_markdown"] = data["body_markdown"].strip()
+            data["body_html"] = render_markdown(data["body_markdown"])
+        return data

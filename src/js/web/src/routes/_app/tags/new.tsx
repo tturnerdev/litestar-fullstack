@@ -85,6 +85,7 @@ function NewTagPage() {
     justSubmittedRef.current = true
 
     const payload: TagCreate = { name: name.trim() }
+    if (description.trim()) payload.description = description.trim()
 
     createTag.mutate(payload, {
       onSuccess: () => {

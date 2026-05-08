@@ -14,10 +14,12 @@ export interface Tag {
 
 export interface TagCreate {
   name: string
+  description?: string | null
 }
 
 export interface TagUpdate {
   name?: string | null
+  description?: string | null
 }
 
 // ── Tag List ─────────────────────────────────────────────────────────

@@ -43,6 +43,15 @@ class TicketService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServ
                 data["body_markdown"] = data["body_markdown"].strip()
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.Ticket]) -> ModelDictT[m.Ticket]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "subject" in data:
+                data["subject"] = data["subject"].strip()
+            if "body_markdown" in data and data["body_markdown"]:
+                data["body_markdown"] = data["body_markdown"].strip()
+        return data
+
     async def _generate_ticket_number(self) -> str:
         """Generate a sequential ticket number like SUP-00001."""
         count = await self.count()

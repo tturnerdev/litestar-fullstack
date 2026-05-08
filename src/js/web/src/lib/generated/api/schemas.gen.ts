@@ -9078,6 +9078,16 @@ export const TagSchema = {
       format: "date-time",
       type: "string",
     },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     id: {
       format: "uuid",
       type: "string",
@@ -9100,6 +9110,16 @@ export const TagSchema = {
 
 export const TagCreateSchema = {
   properties: {
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     name: {
       maxLength: 100,
       minLength: 1,
@@ -9113,6 +9133,16 @@ export const TagCreateSchema = {
 
 export const TagUpdateSchema = {
   properties: {
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     name: {
       oneOf: [
         {
