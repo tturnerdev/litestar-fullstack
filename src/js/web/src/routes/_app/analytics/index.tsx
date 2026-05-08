@@ -50,6 +50,7 @@ import {
   useCallRecord,
   useCallRecords,
 } from "@/lib/api/hooks/analytics"
+import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 
@@ -96,15 +97,13 @@ const dispositionOptions: FilterOption[] = [
 ]
 
 const csvHeaders: CsvHeader<CallRecord>[] = [
-  { label: "Date/Time", accessor: (r) => formatDateTime(r.startedAt) },
-  { label: "Direction", accessor: (r) => r.direction },
-  { label: "Source", accessor: (r) => r.source },
-  { label: "Destination", accessor: (r) => r.destination },
-  { label: "Duration (s)", accessor: (r) => r.durationSeconds },
-  { label: "Disposition", accessor: (r) => r.disposition },
+  { label: "Date/Time", accessor: (r) => formatDateTime(r.callDate) },
+  { label: "Direction", accessor: (r) => r.direction ?? "" },
+  { label: "Source", accessor: (r) => r.source ?? "" },
+  { label: "Destination", accessor: (r) => r.destination ?? "" },
+  { label: "Duration (s)", accessor: (r) => r.duration ?? 0 },
+  { label: "Disposition", accessor: (r) => r.disposition ?? "" },
   { label: "Cost", accessor: (r) => r.cost ?? "" },
-  { label: "Extension", accessor: (r) => r.extensionNumber ?? "" },
-  { label: "Channel", accessor: (r) => r.channel ?? "" },
 ]
 
 // -- Helpers ------------------------------------------------------------------
@@ -362,23 +361,17 @@ function CdrDetailDialog({ cdrId, open, onOpenChange }: { cdrId: string; open: b
               <DetailField label="Destination">
                 <span className="font-mono text-sm">{record.destination}</span>
               </DetailField>
-              <DetailField label="Started">
-                <span className="text-sm">{formatDateTime(record.startedAt)}</span>
-              </DetailField>
-              <DetailField label="Ended">
-                <span className="text-sm">{record.endedAt ? formatDateTime(record.endedAt) : "--"}</span>
+              <DetailField label="Date">
+                <span className="text-sm">{formatDateTime(record.callDate)}</span>
               </DetailField>
               <DetailField label="Duration">
-                <span className="text-sm">{formatDurationLong(record.durationSeconds)}</span>
+                <span className="text-sm">{formatDurationLong(record.duration ?? 0)}</span>
               </DetailField>
               <DetailField label="Billable">
-                <span className="text-sm">{formatDurationLong(record.billableSeconds)}</span>
+                <span className="text-sm">{formatDurationLong(record.billableSeconds ?? 0)}</span>
               </DetailField>
               <DetailField label="Cost">
                 <span className="text-sm font-mono">{formatCost(record.cost)}</span>
-              </DetailField>
-              <DetailField label="Extension">
-                <span className="text-sm font-mono">{record.extensionNumber ?? "--"}</span>
               </DetailField>
             </div>
 
@@ -391,9 +384,6 @@ function CdrDetailDialog({ cdrId, open, onOpenChange }: { cdrId: string; open: b
                 </DetailField>
                 <DetailField label="Unique ID">
                   <span className="text-sm font-mono break-all">{record.uniqueId ?? "--"}</span>
-                </DetailField>
-                <DetailField label="Linked ID">
-                  <span className="text-sm font-mono break-all">{record.linkedId ?? "--"}</span>
                 </DetailField>
               </div>
             </div>
@@ -556,14 +546,16 @@ function CallHeatmap({ data, isLoading }: { data: { period: string; count: numbe
 // -- Dashboard tab ------------------------------------------------------------
 
 function DashboardTab() {
+  const currentTeam = useAuthStore((s) => s.currentTeam)
+  const teamId = currentTeam?.id
   const defaultDates = getPresetDates(7)
   const [startDate, setStartDate] = useState(defaultDates.start)
   const [endDate, setEndDate] = useState(defaultDates.end)
 
-  const { data: summary, isLoading: summaryLoading, dataUpdatedAt, isRefetching, refetch } = useAnalyticsSummary(startDate, endDate)
-  const { data: volumeData, isLoading: volumeLoading } = useAnalyticsVolume(startDate, endDate, "day")
-  const { data: hourlyVolumeData, isLoading: hourlyVolumeLoading } = useAnalyticsVolume(startDate, endDate, "hour")
-  const { data: extensionData, isLoading: extensionLoading } = useAnalyticsByExtension(startDate, endDate)
+  const { data: summary, isLoading: summaryLoading, dataUpdatedAt, isRefetching, refetch } = useAnalyticsSummary(teamId, startDate, endDate)
+  const { data: volumeData, isLoading: volumeLoading } = useAnalyticsVolume(teamId, startDate, endDate, "day")
+  const { data: hourlyVolumeData, isLoading: hourlyVolumeLoading } = useAnalyticsVolume(teamId, startDate, endDate, "hour")
+  const { data: extensionData, isLoading: extensionLoading } = useAnalyticsByExtension(teamId, startDate, endDate)
 
   const handleDatePreset = useCallback((days: number) => {
     const { start, end } = getPresetDates(days)
@@ -621,7 +613,7 @@ function DashboardTab() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <VolumeChart data={volumeData?.items ?? []} />
+              <VolumeChart data={volumeData ?? []} />
             )}
           </CardContent>
         </Card>
@@ -637,7 +629,7 @@ function DashboardTab() {
             <div className="flex h-32 items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : !extensionData?.items?.length ? (
+          ) : !extensionData?.length ? (
             <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">No extension data for this period</div>
           ) : (
             <div className="overflow-x-auto rounded-md border border-border/60">
@@ -653,7 +645,7 @@ function DashboardTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {extensionData.items.map((ext) => {
+                  {extensionData.map((ext) => {
                     const rate = ext.totalCalls > 0 ? ((ext.answered / ext.totalCalls) * 100).toFixed(1) : "0.0"
                     return (
                       <TableRow key={ext.extension}>
@@ -684,7 +676,7 @@ function DashboardTab() {
           <p className="text-sm text-muted-foreground">Call volume by hour of day and day of week</p>
         </CardHeader>
         <CardContent>
-          <CallHeatmap data={hourlyVolumeData?.items ?? []} isLoading={hourlyVolumeLoading} />
+          <CallHeatmap data={hourlyVolumeData ?? []} isLoading={hourlyVolumeLoading} />
         </CardContent>
       </Card>
 
@@ -842,7 +834,7 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
   const chartData = useMemo<CallVolumeChartData[]>(() => {
     const dailyCounts = new Map<string, { total: number; inbound: number; outbound: number }>()
     for (const call of items) {
-      const date = call.startedAt ? new Date(call.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Unknown"
+      const date = call.callDate ? new Date(call.callDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Unknown"
       const existing = dailyCounts.get(date) ?? { total: 0, inbound: 0, outbound: 0 }
       existing.total++
       if (call.direction === "inbound") existing.inbound++
@@ -859,7 +851,7 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
     const totalCalls = items.length
     const inbound = items.filter((c) => c.direction === "inbound").length
     const outbound = items.filter((c) => c.direction === "outbound").length
-    const uniqueDays = new Set(items.filter((c) => c.startedAt).map((c) => new Date(c.startedAt).toDateString())).size
+    const uniqueDays = new Set(items.filter((c) => c.callDate).map((c) => new Date(c.callDate).toDateString())).size
     const avgPerDay = uniqueDays > 0 ? (totalCalls / uniqueDays).toFixed(1) : "0"
     return { totalCalls, inbound, outbound, avgPerDay }
   }, [items])
@@ -1287,9 +1279,9 @@ function CallRecordsTab() {
                       <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="text-sm whitespace-nowrap">{formatDateTime(record.startedAt)}</span>
+                            <span className="text-sm whitespace-nowrap">{formatDateTime(record.callDate)}</span>
                           </TooltipTrigger>
-                          <TooltipContent>{formatDateTime(record.startedAt)}</TooltipContent>
+                          <TooltipContent>{formatDateTime(record.callDate)}</TooltipContent>
                         </Tooltip>
                       </TableCell>
                       <TableCell>
@@ -1301,7 +1293,7 @@ function CallRecordsTab() {
                       <TableCell>
                         <span className="font-mono text-sm">{record.destination}</span>
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">{formatDuration(record.durationSeconds)}</TableCell>
+                      <TableCell className="text-right font-mono text-sm">{formatDuration(record.duration ?? 0)}</TableCell>
                       <TableCell>
                         <DispositionBadge disposition={record.disposition} />
                       </TableCell>

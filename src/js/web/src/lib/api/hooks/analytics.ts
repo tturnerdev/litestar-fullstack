@@ -1,92 +1,20 @@
 import { useQuery } from "@tanstack/react-query"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  type CallAnalyticsSummary,
+  type CallRecordDetail,
+  type CallRecordList,
+  type CallVolumePoint,
+  type ExtensionStats,
+  getCallRecord,
+  getCallSummary,
+  getCallsByExtension,
+  getCallVolume,
+  listCallRecords,
+} from "@/lib/generated/api"
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+export type CallRecord = Required<CallRecordList>
 
-export interface CallRecord {
-  id: string
-  startedAt: string
-  endedAt: string | null
-  direction: "inbound" | "outbound" | "internal"
-  source: string
-  destination: string
-  disposition: "answered" | "missed" | "voicemail" | "busy" | "failed" | "no_answer"
-  durationSeconds: number
-  billableSeconds: number
-  cost: number | null
-  channel: string | null
-  uniqueId: string | null
-  linkedId: string | null
-  recordingUrl: string | null
-  extensionId: string | null
-  extensionNumber: string | null
-  notes: string | null
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface AnalyticsSummary {
-  totalCalls: number
-  answered: number
-  missed: number
-  voicemail: number
-  avgDuration: number
-  totalDuration: number
-  avgBillableSeconds: number
-}
-
-export interface VolumeDataPoint {
-  period: string
-  count: number
-  answered: number
-  missed: number
-}
-
-export interface ExtensionStats {
-  extension: string
-  totalCalls: number
-  answered: number
-  missed: number
-  avgDuration: number
-}
-
-interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const config = client.getConfig()
-  const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-  const response = await fetch(`${baseUrl}${url}`, {
-    credentials: "include",
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
-  })
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail ?? `Request failed (${response.status})`)
-  }
-  if (response.status === 204) return undefined as unknown as T
-  return response.json()
-}
-
-function buildQueryString(params: Record<string, string | number | undefined>): string {
-  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
-  if (entries.length === 0) return ""
-  return `?${entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`).join("&")}`
-}
+export type { CallAnalyticsSummary, CallRecordDetail, CallRecordList, CallVolumePoint, ExtensionStats }
 
 // ---------------------------------------------------------------------------
 // Call Records (CDR list)
@@ -110,9 +38,9 @@ export function useCallRecords(filters: UseCallRecordsFilters = {}) {
 
   return useQuery({
     queryKey: ["analytics", "cdrs", page, pageSize, startDate, endDate, direction, disposition, source, destination, minDuration, maxDuration],
-    queryFn: () =>
-      apiFetch<PaginatedResponse<CallRecord>>(
-        `/api/analytics/cdrs${buildQueryString({
+    queryFn: async () => {
+      const response = await listCallRecords({
+        query: {
           currentPage: page,
           pageSize,
           start_date: startDate,
@@ -123,8 +51,10 @@ export function useCallRecords(filters: UseCallRecordsFilters = {}) {
           destination,
           min_duration: minDuration,
           max_duration: maxDuration,
-        })}`,
-      ),
+        },
+      })
+      return response.data as { items: CallRecord[]; total: number }
+    },
   })
 }
 
@@ -135,7 +65,12 @@ export function useCallRecords(filters: UseCallRecordsFilters = {}) {
 export function useCallRecord(id: string) {
   return useQuery({
     queryKey: ["analytics", "cdr", id],
-    queryFn: () => apiFetch<CallRecord>(`/api/analytics/cdrs/${id}`),
+    queryFn: async () => {
+      const response = await getCallRecord({
+        path: { cdr_id: id },
+      })
+      return response.data as Required<CallRecordDetail>
+    },
     enabled: !!id,
   })
 }
@@ -144,17 +79,16 @@ export function useCallRecord(id: string) {
 // Summary Stats
 // ---------------------------------------------------------------------------
 
-export function useAnalyticsSummary(startDate?: string, endDate?: string) {
+export function useAnalyticsSummary(teamId: string | undefined, startDate?: string, endDate?: string) {
   return useQuery({
-    queryKey: ["analytics", "summary", startDate, endDate],
-    queryFn: () =>
-      apiFetch<AnalyticsSummary>(
-        `/api/analytics/summary${buildQueryString({
-          start_date: startDate,
-          end_date: endDate,
-        })}`,
-      ),
-    enabled: !!startDate && !!endDate,
+    queryKey: ["analytics", "summary", teamId, startDate, endDate],
+    queryFn: async () => {
+      const response = await getCallSummary({
+        query: { team_id: teamId ?? "", start_date: startDate ?? "", end_date: endDate ?? "" },
+      })
+      return response.data as Required<CallAnalyticsSummary>
+    },
+    enabled: !!teamId && !!startDate && !!endDate,
   })
 }
 
@@ -162,18 +96,16 @@ export function useAnalyticsSummary(startDate?: string, endDate?: string) {
 // Call Volume (time-series)
 // ---------------------------------------------------------------------------
 
-export function useAnalyticsVolume(startDate?: string, endDate?: string, interval: "hour" | "day" | "week" | "month" = "day") {
+export function useAnalyticsVolume(teamId: string | undefined, startDate?: string, endDate?: string, interval: string = "day") {
   return useQuery({
-    queryKey: ["analytics", "volume", startDate, endDate, interval],
-    queryFn: () =>
-      apiFetch<PaginatedResponse<VolumeDataPoint>>(
-        `/api/analytics/volume${buildQueryString({
-          start_date: startDate,
-          end_date: endDate,
-          interval,
-        })}`,
-      ),
-    enabled: !!startDate && !!endDate,
+    queryKey: ["analytics", "volume", teamId, startDate, endDate, interval],
+    queryFn: async () => {
+      const response = await getCallVolume({
+        query: { team_id: teamId ?? "", start_date: startDate ?? "", end_date: endDate ?? "", interval },
+      })
+      return response.data as Required<CallVolumePoint>[]
+    },
+    enabled: !!teamId && !!startDate && !!endDate,
   })
 }
 
@@ -181,17 +113,16 @@ export function useAnalyticsVolume(startDate?: string, endDate?: string, interva
 // Per-Extension Breakdown
 // ---------------------------------------------------------------------------
 
-export function useAnalyticsByExtension(startDate?: string, endDate?: string) {
+export function useAnalyticsByExtension(teamId: string | undefined, startDate?: string, endDate?: string) {
   return useQuery({
-    queryKey: ["analytics", "by-extension", startDate, endDate],
-    queryFn: () =>
-      apiFetch<PaginatedResponse<ExtensionStats>>(
-        `/api/analytics/by-extension${buildQueryString({
-          start_date: startDate,
-          end_date: endDate,
-        })}`,
-      ),
-    enabled: !!startDate && !!endDate,
+    queryKey: ["analytics", "by-extension", teamId, startDate, endDate],
+    queryFn: async () => {
+      const response = await getCallsByExtension({
+        query: { team_id: teamId ?? "", start_date: startDate ?? "", end_date: endDate ?? "" },
+      })
+      return response.data as Required<ExtensionStats>[]
+    },
+    enabled: !!teamId && !!startDate && !!endDate,
   })
 }
 
@@ -225,29 +156,24 @@ export function useAnalyticsCostBreakdown(startDate?: string, endDate?: string) 
   return useQuery({
     queryKey: ["analytics", "cost-breakdown", startDate, endDate],
     queryFn: async () => {
-      // Fetch a large page of CDRs to aggregate cost data
-      const data = await apiFetch<PaginatedResponse<CallRecord>>(
-        `/api/analytics/cdrs${buildQueryString({
+      const response = await listCallRecords({
+        query: {
           currentPage: 1,
           pageSize: 1000,
           start_date: startDate,
           end_date: endDate,
-        })}`,
-      )
-
+        },
+      })
+      const data = response.data as { items: CallRecordList[] }
       const items = data.items ?? []
 
-      // Cost summary
       let totalCost = 0
       let inboundCost = 0
       let outboundCost = 0
       let internalCost = 0
       let callsWithCost = 0
 
-      // Cost by extension
       const extensionCosts = new Map<string, { totalCost: number; callCount: number }>()
-
-      // Daily cost
       const dailyCosts = new Map<string, number>()
 
       for (const record of items) {
@@ -260,17 +186,15 @@ export function useAnalyticsCostBreakdown(startDate?: string, endDate?: string) 
           else if (record.direction === "outbound") outboundCost += cost
           else internalCost += cost
 
-          // By extension
-          const ext = record.extensionNumber ?? "Unknown"
+          const ext = record.source ?? "Unknown"
           const existing = extensionCosts.get(ext) ?? { totalCost: 0, callCount: 0 }
           existing.totalCost += cost
           existing.callCount++
           extensionCosts.set(ext, existing)
         }
 
-        // Daily cost (include zero-cost days for continuity)
-        if (record.startedAt) {
-          const dateKey = record.startedAt.split("T")[0]
+        if (record.callDate) {
+          const dateKey = record.callDate.split("T")[0]
           dailyCosts.set(dateKey, (dailyCosts.get(dateKey) ?? 0) + cost)
         }
       }
