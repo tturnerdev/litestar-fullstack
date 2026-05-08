@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -10,7 +9,6 @@ from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from sqlalchemy import inspect as sa_inspect
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -19,6 +17,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.teams.guards import requires_team_admin, requires_team_membership, requires_team_ownership
 from app.domain.teams.schemas import Team, TeamCreate, TeamUpdate
 from app.domain.teams.services import TeamService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
@@ -27,72 +26,6 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
-
-_SNAPSHOT_EXCLUDE: frozenset[str] = frozenset(
-    {"id", "sa_orm_sentinel", "created_at", "updated_at", "hashed_password", "totp_secret", "backup_codes"}
-)
-
-
-def _capture_snapshot(obj: Any) -> dict[str, Any]:
-    """Serialize a SQLAlchemy model instance to a plain dict for audit details."""
-    mapper = sa_inspect(type(obj))
-    result: dict[str, Any] = {}
-    for col in mapper.columns:
-        key = col.key
-        if key in _SNAPSHOT_EXCLUDE:
-            continue
-        try:
-            value = getattr(obj, key)
-        except Exception:  # noqa: BLE001, S112
-            continue  # intentionally skip unreadable model attributes during snapshot
-        if isinstance(value, UUID):
-            value = str(value)
-        elif isinstance(value, (datetime, date)):
-            value = value.isoformat()
-        result[key] = value
-    return result
-
-
-async def _log_audit(
-    audit_service: AuditLogService,
-    *,
-    action: str,
-    actor: m.User,
-    target_type: str,
-    target_id: UUID,
-    target_label: str,
-    before: dict[str, Any] | None = None,
-    after: dict[str, Any] | None = None,
-    request: Request[Any, Any, Any] | None = None,
-) -> None:
-    """Write an audit log entry with optional before/after diff."""
-    details: dict[str, Any] = {}
-    if before is not None or after is not None:
-        if before is None:
-            details = {"before": None, "after": after}
-        elif after is None:
-            details = {"before": before, "after": None}
-        else:
-            changed_before: dict[str, Any] = {}
-            changed_after: dict[str, Any] = {}
-            for key in set(before) | set(after):
-                if before.get(key) != after.get(key):
-                    changed_before[key] = before.get(key)
-                    changed_after[key] = after.get(key)
-            if changed_before or changed_after:
-                details = {"before": changed_before, "after": changed_after}
-
-    await audit_service.log_action(
-        action=action,
-        actor_id=actor.id,
-        actor_email=actor.email,
-        actor_name=actor.name,
-        target_type=target_type,
-        target_id=str(target_id),
-        target_label=target_label,
-        details=details or None,
-        request=request,
-    )
 
 
 class TeamController(Controller):
@@ -170,12 +103,14 @@ class TeamController(Controller):
         obj.update({"owner_id": current_user.id, "owner": current_user})
         db_obj = await teams_service.create(obj)
         request.app.emit(event_id="team_created", team_id=db_obj.id)
-        after = _capture_snapshot(db_obj)
+        after = capture_snapshot(db_obj)
 
-        await _log_audit(
+        await log_audit(
             audit_service,
             action="team.created",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="team",
             target_id=db_obj.id,
             target_label=db_obj.name,
@@ -227,19 +162,21 @@ class TeamController(Controller):
             Team
         """
         before_obj = await teams_service.get(team_id)
-        before = _capture_snapshot(before_obj)
+        before = capture_snapshot(before_obj)
 
         fresh_obj = await teams_service.update(
             item_id=team_id,
             data=data.to_dict(),
         )
         request.app.emit(event_id="team_updated", entity_id=fresh_obj.id)
-        after = _capture_snapshot(fresh_obj)
+        after = capture_snapshot(fresh_obj)
 
-        await _log_audit(
+        await log_audit(
             audit_service,
             action="team.updated",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="team",
             target_id=team_id,
             target_label=fresh_obj.name,
@@ -269,15 +206,17 @@ class TeamController(Controller):
             team_id: Team ID
         """
         team = await teams_service.get(team_id)
-        before = _capture_snapshot(team)
+        before = capture_snapshot(team)
         team_name = team.name
         request.app.emit(event_id="team_deleted", entity_id=team_id)
         _ = await teams_service.delete(team_id)
 
-        await _log_audit(
+        await log_audit(
             audit_service,
             action="team.deleted",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="team",
             target_id=team_id,
             target_label=team_name,

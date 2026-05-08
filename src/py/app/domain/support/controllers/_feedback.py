@@ -5,9 +5,8 @@ from __future__ import annotations
 import html
 import logging
 import mimetypes
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Annotated, Any
-from uuid import UUID
 
 from litestar import Controller, Request, post
 from litestar.datastructures import UploadFile
@@ -16,11 +15,11 @@ from litestar.enums import RequestEncodingType
 from litestar.exceptions import HTTPException
 from litestar.params import Body
 from litestar.security.jwt import Token
-from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import log_audit
 from app.lib.schema import Message
 
 if TYPE_CHECKING:
@@ -33,72 +32,6 @@ FEEDBACK_RECIPIENT = "support@atrelix.com"
 
 _MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB per file
 _MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB total
-
-_SNAPSHOT_EXCLUDE: frozenset[str] = frozenset(
-    {"id", "sa_orm_sentinel", "created_at", "updated_at", "hashed_password", "totp_secret", "backup_codes"}
-)
-
-
-def _capture_snapshot(obj: Any) -> dict[str, Any]:
-    """Serialize a SQLAlchemy model instance to a plain dict for audit details."""
-    mapper = sa_inspect(type(obj))
-    result: dict[str, Any] = {}
-    for col in mapper.columns:
-        key = col.key
-        if key in _SNAPSHOT_EXCLUDE:
-            continue
-        try:
-            value = getattr(obj, key)
-        except Exception:  # noqa: BLE001, S112
-            continue  # intentionally skip unreadable model attributes during snapshot
-        if isinstance(value, UUID):
-            value = str(value)
-        elif isinstance(value, (datetime, date)):
-            value = value.isoformat()
-        result[key] = value
-    return result
-
-
-async def _log_audit(
-    audit_service: AuditLogService,
-    *,
-    action: str,
-    actor: m.User,
-    target_type: str,
-    target_id: UUID,
-    target_label: str,
-    before: dict[str, Any] | None = None,
-    after: dict[str, Any] | None = None,
-    request: Request[Any, Any, Any] | None = None,
-) -> None:
-    """Write an audit log entry with optional before/after diff."""
-    details: dict[str, Any] = {}
-    if before is not None or after is not None:
-        if before is None:
-            details = {"before": None, "after": after}
-        elif after is None:
-            details = {"before": before, "after": None}
-        else:
-            changed_before: dict[str, Any] = {}
-            changed_after: dict[str, Any] = {}
-            for key in set(before) | set(after):
-                if before.get(key) != after.get(key):
-                    changed_before[key] = before.get(key)
-                    changed_after[key] = after.get(key)
-            if changed_before or changed_after:
-                details = {"before": changed_before, "after": changed_after}
-
-    await audit_service.log_action(
-        action=action,
-        actor_id=actor.id,
-        actor_email=actor.email,
-        actor_name=actor.name,
-        target_type=target_type,
-        target_id=str(target_id),
-        target_label=target_label,
-        details=details or None,
-        request=request,
-    )
 
 
 def _build_feedback_html(
@@ -325,10 +258,12 @@ class FeedbackController(Controller):
             title,
         )
 
-        await _log_audit(
+        await log_audit(
             audit_service,
             action="feedback.submitted",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="feedback",
             target_id=current_user.id,
             target_label=title,
