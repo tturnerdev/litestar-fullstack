@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
 
-const SUBJECT_MAX = 200
+const SUBJECT_MAX = 255
 
 export const Route = createFileRoute("/_app/support/$ticketId/edit")({
   component: EditTicketPage,

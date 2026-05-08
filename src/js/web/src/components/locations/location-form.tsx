@@ -27,7 +27,7 @@ import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 
-const NAME_MAX = 100
+const NAME_MAX = 255
 const DESC_MAX = 500
 
 const createLocationSchema = z

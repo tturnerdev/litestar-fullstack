@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
 
-const NAME_MAX = 100
+const NAME_MAX = 255
 const DESC_MAX = 500
 
 export const Route = createFileRoute("/_app/locations/$locationId/edit")({

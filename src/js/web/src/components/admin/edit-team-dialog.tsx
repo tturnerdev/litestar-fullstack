@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useAdminUpdateTeam } from "@/lib/api/hooks/admin"
 
-const NAME_MAX = 50
+const NAME_MAX = 100
 const DESC_MAX = 500
 
 // ── Validation ────────────────────────────────────────────────────────

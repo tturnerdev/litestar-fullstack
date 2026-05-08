@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { useUpdateProfile } from "@/lib/api/hooks/profile"
 import type { User } from "@/lib/generated/api/types.gen"
 
-const NAME_MAX = 120
+const NAME_MAX = 255
 const USERNAME_MAX = 30
 
 function formatPhone(value: string): string {
