@@ -197,6 +197,7 @@ class SaqSettings:
         from app.domain.system import jobs as system_jobs
         from app.domain.tasks import jobs as task_jobs
         from app.domain.voice import jobs as voice_jobs
+        from app.domain.webhooks import jobs as webhook_jobs
         from app.lib.worker import after_process, before_process, on_shutdown, on_startup
 
         return SAQConfig(
@@ -220,6 +221,7 @@ class SaqSettings:
                         voice_jobs.extension_create_job,
                         voice_jobs.extension_update_job,
                         voice_jobs.extension_delete_job,
+                        webhook_jobs.retry_failed_webhook_deliveries,
                     ],
                     scheduled_tasks=[
                         CronJob(
@@ -245,6 +247,12 @@ class SaqSettings:
                             cron="*/5 * * * *",
                             timeout=120,
                             ttl=600,
+                        ),
+                        CronJob(
+                            function=webhook_jobs.retry_failed_webhook_deliveries,
+                            cron="* * * * *",
+                            timeout=120,
+                            ttl=300,
                         ),
                     ],
                     concurrency=self.CONCURRENCY,

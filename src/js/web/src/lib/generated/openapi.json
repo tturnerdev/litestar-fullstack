@@ -10721,6 +10721,27 @@
               }
             ]
           },
+          "endpointId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "endpointUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "error": {
             "oneOf": [
               {
@@ -10738,7 +10759,26 @@
             "format": "uuid",
             "type": "string"
           },
+          "maxRetries": {
+            "default": 5,
+            "type": "integer"
+          },
+          "nextRetryAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "responseTimeMs": {
+            "default": 0,
+            "type": "integer"
+          },
+          "retryCount": {
             "default": 0,
             "type": "integer"
           },
@@ -10927,6 +10967,17 @@
             "default": true,
             "type": "boolean"
           },
+          "lastValidatedAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "teamId": {
             "oneOf": [
               {
@@ -10951,6 +11002,16 @@
           },
           "url": {
             "type": "string"
+          },
+          "validationStatus": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -11074,6 +11135,16 @@
           },
           "url": {
             "type": "string"
+          },
+          "validationStatus": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -12450,7 +12521,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12471,7 +12542,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12839,7 +12910,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12860,7 +12931,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13226,7 +13297,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13247,7 +13318,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13607,7 +13678,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13628,7 +13699,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [

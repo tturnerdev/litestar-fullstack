@@ -21,6 +21,8 @@ class WebhookEndpoint(CamelizedBaseStruct):
     is_active: bool = True
     headers: dict[str, Any] | None = None
     team_id: UUID | None = None
+    last_validated_at: datetime | None = None
+    validation_status: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -34,6 +36,7 @@ class WebhookEndpointList(CamelizedBaseStruct):
     events: list[str] = []
     is_active: bool = True
     team_id: UUID | None = None
+    validation_status: str | None = None
     created_at: datetime | None = None
 
 

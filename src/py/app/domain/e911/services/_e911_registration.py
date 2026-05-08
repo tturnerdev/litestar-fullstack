@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
@@ -11,6 +12,8 @@ from advanced_alchemy.extensions.litestar import repository, service
 from sqlalchemy import select
 
 from app.db import models as m
+
+logger = logging.getLogger(__name__)
 from app.domain.e911.schemas import E911Registration as E911RegistrationSchema
 
 
@@ -41,12 +44,12 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
                 extra["phone_number_display"] = db_obj.phone_number.number
                 extra["phone_number_label"] = db_obj.phone_number.label
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load phone_number relationship on E911 registration", exc_info=True)
         try:
             if db_obj.location is not None:
                 extra["location_name"] = db_obj.location.name
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load location relationship on E911 registration", exc_info=True)
         return extra
 
     def to_schema_enriched(

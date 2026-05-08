@@ -10371,6 +10371,27 @@ export const WebhookDeliveryListSchema = {
         },
       ],
     },
+    endpointId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endpointUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     error: {
       oneOf: [
         {
@@ -10388,7 +10409,26 @@ export const WebhookDeliveryListSchema = {
       format: "uuid",
       type: "string",
     },
+    maxRetries: {
+      default: 5,
+      type: "integer",
+    },
+    nextRetryAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     responseTimeMs: {
+      default: 0,
+      type: "integer",
+    },
+    retryCount: {
       default: 0,
       type: "integer",
     },
@@ -10569,6 +10609,17 @@ export const WebhookEndpointSchema = {
       default: true,
       type: "boolean",
     },
+    lastValidatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     teamId: {
       oneOf: [
         {
@@ -10593,6 +10644,16 @@ export const WebhookEndpointSchema = {
     },
     url: {
       type: "string",
+    },
+    validationStatus: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "url"],
@@ -10713,6 +10774,16 @@ export const WebhookEndpointListSchema = {
     },
     url: {
       type: "string",
+    },
+    validationStatus: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "url"],

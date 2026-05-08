@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -10,6 +11,8 @@ from advanced_alchemy.extensions.litestar import repository, service
 
 from app.db import models as m
 from app.lib.deps import CompositeServiceMixin
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -60,7 +63,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             finally:
                 await redis.aclose()
         except Exception:  # noqa: BLE001
-            pass  # Never let SSE broadcast failures affect task operations
+            logger.warning("Failed to broadcast task event via SSE", exc_info=True)
 
     async def create_task(
         self,
@@ -167,7 +170,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
                         action_url=f"/tasks/{updated.id}",
                     )
         except Exception:  # noqa: BLE001
-            pass  # Never let notification failures affect task operations
+            logger.warning("Failed to send task completion notification", exc_info=True)
         return updated
 
     async def fail_task(self, task_id: Any, error_message: str) -> m.BackgroundTask:
@@ -205,7 +208,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
                         action_url=f"/tasks/{updated.id}",
                     )
         except Exception:  # noqa: BLE001
-            pass  # Never let notification failures affect task operations
+            logger.warning("Failed to send task failure notification", exc_info=True)
         return updated
 
     async def cancel_task(self, task_id: Any) -> m.BackgroundTask:
@@ -236,7 +239,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
                 queue = await get_task_queue()
                 await queue.abort(db_obj.saq_job_key)
             except Exception:
-                pass
+                logger.warning("Failed to abort SAQ job %s during task cancellation", db_obj.saq_job_key, exc_info=True)
         await self._broadcast_task_event(updated)
         return updated
 

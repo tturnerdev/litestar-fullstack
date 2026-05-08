@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
@@ -28,6 +29,8 @@ from app.domain.tasks.schemas import BackgroundTaskDetail
 from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -279,5 +282,5 @@ class FaxMessageController(Controller):
                 action_url="/fax/messages",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send fax queued notification", exc_info=True)
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)

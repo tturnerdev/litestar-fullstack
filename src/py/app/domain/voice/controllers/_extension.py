@@ -124,7 +124,7 @@ class ExtensionController(Controller):
             except ClientException:
                 raise
             except Exception:
-                pass
+                logger.warning("Failed to check PBX for existing extension %s", data.extension_number, exc_info=True)
 
         obj = data.to_dict()
         obj["user_id"] = current_user.id

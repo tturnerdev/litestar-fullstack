@@ -227,7 +227,7 @@ class AccessController(Controller):
                 actor_id = request.user.id
                 actor_email = request.user.email
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to extract actor info during logout", exc_info=True)
 
         request.cookies.pop(auth.key, None)
         request.clear_session()

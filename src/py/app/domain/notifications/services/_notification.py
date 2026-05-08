@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -9,6 +10,8 @@ from advanced_alchemy import repository, service
 from sqlalchemy import func, select, update
 
 from app.db import models as m
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notification]):
@@ -52,7 +55,7 @@ class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notificatio
             finally:
                 await redis.aclose()
         except Exception:  # noqa: BLE001
-            pass  # Never let SSE broadcast failures affect notification operations
+            logger.warning("Failed to broadcast notification event via SSE", exc_info=True)
 
     async def notify(
         self,

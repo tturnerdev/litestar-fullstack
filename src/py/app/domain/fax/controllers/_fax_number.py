@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -22,6 +23,8 @@ from app.domain.teams.guards import requires_feature_permission
 from app.lib import constants
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -137,7 +140,7 @@ class FaxNumberController(Controller):
                 action_url="/fax/numbers",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send fax number creation notification", exc_info=True)
         return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
 
     @get(
@@ -264,4 +267,4 @@ class FaxNumberController(Controller):
                 action_url="/fax/numbers",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send fax number removal notification", exc_info=True)

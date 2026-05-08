@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -20,6 +21,8 @@ from app.domain.support.utils import render_markdown
 from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -127,7 +130,7 @@ class TicketController(Controller):
                 action_url=f"/support/{db_obj.id}",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send ticket creation notification", exc_info=True)
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
     @get(
@@ -252,7 +255,7 @@ class TicketController(Controller):
                 action_url=f"/support/{db_obj.id}",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send ticket closed notification", exc_info=True)
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
     @post(
@@ -295,5 +298,5 @@ class TicketController(Controller):
                 action_url=f"/support/{db_obj.id}",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send ticket reopened notification", exc_info=True)
         return tickets_service.to_schema(db_obj, schema_type=Ticket)

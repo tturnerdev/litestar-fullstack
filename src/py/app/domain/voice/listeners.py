@@ -42,7 +42,7 @@ async def voicemail_received_event_handler(voicemail_box_id: UUID, message_id: U
                 )
             except Exception:
                 await logger.aerror(
-                    "Failed to create notification for voicemail_received", voicemail_box_id=voicemail_box_id
+                    "Failed to create notification for voicemail_received", voicemail_box_id=voicemail_box_id, exc_info=True
                 )
 
 

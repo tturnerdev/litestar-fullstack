@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -19,6 +20,8 @@ from app.domain.voicemail.schemas import VoicemailBox, VoicemailBoxCreate, Voice
 from app.domain.voicemail.services import VoicemailBoxService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -133,7 +136,7 @@ class VoicemailBoxController(Controller):
                 action_url=f"/voicemail/boxes/{db_obj.id}",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send voicemail box creation notification", exc_info=True)
         return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailBox)
 
     @get(
@@ -253,7 +256,7 @@ class VoicemailBoxController(Controller):
                 action_url="/voicemail/boxes",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send voicemail box removal notification", exc_info=True)
 
     @get(
         operation_id="GetVoicemailBoxUnreadCount",

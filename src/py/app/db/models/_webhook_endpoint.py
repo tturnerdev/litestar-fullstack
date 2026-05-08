@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
 from advanced_alchemy.base import UUIDv7AuditBase
-from sqlalchemy import Boolean, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -49,3 +50,9 @@ class WebhookEndpoint(UUIDv7AuditBase):
 
     headers: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     """Custom headers to include in webhook deliveries."""
+
+    last_validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    """When the URL was last validated for reachability."""
+
+    validation_status: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
+    """URL validation status: 'valid', 'unreachable', or 'invalid_url'."""

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any
 
 from litestar import Controller, Request, delete, get, post
@@ -20,6 +21,8 @@ from app.domain.teams.services import TeamInvitationService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -131,7 +134,7 @@ class TeamInvitationController(Controller):
                     action_url=f"/teams/{team_id}",
                 )
         except Exception:
-            pass
+            logger.warning("Failed to send team invitation notification", exc_info=True)
 
         return team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
 
@@ -276,7 +279,7 @@ class TeamInvitationController(Controller):
                     action_url=f"/teams/{team_id}",
                 )
         except Exception:
-            pass
+            logger.warning("Failed to send invitation accepted notification", exc_info=True)
 
         return Message(message="Team invitation accepted")
 

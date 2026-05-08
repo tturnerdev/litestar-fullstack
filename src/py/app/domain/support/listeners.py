@@ -44,7 +44,7 @@ async def ticket_created_event_handler(ticket_id: UUID) -> None:
                     action_url=f"/support/tickets/{ticket_id}",
                 )
             except Exception:
-                await logger.aerror("Failed to create notification for ticket_created", ticket_id=ticket_id)
+                await logger.aerror("Failed to create notification for ticket_created", ticket_id=ticket_id, exc_info=True)
 
 
 @listener("ticket_message_created")
@@ -91,7 +91,7 @@ async def ticket_status_changed_event_handler(ticket_id: UUID, old_status: str, 
                 )
             except Exception:
                 await logger.aerror(
-                    "Failed to create notification for ticket_status_changed", ticket_id=ticket_id
+                    "Failed to create notification for ticket_status_changed", ticket_id=ticket_id, exc_info=True
                 )
 
 
@@ -122,7 +122,7 @@ async def ticket_assigned_event_handler(ticket_id: UUID, assigned_to_id: UUID) -
                 )
             except Exception:
                 await logger.aerror(
-                    "Failed to create notification for ticket_assigned", ticket_id=ticket_id
+                    "Failed to create notification for ticket_assigned", ticket_id=ticket_id, exc_info=True
                 )
 
 

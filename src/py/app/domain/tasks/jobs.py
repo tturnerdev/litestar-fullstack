@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 from app.domain.tasks import deps as task_deps
 from app.lib.deps import provide_services
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from saq.types import Context
@@ -72,7 +75,7 @@ async def broadcast_entity_event(task: BackgroundTask, action: str = "updated") 
         finally:
             await redis.aclose()
     except Exception:  # noqa: BLE001
-        pass  # Never let SSE broadcast failures affect job execution
+        logger.warning("Failed to broadcast entity event via SSE", exc_info=True)
 
 
 async def cleanup_stale_tasks(ctx: Context) -> dict[str, int]:

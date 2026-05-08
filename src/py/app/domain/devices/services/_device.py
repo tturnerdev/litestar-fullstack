@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import secrets
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
@@ -10,6 +11,8 @@ from uuid import UUID
 from advanced_alchemy.extensions.litestar import repository, service
 
 from app.db import models as m
+
+logger = logging.getLogger(__name__)
 from app.domain.devices.schemas import Device as DeviceSchema
 
 if TYPE_CHECKING:
@@ -51,7 +54,7 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
                 object.__setattr__(schema, "extension_number", line.extension.extension_number)
                 object.__setattr__(schema, "extension_display_name", line.extension.display_name)
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load extension relationship on device line assignment", exc_info=True)
 
     @staticmethod
     def _enrich_schema(db_obj: m.Device) -> dict[str, Any]:
@@ -68,12 +71,12 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
             if db_obj.location is not None:
                 extra["location_name"] = db_obj.location.name
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load location relationship on device", exc_info=True)
         try:
             if db_obj.connection is not None:
                 extra["connection_name"] = db_obj.connection.name
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load connection relationship on device", exc_info=True)
         return extra
 
     def _enrich_device(self, db_obj: m.Device, schema: DeviceSchema) -> None:

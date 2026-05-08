@@ -54,6 +54,7 @@ async def _get_redis_info(request: Any) -> RedisInfo | None:
             uptime_seconds=info.get("uptime_in_seconds"),
         )
     except Exception:  # noqa: BLE001
+        logger.warning("Failed to retrieve Redis info", exc_info=True)
         return RedisInfo(status="offline")
 
 
@@ -70,6 +71,7 @@ def _get_db_pool_info(db_session: Any) -> DatabasePoolInfo | None:
             max_overflow=pool._max_overflow,  # noqa: SLF001
         )
     except Exception:  # noqa: BLE001
+        logger.warning("Failed to retrieve database pool info", exc_info=True)
         return None
 
 
@@ -91,7 +93,7 @@ async def _get_resource_counts(db_session: Any) -> dict[str, int | None]:
             result = await db_session.execute(text(f"SELECT count(*) FROM {table}"))  # noqa: S608
             counts[key] = result.scalar()
     except Exception:  # noqa: BLE001
-        pass
+        logger.warning("Failed to retrieve resource counts from database", exc_info=True)
     return counts
 
 
@@ -145,9 +147,10 @@ class AdminSystemController(Controller):
                         )
                     )
                 except Exception:  # noqa: BLE001
+                    logger.warning("Failed to retrieve info for SAQ queue %s", queue.name, exc_info=True)
                     worker_queues.append(WorkerQueueInfo(name=queue.name))
         except Exception:  # noqa: BLE001
-            await logger.adebug("SAQ plugin not available for system status")
+            logger.warning("SAQ plugin not available for system status", exc_info=True)
 
         # Collect Redis info
         redis_info = await _get_redis_info(request)
@@ -165,7 +168,7 @@ class AdminSystemController(Controller):
 
             litestar_version = litestar.__version__
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to determine Litestar version", exc_info=True)
 
         # Determine environment label
         environment = "development" if settings.DEBUG else "production"

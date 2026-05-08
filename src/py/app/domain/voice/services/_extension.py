@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -7,6 +8,8 @@ from advanced_alchemy.extensions.litestar import repository, service
 from sqlalchemy import select
 
 from app.db import models as m
+
+logger = logging.getLogger(__name__)
 from app.domain.voice.schemas import Extension as ExtensionSchema
 from app.domain.voice.schemas import ExtensionDeviceSummary
 
@@ -45,9 +48,9 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
                 else:
                     extra["e911_status"] = "unregistered"
             except Exception:  # noqa: BLE001
-                pass
+                logger.warning("Failed to load e911_registration for phone_number on extension", exc_info=True)
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load phone_number relationship on extension", exc_info=True)
         return extra
 
     def to_schema_enriched(self, obj: m.Extension) -> ExtensionSchema:

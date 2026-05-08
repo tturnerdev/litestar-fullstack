@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any
 
 from advanced_alchemy.exceptions import IntegrityError
@@ -17,6 +18,8 @@ from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import Team, TeamMember, TeamMemberModify, TeamMemberUpdate
 from app.lib.audit import capture_snapshot, log_audit
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -168,7 +171,7 @@ class TeamMemberController(Controller):
                 action_url=f"/teams/{team_id}",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send team member removal notification", exc_info=True)
 
         return teams_service.to_schema(team_obj, schema_type=Team)
 

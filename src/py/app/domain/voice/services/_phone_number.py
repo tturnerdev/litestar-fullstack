@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
@@ -10,9 +11,15 @@ from sqlalchemy import select
 from app.db import models as m
 from app.domain.voice.schemas import PhoneNumber as PhoneNumberSchema
 
+logger = logging.getLogger(__name__)
+
 
 class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]):
-    """Phone Number Service."""
+    """Phone Number Service.
+
+    Consolidated service for all phone number operations including CRUD,
+    bulk import, E911 lookups, and schema enrichment.
+    """
 
     class Repo(repository.SQLAlchemyAsyncRepository[m.PhoneNumber]):
         """Phone Number Repository."""
@@ -20,6 +27,32 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
         model_type = m.PhoneNumber
 
     repository_type = Repo
+    match_fields = ["number"]
+
+    async def check_duplicates(self, numbers: list[str]) -> set[str]:
+        """Check which phone numbers already exist in the database.
+
+        Args:
+            numbers: List of E.164 phone numbers to check.
+
+        Returns:
+            Set of numbers that already exist.
+        """
+        if not numbers:
+            return set()
+        existing = await self.list(m.PhoneNumber.number.in_(numbers))
+        return {pn.number for pn in existing}
+
+    async def bulk_create(self, items: list[dict[str, Any]]) -> list[m.PhoneNumber]:
+        """Create multiple phone numbers in a single operation.
+
+        Args:
+            items: List of dicts with phone number field data.
+
+        Returns:
+            List of created PhoneNumber model instances.
+        """
+        return list(await self.create_many(items, auto_commit=True))
 
     async def get_unregistered_e911_numbers(self, team_id: UUID) -> list[m.PhoneNumber]:
         """Get active phone numbers belonging to a team that have no E911 registration.
@@ -63,7 +96,7 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
                 extra["e911_registered"] = True
                 extra["e911_registration_id"] = db_obj.e911_registration.id
         except Exception:  # noqa: BLE001
-            pass
+            logger.warning("Failed to load e911_registration relationship on phone number", exc_info=True)
         return extra
 
     def to_schema_enriched(

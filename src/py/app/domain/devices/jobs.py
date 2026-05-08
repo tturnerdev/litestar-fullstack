@@ -53,7 +53,7 @@ async def broadcast_device_status(task: BackgroundTask, *, status: str, previous
         finally:
             await redis.aclose()
     except Exception:  # noqa: BLE001
-        pass  # Never let SSE broadcast failures affect job execution
+        logger.warning("Failed to broadcast device status event via SSE", exc_info=True)
 
 
 async def device_reboot_job(ctx: Context, *, task_id: str) -> dict:

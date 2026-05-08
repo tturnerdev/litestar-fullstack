@@ -7,11 +7,14 @@ an :class:`AuditMixin` that services can inherit for declarative audit support.
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, ClassVar
 from uuid import UUID
 
 from sqlalchemy import inspect as sa_inspect
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from litestar import Request
@@ -60,6 +63,7 @@ def capture_snapshot(obj: Any, *, exclude: frozenset[str] | None = None) -> dict
         try:
             value = getattr(obj, key)
         except Exception:  # noqa: BLE001
+            logger.debug("Skipping unreadable attribute %r during audit snapshot", key)
             continue
         # Convert non-JSON-native types to serializable forms
         if isinstance(value, UUID):

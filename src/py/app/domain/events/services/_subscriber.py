@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
 import msgspec
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -57,6 +60,7 @@ class EventSubscriber:
                 payload = msgspec.json.decode(message["data"])
                 yield payload["event"], payload["data"]
             except Exception:  # noqa: BLE001
+                logger.warning("Failed to decode SSE message from Redis", exc_info=True)
                 continue
 
     async def unsubscribe(self) -> None:

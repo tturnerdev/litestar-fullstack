@@ -1,13 +1,17 @@
-"""Phone number service for CRUD and bulk operations."""
+"""Phone number utilities and service re-export.
+
+The canonical PhoneNumberService lives in ``app.domain.voice.services``.
+This module re-exports it so that existing imports from
+``app.domain.phone_numbers.services`` continue to work, and provides
+module-level utility functions used by the bulk-import controller.
+"""
 
 from __future__ import annotations
 
 import re
 from typing import Any
 
-from advanced_alchemy.extensions.litestar import repository, service
-
-from app.db import models as m
+from app.domain.voice.services._phone_number import PhoneNumberService
 
 _E164_PATTERN = re.compile(r"^\+[1-9]\d{1,14}$")
 _DIGITS_ONLY = re.compile(r"\D")
@@ -16,6 +20,17 @@ VALID_NUMBER_TYPES = {"local", "toll_free", "international"}
 
 
 def normalize_phone_number(raw: str) -> str:
+    """Normalize a raw phone string to E.164 format.
+
+    Args:
+        raw: Raw phone number string.
+
+    Returns:
+        E.164 formatted phone number.
+
+    Raises:
+        ValueError: If the input cannot be normalized to valid E.164.
+    """
     stripped = raw.strip()
     if not stripped:
         msg = "Phone number cannot be empty"
@@ -43,6 +58,15 @@ def normalize_phone_number(raw: str) -> str:
 
 
 def validate_phone_row(row: dict[str, str], row_index: int) -> tuple[dict[str, Any] | None, list[str]]:
+    """Validate a single CSV row for phone number bulk import.
+
+    Args:
+        row: Dict of field name to value from CSV.
+        row_index: 1-based row number for error messages.
+
+    Returns:
+        Tuple of (validated_data_dict_or_None, error_list).
+    """
     errors: list[str] = []
     data: dict[str, Any] = {}
 
@@ -94,19 +118,4 @@ def validate_phone_row(row: dict[str, str], row_index: int) -> tuple[dict[str, A
     return data, []
 
 
-class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]):
-
-    class Repo(repository.SQLAlchemyAsyncRepository[m.PhoneNumber]):
-        model_type = m.PhoneNumber
-
-    repository_type = Repo
-    match_fields = ["number"]
-
-    async def check_duplicates(self, numbers: list[str]) -> set[str]:
-        if not numbers:
-            return set()
-        existing = await self.list(m.PhoneNumber.number.in_(numbers))
-        return {pn.number for pn in existing}
-
-    async def bulk_create(self, items: list[dict[str, Any]]) -> list[m.PhoneNumber]:
-        return list(await self.create_many(items, auto_commit=True))
+__all__ = ("PhoneNumberService", "normalize_phone_number", "validate_phone_row")

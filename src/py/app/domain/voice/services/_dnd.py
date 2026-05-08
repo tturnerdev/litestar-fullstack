@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
 
 from app.db import models as m
+
+logger = logging.getLogger(__name__)
 
 
 class DoNotDisturbService(service.SQLAlchemyAsyncRepositoryService[m.DoNotDisturb]):
@@ -24,5 +27,6 @@ class DoNotDisturbService(service.SQLAlchemyAsyncRepositoryService[m.DoNotDistur
         try:
             return await self.create({"extension_id": extension_id})
         except Exception:
+            logger.warning("Race condition creating DND record for extension %s, fetching existing", extension_id, exc_info=True)
             await self.repository.session.rollback()
             return await self.get_one(extension_id=extension_id)

@@ -40,7 +40,7 @@ def _capture_snapshot(obj: Any) -> dict[str, Any]:
         try:
             value = getattr(obj, key)
         except Exception:  # noqa: BLE001, S112
-            continue
+            continue  # intentionally skip unreadable model attributes during snapshot
         if isinstance(value, UUID):
             value = str(value)
         elif isinstance(value, (datetime, date)):

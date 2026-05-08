@@ -46,7 +46,7 @@ async def device_created_event_handler(device_id: UUID) -> None:
                     action_url=f"/devices/{device_id}",
                 )
             except Exception:
-                await logger.aerror("Failed to create notification for device_created", device_id=device_id)
+                await logger.aerror("Failed to create notification for device_created", device_id=device_id, exc_info=True)
 
 
 __all__ = ("device_created_event_handler",)

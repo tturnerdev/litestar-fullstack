@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
@@ -20,6 +21,8 @@ from app.domain.devices.services import DeviceService
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.guards import requires_feature_permission
 from app.lib.deps import create_service_dependencies
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -46,7 +49,7 @@ def _capture_snapshot(obj: Any) -> dict[str, Any]:
         try:
             value = getattr(obj, key)
         except Exception:  # noqa: BLE001, S112
-            continue
+            continue  # intentionally skip unreadable model attributes during snapshot
         if isinstance(value, UUID):
             value = str(value)
         elif isinstance(value, (datetime, date)):
@@ -203,7 +206,7 @@ class DeviceController(Controller):
                 action_url=f"/devices/{db_obj.id}",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send device registration notification", exc_info=True)
         return devices_service.to_schema_enriched(db_obj)
 
     @get(
@@ -322,4 +325,4 @@ class DeviceController(Controller):
                 action_url="/devices",
             )
         except Exception:
-            pass
+            logger.warning("Failed to send device removal notification", exc_info=True)

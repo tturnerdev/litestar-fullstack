@@ -2793,10 +2793,15 @@ export type WebhookCreate = {
  */
 export type WebhookDeliveryList = {
   createdAt?: string | null;
+  endpointId?: string | null;
+  endpointUrl?: string | null;
   error?: string | null;
   event: string;
   id: string;
+  maxRetries?: number;
+  nextRetryAt?: string | null;
   responseTimeMs?: number;
+  retryCount?: number;
   statusCode?: number | null;
   success?: boolean;
   webhookId: string;
@@ -2836,9 +2841,11 @@ export type WebhookEndpoint = {
   } | null;
   id: string;
   isActive?: boolean;
+  lastValidatedAt?: string | null;
   teamId?: string | null;
   updatedAt?: string | null;
   url: string;
+  validationStatus?: string | null;
 };
 
 /**
@@ -2867,6 +2874,7 @@ export type WebhookEndpointList = {
   isActive?: boolean;
   teamId?: string | null;
   url: string;
+  validationStatus?: string | null;
 };
 
 /**
@@ -3330,8 +3338,8 @@ export type AdminListAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3409,8 +3417,8 @@ export type AdminExportAuditLogData = {
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3477,8 +3485,8 @@ export type AdminGetTargetAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3557,8 +3565,8 @@ export type AdminGetUserAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

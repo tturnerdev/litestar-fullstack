@@ -80,8 +80,13 @@ class WebhookDeliveryList(CamelizedBaseStruct):
     id: UUID
     webhook_id: UUID
     event: str
+    endpoint_id: UUID | None = None
+    endpoint_url: str | None = None
     status_code: int | None = None
     response_time_ms: int = 0
     success: bool = False
     error: str | None = None
+    retry_count: int = 0
+    max_retries: int = 5
+    next_retry_at: datetime | None = None
     created_at: datetime | None = None
