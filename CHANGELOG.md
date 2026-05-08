@@ -1,5 +1,38 @@
 # Changelog
 
+## v0.319.0 (2026-05-08)
+
+### Improved
+- **Admin extensions pagination** — `AdminListExtensions` endpoint now returns paginated results with search support instead of loading all records unbounded; admin voice page fetches 8-item preview with on-demand full CSV export
+
+### Fixed
+- **HTTP 201 on all create endpoints** — Added `status_code=HTTP_201_CREATED` to fax number, voice phone number, ticket message, ticket attachment, paste image, device template, music-on-hold, call record, and phone number management create endpoints
+- **Ticket attachment exception** — Fixed `NotImplementedException` import error (doesn't exist in this Litestar version); replaced with `HTTPException(status_code=501)`
+
+## v0.318.0 (2026-05-08)
+
+### Security
+- **Team membership validation on create** — Fax number, support ticket, schedule, and connection create endpoints now verify the user belongs to the specified team before creating the resource
+
+## v0.317.0 (2026-05-08)
+
+### Improved
+- **Audit logging coverage** — Added before/after snapshot audit logging to DND update and voicemail message update controllers
+- **Event emission coverage** — Added `request.app.emit()` to DND update/toggle, voicemail message update, schedule entry create/update, and ticket message update handlers
+
+## v0.316.0 (2026-05-08)
+
+### Fixed
+- **Missing SQLAlchemy `text` import** — Admin system health-check endpoint would have crashed at runtime due to missing `text` import
+- **Delete button protection** — Added `disabled={isPending}` to delete confirmation AlertDialogAction and AlertDialogCancel in connections, webhooks, call-routing (4 entities), fax numbers/messages, and voice forwarding dialogs
+
+## v0.315.0 (2026-05-08)
+
+### Improved
+- **Voicemail OpenAPI summaries** — Added `summary=` to all 11 voicemail endpoint decorators (6 box, 5 message)
+- **Eliminated 12 redundant queries** — Removed `get_one()` after `update()` in call routing (8), connections, E911, and webhook controllers where `update()` already returns the fresh object
+- **Removed 3 double toasts** — Eliminated duplicate `toast.success()` calls in locations detail (update/delete) and tags/new pages
+
 ## v0.312.0 (2026-05-08)
 
 ### Security
