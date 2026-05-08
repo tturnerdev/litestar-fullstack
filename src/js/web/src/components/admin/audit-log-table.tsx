@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import {
   AlertCircle,
   AlertTriangle,
@@ -7,6 +8,7 @@ import {
   Clock,
   Code,
   Download,
+  ExternalLink,
   FileSpreadsheet,
   FileText,
   Globe,
@@ -243,6 +245,33 @@ function getActionBadgeClasses(action: string): string {
   }
 }
 
+/** Map a target type + id to the in-app route for that resource, or null if none exists. */
+function getResourceRoute(targetType: string | null | undefined, targetId: string | null | undefined): string | null {
+  if (!targetType || !targetId) return null
+  const routes: Record<string, string | null> = {
+    user: `/admin/users/${targetId}`,
+    team: `/teams/${targetId}`,
+    device: `/devices/${targetId}`,
+    extension: `/voice/extensions/${targetId}`,
+    connection: `/connections/${targetId}`,
+    webhook: `/webhooks/${targetId}`,
+    tag: `/tags/${targetId}`,
+    schedule: `/schedules/${targetId}`,
+    location: `/locations/${targetId}`,
+    e911_registration: `/e911/${targetId}`,
+    phone_number: `/voice/phone-numbers/${targetId}`,
+    fax_number: `/fax/numbers/${targetId}`,
+    call_queue: "/call-routing",
+    ring_group: "/call-routing",
+    ivr_menu: "/call-routing",
+    time_condition: "/call-routing",
+    ticket: `/support/${targetId}`,
+    role: null,
+    notification_preference: null,
+  }
+  return routes[targetType] ?? null
+}
+
 // ── CSV Export ──────────────────────────────────────────────────────────────
 
 function escapeCsvField(value: string): string {
@@ -370,8 +399,30 @@ function AuditDetailRow({ entry, colSpan }: { entry: AuditLogEntry; colSpan: num
               Target
             </h4>
             <DetailField label="Type" value={entry.targetType} />
-            <DetailField label="Label" value={entry.targetLabel} />
-            <DetailField label="ID" value={entry.targetId} mono />
+            {(() => {
+              const route = getResourceRoute(entry.targetType, entry.targetId)
+              return route ? (
+                <>
+                  <p className="flex items-baseline gap-2">
+                    <span className="min-w-[5rem] shrink-0 text-xs text-muted-foreground">Label</span>
+                    <Link to={route} className="text-xs font-medium text-primary hover:underline">
+                      {entry.targetLabel ?? "N/A"}
+                    </Link>
+                  </p>
+                  <p className="flex items-baseline gap-2">
+                    <span className="min-w-[5rem] shrink-0 text-xs text-muted-foreground">ID</span>
+                    <Link to={route} className="font-mono text-xs text-primary hover:underline">
+                      {entry.targetId ?? "N/A"}
+                    </Link>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <DetailField label="Label" value={entry.targetLabel} />
+                  <DetailField label="ID" value={entry.targetId} mono />
+                </>
+              )
+            })()}
           </div>
         </div>
 
@@ -623,8 +674,37 @@ function AuditLogDetailSheet({ entry, open, onOpenChange }: { entry: AuditLogEnt
               </h4>
               <div className="space-y-1.5">
                 <DetailField label="Type" value={entry.targetType} />
-                <DetailField label="Label" value={entry.targetLabel} />
-                <DetailField label="ID" value={entry.targetId} mono />
+                {(() => {
+                  const route = getResourceRoute(entry.targetType, entry.targetId)
+                  return route ? (
+                    <>
+                      <p className="flex items-baseline gap-2">
+                        <span className="min-w-[5rem] shrink-0 text-xs text-muted-foreground">Label</span>
+                        <Link to={route} className="text-xs font-medium text-primary hover:underline">
+                          {entry.targetLabel ?? "N/A"}
+                        </Link>
+                      </p>
+                      <p className="flex items-baseline gap-2">
+                        <span className="min-w-[5rem] shrink-0 text-xs text-muted-foreground">ID</span>
+                        <Link to={route} className="font-mono text-xs text-primary hover:underline">
+                          {entry.targetId ?? "N/A"}
+                        </Link>
+                      </p>
+                      <Link
+                        to={route}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        View Resource
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <DetailField label="Label" value={entry.targetLabel} />
+                      <DetailField label="ID" value={entry.targetId} mono />
+                    </>
+                  )
+                })()}
               </div>
             </div>
           </div>
@@ -1289,7 +1369,17 @@ export function AuditLogTable() {
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          <span className="text-sm">{entry.targetLabel ?? entry.targetId ?? "-"}</span>
+                          {(() => {
+                            const route = getResourceRoute(entry.targetType, entry.targetId)
+                            const label = entry.targetLabel ?? entry.targetId ?? "-"
+                            return route ? (
+                              <Link to={route} className="text-sm font-medium text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                                {label}
+                              </Link>
+                            ) : (
+                              <span className="text-sm">{label}</span>
+                            )
+                          })()}
                         </TableCell>
                         <TableCell>
                           {entry.targetType ? (

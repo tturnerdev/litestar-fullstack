@@ -39,6 +39,7 @@ import { type BulkAction, BulkActionBar, createBulkDeleteAction } from "@/compon
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -540,7 +541,7 @@ function NotificationsPage() {
   }, [])
 
   const { data: unreadData } = useUnreadCount()
-  const { data, isLoading } = useNotifications(page, pageSize, {
+  const { data, isLoading, dataUpdatedAt, isRefetching, refetch } = useNotifications(page, pageSize, {
     refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
   })
   const markAllRead = useMarkAllRead()
@@ -692,7 +693,8 @@ function NotificationsPage() {
         description={unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` : "You're all caught up"}
         breadcrumbs={breadcrumbs}
         actions={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
               {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live

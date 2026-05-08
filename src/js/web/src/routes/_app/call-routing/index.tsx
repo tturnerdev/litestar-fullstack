@@ -17,6 +17,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -393,13 +394,20 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
 // Tab content components
 // ---------------------------------------------------------------------------
 
+interface TabFreshnessState {
+  dataUpdatedAt: number
+  isRefetching: boolean
+  refetch: () => void
+}
+
 interface TabSearchProps {
   search: string
   onSearchChange: (value: string) => void
   debouncedSearch: string
+  onFreshnessChange?: (state: TabFreshnessState) => void
 }
 
-function TimeConditionsTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
+function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -411,12 +419,18 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch }: TabSearc
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useTimeConditions({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTimeConditions({
     page,
     pageSize: 25,
     search: debouncedSearch || undefined,
   })
   const deleteTimeCondition = useDeleteTimeCondition()
+
+  useEffect(() => {
+    if (onFreshnessChange && dataUpdatedAt) {
+      onFreshnessChange({ dataUpdatedAt, isRefetching, refetch: () => refetch() })
+    }
+  }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -680,7 +694,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch }: TabSearc
   )
 }
 
-function IvrMenusTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
+function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -692,12 +706,18 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch }: TabSearchProps
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useIvrMenus({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useIvrMenus({
     page,
     pageSize: 25,
     search: debouncedSearch || undefined,
   })
   const deleteIvrMenu = useDeleteIvrMenu()
+
+  useEffect(() => {
+    if (onFreshnessChange && dataUpdatedAt) {
+      onFreshnessChange({ dataUpdatedAt, isRefetching, refetch: () => refetch() })
+    }
+  }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -956,7 +976,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch }: TabSearchProps
   )
 }
 
-function CallQueuesTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
+function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -968,12 +988,18 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch }: TabSearchPro
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useCallQueues({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useCallQueues({
     page,
     pageSize: 25,
     search: debouncedSearch || undefined,
   })
   const deleteCallQueue = useDeleteCallQueue()
+
+  useEffect(() => {
+    if (onFreshnessChange && dataUpdatedAt) {
+      onFreshnessChange({ dataUpdatedAt, isRefetching, refetch: () => refetch() })
+    }
+  }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -1239,7 +1265,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch }: TabSearchPro
   )
 }
 
-function RingGroupsTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
+function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -1251,12 +1277,18 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch }: TabSearchPro
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useRingGroups({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useRingGroups({
     page,
     pageSize: 25,
     search: debouncedSearch || undefined,
   })
   const deleteRingGroup = useDeleteRingGroup()
+
+  useEffect(() => {
+    if (onFreshnessChange && dataUpdatedAt) {
+      onFreshnessChange({ dataUpdatedAt, isRefetching, refetch: () => refetch() })
+    }
+  }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -1537,6 +1569,20 @@ function CallRoutingPage() {
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebouncedValue(searchInput)
 
+  // Data freshness per tab — only the active tab's state is displayed
+  const [tabFreshness, setTabFreshness] = useState<Record<string, TabFreshnessState>>({})
+  const activeFreshness = tabFreshness[tab] ?? null
+
+  const freshnessCallbacks = useMemo(
+    () => ({
+      "time-conditions": (state: TabFreshnessState) => setTabFreshness((prev) => ({ ...prev, "time-conditions": state })),
+      "ivr-menus": (state: TabFreshnessState) => setTabFreshness((prev) => ({ ...prev, "ivr-menus": state })),
+      "call-queues": (state: TabFreshnessState) => setTabFreshness((prev) => ({ ...prev, "call-queues": state })),
+      "ring-groups": (state: TabFreshnessState) => setTabFreshness((prev) => ({ ...prev, "ring-groups": state })),
+    }),
+    [],
+  )
+
   // Sync URL when debounced search value settles
   useEffect(() => {
     navigate({
@@ -1586,7 +1632,17 @@ function CallRoutingPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Workspace" title="Call Routing" description="Manage time conditions, IVR menus, call queues, and ring groups." breadcrumbs={breadcrumbs} />
+      <PageHeader
+        eyebrow="Workspace"
+        title="Call Routing"
+        description="Manage time conditions, IVR menus, call queues, and ring groups."
+        breadcrumbs={breadcrumbs}
+        actions={
+          activeFreshness ? (
+            <DataFreshness dataUpdatedAt={activeFreshness.dataUpdatedAt} onRefresh={activeFreshness.refetch} isRefreshing={activeFreshness.isRefetching} />
+          ) : undefined
+        }
+      />
 
       <PageSection>
         <SectionErrorBoundary name="Call Routing Summary">
@@ -1636,22 +1692,22 @@ function CallRoutingPage() {
 
           <TabsContent value="time-conditions" className="mt-6">
             <SectionErrorBoundary name="Time Conditions">
-              <TimeConditionsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
+              <TimeConditionsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["time-conditions"]} />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ivr-menus" className="mt-6">
             <SectionErrorBoundary name="IVR Menus">
-              <IvrMenusTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
+              <IvrMenusTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["ivr-menus"]} />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="call-queues" className="mt-6">
             <SectionErrorBoundary name="Call Queues">
-              <CallQueuesTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
+              <CallQueuesTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["call-queues"]} />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ring-groups" className="mt-6">
             <SectionErrorBoundary name="Ring Groups">
-              <RingGroupsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
+              <RingGroupsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["ring-groups"]} />
             </SectionErrorBoundary>
           </TabsContent>
         </Tabs>

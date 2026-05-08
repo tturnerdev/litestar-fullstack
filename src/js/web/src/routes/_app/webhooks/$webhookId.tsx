@@ -17,6 +17,7 @@ import {
   Pencil,
   Play,
   RefreshCw,
+  RotateCw,
   Save,
   Trash2,
   X,
@@ -46,6 +47,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -53,7 +55,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
-import { useDeleteWebhook, useTestWebhook, useUpdateWebhook, useWebhook, useWebhookDeliveries } from "@/lib/api/hooks/webhooks"
+import { useDeleteWebhook, useRedeliverWebhookDelivery, useTestWebhook, useUpdateWebhook, useWebhook, useWebhookDeliveries } from "@/lib/api/hooks/webhooks"
 import { formatDateTime, formatRelativeFuture, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/webhooks/$webhookId")({
@@ -296,6 +298,11 @@ function TimestampField({ label, value }: { label: string; value: string | null 
   )
 }
 
+function isRetryPending(delivery: WebhookDelivery): boolean {
+  if (!delivery.nextRetryAt) return false
+  return new Date(delivery.nextRetryAt) > new Date()
+}
+
 // -- Main page ----------------------------------------------------------------
 
 function WebhookDetailPage() {
@@ -306,11 +313,13 @@ function WebhookDetailPage() {
   const updateWebhook = useUpdateWebhook(webhookId)
   const deleteWebhook = useDeleteWebhook()
   const testWebhookMutation = useTestWebhook()
+  const redeliverMutation = useRedeliverWebhookDelivery(webhookId)
 
   useDocumentTitle(data?.name ? `${data.name} - Webhook` : "Webhook Details")
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
+  const [deliveryStatusFilter, setDeliveryStatusFilter] = useState<"all" | "success" | "failed" | "pending_retry">("all")
 
   // -- Inline editing state ---------------------------------------------------
 
@@ -412,6 +421,23 @@ function WebhookDetailPage() {
       },
     })
   }, [data, editName, editUrl, editDescription, editActive, editEvents, updateWebhook, validateField])
+
+  // -- Delivery filtering (must be above early returns) -----------------------
+
+  const deliveries = deliveriesQuery.data ?? []
+
+  const filteredDeliveries = useMemo(() => {
+    switch (deliveryStatusFilter) {
+      case "success":
+        return deliveries.filter((d) => d.success)
+      case "failed":
+        return deliveries.filter((d) => !d.success && !d.nextRetryAt)
+      case "pending_retry":
+        return deliveries.filter((d) => !d.success && !!d.nextRetryAt)
+      default:
+        return deliveries
+    }
+  }, [deliveries, deliveryStatusFilter])
 
   // -- Loading state ----------------------------------------------------------
 
@@ -522,7 +548,6 @@ function WebhookDetailPage() {
 
   const headers = data.headers ?? {}
   const headerEntries = Object.entries(headers)
-  const deliveries = deliveriesQuery.data ?? []
 
   // -- Render -----------------------------------------------------------------
 
@@ -879,10 +904,23 @@ function WebhookDetailPage() {
                 <Activity className="h-5 w-5 text-muted-foreground" />
                 <CardTitle>Delivery Log</CardTitle>
               </div>
-              <Button variant="outline" size="sm" onClick={() => deliveriesQuery.refetch()} disabled={deliveriesQuery.isRefetching}>
-                {deliveriesQuery.isRefetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Activity className="mr-2 h-4 w-4" />}
-                Refresh
-              </Button>
+              <div className="flex items-center gap-2">
+                <Select value={deliveryStatusFilter} onValueChange={(v) => setDeliveryStatusFilter(v as typeof deliveryStatusFilter)}>
+                  <SelectTrigger className="h-9 w-[140px]">
+                    <SelectValue placeholder="Filter status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                    <SelectItem value="pending_retry">Pending Retry</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" onClick={() => deliveriesQuery.refetch()} disabled={deliveriesQuery.isRefetching}>
+                  {deliveriesQuery.isRefetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Activity className="mr-2 h-4 w-4" />}
+                  Refresh
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {deliveriesQuery.isLoading ? (
@@ -905,6 +943,8 @@ function WebhookDetailPage() {
                 />
               ) : deliveries.length === 0 ? (
                 <EmptyState icon={Activity} title="No deliveries yet" description="No delivery attempts have been recorded. Use the Send Test action to send a test payload." />
+              ) : filteredDeliveries.length === 0 ? (
+                <EmptyState icon={Activity} title="No matching deliveries" description="No deliveries match the selected filter. Try a different status filter." />
               ) : (
                 <div className="overflow-x-auto rounded-md border border-border/60">
                   <Table aria-label="Webhook deliveries">
@@ -916,10 +956,11 @@ function WebhookDetailPage() {
                         <TableHead>HTTP Status</TableHead>
                         <TableHead>Response Time</TableHead>
                         <TableHead>Timestamp</TableHead>
+                        <TableHead className="w-[80px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {deliveries.map((delivery: WebhookDelivery) => (
+                      {filteredDeliveries.map((delivery: WebhookDelivery) => (
                         <TableRow key={delivery.id} className="hover:bg-muted/50 transition-colors">
                           <TableCell>
                             <span className="text-sm font-mono">{delivery.event}</span>
@@ -935,6 +976,29 @@ function WebhookDetailPage() {
                               <Clock className="h-3 w-3 text-muted-foreground" />
                               <span className="text-sm text-muted-foreground">{formatDateTime(delivery.createdAt, "--")}</span>
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            {!delivery.success && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    disabled={isRetryPending(delivery) || redeliverMutation.isPending}
+                                    onClick={() => redeliverMutation.mutate(delivery.id)}
+                                    aria-label="Redeliver"
+                                  >
+                                    {redeliverMutation.isPending && redeliverMutation.variables === delivery.id ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <RotateCw className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{isRetryPending(delivery) ? "Retry already pending" : "Redeliver"}</TooltipContent>
+                              </Tooltip>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

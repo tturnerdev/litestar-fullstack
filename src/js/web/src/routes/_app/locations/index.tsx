@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Home, Plus, Search, SlidersHorizontal, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { LocationList } from "@/components/locations/location-list"
+import { type LocationFreshnessState, LocationList } from "@/components/locations/location-list"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -60,6 +61,9 @@ function LocationsPage() {
   const { q: searchParam, page: pageParam, type: typeParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Data freshness state lifted from LocationList
+  const [freshness, setFreshness] = useState<LocationFreshnessState | null>(null)
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -138,6 +142,7 @@ function LocationsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            {freshness && <DataFreshness dataUpdatedAt={freshness.dataUpdatedAt} onRefresh={freshness.refetch} isRefreshing={freshness.isRefetching} />}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -230,7 +235,14 @@ function LocationsPage() {
       </PageSection>
 
       <PageSection delay={0.1}>
-        <LocationList searchParams={resolvedSearchParams} navigate={navigate} cellClass={cellClass} isColumnVisible={isColumnVisible} onSearchInputChange={setSearchInput} />
+        <LocationList
+          searchParams={resolvedSearchParams}
+          navigate={navigate}
+          cellClass={cellClass}
+          isColumnVisible={isColumnVisible}
+          onSearchInputChange={setSearchInput}
+          onFreshnessChange={setFreshness}
+        />
       </PageSection>
     </PageContainer>
   )

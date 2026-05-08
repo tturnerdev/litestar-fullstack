@@ -10,10 +10,13 @@ import {
   type ListWebhooksData,
   listWebhookEventTypes,
   listWebhooks,
+  type RedeliverWebhookDeliveryData,
+  redeliverWebhookDelivery,
   testWebhook,
   type UpdateWebhookData,
   updateWebhook,
   type WebhookCreate,
+  type WebhookDeliveryDetail,
   type WebhookDetail,
   type WebhookEventTypeInfo,
   type WebhookList,
@@ -196,6 +199,31 @@ export function useTestWebhook() {
     },
     onError: (error) => {
       toast.error("Unable to test webhook", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Redeliver Webhook Delivery
+// ---------------------------------------------------------------------------
+
+export function useRedeliverWebhookDelivery(webhookId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (deliveryId: string) => {
+      const response = await redeliverWebhookDelivery({
+        path: { webhook_id: webhookId, delivery_id: deliveryId },
+      } as unknown as RedeliverWebhookDeliveryData)
+      return response.data as WebhookDeliveryDetail
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["webhook-deliveries", webhookId] })
+      toast.success("Delivery requeued")
+    },
+    onError: (error) => {
+      toast.error("Failed to redeliver", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

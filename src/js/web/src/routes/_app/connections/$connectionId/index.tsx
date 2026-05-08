@@ -7,6 +7,7 @@ import {
   Check,
   CheckCircle2,
   Circle,
+  Clock,
   Copy,
   Cpu,
   Globe,
@@ -22,6 +23,7 @@ import {
   Server,
   Settings,
   ShieldCheck,
+  Timer,
   Trash2,
   Wifi,
   X,
@@ -64,6 +66,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useConnection, useDeleteConnection, useTestConnection, useUpdateConnection } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/connections/$connectionId/")({
   component: ConnectionDetailPage,
@@ -239,6 +242,38 @@ function ConnectionDetailPage() {
   const [settingsText, setSettingsText] = useState<string | null>(null)
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [settingsDirty, setSettingsDirty] = useState(false)
+
+  // ── Test result history ─────────────────────────────────────────────
+  interface TestResult {
+    success: boolean
+    message: string
+    timestamp: string
+    durationMs: number
+  }
+  const [testHistory, setTestHistory] = useState<TestResult[]>([])
+  const [testAnimating, setTestAnimating] = useState(false)
+  const testStartRef = useRef<number | null>(null)
+
+  // Wrap the test mutation to track timing and history
+  const handleTestConnection = useCallback(() => {
+    testStartRef.current = performance.now()
+    testConnection.mutate(undefined, {
+      onSuccess: (result) => {
+        const durationMs = testStartRef.current ? Math.round(performance.now() - testStartRef.current) : 0
+        const isSuccess = result.message.toLowerCase().includes("successful")
+        setTestHistory((prev) => [{ success: isSuccess, message: result.message, timestamp: new Date().toISOString(), durationMs }, ...prev.slice(0, 9)])
+        setTestAnimating(true)
+        setTimeout(() => setTestAnimating(false), 600)
+      },
+      onError: (error) => {
+        const durationMs = testStartRef.current ? Math.round(performance.now() - testStartRef.current) : 0
+        const message = error instanceof Error ? error.message : "An unexpected error occurred"
+        setTestHistory((prev) => [{ success: false, message, timestamp: new Date().toISOString(), durationMs }, ...prev.slice(0, 9)])
+        setTestAnimating(true)
+        setTimeout(() => setTestAnimating(false), 600)
+      },
+    })
+  }, [testConnection])
 
   // ── Inline editing state ───────────────────────────────────────────────
   const [editing, setEditing] = useState(false)
@@ -471,7 +506,50 @@ function ConnectionDetailPage() {
       <PageHeader
         eyebrow="Connections"
         title={data.name}
-        description={`${typeLabels[data.connectionType] ?? data.connectionType} · ${data.provider}`}
+        description={
+          <div className="flex flex-wrap items-center gap-3 mt-1">
+            {/* Provider badge */}
+            <Badge variant="outline" className="gap-1.5 text-sm">
+              {(() => {
+                const ProvIcon = providerIcons[data.provider.toLowerCase()] ?? connectionTypeIcons[data.connectionType] ?? Plug
+                return <ProvIcon className="h-3.5 w-3.5" />
+              })()}
+              {providerLabels[data.provider.toLowerCase()] ?? data.provider}
+            </Badge>
+            {/* Connection type */}
+            <Badge variant="secondary" className="text-xs">
+              {typeLabels[data.connectionType] ?? data.connectionType}
+            </Badge>
+            {/* Status badge */}
+            <StatusBadge status={data.status} />
+            {/* Enabled / Disabled indicator with toggle when not editing */}
+            {!editing ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      checked={data.isEnabled}
+                      onCheckedChange={(checked) => updateConnection.mutate({ isEnabled: checked })}
+                      disabled={updateConnection.isPending}
+                      aria-label="Toggle connection enabled"
+                      className="h-4 w-7 [&>span]:h-3 [&>span]:w-3"
+                    />
+                    <span className={cn("text-xs", data.isEnabled ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+                      {data.isEnabled ? "Enabled" : "Disabled"}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{data.isEnabled ? "Click to disable connection" : "Click to enable connection"}</TooltipContent>
+              </Tooltip>
+            ) : (
+              !data.isEnabled && (
+                <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
+                  Disabled
+                </Badge>
+              )
+            )}
+          </div>
+        }
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
@@ -495,15 +573,9 @@ function ConnectionDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
-            <StatusBadge status={data.status} />
-            {!editing && !data.isEnabled && (
-              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
-                Disabled
-              </Badge>
-            )}
-            <Button size="sm" variant="outline" onClick={() => testConnection.mutate()} disabled={testConnection.isPending || editing}>
+            <Button size="sm" variant="outline" onClick={handleTestConnection} disabled={testConnection.isPending || editing}>
               {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
-              Test
+              {testConnection.isPending ? "Testing..." : "Test"}
             </Button>
             {editing ? (
               <>
@@ -553,82 +625,67 @@ function ConnectionDetailPage() {
         }
       />
 
-      {/* Test result inline feedback */}
-      {testConnection.isSuccess && (
-        <Alert variant="success">
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertTitle>Connection test passed</AlertTitle>
-          <AlertDescription>{testConnection.data.message}</AlertDescription>
-        </Alert>
-      )}
-      {testConnection.isError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Connection test failed</AlertTitle>
-          <AlertDescription>{testConnection.error instanceof Error ? testConnection.error.message : "An unexpected error occurred"}</AlertDescription>
-        </Alert>
-      )}
-
       {/* Connection Health */}
       <PageSection>
         <SectionErrorBoundary name="Connection Health">
           {(() => {
             const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled)
             const config = healthConfig[health]
-            const ProviderIcon = providerIcons[data.provider.toLowerCase()] ?? connectionTypeIcons[data.connectionType] ?? Plug
-            const providerDisplayName = providerLabels[data.provider.toLowerCase()] ?? data.provider
+
+            const borderColor = {
+              healthy: "border-emerald-500/40",
+              degraded: "border-yellow-500/40",
+              error: "border-red-500/40",
+              unknown: "border-border",
+            }[health]
 
             return (
-              <Card>
+              <Card
+                className={cn(
+                  "transition-colors duration-300",
+                  borderColor,
+                  testAnimating && "ring-2 ring-offset-2 ring-offset-background",
+                  testAnimating && testHistory[0]?.success ? "ring-emerald-500/50" : testAnimating ? "ring-red-500/50" : "",
+                )}
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Activity className="h-5 w-5 text-muted-foreground" />
                       <CardTitle>Connection Health</CardTitle>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => testConnection.mutate()} disabled={testConnection.isPending || editing}>
+                    <Button size="sm" variant="outline" onClick={handleTestConnection} disabled={testConnection.isPending || editing}>
                       {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
-                      Test Connection
+                      {testConnection.isPending ? "Testing..." : "Test Connection"}
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {/* Health status indicator */}
                     <div className="space-y-1.5">
                       <p className="text-muted-foreground text-sm">Status</p>
-                      <div className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 ${config.bgClass}`}>
-                        <span className={`inline-block h-2.5 w-2.5 rounded-full ${config.dotClass} ${health === "healthy" ? "animate-pulse" : ""}`} />
-                        <span className={`text-sm font-medium ${config.textClass}`}>{config.label}</span>
+                      <div className={cn("inline-flex items-center gap-2 rounded-md px-3 py-1.5", config.bgClass)}>
+                        <span className={cn("inline-block h-2.5 w-2.5 rounded-full", config.dotClass, health === "healthy" && "animate-pulse")} />
+                        <span className={cn("text-sm font-medium", config.textClass)}>{config.label}</span>
                       </div>
                     </div>
 
-                    {/* Provider badge */}
-                    <div className="space-y-1.5">
-                      <p className="text-muted-foreground text-sm">Provider</p>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="gap-1.5 text-sm">
-                          <ProviderIcon className="h-3.5 w-3.5" />
-                          {providerDisplayName}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {typeLabels[data.connectionType] ?? data.connectionType}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Last health check */}
+                    {/* Last health check - more prominent */}
                     <div className="space-y-1.5">
                       <p className="text-muted-foreground text-sm">Last Health Check</p>
                       {data.lastHealthCheck ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="cursor-default text-sm">{formatRelativeTimeShort(data.lastHealthCheck)}</p>
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              <p className="cursor-default text-sm font-medium">{formatRelativeTimeShort(data.lastHealthCheck)}</p>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>{formatDateTime(data.lastHealthCheck)}</TooltipContent>
                         </Tooltip>
                       ) : (
-                        <p className="text-sm text-muted-foreground">Never checked</p>
+                        <p className="text-sm text-muted-foreground italic">Never checked</p>
                       )}
                     </div>
 
@@ -639,7 +696,7 @@ function ConnectionDetailPage() {
                         {data.isEnabled ? (
                           <>
                             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                            <span className="text-sm">Active</span>
+                            <span className="text-sm font-medium">Active</span>
                           </>
                         ) : (
                           <>
@@ -649,16 +706,114 @@ function ConnectionDetailPage() {
                         )}
                       </div>
                     </div>
+
+                    {/* Latest test response time */}
+                    <div className="space-y-1.5">
+                      <p className="text-muted-foreground text-sm">Response Time</p>
+                      {testHistory.length > 0 ? (
+                        <div className="flex items-center gap-1.5">
+                          <Timer className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span
+                            className={cn(
+                              "text-sm font-mono font-medium",
+                              testHistory[0].durationMs < 1000
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : testHistory[0].durationMs < 3000
+                                  ? "text-yellow-600 dark:text-yellow-400"
+                                  : "text-red-600 dark:text-red-400",
+                            )}
+                          >
+                            {testHistory[0].durationMs < 1000 ? `${testHistory[0].durationMs}ms` : `${(testHistory[0].durationMs / 1000).toFixed(1)}s`}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">No tests run</p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Last error display */}
                   {data.lastError && (
-                    <div className="mt-4">
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Last Error</AlertTitle>
-                        <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
-                      </Alert>
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Last Error</AlertTitle>
+                      <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Structured latest test result */}
+                  {testHistory.length > 0 && (
+                    <div
+                      className={cn(
+                        "rounded-lg border p-4 transition-all duration-300",
+                        testHistory[0].success
+                          ? "border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-950/20"
+                          : "border-red-200 bg-red-50/50 dark:border-red-800/50 dark:bg-red-950/20",
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={cn(
+                            "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+                            testHistory[0].success ? "bg-emerald-100 dark:bg-emerald-900/50" : "bg-red-100 dark:bg-red-900/50",
+                          )}
+                        >
+                          {testHistory[0].success ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={cn("text-sm font-medium", testHistory[0].success ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300")}>
+                              {testHistory[0].success ? "Connection test passed" : "Connection test failed"}
+                            </p>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Timer className="h-3 w-3" />
+                                {testHistory[0].durationMs < 1000 ? `${testHistory[0].durationMs}ms` : `${(testHistory[0].durationMs / 1000).toFixed(1)}s`}
+                              </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="flex cursor-default items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {formatRelativeTimeShort(testHistory[0].timestamp)}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>{formatDateTime(testHistory[0].timestamp)}</TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </div>
+                          <p className={cn("mt-1 text-sm", testHistory[0].success ? "text-emerald-600/80 dark:text-emerald-400/80" : "text-red-600/80 dark:text-red-400/80")}>
+                            {testHistory[0].message}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Test history (collapsed when 2+ results) */}
+                  {testHistory.length > 1 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Test History</p>
+                      <div className="rounded-md border">
+                        {testHistory.slice(1).map((result, idx) => (
+                          <div key={result.timestamp} className={cn("flex items-center gap-3 px-3 py-2 text-sm", idx < testHistory.length - 2 && "border-b")}>
+                            {result.success ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />}
+                            <span className="min-w-0 flex-1 truncate text-muted-foreground">{result.message}</span>
+                            <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                              {result.durationMs < 1000 ? `${result.durationMs}ms` : `${(result.durationMs / 1000).toFixed(1)}s`}
+                            </span>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="shrink-0 cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(result.timestamp)}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>{formatDateTime(result.timestamp)}</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>

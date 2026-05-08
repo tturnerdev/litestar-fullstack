@@ -30,6 +30,7 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -701,7 +702,7 @@ function WebhooksPage() {
     [navigate],
   )
 
-  const { data, isLoading, isError, refetch } = useWebhooks(page, pageSize, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useWebhooks(page, pageSize, debouncedSearch || undefined)
   const deleteWebhook = useDeleteWebhook()
 
   const rawWebhooks = data?.items ?? []
@@ -819,6 +820,7 @@ function WebhooksPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">

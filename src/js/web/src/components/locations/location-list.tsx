@@ -72,18 +72,26 @@ type NavigateFn = (opts: {
   replace?: boolean
 }) => void
 
+export interface LocationFreshnessState {
+  dataUpdatedAt: number
+  isRefetching: boolean
+  refetch: () => void
+}
+
 export function LocationList({
   searchParams,
   navigate,
   cellClass = "",
   isColumnVisible = () => true,
   onSearchInputChange,
+  onFreshnessChange,
 }: {
   searchParams: LocationSearchParams
   navigate: NavigateFn
   cellClass?: string
   isColumnVisible?: (col: string) => boolean
   onSearchInputChange?: (value: string) => void
+  onFreshnessChange?: (state: LocationFreshnessState) => void
 }) {
   const { currentTeam } = useAuthStore()
 
@@ -114,7 +122,7 @@ export function LocationList({
 
   const teamId = currentTeam?.id ?? ""
 
-  const { data, isLoading, isRefetching, isError, refetch } = useLocations({
+  const { data, isLoading, isRefetching, isError, refetch, dataUpdatedAt } = useLocations({
     teamId,
     page,
     pageSize,
@@ -123,6 +131,13 @@ export function LocationList({
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
   })
+
+  // Report freshness state to parent for DataFreshness indicator
+  useEffect(() => {
+    if (onFreshnessChange && dataUpdatedAt) {
+      onFreshnessChange({ dataUpdatedAt, isRefetching, refetch: () => refetch() })
+    }
+  }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
 
   const locations = data?.items ?? []
   const total = data?.total ?? 0
