@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.264.0 (2026-05-07)
+
+### Added
+- **Webhook validation status UI** — List page shows colored icons (green/amber/red) per endpoint; detail page shows status badge with re-validate button; create page warns on unreachable URLs
+- **Webhook delivery retry display** — Delivery log shows retry count badges, next retry time, and exhausted indicators for failed deliveries
+- **Support ticket form validation** — Enhanced Zod schema with subject (5-200 chars), description (10-2000 chars), required category; blur-triggered with clear-on-fix
+- **Admin user edit validation** — Name and username field validation with touchedRef pattern on admin user detail page
+
 ## v0.263.0 (2026-05-07)
 
 ### Added
