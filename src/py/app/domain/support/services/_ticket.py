@@ -25,8 +25,22 @@ class TicketService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServ
 
     async def to_model_on_create(self, data: ModelDictT[m.Ticket]) -> ModelDictT[m.Ticket]:
         data = service.schema_dump(data)
-        if service.is_dict(data) and "ticket_number" not in data:
-            data["ticket_number"] = await self._generate_ticket_number()
+        if service.is_dict(data):
+            if "subject" in data:
+                data["subject"] = data["subject"].strip()
+            if "body_markdown" in data and data["body_markdown"]:
+                data["body_markdown"] = data["body_markdown"].strip()
+            if "ticket_number" not in data:
+                data["ticket_number"] = await self._generate_ticket_number()
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.Ticket]) -> ModelDictT[m.Ticket]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "subject" in data:
+                data["subject"] = data["subject"].strip()
+            if "body_markdown" in data and data["body_markdown"]:
+                data["body_markdown"] = data["body_markdown"].strip()
         return data
 
     async def _generate_ticket_number(self) -> str:

@@ -33,8 +33,18 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
     repository_type = Repo
     match_fields = ["phone_number_id"]
 
+    _address_fields = ("address_line_1", "address_line_2", "city", "state", "postal_code", "country")
+
+    def _strip_address_fields(self, data: ModelDictT[m.E911Registration]) -> ModelDictT[m.E911Registration]:
+        if service.is_dict(data):
+            for field in self._address_fields:
+                if field in data and data[field]:
+                    data[field] = data[field].strip()
+        return data
+
     async def to_model_on_create(self, data: ModelDictT[m.E911Registration]) -> ModelDictT[m.E911Registration]:
         data = service.schema_dump(data)
+        data = self._strip_address_fields(data)
         if service.is_dict(data):
             existing = await self.repository.list(
                 CollectionFilter(field_name="phone_number_id", values=[data["phone_number_id"]]),
@@ -45,6 +55,7 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
 
     async def to_model_on_update(self, data: ModelDictT[m.E911Registration], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.E911Registration]:
         data = service.schema_dump(data)
+        data = self._strip_address_fields(data)
         if service.is_dict(data) and "phone_number_id" in data:
             existing = await self.repository.list(
                 CollectionFilter(field_name="phone_number_id", values=[data["phone_number_id"]]),
