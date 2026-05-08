@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Copy, Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { DestinationLink, DestinationPicker } from "@/components/shared/destination-picker"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
@@ -24,10 +25,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type TimeCondition, useDeleteTimeCondition, useSetTimeConditionOverride, useTimeCondition, useUpdateTimeCondition } from "@/lib/api/hooks/call-routing"
+import { useSchedules } from "@/lib/api/hooks/schedules"
 
 export const Route = createFileRoute("/_app/call-routing/time-conditions/$timeConditionId")({
   component: TimeConditionDetailPage,
@@ -102,6 +105,8 @@ function TimeConditionDetailPage() {
   const updateMutation = useUpdateTimeCondition(timeConditionId)
   const deleteMutation = useDeleteTimeCondition()
   const overrideMutation = useSetTimeConditionOverride(timeConditionId)
+  const schedulesQuery = useSchedules({ page: 1, pageSize: 200 })
+  const schedules = schedulesQuery.data?.items ?? []
 
   const [editing, setEditing] = useState(false)
   const [showDeleteAlert, setShowDeleteAlert] = useState(false)
@@ -116,7 +121,7 @@ function TimeConditionDetailPage() {
     setEditName(tc.name)
     setEditMatchDest(tc.matchDestination)
     setEditNoMatchDest(tc.noMatchDestination)
-    setEditScheduleId(tc.scheduleId ?? "")
+    setEditScheduleId(tc.scheduleId ?? "__none__")
     setEditing(true)
   }
 
@@ -125,7 +130,7 @@ function TimeConditionDetailPage() {
     if (editName !== data?.name) payload.name = editName
     if (editMatchDest !== data?.matchDestination) payload.matchDestination = editMatchDest
     if (editNoMatchDest !== data?.noMatchDestination) payload.noMatchDestination = editNoMatchDest
-    const newScheduleId = editScheduleId || null
+    const newScheduleId = editScheduleId === "__none__" ? null : editScheduleId || null
     if (newScheduleId !== data?.scheduleId) payload.scheduleId = newScheduleId
     updateMutation.mutate(payload, {
       onSuccess: () => {
@@ -326,25 +331,41 @@ function TimeConditionDetailPage() {
                         <Label>Name</Label>
                         <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
                       </div>
+                      <DestinationPicker label="Match Destination" value={editMatchDest} onChange={setEditMatchDest} />
+                      <DestinationPicker label="No-Match Destination" value={editNoMatchDest} onChange={setEditNoMatchDest} />
                       <div className="space-y-2">
-                        <Label>Match Destination</Label>
-                        <Input value={editMatchDest} onChange={(e) => setEditMatchDest(e.target.value)} placeholder="e.g., ext:100" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>No Match Destination</Label>
-                        <Input value={editNoMatchDest} onChange={(e) => setEditNoMatchDest(e.target.value)} placeholder="e.g., voicemail:main" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Schedule ID</Label>
-                        <Input value={editScheduleId} onChange={(e) => setEditScheduleId(e.target.value)} placeholder="Linked schedule UUID (optional)" />
+                        <Label>Schedule</Label>
+                        <Select value={editScheduleId} onValueChange={setEditScheduleId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={schedulesQuery.isLoading ? "Loading..." : "Select a schedule (optional)"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">No schedule</SelectItem>
+                            {schedules.map((s) => (
+                              <SelectItem key={s.id} value={s.id}>
+                                {s.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   ) : (
                     <div className="grid gap-4 text-sm md:grid-cols-2">
                       <InfoField label="Name" value={data.name} />
-                      <InfoField label="Match Destination" value={data.matchDestination} />
-                      <InfoField label="No Match Destination" value={data.noMatchDestination} />
-                      <InfoField label="Schedule ID" value={data.scheduleId} mono />
+                      <div>
+                        <p className="text-muted-foreground">Match Destination</p>
+                        {data.matchDestination ? <DestinationLink value={data.matchDestination} /> : <p>---</p>}
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">No-Match Destination</p>
+                        {data.noMatchDestination ? <DestinationLink value={data.noMatchDestination} /> : <p>---</p>}
+                      </div>
+                      <InfoField
+                        label="Schedule"
+                        value={schedules.find((s) => s.id === data.scheduleId)?.name ?? data.scheduleId}
+                        mono={!schedules.find((s) => s.id === data.scheduleId)}
+                      />
                     </div>
                   )}
                 </CardContent>

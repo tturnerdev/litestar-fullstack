@@ -162,30 +162,61 @@ function getCredentialFields(authType: string): { key: string; label: string; ty
 
 // ── Validation helpers ───────────────────────────────────────────────────
 
-interface FieldErrors {
+interface ConnectionFieldErrors {
   name?: string
   provider?: string
   host?: string
   port?: string
+  [credentialKey: `cred_${string}`]: string | undefined
 }
 
-function validateHost(value: string): string | undefined {
-  if (!value) return undefined
-  // Allow hostname, IP, or URL with optional protocol
-  const hostPattern = /^(https?:\/\/)?[\w.-]+(:\d+)?(\/.*)?$/i
-  if (!hostPattern.test(value)) {
-    return "Enter a valid hostname or URL (e.g., pbx.example.com or https://api.example.com)"
+function validateConnectionField(field: string, value: string, context?: { authType?: string; credentialFields?: { key: string; label: string }[] }): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "provider":
+      if (value.trim() === "") return "Provider is required"
+      return undefined
+    case "host":
+      if (!value) return undefined
+      if (value.includes("://")) {
+        try {
+          const url = new URL(value)
+          if (!["http:", "https:"].includes(url.protocol)) {
+            return "URL must start with http:// or https://"
+          }
+        } catch {
+          return "Enter a valid hostname or URL (e.g., pbx.example.com or https://api.example.com)"
+        }
+      } else {
+        const hostPattern = /^[\w.-]+(:\d+)?(\/.*)?$/i
+        if (!hostPattern.test(value)) {
+          return "Enter a valid hostname or URL (e.g., pbx.example.com or https://api.example.com)"
+        }
+      }
+      return undefined
+    case "port": {
+      if (!value) return undefined
+      const num = Number(value)
+      if (!Number.isInteger(num) || num < 1 || num > 65535) {
+        return "Port must be between 1 and 65535"
+      }
+      return undefined
+    }
+    default: {
+      // Credential fields: cred_<key>
+      if (field.startsWith("cred_") && context?.authType && context.authType !== "none") {
+        const credKey = field.slice(5)
+        const credField = context.credentialFields?.find((f) => f.key === credKey)
+        if (credField && value.trim() === "") {
+          return `${credField.label} is required`
+        }
+      }
+      return undefined
+    }
   }
-  return undefined
-}
-
-function validatePort(value: string): string | undefined {
-  if (!value) return undefined
-  const num = Number(value)
-  if (!Number.isInteger(num) || num < 1 || num > 65535) {
-    return "Port must be between 1 and 65535"
-  }
-  return undefined
 }
 
 /** Required-field asterisk. */
@@ -227,8 +258,8 @@ function NewConnectionPage() {
   const [gatewayCacheTtl, setGatewayCacheTtl] = useState("")
 
   // Validation state
-  const [errors, setErrors] = useState<FieldErrors>({})
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [errors, setErrors] = useState<ConnectionFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
 
   // Auth-type change confirmation
   const [pendingAuthType, setPendingAuthType] = useState<string | null>(null)
@@ -264,51 +295,55 @@ function NewConnectionPage() {
 
   // ── Field handlers ───────────────────────────────────────────────────
 
-  const markTouched = useCallback((field: string) => {
-    setTouched((prev) => ({ ...prev, [field]: true }))
-  }, [])
-
-  const validateField = useCallback((field: keyof FieldErrors, value: string) => {
-    let error: string | undefined
-    switch (field) {
-      case "name":
-        error = value.trim() === "" ? "Name is required" : undefined
-        break
-      case "provider":
-        error = value.trim() === "" ? "Provider is required" : undefined
-        break
-      case "host":
-        error = validateHost(value)
-        break
-      case "port":
-        error = validatePort(value)
-        break
-    }
-    setErrors((prev) => ({ ...prev, [field]: error }))
-    return error
-  }, [])
+  const validateField = useCallback(
+    (field: string, value: string) => {
+      const error = validateConnectionField(field, value, {
+        authType,
+        credentialFields: getCredentialFields(authType),
+      })
+      setErrors((prev) => ({ ...prev, [field]: error }))
+      return error
+    },
+    [authType],
+  )
 
   const handleFieldChange = useCallback(
-    (field: keyof FieldErrors, value: string, setter: (v: string) => void) => {
+    (field: string, value: string, setter: (v: string) => void) => {
       setter(value)
-      if (touched[field]) {
+      if (touchedRef.current[field]) {
         validateField(field, value)
       }
     },
-    [touched, validateField],
+    [validateField],
   )
 
   const handleFieldBlur = useCallback(
-    (field: keyof FieldErrors, value: string) => {
-      markTouched(field)
+    (field: string, value: string) => {
+      touchedRef.current[field] = true
       validateField(field, value)
     },
-    [markTouched, validateField],
+    [validateField],
   )
 
-  const handleCredentialChange = (key: string, value: string) => {
-    setCredentials((prev) => ({ ...prev, [key]: value }))
-  }
+  const handleCredentialChange = useCallback(
+    (key: string, value: string) => {
+      setCredentials((prev) => ({ ...prev, [key]: value }))
+      const credField = `cred_${key}`
+      if (touchedRef.current[credField]) {
+        validateField(credField, value)
+      }
+    },
+    [validateField],
+  )
+
+  const handleCredentialBlur = useCallback(
+    (key: string, value: string) => {
+      const credField = `cred_${key}`
+      touchedRef.current[credField] = true
+      validateField(credField, value)
+    },
+    [validateField],
+  )
 
   // ── Provider preset selection ───────────────────────────────────────
 
@@ -344,12 +379,31 @@ function NewConnectionPage() {
 
   // ── Auth type change with confirmation ───────────────────────────────
 
+  const clearCredentialErrors = useCallback(() => {
+    setErrors((prev) => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        if (key.startsWith("cred_")) {
+          delete next[key as keyof ConnectionFieldErrors]
+        }
+      }
+      return next
+    })
+    // Clear credential touched state
+    for (const key of Object.keys(touchedRef.current)) {
+      if (key.startsWith("cred_")) {
+        delete touchedRef.current[key]
+      }
+    }
+  }, [])
+
   const handleAuthTypeChange = (newType: string) => {
     if (hasCredentials && newType !== authType) {
       setPendingAuthType(newType)
     } else {
       setAuthType(newType)
       setCredentials({})
+      clearCredentialErrors()
     }
   }
 
@@ -357,6 +411,7 @@ function NewConnectionPage() {
     if (pendingAuthType) {
       setAuthType(pendingAuthType)
       setCredentials({})
+      clearCredentialErrors()
       setPendingAuthType(null)
     }
   }
@@ -377,9 +432,24 @@ function NewConnectionPage() {
     const providerError = validateField("provider", provider)
     const hostError = validateField("host", host)
     const portError = validateField("port", port)
-    setTouched({ name: true, provider: true, host: true, port: true })
 
-    if (nameError || providerError || hostError || portError) return
+    // Validate credential fields when auth type requires them
+    let hasCredentialError = false
+    if (authType !== "none") {
+      for (const field of credentialFields) {
+        const credField = `cred_${field.key}`
+        touchedRef.current[credField] = true
+        const err = validateField(credField, credentials[field.key] ?? "")
+        if (err) hasCredentialError = true
+      }
+    }
+
+    // Mark all core fields as touched so errors display
+    for (const f of ["name", "provider", "host", "port"]) {
+      touchedRef.current[f] = true
+    }
+
+    if (nameError || providerError || hostError || portError || hasCredentialError) return
 
     const activePresetValue = selectedPreset && selectedPreset !== "_custom" ? selectedPreset : provider.toLowerCase()
 
@@ -432,7 +502,8 @@ function NewConnectionPage() {
     })
   }
 
-  const isValid = name.trim() !== "" && provider.trim() !== "" && !errors.host && !errors.port && !!currentTeam
+  const hasValidationErrors = Object.values(errors).some((e) => !!e)
+  const isValid = name.trim().length >= 2 && provider.trim() !== "" && !hasValidationErrors && !!currentTeam
 
   // Get the icon for the currently selected connection type
 
@@ -674,14 +745,19 @@ function NewConnectionPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         {credentialFields.map((field) => (
                           <div key={field.key} className={`space-y-2 ${field.key === "scopes" ? "md:col-span-2" : ""}`}>
-                            <Label htmlFor={`cred-${field.key}`}>{field.label}</Label>
+                            <Label htmlFor={`cred-${field.key}`}>
+                              {field.label} <RequiredMark />
+                            </Label>
                             <Input
                               id={`cred-${field.key}`}
                               type={field.type}
                               value={credentials[field.key] ?? ""}
                               onChange={(e) => handleCredentialChange(field.key, e.target.value)}
+                              onBlur={() => handleCredentialBlur(field.key, credentials[field.key] ?? "")}
+                              aria-invalid={!!errors[`cred_${field.key}`]}
                               placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
                             />
+                            <FieldError message={errors[`cred_${field.key}`]} />
                           </div>
                         ))}
                       </div>

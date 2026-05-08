@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowLeft, Calendar, Clock, Copy, Hash, Loader2, Mail, MoreHorizontal, Pencil, Save, Shield, Trash2, UserCheck, Users, UserX, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteTeamDialog } from "@/components/admin/delete-team-dialog"
@@ -106,6 +106,30 @@ function SectionHeading({
   )
 }
 
+// -- Validation -------------------------------------------------------------
+
+interface TeamFieldErrors {
+  name?: string
+  description?: string
+}
+
+function validateTeamField(field: keyof TeamFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Team name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "description":
+      if (value.trim() !== "" && value.trim().length < 3) return "Description must be at least 3 characters"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Main page component ----------------------------------------------------
 
 function AdminTeamDetailPage() {
@@ -120,6 +144,44 @@ function AdminTeamDetailPage() {
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState("")
   const [editDescription, setEditDescription] = useState("")
+
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<TeamFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof TeamFieldErrors, value: string) => {
+    const error = validateTeamField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof TeamFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleEditNameChange = useCallback(
+    (value: string) => {
+      setEditName(value)
+      if (touchedRef.current.name) {
+        validateField("name", value)
+      }
+    },
+    [validateField],
+  )
+
+  const handleEditDescriptionChange = useCallback(
+    (value: string) => {
+      setEditDescription(value)
+      if (touchedRef.current.description) {
+        validateField("description", value)
+      }
+    },
+    [validateField],
+  )
 
   // Sync edit fields from current data
   const syncEditFields = useCallback(() => {
@@ -139,6 +201,8 @@ function AdminTeamDetailPage() {
     return editName !== data.name || editDescription !== (data.description ?? "")
   }, [editing, data, editName, editDescription])
 
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   // Block navigation when dirty
   const blocker = useBlocker({
     shouldBlockFn: () => formDirty,
@@ -147,24 +211,35 @@ function AdminTeamDetailPage() {
 
   function handleStartEditing() {
     syncEditFields()
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(true)
   }
 
   function handleCancelEditing() {
     syncEditFields()
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(false)
   }
 
   function handleSaveEditing() {
     if (!data) return
-    const trimmedName = editName.trim()
-    if (!trimmedName) return
 
+    // Validate all fields before save
+    const nameErr = validateField("name", editName)
+    const descErr = validateField("description", editDescription)
+    for (const f of ["name", "description"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || descErr) return
+
+    const trimmedName = editName.trim()
     const payload: Record<string, unknown> = {}
 
     if (trimmedName !== data.name) payload.name = trimmedName
     if (editDescription !== (data.description ?? "")) {
-      payload.description = editDescription || null
+      payload.description = editDescription.trim() || null
     }
 
     if (Object.keys(payload).length === 0) {
@@ -174,6 +249,8 @@ function AdminTeamDetailPage() {
 
     updateTeam.mutate(payload, {
       onSuccess: () => {
+        setFieldErrors({})
+        touchedRef.current = {}
         setEditing(false)
       },
     })
@@ -266,7 +343,7 @@ function AdminTeamDetailPage() {
                 <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateTeam.isPending}>
                   <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-                <Button size="sm" onClick={handleSaveEditing} disabled={updateTeam.isPending || !editName.trim()}>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateTeam.isPending || !editName.trim() || editName.trim().length < 2 || hasValidationErrors}>
                   {updateTeam.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {updateTeam.isPending ? "Saving..." : "Save"}
                 </Button>
@@ -339,27 +416,35 @@ function AdminTeamDetailPage() {
                   {editing ? (
                     <div className="space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor="edit-team-name">Name</Label>
+                        <Label htmlFor="edit-team-name">
+                          Name <span className="text-destructive">*</span>
+                        </Label>
                         <Input
                           id="edit-team-name"
                           value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
+                          onChange={(e) => handleEditNameChange(e.target.value)}
+                          onBlur={() => handleFieldBlur("name", editName)}
+                          aria-invalid={!!fieldErrors.name}
                           placeholder="Team name"
                           disabled={updateTeam.isPending}
                           maxLength={100}
                         />
+                        <FieldError message={fieldErrors.name} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-team-description">Description</Label>
                         <Textarea
                           id="edit-team-description"
                           value={editDescription}
-                          onChange={(e) => setEditDescription(e.target.value)}
+                          onChange={(e) => handleEditDescriptionChange(e.target.value)}
+                          onBlur={() => handleFieldBlur("description", editDescription)}
+                          aria-invalid={!!fieldErrors.description}
                           placeholder="Optional description"
                           disabled={updateTeam.isPending}
                           maxLength={500}
                           rows={3}
                         />
+                        <FieldError message={fieldErrors.description} />
                       </div>
                     </div>
                   ) : (

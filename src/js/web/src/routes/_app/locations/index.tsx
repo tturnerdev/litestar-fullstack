@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { Home, Plus, SlidersHorizontal } from "lucide-react"
-import { useCallback, useState } from "react"
+import { Home, Plus, Search, SlidersHorizontal, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { LocationList } from "@/components/locations/location-list"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useSettingsStore } from "@/lib/settings-store"
 
@@ -54,8 +57,46 @@ function LocationsPage() {
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
-  const searchParams = Route.useSearch()
+  const { q: searchParam, page: pageParam, type: typeParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const typeFilter = typeParam ?? "all"
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
+  // Resolved search params for the child component
+  const resolvedSearchParams = useMemo(
+    () => ({
+      q: debouncedSearch || undefined,
+      page: pageParam,
+      type: typeParam,
+      sort: sortParam,
+      order: orderParam,
+    }),
+    [debouncedSearch, pageParam, typeParam, sortParam, orderParam],
+  )
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
@@ -67,6 +108,8 @@ function LocationsPage() {
       return updated
     })
   }, [])
+
+  const hasActiveFilters = search !== "" || typeFilter !== "all"
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -120,8 +163,74 @@ function LocationsPage() {
           </div>
         }
       />
+
+      {/* Search & filter bar */}
       <PageSection>
-        <LocationList searchParams={searchParams} navigate={navigate} cellClass={cellClass} isColumnVisible={isColumnVisible} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative max-w-md flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input ref={searchInputRef} placeholder="Search locations..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-10 pr-8" />
+            {searchInput ? (
+              <button
+                type="button"
+                onClick={() => setSearchInput("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
+            )}
+          </div>
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  type: v !== "all" ? v : undefined,
+                  page: undefined,
+                }),
+              })
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="ADDRESSED">Addressed</SelectItem>
+              <SelectItem value="PHYSICAL">Physical</SelectItem>
+            </SelectContent>
+          </Select>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground"
+              onClick={() => {
+                setSearchInput("")
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    q: undefined,
+                    type: undefined,
+                    page: undefined,
+                  }),
+                })
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      </PageSection>
+
+      <PageSection delay={0.1}>
+        <LocationList searchParams={resolvedSearchParams} navigate={navigate} cellClass={cellClass} isColumnVisible={isColumnVisible} onSearchInputChange={setSearchInput} />
       </PageSection>
     </PageContainer>
   )

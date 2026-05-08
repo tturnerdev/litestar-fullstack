@@ -1,5 +1,5 @@
 import { Loader2, Users } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,30 @@ import { useAdminUpdateTeam } from "@/lib/api/hooks/admin"
 
 const NAME_MAX = 50
 const DESC_MAX = 500
+
+// ── Validation ────────────────────────────────────────────────────────
+
+interface TeamFieldErrors {
+  name?: string
+  description?: string
+}
+
+function validateTeamField(field: keyof TeamFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Team name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "description":
+      if (value.trim() !== "" && value.trim().length < 3) return "Description must be at least 3 characters"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
 
 interface EditTeamDialogProps {
   teamId: string
@@ -27,6 +51,44 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
   const [isActive, setIsActive] = useState(currentIsActive ?? true)
   const updateTeam = useAdminUpdateTeam(teamId)
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<TeamFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof TeamFieldErrors, value: string) => {
+    const error = validateTeamField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof TeamFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleNameChange = useCallback(
+    (value: string) => {
+      setName(value.slice(0, NAME_MAX))
+      if (touchedRef.current.name) {
+        validateField("name", value)
+      }
+    },
+    [validateField],
+  )
+
+  const handleDescriptionChange = useCallback(
+    (value: string) => {
+      setDescription(value.slice(0, DESC_MAX))
+      if (touchedRef.current.description) {
+        validateField("description", value)
+      }
+    },
+    [validateField],
+  )
+
   const isDirty = useMemo(() => {
     if (name !== currentName) return true
     if (description !== (currentDescription ?? "")) return true
@@ -34,11 +96,22 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
     return false
   }, [name, description, isActive, currentName, currentDescription, currentIsActive])
 
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate all fields before submit
+    const nameErr = validateField("name", name)
+    const descErr = validateField("description", description)
+    for (const f of ["name", "description"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || descErr) return
+
     const payload: Record<string, unknown> = {
-      name,
-      description: description || null,
+      name: name.trim(),
+      description: description.trim() || null,
     }
     if (currentIsActive !== undefined) {
       payload.is_active = isActive
@@ -55,6 +128,8 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
       setName(currentName)
       setDescription(currentDescription ?? "")
       setIsActive(currentIsActive ?? true)
+      setFieldErrors({})
+      touchedRef.current = {}
     }
     onOpenChange(nextOpen)
   }
@@ -78,10 +153,21 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
                 Name <span className="text-destructive">*</span>
               </Label>
               <p className="text-xs text-muted-foreground">Team display name</p>
-              <Input id="team-name" value={name} onChange={(e) => setName(e.target.value.slice(0, NAME_MAX))} required maxLength={NAME_MAX} />
-              <p className="text-right text-xs text-muted-foreground">
-                {name.length}/{NAME_MAX}
-              </p>
+              <Input
+                id="team-name"
+                value={name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                onBlur={() => handleFieldBlur("name", name)}
+                aria-invalid={!!fieldErrors.name}
+                required
+                maxLength={NAME_MAX}
+              />
+              <div className="flex items-center justify-between">
+                <FieldError message={fieldErrors.name} />
+                <p className="shrink-0 text-right text-xs text-muted-foreground">
+                  {name.length}/{NAME_MAX}
+                </p>
+              </div>
             </div>
 
             <Separator />
@@ -93,14 +179,19 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
               <Textarea
                 id="team-description"
                 value={description}
-                onChange={(e) => setDescription(e.target.value.slice(0, DESC_MAX))}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+                onBlur={() => handleFieldBlur("description", description)}
+                aria-invalid={!!fieldErrors.description}
                 placeholder="Optional team description"
                 rows={3}
                 maxLength={DESC_MAX}
               />
-              <p className="text-right text-xs text-muted-foreground">
-                {description.length}/{DESC_MAX}
-              </p>
+              <div className="flex items-center justify-between">
+                <FieldError message={fieldErrors.description} />
+                <p className="shrink-0 text-right text-xs text-muted-foreground">
+                  {description.length}/{DESC_MAX}
+                </p>
+              </div>
             </div>
 
             {/* Active toggle */}
@@ -122,7 +213,7 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={updateTeam.isPending || !name.trim() || !isDirty}>
+            <Button type="submit" disabled={updateTeam.isPending || !name.trim() || name.trim().length < 2 || hasValidationErrors || !isDirty}>
               {updateTeam.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {updateTeam.isPending ? "Saving..." : "Save changes"}
             </Button>

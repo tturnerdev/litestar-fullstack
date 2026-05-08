@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,25 @@ const DESC_MAX = 500
 export const Route = createFileRoute("/_app/teams/$teamId/edit")({
   component: EditTeamPage,
 })
+
+// ── Validation ────────────────────────────────────────────────────────
+
+interface TeamFieldErrors {
+  name?: string
+  description?: string
+}
+
+function validateTeamField(field: keyof TeamFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Team name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "description":
+      if (value.trim() !== "" && value.trim().length < 3) return "Description must be at least 3 characters"
+      return undefined
+  }
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -56,15 +75,15 @@ function EditTeamPage() {
   const [initialized, setInitialized] = useState(false)
 
   // Validation state
-  const [nameError, setNameError] = useState<string | undefined>()
-  const [nameTouched, setNameTouched] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<TeamFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
 
   // Reset form state when navigating to a different team
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setInitialized(false)
-    setNameTouched(false)
-    setNameError(undefined)
+    setFieldErrors({})
+    touchedRef.current = {}
   }, [teamId])
 
   // Pre-populate form fields when data loads
@@ -96,21 +115,39 @@ function EditTeamPage() {
 
   // ── Validation ──────────────────────────────────────────────────────
 
-  const validateName = (value: string) => {
-    const error = value.trim() === "" ? "Name is required" : undefined
-    setNameError(error)
+  const validateField = useCallback((field: keyof TeamFieldErrors, value: string) => {
+    const error = validateTeamField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
     return error
-  }
+  }, [])
 
-  const handleNameChange = (value: string) => {
-    setName(value)
-    if (nameTouched) validateName(value)
-  }
+  const handleFieldBlur = useCallback(
+    (field: keyof TeamFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
 
-  const handleNameBlur = () => {
-    setNameTouched(true)
-    validateName(name)
-  }
+  const handleNameChange = useCallback(
+    (value: string) => {
+      setName(value)
+      if (touchedRef.current.name) {
+        validateField("name", value)
+      }
+    },
+    [validateField],
+  )
+
+  const handleDescriptionChange = useCallback(
+    (value: string) => {
+      setDescription(value)
+      if (touchedRef.current.description) {
+        validateField("description", value)
+      }
+    },
+    [validateField],
+  )
 
   // ── Submit ──────────────────────────────────────────────────────────
 
@@ -118,10 +155,13 @@ function EditTeamPage() {
     e.preventDefault()
     if (!data) return
 
-    // Validate
-    const error = validateName(name)
-    setNameTouched(true)
-    if (error) return
+    // Validate all fields before submit
+    const nameErr = validateField("name", name)
+    const descErr = validateField("description", description)
+    for (const f of ["name", "description"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || descErr) return
 
     const payload: { name?: string | null; description?: string | null; tags?: string[] | null } = {}
 
@@ -158,7 +198,8 @@ function EditTeamPage() {
     })
   }
 
-  const isValid = name.trim() !== ""
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+  const isValid = name.trim().length >= 2 && !hasValidationErrors
 
   // ── Loading state ───────────────────────────────────────────────────
 
@@ -263,13 +304,13 @@ function EditTeamPage() {
                     placeholder="e.g., Engineering"
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    onBlur={handleNameBlur}
-                    aria-invalid={!!nameError}
+                    onBlur={() => handleFieldBlur("name", name)}
+                    aria-invalid={!!fieldErrors.name}
                     maxLength={NAME_MAX}
                     required
                   />
                   <div className="flex items-center justify-between">
-                    {nameError ? <FieldError message={nameError} /> : <FieldHint>A descriptive name for the team.</FieldHint>}
+                    {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <FieldHint>A descriptive name for the team.</FieldHint>}
                     <p
                       className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}
                     >
@@ -285,12 +326,14 @@ function EditTeamPage() {
                     id="team-description"
                     placeholder="Optional description of this team"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(e) => handleDescriptionChange(e.target.value)}
+                    onBlur={() => handleFieldBlur("description", description)}
+                    aria-invalid={!!fieldErrors.description}
                     maxLength={DESC_MAX}
                     rows={3}
                   />
                   <div className="flex items-center justify-between">
-                    <FieldHint>Optional notes about the purpose of this team.</FieldHint>
+                    {fieldErrors.description ? <FieldError message={fieldErrors.description} /> : <FieldHint>Optional notes about the purpose of this team.</FieldHint>}
                     <p
                       className={cn(
                         "shrink-0 text-xs",

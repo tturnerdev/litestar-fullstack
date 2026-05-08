@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
+import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -17,13 +17,11 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { type Location, useBulkDeleteLocations, useDeleteLocation, useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
@@ -79,41 +77,22 @@ export function LocationList({
   navigate,
   cellClass = "",
   isColumnVisible = () => true,
+  onSearchInputChange,
 }: {
   searchParams: LocationSearchParams
   navigate: NavigateFn
   cellClass?: string
   isColumnVisible?: (col: string) => boolean
+  onSearchInputChange?: (value: string) => void
 }) {
   const { currentTeam } = useAuthStore()
 
-  // Derive filter state from URL search params
+  // Derive filter state from URL search params (already debounced by parent)
   const search = searchParams.q ?? ""
   const page = searchParams.page ?? 1
   const typeFilter = searchParams.type ?? "all"
   const sortKey = searchParams.sort ?? null
   const sortDir: SortDirection = (searchParams.order as SortDirection) ?? null
-
-  // Local input state for search (so typing is smooth before debounce)
-  const [searchInput, setSearchInput] = useState(search)
-  const debouncedSearch = useDebouncedValue(searchInput)
-
-  // Sync URL when debounced search value settles
-  useEffect(() => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        q: debouncedSearch || undefined,
-        page: undefined,
-      }),
-      replace: true,
-    })
-  }, [debouncedSearch, navigate])
-
-  // Keep local input in sync if URL search param changes externally (back/forward)
-  useEffect(() => {
-    setSearchInput(search)
-  }, [search])
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pageSize, setPageSize] = useState(getStoredPageSize)
@@ -139,7 +118,7 @@ export function LocationList({
     teamId,
     page,
     pageSize,
-    search: debouncedSearch || undefined,
+    search: search || undefined,
     locationType: typeFilter !== "all" ? typeFilter : undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
@@ -296,45 +275,6 @@ export function LocationList({
             Total
             <span className="ml-0.5 font-semibold text-foreground">{total}</span>
           </span>
-        </div>
-
-        {/* Search & filter bar */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative max-w-md flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search locations..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-10 pr-8" />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => setSearchInput("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" />
-                <span className="sr-only">Clear search</span>
-              </button>
-            )}
-          </div>
-          <Select
-            value={typeFilter}
-            onValueChange={(v) => {
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  type: v !== "all" ? v : undefined,
-                  page: undefined,
-                }),
-              })
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="All types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              <SelectItem value="ADDRESSED">Addressed</SelectItem>
-              <SelectItem value="PHYSICAL">Physical</SelectItem>
-            </SelectContent>
-          </Select>
           <Button variant="outline" size="sm" onClick={handleExportAll} disabled={locations.length === 0}>
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -355,7 +295,7 @@ export function LocationList({
                   size="sm"
                   className="text-xs text-muted-foreground"
                   onClick={() => {
-                    setSearchInput("")
+                    onSearchInputChange?.("")
                     navigate({
                       search: {
                         q: undefined,
@@ -429,7 +369,7 @@ export function LocationList({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearchInput("")
+                  onSearchInputChange?.("")
                   navigate({
                     search: {
                       q: undefined,
