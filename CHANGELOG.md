@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.278.0 (2026-05-07)
+
+### Added
+- **Update event emissions across 22 controllers** — All update/patch methods now emit events (`entity_updated`) across call routing, fax, voice, devices, teams, webhooks, connections, locations, schedules, E911, organizations, phone numbers, voicemail, accounts
+
 ## v0.277.0 (2026-05-07)
 
 ### Added
