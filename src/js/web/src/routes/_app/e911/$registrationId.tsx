@@ -468,12 +468,13 @@ function E911DetailPage() {
                         onChange={(e) => handleFieldChange("addressLine1", e.target.value, setEditAddr1)}
                         onBlur={() => handleFieldBlur("addressLine1", editAddr1)}
                         aria-invalid={!!fieldErrors.addressLine1}
+                        maxLength={255}
                       />
                       <FieldError message={fieldErrors.addressLine1} />
                     </div>
                     <div className="space-y-2">
                       <Label>Address Line 2</Label>
-                      <Input value={editAddr2} onChange={(e) => setEditAddr2(e.target.value)} placeholder="Suite, Apt, etc." />
+                      <Input value={editAddr2} onChange={(e) => setEditAddr2(e.target.value)} placeholder="Suite, Apt, etc." maxLength={255} />
                     </div>
                     <div className="space-y-2">
                       <Label>
@@ -484,6 +485,7 @@ function E911DetailPage() {
                         onChange={(e) => handleFieldChange("city", e.target.value, setEditCity)}
                         onBlur={() => handleFieldBlur("city", editCity)}
                         aria-invalid={!!fieldErrors.city}
+                        maxLength={100}
                       />
                       <FieldError message={fieldErrors.city} />
                     </div>
@@ -520,6 +522,7 @@ function E911DetailPage() {
                         onChange={(e) => handleFieldChange("country", e.target.value, setEditCountry)}
                         onBlur={() => handleFieldBlur("country", editCountry)}
                         aria-invalid={!!fieldErrors.country}
+                        maxLength={100}
                       />
                       <FieldError message={fieldErrors.country} />
                     </div>

@@ -269,6 +269,7 @@ function NewSchedulePage() {
                       onBlur={() => handleFieldBlur("name", name)}
                       aria-invalid={!!fieldErrors.name}
                       autoFocus
+                      maxLength={255}
                     />
                     <FieldError message={fieldErrors.name} />
                     <p className="text-xs text-muted-foreground">A descriptive name for this schedule.</p>

@@ -258,6 +258,7 @@ function NewE911RegistrationPage() {
                       placeholder="123 Main St"
                       aria-invalid={showError("addressLine1", addressLine1)}
                       autoFocus
+                      maxLength={255}
                     />
                     {showError("addressLine1", addressLine1) ? (
                       <p className="text-xs text-destructive">Address line 1 is required</p>
@@ -269,7 +270,7 @@ function NewE911RegistrationPage() {
                   {/* Address Line 2 */}
                   <div className="space-y-2">
                     <Label htmlFor="address-line-2">Address Line 2</Label>
-                    <Input id="address-line-2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Suite 100, Floor 2, etc." />
+                    <Input id="address-line-2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Suite 100, Floor 2, etc." maxLength={255} />
                   </div>
 
                   {/* City / State row */}
@@ -283,6 +284,7 @@ function NewE911RegistrationPage() {
                         onBlur={() => handleBlur("city")}
                         placeholder="Springfield"
                         aria-invalid={showError("city", city)}
+                        maxLength={100}
                       />
                       {showError("city", city) && <p className="text-xs text-destructive">City is required</p>}
                     </div>
@@ -329,7 +331,7 @@ function NewE911RegistrationPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="country">Country</Label>
-                      <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="US" />
+                      <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="US" maxLength={100} />
                       <p className="text-xs text-muted-foreground">Defaults to US</p>
                     </div>
                   </div>

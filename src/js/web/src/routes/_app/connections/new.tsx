@@ -684,6 +684,7 @@ function NewConnectionPage() {
                         onChange={(e) => handleFieldChange("host", e.target.value, setHost)}
                         onBlur={() => handleFieldBlur("host", host)}
                         aria-invalid={!!errors.host}
+                        maxLength={500}
                       />
                       {errors.host ? (
                         <FieldError message={errors.host} />
