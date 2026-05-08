@@ -16,6 +16,7 @@ from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_team_admin, requires_team_membership
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import TeamInvitation, TeamInvitationCreate
@@ -71,7 +72,7 @@ class TeamInvitationController(Controller):
         "users_service": Provide(provide_users_service),
     }
 
-    @post(operation_id="CreateTeamInvitation", summary="Create a team invitation", path="", status_code=HTTP_201_CREATED)
+    @post(operation_id="CreateTeamInvitation", summary="Create a team invitation", path="", status_code=HTTP_201_CREATED, guards=[requires_team_admin])
     async def create_team_invitation(
         self,
         current_user: m.User,
@@ -142,7 +143,7 @@ class TeamInvitationController(Controller):
 
         return team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
 
-    @get(operation_id="ListTeamInvitations", summary="List team invitations", path="")
+    @get(operation_id="ListTeamInvitations", summary="List team invitations", path="", guards=[requires_team_membership])
     async def list_team_invitations(
         self,
         team_invitations_service: TeamInvitationService,
@@ -162,7 +163,7 @@ class TeamInvitationController(Controller):
         db_objs, total = await team_invitations_service.list_and_count(*filters, m.TeamInvitation.team_id == team_id)
         return team_invitations_service.to_schema(db_objs, total, filters, schema_type=TeamInvitation)
 
-    @delete(operation_id="DeleteTeamInvitation", summary="Delete a team invitation", path="/{invitation_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(operation_id="DeleteTeamInvitation", summary="Delete a team invitation", path="/{invitation_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None, guards=[requires_team_admin])
     async def delete_team_invitation(
         self,
         request: Request[m.User, Token, Any],

@@ -16,6 +16,7 @@ from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_team_admin
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import Team, TeamMember, TeamMemberModify, TeamMemberUpdate
@@ -47,7 +48,7 @@ class TeamMemberController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @post(operation_id="AddMemberToTeam", summary="Add a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_201_CREATED)
+    @post(operation_id="AddMemberToTeam", summary="Add a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_201_CREATED, guards=[requires_team_admin])
     async def add_member_to_team(
         self,
         request: Request[m.User, Token, Any],
@@ -124,7 +125,7 @@ class TeamMemberController(Controller):
         return teams_service.to_schema(team_obj, schema_type=Team)
 
     @delete(
-        operation_id="RemoveMemberFromTeam", summary="Remove a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_202_ACCEPTED
+        operation_id="RemoveMemberFromTeam", summary="Remove a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_202_ACCEPTED, guards=[requires_team_admin]
     )
     async def remove_member_from_team(
         self,
@@ -198,7 +199,7 @@ class TeamMemberController(Controller):
 
         return teams_service.to_schema(team_obj, schema_type=Team)
 
-    @patch(operation_id="UpdateTeamMember", summary="Update a team member's role", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}")
+    @patch(operation_id="UpdateTeamMember", summary="Update a team member's role", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}", guards=[requires_team_admin])
     async def update_team_member(
         self,
         request: Request[m.User, Token, Any],
