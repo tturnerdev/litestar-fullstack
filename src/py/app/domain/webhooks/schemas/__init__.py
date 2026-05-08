@@ -2,6 +2,7 @@
 
 from app.domain.webhooks.schemas._webhook import (
     WebhookCreate,
+    WebhookDeliveryDetail,
     WebhookDeliveryList,
     WebhookDetail,
     WebhookList,
@@ -20,6 +21,7 @@ from app.lib.schema import Message
 __all__ = (
     "Message",
     "WebhookCreate",
+    "WebhookDeliveryDetail",
     "WebhookDeliveryList",
     "WebhookDetail",
     "WebhookEndpoint",

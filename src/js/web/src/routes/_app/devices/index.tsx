@@ -1,11 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertCircle, Download, Eye, Filter, Home, Monitor, MoreVertical, Pencil, Plus, Power, RefreshCw, RotateCcw, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
+import {
+  AlertCircle,
+  AlertTriangle,
+  Download,
+  Eye,
+  Filter,
+  Home,
+  Monitor,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Power,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
+  Trash2,
+  X,
+} from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
@@ -251,6 +280,9 @@ function DevicesPage() {
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Delete confirmation state
+  const [deviceToDelete, setDeviceToDelete] = useState<Device | null>(null)
 
   // Queries & mutations
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useDevices({
@@ -819,7 +851,7 @@ function DevicesPage() {
                         selected={selectedIds.has(device.id)}
                         onToggle={() => toggleOne(device.id)}
                         onRowClick={() => handleRowClick(device.id)}
-                        onDelete={() => deleteMutation.mutate(device.id)}
+                        onDelete={() => setDeviceToDelete(device)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
                       />
@@ -906,6 +938,49 @@ function DevicesPage() {
 
       {/* Bulk action bar */}
       <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+
+      {/* Single-item delete confirmation */}
+      <AlertDialog
+        open={!!deviceToDelete}
+        onOpenChange={(open) => {
+          if (!open) setDeviceToDelete(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete device?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove <span className="font-medium text-foreground">{deviceToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (!deviceToDelete) return
+                deleteMutation.mutate(deviceToDelete.id, {
+                  onSuccess: () => {
+                    toast.success("Device deleted")
+                    setDeviceToDelete(null)
+                  },
+                  onError: (err) => {
+                    toast.error("Failed to delete device", {
+                      description: err instanceof Error ? err.message : undefined,
+                    })
+                  },
+                })
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete Device"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

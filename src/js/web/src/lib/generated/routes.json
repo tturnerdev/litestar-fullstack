@@ -3002,6 +3002,21 @@
       ],
       "uri": "/api/devices/{device_id}/reboot"
     },
+    "redeliver_delivery": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "delivery_id": "UUID",
+        "webhook_id": "UUID"
+      },
+      "parameters": [
+        "delivery_id",
+        "webhook_id"
+      ],
+      "uri": "/api/webhooks/{webhook_id}/deliveries/{delivery_id}/redeliver"
+    },
     "refresh_token": {
       "method": "post",
       "methods": [

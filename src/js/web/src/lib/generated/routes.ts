@@ -245,6 +245,7 @@ export type RouteName =
   | 'preview_extension_import'
   | 'preview_import'
   | 'reboot_device'
+  | 'redeliver_delivery'
   | 'refresh_token'
   | 'regenerate_backup_codes'
   | 'reject_team_invitation'
@@ -817,6 +818,10 @@ export interface RoutePathParams {
   'preview_import': Record<string, never>;
   'reboot_device': {
     device_id: UUID;
+  };
+  'redeliver_delivery': {
+    delivery_id: UUID;
+    webhook_id: UUID;
   };
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
@@ -1897,6 +1902,7 @@ export interface RouteQueryParams {
   'preview_extension_import': Record<string, never>;
   'preview_import': Record<string, never>;
   'reboot_device': Record<string, never>;
+  'redeliver_delivery': Record<string, never>;
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
   'reject_team_invitation': Record<string, never>;
@@ -3603,6 +3609,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['device_id'] as const,
+    queryParams: [] as const,
+  },
+  'redeliver_delivery': {
+    path: '/api/webhooks/{webhook_id}/deliveries/{delivery_id}/redeliver',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['delivery_id', 'webhook_id'] as const,
     queryParams: [] as const,
   },
   'refresh_token': {

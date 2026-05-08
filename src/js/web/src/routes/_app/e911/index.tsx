@@ -19,10 +19,20 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
@@ -146,6 +156,7 @@ function E911Row({
   selected,
   onToggle,
   onRowClick,
+  onDelete,
   cellClass,
   isColumnVisible,
 }: {
@@ -154,11 +165,11 @@ function E911Row({
   selected: boolean
   onToggle: () => void
   onRowClick: () => void
+  onDelete: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
 }) {
   const validateMutation = useValidateE911Registration(reg.id)
-  const deleteMutation = useDeleteE911Registration()
 
   return (
     <TableRow
@@ -266,19 +277,7 @@ function E911Row({
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() =>
-                deleteMutation.mutate(reg.id, {
-                  onSuccess: () => toast.success("E911 registration deleted"),
-                  onError: (err) =>
-                    toast.error("Failed to delete E911 registration", {
-                      description: err instanceof Error ? err.message : undefined,
-                    }),
-                })
-              }
-            >
+            <DropdownMenuItem variant="destructive" onClick={onDelete}>
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
@@ -401,6 +400,9 @@ function E911Page() {
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Delete confirmation state
+  const [registrationToDelete, setRegistrationToDelete] = useState<E911Registration | null>(null)
 
   const items = data?.items ?? []
 
@@ -771,6 +773,7 @@ function E911Page() {
                         selected={selectedIds.has(reg.id)}
                         onToggle={() => toggleOne(reg.id)}
                         onRowClick={() => handleRowClick(reg.id)}
+                        onDelete={() => setRegistrationToDelete(reg)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
                       />
@@ -838,6 +841,50 @@ function E911Page() {
 
       {/* Bulk action bar */}
       <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+
+      {/* Single-item delete confirmation */}
+      <AlertDialog
+        open={!!registrationToDelete}
+        onOpenChange={(open) => {
+          if (!open) setRegistrationToDelete(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete E911 registration?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the E911 registration for <span className="font-medium text-foreground">{registrationToDelete?.addressLine1}</span>. This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (!registrationToDelete) return
+                deleteMutation.mutate(registrationToDelete.id, {
+                  onSuccess: () => {
+                    toast.success("E911 registration deleted")
+                    setRegistrationToDelete(null)
+                  },
+                  onError: (err) => {
+                    toast.error("Failed to delete E911 registration", {
+                      description: err instanceof Error ? err.message : undefined,
+                    })
+                  },
+                })
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete Registration"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

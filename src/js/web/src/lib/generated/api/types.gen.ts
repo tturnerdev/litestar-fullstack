@@ -2789,6 +2789,29 @@ export type WebhookCreate = {
 };
 
 /**
+ * WebhookDeliveryDetail
+ */
+export type WebhookDeliveryDetail = {
+  createdAt?: string | null;
+  endpointId?: string | null;
+  endpointUrl?: string | null;
+  error?: string | null;
+  event: string;
+  id: string;
+  maxRetries?: number;
+  nextRetryAt?: string | null;
+  payload?: {
+    [key: string]: unknown;
+  } | null;
+  responseTimeMs?: number;
+  retryCount?: number;
+  statusCode?: number | null;
+  success?: boolean;
+  updatedAt?: string | null;
+  webhookId: string;
+};
+
+/**
  * WebhookDeliveryList
  */
 export type WebhookDeliveryList = {
@@ -3340,10 +3363,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3419,10 +3442,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3487,10 +3510,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3567,10 +3590,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -16151,6 +16174,55 @@ export type ListWebhookDeliveriesResponses = {
 
 export type ListWebhookDeliveriesResponse =
   ListWebhookDeliveriesResponses[keyof ListWebhookDeliveriesResponses];
+
+export type RedeliverWebhookDeliveryData = {
+  body?: never;
+  path: {
+    /**
+     * Webhook ID
+     *
+     * The webhook that owns the delivery.
+     */
+    webhook_id: string;
+    /**
+     * Delivery ID
+     *
+     * The delivery to redeliver.
+     */
+    delivery_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/{webhook_id}/deliveries/{delivery_id}/redeliver";
+};
+
+export type RedeliverWebhookDeliveryErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type RedeliverWebhookDeliveryError =
+  RedeliverWebhookDeliveryErrors[keyof RedeliverWebhookDeliveryErrors];
+
+export type RedeliverWebhookDeliveryResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: WebhookDeliveryDetail;
+};
+
+export type RedeliverWebhookDeliveryResponse =
+  RedeliverWebhookDeliveryResponses[keyof RedeliverWebhookDeliveryResponses];
 
 export type TestWebhookData = {
   body?: never;

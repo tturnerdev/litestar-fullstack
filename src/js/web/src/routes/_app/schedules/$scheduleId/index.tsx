@@ -662,8 +662,13 @@ function ScheduleDetailPage() {
   }
 
   const handleDelete = async () => {
-    await deleteSchedule.mutateAsync(scheduleId)
-    router.navigate({ to: "/schedules" })
+    try {
+      await deleteSchedule.mutateAsync(scheduleId)
+      toast.success("Schedule deleted successfully")
+      router.navigate({ to: "/schedules" })
+    } catch {
+      toast.error("Failed to delete schedule")
+    }
   }
 
   // Organize entries by type

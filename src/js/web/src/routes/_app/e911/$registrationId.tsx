@@ -278,8 +278,13 @@ function E911DetailPage() {
   }
 
   const handleDelete = async () => {
-    await deleteMutation.mutateAsync(registrationId)
-    router.navigate({ to: "/e911" })
+    try {
+      await deleteMutation.mutateAsync(registrationId)
+      toast.success("E911 registration deleted")
+      router.navigate({ to: "/e911" })
+    } catch {
+      toast.error("Failed to delete E911 registration")
+    }
   }
 
   if (isLoading) {

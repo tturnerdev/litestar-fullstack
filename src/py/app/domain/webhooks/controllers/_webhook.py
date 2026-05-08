@@ -17,13 +17,14 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.webhooks.deps import provide_webhook_delivery_service
 from app.domain.webhooks.schemas import (
     WebhookCreate,
+    WebhookDeliveryDetail,
     WebhookDeliveryList,
     WebhookDetail,
     WebhookList,
     WebhookTestResult,
     WebhookUpdate,
 )
-from app.domain.webhooks.services import WebhookDeliveryService, WebhookService
+from app.domain.webhooks.services import WebhookDeliveryService, WebhookService, redeliver
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
@@ -304,6 +305,42 @@ class WebhookController(Controller):
             OrderBy(field_name="created_at", sort_order="desc"),
         )
         return [delivery_service.to_schema(obj, schema_type=WebhookDeliveryList) for obj in results]
+
+    @post(
+        operation_id="RedeliverWebhookDelivery",
+        path="/api/webhooks/{webhook_id:uuid}/deliveries/{delivery_id:uuid}/redeliver",
+    )
+    async def redeliver_delivery(
+        self,
+        webhooks_service: WebhookService,
+        delivery_service: WebhookDeliveryService,
+        current_user: m.User,
+        webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook that owns the delivery.")],
+        delivery_id: Annotated[UUID, Parameter(title="Delivery ID", description="The delivery to redeliver.")],
+    ) -> WebhookDeliveryDetail:
+        """Manually redeliver a failed webhook delivery.
+
+        Args:
+            webhooks_service: Webhook Service
+            delivery_service: Webhook Delivery Service
+            current_user: Current User
+            webhook_id: Webhook ID
+            delivery_id: Delivery ID
+
+        Returns:
+            WebhookDeliveryDetail
+        """
+        db_obj = await webhooks_service.get(webhook_id)
+        if db_obj.user_id != current_user.id and not current_user.is_superuser:
+            raise NotFoundException(detail="Webhook not found.")
+
+        delivery = await delivery_service.get(delivery_id)
+        if delivery.webhook_id != webhook_id:
+            raise NotFoundException(detail="Delivery not found.")
+
+        await redeliver(delivery, delivery_service)
+        updated = await delivery_service.get(delivery_id)
+        return delivery_service.to_schema(updated, schema_type=WebhookDeliveryDetail)
 
     @post(
         operation_id="TestWebhook",

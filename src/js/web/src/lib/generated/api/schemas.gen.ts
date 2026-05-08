@@ -10358,6 +10358,126 @@ export const WebhookCreateSchema = {
   type: "object",
 } as const;
 
+export const WebhookDeliveryDetailSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endpointId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endpointUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    error: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    event: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    maxRetries: {
+      default: 5,
+      type: "integer",
+    },
+    nextRetryAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    payload: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    responseTimeMs: {
+      default: 0,
+      type: "integer",
+    },
+    retryCount: {
+      default: 0,
+      type: "integer",
+    },
+    statusCode: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    success: {
+      default: false,
+      type: "boolean",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    webhookId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["event", "id", "webhookId"],
+  title: "WebhookDeliveryDetail",
+  type: "object",
+} as const;
+
 export const WebhookDeliveryListSchema = {
   properties: {
     createdAt: {

@@ -704,6 +704,9 @@ import type {
   RebootDeviceData,
   RebootDeviceErrors,
   RebootDeviceResponses,
+  RedeliverWebhookDeliveryData,
+  RedeliverWebhookDeliveryErrors,
+  RedeliverWebhookDeliveryResponses,
   RegenerateMfaBackupCodesData,
   RegenerateMfaBackupCodesErrors,
   RegenerateMfaBackupCodesResponses,
@@ -6157,6 +6160,22 @@ export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/webhooks/{webhook_id}/deliveries",
+    ...options,
+  });
+
+/**
+ * RedeliverDelivery
+ */
+export const redeliverWebhookDelivery = <ThrowOnError extends boolean = false>(
+  options: Options<RedeliverWebhookDeliveryData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    RedeliverWebhookDeliveryResponses,
+    RedeliverWebhookDeliveryErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/{webhook_id}/deliveries/{delivery_id}/redeliver",
     ...options,
   });
 

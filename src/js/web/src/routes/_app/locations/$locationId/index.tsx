@@ -139,8 +139,13 @@ function LocationDetailPage() {
   }
 
   const handleDelete = async () => {
-    await deleteLocation.mutateAsync(locationId)
-    router.navigate({ to: "/locations" })
+    try {
+      await deleteLocation.mutateAsync(locationId)
+      toast.success("Location deleted successfully")
+      router.navigate({ to: "/locations" })
+    } catch {
+      toast.error("Failed to delete location")
+    }
   }
 
   if (isLoading) {

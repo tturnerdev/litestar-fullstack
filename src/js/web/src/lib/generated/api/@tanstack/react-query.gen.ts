@@ -249,6 +249,7 @@ import {
   profileOAuthUnlink,
   profileOAuthUpgradeScopes,
   rebootDevice,
+  redeliverWebhookDelivery,
   regenerateMfaBackupCodes,
   rejectTeamInvitation,
   removeMemberFromTeam,
@@ -1005,6 +1006,9 @@ import type {
   RebootDeviceData,
   RebootDeviceError,
   RebootDeviceResponse,
+  RedeliverWebhookDeliveryData,
+  RedeliverWebhookDeliveryError,
+  RedeliverWebhookDeliveryResponse,
   RegenerateMfaBackupCodesData,
   RegenerateMfaBackupCodesError,
   RegenerateMfaBackupCodesResponse,
@@ -9324,6 +9328,33 @@ export const listWebhookDeliveriesOptions = (
     },
     queryKey: listWebhookDeliveriesQueryKey(options),
   });
+
+/**
+ * RedeliverDelivery
+ */
+export const redeliverWebhookDeliveryMutation = (
+  options?: Partial<Options<RedeliverWebhookDeliveryData>>,
+): UseMutationOptions<
+  RedeliverWebhookDeliveryResponse,
+  RedeliverWebhookDeliveryError,
+  Options<RedeliverWebhookDeliveryData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RedeliverWebhookDeliveryResponse,
+    RedeliverWebhookDeliveryError,
+    Options<RedeliverWebhookDeliveryData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await redeliverWebhookDelivery({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 /**
  * TestWebhook
