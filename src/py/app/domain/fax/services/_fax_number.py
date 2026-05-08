@@ -44,3 +44,9 @@ class FaxNumberService(service.SQLAlchemyAsyncRepositoryService[m.FaxNumber]):
             if existing and any(str(e.id) != str(item_id) for e in existing):
                 raise ValidationException("A fax number with this number already exists.")
         return data
+
+    async def to_model_on_upsert(self, data: ModelDictT[m.FaxNumber]) -> ModelDictT[m.FaxNumber]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "number" in data:
+            data["number"] = data["number"].strip()
+        return data

@@ -43,3 +43,6 @@ class UserRoleService(service.SQLAlchemyAsyncRepositoryService[m.UserRole]):
             if any(str(e.id) != str(item_id) for e in existing):
                 raise ValidationException("This role is already assigned to this user.")
         return data
+
+    async def to_model_on_upsert(self, data: ModelDictT[m.UserRole]) -> ModelDictT[m.UserRole]:
+        return service.schema_dump(data)

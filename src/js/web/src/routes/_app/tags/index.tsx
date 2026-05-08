@@ -100,6 +100,7 @@ function loadColumnVisibility(): ColumnVisibility {
 const csvHeaders: CsvHeader<Tag>[] = [
   { label: "Name", accessor: (t) => t.name },
   { label: "Slug", accessor: (t) => t.slug },
+  { label: "Description", accessor: (t) => t.description ?? "" },
 ]
 
 function TagsPage() {

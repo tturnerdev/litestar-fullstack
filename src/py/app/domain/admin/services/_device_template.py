@@ -58,6 +58,15 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
                     raise ValidationException("A device template for this manufacturer and model already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.DeviceTemplate]) -> ModelDictT[m.DeviceTemplate]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "manufacturer" in data:
+                data["manufacturer"] = data["manufacturer"].strip()
+            if "model" in data:
+                data["model"] = data["model"].strip()
+        return data
+
     async def to_model(
         self,
         data: ModelDictT[m.DeviceTemplate],

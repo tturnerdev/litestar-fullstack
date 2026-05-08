@@ -47,6 +47,12 @@ class MusicOnHoldService(service.SQLAlchemyAsyncRepositoryService[m.MusicOnHold]
                 raise ValidationException("A music on hold entry with this name already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.MusicOnHold]) -> ModelDictT[m.MusicOnHold]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
+        return data
+
     async def get_default(self) -> m.MusicOnHold | None:
         """Get the default Music on Hold class.
 
