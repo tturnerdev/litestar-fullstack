@@ -33,6 +33,6 @@ class FaxEmailRouteCreate(CamelizedBaseStruct):
 class FaxEmailRouteUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a fax email route."""
 
-    email_address: Annotated[str, Meta(max_length=320)] | msgspec.UnsetType = msgspec.UNSET
+    email_address: Annotated[str, Meta(min_length=1, max_length=320)] | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     notify_on_failure: bool | msgspec.UnsetType = msgspec.UNSET

@@ -62,7 +62,7 @@ class IvrMenuCreate(CamelizedBaseStruct):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
     greeting_type: Annotated[str, Meta(min_length=1, max_length=50)] = "none"
-    greeting_text: Annotated[str, Meta(max_length=2000)] | None = None
+    greeting_text: Annotated[str, Meta(min_length=1, max_length=2000)] | None = None
     greeting_file_url: Annotated[str, Meta(min_length=1, max_length=500)] | None = None
     timeout_seconds: Annotated[int, Meta(ge=1, le=120)] = 5
     max_retries: Annotated[int, Meta(ge=0, le=10)] = 3
@@ -75,7 +75,7 @@ class IvrMenuUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     greeting_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    greeting_text: Annotated[str, Meta(max_length=2000)] | msgspec.UnsetType | None = msgspec.UNSET
+    greeting_text: Annotated[str, Meta(min_length=1, max_length=2000)] | msgspec.UnsetType | None = msgspec.UNSET
     greeting_file_url: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     timeout_seconds: Annotated[int, Meta(ge=1, le=120)] | msgspec.UnsetType = msgspec.UNSET
     max_retries: Annotated[int, Meta(ge=0, le=10)] | msgspec.UnsetType = msgspec.UNSET

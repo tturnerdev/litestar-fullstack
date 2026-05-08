@@ -321,6 +321,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
                   setEmailAddress(e.target.value)
                   setDirty(true)
                 }}
+                maxLength={255}
               />
             </div>
           )}
