@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Check } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -182,6 +182,7 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
               )}
               <div className="flex items-center gap-2">
                 <Button type="submit" disabled={!isDirty || updateProfile.isPending}>
+                  {updateProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {updateProfile.isPending ? "Saving..." : "Save changes"}
                 </Button>
                 {showSuccess && <Check className="h-5 w-5 animate-in fade-in zoom-in text-green-500" />}

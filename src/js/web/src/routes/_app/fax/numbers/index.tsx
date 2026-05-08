@@ -8,6 +8,7 @@ import {
   Home,
   LayoutGrid,
   List,
+  Loader2,
   Mail,
   MessageSquare,
   MoreVertical,
@@ -821,6 +822,7 @@ function FaxNumbersPage() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteFaxNumber.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction disabled={deleteFaxNumber.isPending} onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleteFaxNumber.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteFaxNumber.isPending ? "Deleting..." : "Delete Fax Number"}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -6,6 +6,7 @@ import {
   Eye,
   Filter,
   Home,
+  Loader2,
   Monitor,
   MoreVertical,
   Pencil,
@@ -987,6 +988,7 @@ function DevicesPage() {
                 })
               }}
             >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteMutation.isPending ? "Deleting..." : "Delete Device"}
             </AlertDialogAction>
           </AlertDialogFooter>

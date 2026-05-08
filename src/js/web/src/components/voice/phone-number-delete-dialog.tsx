@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react"
 import { useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -48,6 +49,7 @@ export function PhoneNumberDeleteDialog({ phoneNumberId, phoneNumber, open, onOp
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button variant="destructive" onClick={handleDelete} disabled={deletePhoneNumber.isPending}>
+            {deletePhoneNumber.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {deletePhoneNumber.isPending ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
