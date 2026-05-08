@@ -10,6 +10,7 @@ from litestar.di import Provide
 from litestar.params import Parameter
 from litestar.status_codes import HTTP_202_ACCEPTED
 
+from app.db import models as m
 from app.domain.accounts.deps import provide_roles_service, provide_user_roles_service, provide_users_service
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
@@ -20,7 +21,6 @@ if TYPE_CHECKING:
     from litestar import Request
     from litestar.security.jwt import Token
 
-    from app.db import models as m
     from app.domain.accounts.schemas import UserRoleAdd, UserRoleRevoke
     from app.domain.accounts.services import RoleService, UserRoleService, UserService
     from app.domain.admin.services import AuditLogService

@@ -9,6 +9,7 @@ from litestar import Controller, delete, get, patch, post, put
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
+from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.guards import requires_call_routing_access
 from app.domain.call_routing.schemas import (
@@ -28,7 +29,6 @@ if TYPE_CHECKING:
     from litestar import Request
     from litestar.security.jwt import Token
 
-    from app.db import models as m
     from app.domain.admin.services import AuditLogService
 
 

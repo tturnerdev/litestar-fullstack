@@ -5,6 +5,7 @@ from __future__ import annotations
 import ipaddress
 import logging
 from typing import TYPE_CHECKING, Annotated, Any
+from uuid import UUID
 
 import httpx
 from litestar import Controller, Response, get, post, put
@@ -12,6 +13,7 @@ from litestar.di import Provide
 from litestar.exceptions import NotFoundException, ValidationException
 from litestar.params import Parameter
 
+from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.deps import provide_devices_service
 from app.domain.devices.jobs import device_reboot_job, device_reprovision_job

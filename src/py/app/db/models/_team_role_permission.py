@@ -7,10 +7,11 @@ from advanced_alchemy.base import UUIDv7AuditBase
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.db.models._feature_area import FeatureArea
+from app.db.models._team_roles import TeamRoles
+
 if TYPE_CHECKING:
-    from app.db.models._feature_area import FeatureArea
     from app.db.models._team import Team
-    from app.db.models._team_roles import TeamRoles
 
 
 class TeamRolePermission(UUIDv7AuditBase):

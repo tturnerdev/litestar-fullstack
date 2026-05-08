@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app.db import models as m
 from app.lib import constants
 
 if TYPE_CHECKING:
@@ -12,8 +13,6 @@ if TYPE_CHECKING:
     from litestar.connection import ASGIConnection
     from litestar.handlers.base import BaseRouteHandler
     from litestar.security.jwt import Token
-
-    from app.db import models as m
 
 
 def _has_system_access(user: m.User) -> bool:
