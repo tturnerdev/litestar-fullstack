@@ -54,7 +54,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
                     raise ValidationException("A tag with this name already exists.")
             if "description" in data and data["description"]:
                 data["description"] = data["description"].strip()
-        return data
+        return await super().to_model_on_update(data)
 
     async def to_model_on_upsert(self, data: service.ModelDictT[m.Tag]) -> service.ModelDictT[m.Tag]:
         data = service.schema_dump(data)

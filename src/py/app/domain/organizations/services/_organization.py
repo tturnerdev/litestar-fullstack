@@ -40,7 +40,7 @@ class OrganizationService(
             )
             if existing:
                 raise ValidationException("An organization with this name already exists.")
-        return data
+        return await super().to_model_on_create(data)
 
     async def to_model_on_update(self, data: ModelDictT[m.Organization], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Organization]:
         data = service.schema_dump(data)
@@ -54,7 +54,7 @@ class OrganizationService(
                     raise ValidationException("An organization with this name already exists.")
             if "description" in data and data["description"]:
                 data["description"] = data["description"].strip()
-        return data
+        return await super().to_model_on_update(data)
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Organization]) -> ModelDictT[m.Organization]:
         data = service.schema_dump(data)
@@ -63,4 +63,4 @@ class OrganizationService(
                 data["name"] = data["name"].strip()
             if "description" in data and data["description"]:
                 data["description"] = data["description"].strip()
-        return data
+        return await super().to_model_on_upsert(data)

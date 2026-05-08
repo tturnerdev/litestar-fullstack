@@ -47,4 +47,4 @@ class RoleService(AutoSlugServiceMixin[m.Role], service.SQLAlchemyAsyncRepositor
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
                 raise ValidationException("A role with this name already exists.")
-        return data
+        return await super().to_model_on_update(data)
