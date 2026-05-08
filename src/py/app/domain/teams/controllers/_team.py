@@ -168,7 +168,7 @@ class TeamController(Controller):
             item_id=team_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="team_updated", entity_id=fresh_obj.id)
+        request.app.emit(event_id="team_updated", team_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
 
         await log_audit(
@@ -208,7 +208,7 @@ class TeamController(Controller):
         team = await teams_service.get(team_id)
         before = capture_snapshot(team)
         team_name = team.name
-        request.app.emit(event_id="team_deleted", entity_id=team_id)
+        request.app.emit(event_id="team_deleted", team_id=team_id)
         _ = await teams_service.delete(team_id)
 
         await log_audit(

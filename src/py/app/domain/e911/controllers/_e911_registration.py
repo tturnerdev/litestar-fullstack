@@ -191,7 +191,7 @@ class E911RegistrationController(Controller):
             item_id=registration_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="e911_registration_updated", entity_id=fresh_obj.id)
+        request.app.emit(event_id="e911_registration_updated", registration_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -236,7 +236,7 @@ class E911RegistrationController(Controller):
         db_obj = await e911_service.get(registration_id)
         before = capture_snapshot(db_obj)
         target_label = f"{db_obj.address_line_1}, {db_obj.city}"
-        request.app.emit(event_id="e911_registration_deleted", entity_id=registration_id)
+        request.app.emit(event_id="e911_registration_deleted", registration_id=registration_id)
         await e911_service.delete(registration_id)
         await log_audit(
             audit_service,

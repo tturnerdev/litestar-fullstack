@@ -108,7 +108,7 @@ class ConnectionController(Controller):
         audit_service: AuditLogService,
         current_user: m.User,
         data: ConnectionCreate,
-    ) -> ConnectionList:
+    ) -> ConnectionDetail:
         """Create a new connection.
 
         Args:
@@ -119,7 +119,7 @@ class ConnectionController(Controller):
             data: Connection Create
 
         Returns:
-            ConnectionList
+            ConnectionDetail
         """
         if not current_user.is_superuser:
             if not any(tm.team_id == data.team_id for tm in current_user.teams):
@@ -141,7 +141,7 @@ class ConnectionController(Controller):
             after=after,
             request=request,
         )
-        return await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionList)
+        return await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
 
     @get(
         operation_id="GetConnection",
@@ -203,7 +203,7 @@ class ConnectionController(Controller):
             item_id=connection_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="connection_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="connection_updated", connection_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -256,7 +256,7 @@ class ConnectionController(Controller):
             )
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="connection_deleted", entity_id=connection_id)
+        request.app.emit(event_id="connection_deleted", connection_id=connection_id)
         await connections_service.delete(connection_id)
         await log_audit(
             audit_service,

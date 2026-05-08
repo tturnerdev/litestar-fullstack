@@ -193,7 +193,7 @@ class LocationController(Controller):
             item_id=location_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="location_updated", entity_id=fresh_obj.id)
+        request.app.emit(event_id="location_updated", location_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -246,7 +246,7 @@ class LocationController(Controller):
             )
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="location_deleted", entity_id=location_id)
+        request.app.emit(event_id="location_deleted", location_id=location_id)
         await locations_service.delete(location_id)
         await log_audit(
             audit_service,

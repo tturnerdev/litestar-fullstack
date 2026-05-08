@@ -205,7 +205,7 @@ class ScheduleController(Controller):
             item_id=schedule_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="schedule_updated", entity_id=fresh_obj.id)
+        request.app.emit(event_id="schedule_updated", schedule_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -250,7 +250,7 @@ class ScheduleController(Controller):
         db_obj = await schedules_service.get(schedule_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="schedule_deleted", entity_id=schedule_id)
+        request.app.emit(event_id="schedule_deleted", schedule_id=schedule_id)
         await schedules_service.delete(schedule_id)
         await log_audit(
             audit_service,
@@ -349,7 +349,7 @@ class ScheduleController(Controller):
         obj = data.to_dict()
         obj["schedule_id"] = schedule_id
         db_obj = await entries_service.create(obj)
-        request.app.emit(event_id="schedule_entry_created", entity_id=db_obj.id)
+        request.app.emit(event_id="schedule_entry_created", entry_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -401,7 +401,7 @@ class ScheduleController(Controller):
             item_id=entry_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="schedule_entry_updated", entity_id=entry_id)
+        request.app.emit(event_id="schedule_entry_updated", entry_id=entry_id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -448,7 +448,7 @@ class ScheduleController(Controller):
         db_obj = await entries_service.get(entry_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.label or f"Entry {entry_id}"
-        request.app.emit(event_id="schedule_entry_deleted", entity_id=entry_id)
+        request.app.emit(event_id="schedule_entry_deleted", entry_id=entry_id)
         await entries_service.delete(entry_id)
         await log_audit(
             audit_service,

@@ -206,7 +206,7 @@ class DeviceController(Controller):
             data=data.to_dict(),
         )
         fresh_obj = await devices_service.get_one(id=device_id)
-        request.app.emit(event_id="device_updated", entity_id=device_id)
+        request.app.emit(event_id="device_updated", device_id=device_id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -253,7 +253,7 @@ class DeviceController(Controller):
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
         owner_id = db_obj.user_id
-        request.app.emit(event_id="device_deleted", entity_id=device_id)
+        request.app.emit(event_id="device_deleted", device_id=device_id)
         await devices_service.delete(device_id)
         await log_audit(
             audit_service,
