@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any
-from uuid import UUID
+from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.extensions.litestar import repository, service
 from sqlalchemy import func, select
 
 from app.db import models as m
 from app.domain.connections.schemas import ConnectionDetail, ConnectionList
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from uuid import UUID
 
 
 class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):

@@ -2,19 +2,22 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Annotated
-from uuid import UUID
+from typing import TYPE_CHECKING, Annotated
 
 from litestar import Controller, get
 from litestar.di import Provide
 from litestar.params import Parameter
 
-from app.db import models as m
 from app.domain.analytics.deps import provide_call_records_service
 from app.domain.analytics.guards import requires_analytics_access
-from app.domain.analytics.schemas import CallAnalyticsSummary, CallVolumePoint, ExtensionStats
-from app.domain.analytics.services import CallRecordService
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from uuid import UUID
+
+    from app.db import models as m
+    from app.domain.analytics.schemas import CallAnalyticsSummary, CallVolumePoint, ExtensionStats
+    from app.domain.analytics.services import CallRecordService
 
 
 class CallAnalyticsController(Controller):

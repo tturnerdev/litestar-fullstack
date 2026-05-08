@@ -9,9 +9,8 @@ from sqlalchemy import BigInteger, ForeignKey, String
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.models._fax_enums import FaxDirection, FaxStatus
-
 if TYPE_CHECKING:
+    from app.db.models._fax_enums import FaxDirection, FaxStatus
     from app.db.models._fax_number import FaxNumber
 
 

@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import secrets
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
-from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
 
@@ -13,6 +11,9 @@ from app.db import models as m
 from app.domain.devices.schemas import Device as DeviceSchema
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from uuid import UUID
+
     from advanced_alchemy.service import ModelDictT
 
     from app.domain.devices.schemas import DeviceLineAssignment as DeviceLineAssignmentSchema

@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 from advanced_alchemy.extensions.litestar import repository, service
 from sqlalchemy import case, cast, func, select
@@ -12,6 +11,10 @@ from sqlalchemy.types import Float
 from app.db import models as m
 from app.db.models._call_record_enums import CallDisposition
 from app.domain.analytics.schemas import CallAnalyticsSummary, CallVolumePoint, ExtensionStats
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from uuid import UUID
 
 
 class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):

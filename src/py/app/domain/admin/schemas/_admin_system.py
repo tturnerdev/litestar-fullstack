@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from app.lib.schema import CamelizedBaseStruct
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class WorkerQueueInfo(CamelizedBaseStruct, kw_only=True):

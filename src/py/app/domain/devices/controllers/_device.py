@@ -15,7 +15,6 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.guards import requires_device_ownership
-from app.domain.devices.schemas import Device, DeviceCreate, DeviceUpdate
 from app.domain.devices.services import DeviceService
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.guards import requires_feature_permission
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
+    from app.domain.devices.schemas import Device, DeviceCreate, DeviceUpdate
     from app.domain.notifications.services import NotificationService
 
 _SNAPSHOT_EXCLUDE: frozenset[str] = frozenset(

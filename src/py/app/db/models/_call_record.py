@@ -9,9 +9,8 @@ from advanced_alchemy.base import UUIDv7AuditBase
 from sqlalchemy import ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.models._call_record_enums import CallDirection, CallDisposition
-
 if TYPE_CHECKING:
+    from app.db.models._call_record_enums import CallDirection, CallDisposition
     from app.db.models._connection import Connection
     from app.db.models._team import Team
 

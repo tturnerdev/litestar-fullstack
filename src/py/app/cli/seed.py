@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
-from uuid import UUID
+from typing import TYPE_CHECKING, Any
 
 import anyio
 import click
@@ -17,6 +16,9 @@ from app.config import alchemy
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.lib.deps import provide_services
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 
 @click.command(name="seed", help="Seed the database with realistic development data.")
