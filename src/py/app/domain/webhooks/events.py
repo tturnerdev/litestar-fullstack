@@ -176,6 +176,13 @@ class WebhookEventType(StrEnum):
     MUSIC_ON_HOLD_CREATED = "music_on_hold.created"
     MUSIC_ON_HOLD_DELETED = "music_on_hold.deleted"
 
+    # Admin — bulk import events
+    DEVICES_BULK_IMPORTED = "admin.devices.bulk_imported"
+    EXTENSIONS_BULK_IMPORTED = "admin.extensions.bulk_imported"
+
+    # Admin — gateway events
+    GATEWAY_SETTINGS_UPDATED = "admin.gateway.settings_updated"
+
     # Background task events
     BACKGROUND_TASK_DELETED = "background_task.deleted"
 
@@ -319,6 +326,9 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.MUSIC_ON_HOLD_CREATED: "A new music on hold entry was created",
     WebhookEventType.MUSIC_ON_HOLD_DELETED: "A music on hold entry was deleted",
     # Background task events
+    WebhookEventType.DEVICES_BULK_IMPORTED: "Devices were bulk-imported from CSV",
+    WebhookEventType.EXTENSIONS_BULK_IMPORTED: "Extensions were bulk-imported from CSV",
+    WebhookEventType.GATEWAY_SETTINGS_UPDATED: "Gateway settings were updated",
     WebhookEventType.BACKGROUND_TASK_DELETED: "A background task was deleted",
 }
 

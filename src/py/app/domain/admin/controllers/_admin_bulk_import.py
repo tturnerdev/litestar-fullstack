@@ -356,6 +356,9 @@ class AdminBulkImportController(Controller):
             },
         )
 
+        if created or updated:
+            request.app.emit(event_id="devices_bulk_imported", created=created, updated=updated)
+
         return BulkImportResult(
             created=created,
             updated=updated,
@@ -528,6 +531,9 @@ class AdminBulkImportController(Controller):
                 "error_count": len(errors),
             },
         )
+
+        if created or updated:
+            request.app.emit(event_id="extensions_bulk_imported", created=created, updated=updated)
 
         return BulkImportResult(
             created=created,

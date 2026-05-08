@@ -105,6 +105,8 @@ class AdminGatewayController(Controller):
             request=request,
         )
 
+        request.app.emit(event_id="gateway_settings_updated")
+
         return AdminGatewaySettings(
             default_timeout=settings.gateway.DEFAULT_TIMEOUT,
             default_cache_ttl=settings.gateway.DEFAULT_CACHE_TTL,
