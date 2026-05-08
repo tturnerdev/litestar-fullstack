@@ -82,8 +82,8 @@ class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notificatio
         notification = await self.create(
             {
                 "user_id": user_id,
-                "title": title,
-                "message": message,
+                "title": title.strip(),
+                "message": message.strip(),
                 "category": category,
                 "action_url": action_url,
                 "metadata_": metadata,
