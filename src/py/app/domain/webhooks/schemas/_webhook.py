@@ -1,9 +1,11 @@
 """Webhook schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -49,13 +51,13 @@ class WebhookDetail(CamelizedBaseStruct):
 class WebhookCreate(CamelizedBaseStruct):
     """Schema for creating a webhook."""
 
-    name: str
-    url: str
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
+    url: Annotated[str, Meta(min_length=1, max_length=2048)]
     secret: str | None = None
     events: list[str] = []
     is_active: bool = True
     headers: dict[str, str] = {}
-    description: str = ""
+    description: Annotated[str, Meta(max_length=1000)] = ""
 
 
 class WebhookUpdate(CamelizedBaseStruct, omit_defaults=True):

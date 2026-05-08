@@ -1,9 +1,11 @@
 """Extension schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -36,8 +38,8 @@ class Extension(CamelizedBaseStruct):
 class ExtensionCreate(CamelizedBaseStruct):
     """Extension create properties."""
 
-    extension_number: str
-    display_name: str = ""
+    extension_number: Annotated[str, Meta(min_length=1, max_length=20)]
+    display_name: Annotated[str, Meta(max_length=100)] = ""
     phone_number_id: UUID | None = None
     is_active: bool = True
 

@@ -1,9 +1,11 @@
 """Fax number schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -20,8 +22,8 @@ class FaxNumber(CamelizedBaseStruct):
 
 
 class FaxNumberCreate(CamelizedBaseStruct):
-    number: str
-    label: str | None = None
+    number: Annotated[str, Meta(min_length=1, max_length=20)]
+    label: Annotated[str, Meta(max_length=100)] | None = None
     is_active: bool = True
     team_id: UUID | None = None
 

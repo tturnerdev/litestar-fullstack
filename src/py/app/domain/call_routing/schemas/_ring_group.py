@@ -1,9 +1,11 @@
 """Ring group schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -52,7 +54,7 @@ class RingGroup(CamelizedBaseStruct):
 class RingGroupCreate(CamelizedBaseStruct):
     """Schema for creating a ring group."""
 
-    name: str
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
     number: str
     strategy: str = "ring_all"
     ring_time: int = 20

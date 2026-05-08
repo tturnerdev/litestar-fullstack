@@ -2265,6 +2265,8 @@ export const CallQueueCreateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     number: {
@@ -2939,6 +2941,8 @@ export const ConnectionCreateSchema = {
       type: "boolean",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     port: {
@@ -3646,6 +3650,8 @@ export const DeviceCreateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     sipUsername: {
@@ -4547,6 +4553,8 @@ export const E911RegistrationSchema = {
 export const E911RegistrationCreateSchema = {
   properties: {
     addressLine1: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     addressLine2: {
@@ -4560,6 +4568,8 @@ export const E911RegistrationCreateSchema = {
       ],
     },
     city: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     country: {
@@ -4589,9 +4599,13 @@ export const E911RegistrationCreateSchema = {
       ],
     },
     postalCode: {
+      maxLength: 20,
+      minLength: 1,
       type: "string",
     },
     state: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     teamId: {
@@ -4876,9 +4890,12 @@ export const ExtensionCreateSchema = {
   properties: {
     displayName: {
       default: "",
+      maxLength: 100,
       type: "string",
     },
     extensionNumber: {
+      maxLength: 20,
+      minLength: 1,
       type: "string",
     },
     isActive: {
@@ -5443,6 +5460,8 @@ export const FaxNumberCreateSchema = {
       ],
     },
     number: {
+      maxLength: 20,
+      minLength: 1,
       type: "string",
     },
     teamId: {
@@ -5828,6 +5847,8 @@ export const IvrMenuCreateSchema = {
       type: "integer",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     timeoutDestination: {
@@ -6206,6 +6227,8 @@ export const LocationCreateSchema = {
       type: "string",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     parentId: {
@@ -7450,6 +7473,8 @@ export const PhoneNumberCreateSchema = {
       ],
     },
     number: {
+      maxLength: 20,
+      minLength: 1,
       type: "string",
     },
     numberType: {
@@ -7869,6 +7894,8 @@ export const RingGroupSchema = {
 export const RingGroupCreateSchema = {
   properties: {
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     noAnswerDestination: {
@@ -8147,6 +8174,8 @@ export const ScheduleCreateSchema = {
       type: "boolean",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     scheduleType: {
@@ -8837,6 +8866,8 @@ export const TagSchema = {
 export const TagCreateSchema = {
   properties: {
     name: {
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
   },
@@ -8942,6 +8973,8 @@ export const TeamCreateSchema = {
       ],
     },
     name: {
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
     tags: {
@@ -9355,6 +9388,7 @@ export const TicketAttachmentSchema = {
 export const TicketCreateSchema = {
   properties: {
     bodyMarkdown: {
+      minLength: 1,
       type: "string",
     },
     category: {
@@ -9372,6 +9406,8 @@ export const TicketCreateSchema = {
       type: "string",
     },
     subject: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     teamId: {
@@ -9618,6 +9654,8 @@ export const TimeConditionCreateSchema = {
       type: "string",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     noMatchDestination: {
@@ -10543,6 +10581,7 @@ export const WebhookCreateSchema = {
   properties: {
     description: {
       default: "",
+      maxLength: 1000,
       type: "string",
     },
     events: {
@@ -10562,6 +10601,8 @@ export const WebhookCreateSchema = {
       type: "boolean",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     secret: {
@@ -10575,6 +10616,8 @@ export const WebhookCreateSchema = {
       ],
     },
     url: {
+      maxLength: 2048,
+      minLength: 1,
       type: "string",
     },
   },
@@ -11082,6 +11125,8 @@ export const WebhookEndpointCreateSchema = {
       ],
     },
     url: {
+      maxLength: 2048,
+      minLength: 1,
       type: "string",
     },
   },

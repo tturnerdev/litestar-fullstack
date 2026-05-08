@@ -1,9 +1,11 @@
 """E911 Registration schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -31,10 +33,10 @@ class E911Registration(CamelizedBaseStruct, kw_only=True):
 
 class E911RegistrationCreate(CamelizedBaseStruct, kw_only=True):
     team_id: UUID
-    address_line_1: str
-    city: str
-    state: str
-    postal_code: str
+    address_line_1: Annotated[str, Meta(min_length=1, max_length=255)]
+    city: Annotated[str, Meta(min_length=1, max_length=255)]
+    state: Annotated[str, Meta(min_length=1, max_length=255)]
+    postal_code: Annotated[str, Meta(min_length=1, max_length=20)]
     country: str = "US"
     phone_number_id: UUID | None = None
     location_id: UUID | None = None

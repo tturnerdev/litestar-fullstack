@@ -1,9 +1,11 @@
 """Call queue schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -69,7 +71,7 @@ class CallQueue(CamelizedBaseStruct):
 class CallQueueCreate(CamelizedBaseStruct):
     """Schema for creating a call queue."""
 
-    name: str
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
     number: str
     strategy: str = "ring_all"
     ring_time: int = 15

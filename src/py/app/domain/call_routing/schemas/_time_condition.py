@@ -1,9 +1,11 @@
 """Time condition schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -25,7 +27,7 @@ class TimeCondition(CamelizedBaseStruct):
 class TimeConditionCreate(CamelizedBaseStruct):
     """Schema for creating a time condition."""
 
-    name: str
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
     match_destination: str
     no_match_destination: str
     schedule_id: UUID | None = None

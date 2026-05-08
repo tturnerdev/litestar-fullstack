@@ -1,8 +1,10 @@
 """Location schemas."""
 
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -37,13 +39,13 @@ class Location(CamelizedBaseStruct):
 class LocationCreate(CamelizedBaseStruct):
     """Schema for creating a location."""
 
-    name: str
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
     location_type: str
     team_id: UUID
     description: str | None = None
     parent_id: UUID | None = None
-    address_line_1: str | None = None
-    address_line_2: str | None = None
+    address_line_1: Annotated[str, Meta(max_length=500)] | None = None
+    address_line_2: Annotated[str, Meta(max_length=500)] | None = None
     city: str | None = None
     state: str | None = None
     postal_code: str | None = None

@@ -2343,6 +2343,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "number": {
@@ -3028,6 +3030,8 @@
             "type": "boolean"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "port": {
@@ -3739,6 +3743,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "sipUsername": {
@@ -4654,6 +4660,8 @@
       "E911RegistrationCreate": {
         "properties": {
           "addressLine1": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "addressLine2": {
@@ -4667,6 +4675,8 @@
             ]
           },
           "city": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "country": {
@@ -4696,9 +4706,13 @@
             ]
           },
           "postalCode": {
+            "maxLength": 20,
+            "minLength": 1,
             "type": "string"
           },
           "state": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "teamId": {
@@ -4994,9 +5008,12 @@
         "properties": {
           "displayName": {
             "default": "",
+            "maxLength": 100,
             "type": "string"
           },
           "extensionNumber": {
+            "maxLength": 20,
+            "minLength": 1,
             "type": "string"
           },
           "isActive": {
@@ -5573,6 +5590,8 @@
             ]
           },
           "number": {
+            "maxLength": 20,
+            "minLength": 1,
             "type": "string"
           },
           "teamId": {
@@ -5974,6 +5993,8 @@
             "type": "integer"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "timeoutDestination": {
@@ -6365,6 +6386,8 @@
             "type": "string"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "parentId": {
@@ -7638,6 +7661,8 @@
             ]
           },
           "number": {
+            "maxLength": 20,
+            "minLength": 1,
             "type": "string"
           },
           "numberType": {
@@ -8082,6 +8107,8 @@
       "RingGroupCreate": {
         "properties": {
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "noAnswerDestination": {
@@ -8368,6 +8395,8 @@
             "type": "boolean"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "scheduleType": {
@@ -9114,6 +9143,8 @@
       "TagCreate": {
         "properties": {
           "name": {
+            "maxLength": 100,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -9222,6 +9253,8 @@
             ]
           },
           "name": {
+            "maxLength": 100,
+            "minLength": 1,
             "type": "string"
           },
           "tags": {
@@ -9670,6 +9703,7 @@
       "TicketCreate": {
         "properties": {
           "bodyMarkdown": {
+            "minLength": 1,
             "type": "string"
           },
           "category": {
@@ -9687,6 +9721,8 @@
             "type": "string"
           },
           "subject": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "teamId": {
@@ -9939,6 +9975,8 @@
             "type": "string"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "noMatchDestination": {
@@ -10891,6 +10929,7 @@
         "properties": {
           "description": {
             "default": "",
+            "maxLength": 1000,
             "type": "string"
           },
           "events": {
@@ -10910,6 +10949,8 @@
             "type": "boolean"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "secret": {
@@ -10923,6 +10964,8 @@
             ]
           },
           "url": {
+            "maxLength": 2048,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -11445,6 +11488,8 @@
             ]
           },
           "url": {
+            "maxLength": 2048,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -12891,6 +12936,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -12934,27 +13000,6 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13280,6 +13325,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -13323,27 +13389,6 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13667,6 +13712,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -13710,27 +13776,6 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14048,6 +14093,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -14091,27 +14157,6 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [

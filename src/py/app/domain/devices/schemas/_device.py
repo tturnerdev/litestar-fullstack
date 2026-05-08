@@ -1,9 +1,11 @@
 """Device schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -50,9 +52,9 @@ class Device(CamelizedBaseStruct):
 class DeviceCreate(CamelizedBaseStruct):
     """Schema for creating a device."""
 
-    name: str
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
     device_type: str
-    mac_address: str | None = None
+    mac_address: Annotated[str, Meta(max_length=17)] | None = None
     device_model: str | None = None
     manufacturer: str | None = None
     sip_username: str | None = None

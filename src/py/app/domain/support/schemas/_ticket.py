@@ -1,9 +1,11 @@
 """Ticket schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -37,8 +39,8 @@ class Ticket(CamelizedBaseStruct):
 
 
 class TicketCreate(CamelizedBaseStruct):
-    subject: str
-    body_markdown: str
+    subject: Annotated[str, Meta(min_length=1, max_length=255)]
+    body_markdown: Annotated[str, Meta(min_length=1)]
     priority: str = "medium"
     category: str | None = None
     team_id: UUID | None = None

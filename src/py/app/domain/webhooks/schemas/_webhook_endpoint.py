@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -44,7 +45,7 @@ class WebhookEndpointList(CamelizedBaseStruct):
 class WebhookEndpointCreate(CamelizedBaseStruct):
     """Webhook endpoint create schema."""
 
-    url: str
+    url: Annotated[str, Meta(min_length=1, max_length=2048)]
     description: str | None = None
     events: list[str] = []
     is_active: bool = True
