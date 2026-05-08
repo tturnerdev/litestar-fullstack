@@ -113,8 +113,9 @@ export function useDeleteMusicOnHold() {
       })
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (_data, mohId) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "music-on-hold"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "music-on-hold-detail", mohId] })
       toast.success("Music on Hold class deleted")
     },
     onError: (error) => {

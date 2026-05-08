@@ -160,8 +160,9 @@ export function useDeleteWebhook() {
       } as unknown as DeleteWebhookData)
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (_data, webhookId) => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] })
+      queryClient.invalidateQueries({ queryKey: ["webhook", webhookId] })
       toast.success("Webhook deleted")
     },
     onError: (error) => {

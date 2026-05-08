@@ -129,8 +129,9 @@ export function useDeleteTag() {
         security: [{ scheme: "bearer", type: "http" }],
       } as never)
     },
-    onSuccess: () => {
+    onSuccess: (_data, tagId) => {
       queryClient.invalidateQueries({ queryKey: ["tags"] })
+      queryClient.invalidateQueries({ queryKey: ["tag", tagId] })
       toast.success("Tag deleted")
     },
     onError: (error) => {

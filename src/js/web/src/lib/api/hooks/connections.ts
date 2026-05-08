@@ -181,8 +181,9 @@ export function useDeleteConnection() {
         security: [{ scheme: "bearer", type: "http" }],
       } as never)
     },
-    onSuccess: () => {
+    onSuccess: (_data, connectionId) => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
+      queryClient.invalidateQueries({ queryKey: ["connection", connectionId] })
       toast.success("Connection deleted")
     },
     onError: (error) => {

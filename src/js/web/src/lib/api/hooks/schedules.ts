@@ -208,8 +208,9 @@ export function useDeleteSchedule() {
         method: "DELETE",
       })
     },
-    onSuccess: () => {
+    onSuccess: (_data, scheduleId) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] })
+      queryClient.invalidateQueries({ queryKey: ["schedule", scheduleId] })
       toast.success("Schedule deleted")
     },
     onError: (error) => {

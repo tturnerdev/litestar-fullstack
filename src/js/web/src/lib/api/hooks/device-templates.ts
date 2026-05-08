@@ -116,8 +116,9 @@ export function useDeleteDeviceTemplate() {
       })
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (_data, templateId) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "device-templates"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "device-template", templateId] })
       toast.success("Device template deleted")
     },
     onError: (error) => {
