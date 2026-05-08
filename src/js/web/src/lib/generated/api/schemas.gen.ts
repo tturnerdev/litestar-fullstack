@@ -2945,6 +2945,8 @@ export const ConnectionCreateSchema = {
   properties: {
     authType: {
       default: "none",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     connectionType: {
@@ -3291,6 +3293,8 @@ export const ConnectionListSchema = {
 export const ConnectionUpdateSchema = {
   properties: {
     authType: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -5997,6 +6001,8 @@ export const IvrMenuCreateSchema = {
     },
     greetingType: {
       default: "none",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     invalidDestination: {
@@ -6164,6 +6170,8 @@ export const IvrMenuUpdateSchema = {
       ],
     },
     greetingType: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6685,6 +6693,8 @@ export const MusicOnHoldCreateSchema = {
   properties: {
     category: {
       default: "custom",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     description: {
@@ -6823,6 +6833,8 @@ export const MusicOnHoldListSchema = {
 export const MusicOnHoldUpdateSchema = {
   properties: {
     category: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8132,6 +8144,8 @@ export const RingGroupCreateSchema = {
     },
     strategy: {
       default: "ring_all",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
   },
@@ -8289,6 +8303,8 @@ export const RingGroupUpdateSchema = {
       ],
     },
     strategy: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -9694,6 +9710,7 @@ export const TicketCreateSchema = {
     priority: {
       default: "medium",
       maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     subject: {
@@ -9977,6 +9994,8 @@ export const TimeConditionCreateSchema = {
     },
     overrideMode: {
       default: "none",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     scheduleId: {
@@ -9999,6 +10018,8 @@ export const TimeConditionCreateSchema = {
 export const TimeConditionOverrideSchema = {
   properties: {
     overrideMode: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
   },
@@ -10037,6 +10058,8 @@ export const TimeConditionUpdateSchema = {
       ],
     },
     overrideMode: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",

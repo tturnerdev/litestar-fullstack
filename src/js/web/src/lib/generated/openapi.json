@@ -3034,6 +3034,8 @@
         "properties": {
           "authType": {
             "default": "none",
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "connectionType": {
@@ -3388,6 +3390,8 @@
       "ConnectionUpdate": {
         "properties": {
           "authType": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6143,6 +6147,8 @@
           },
           "greetingType": {
             "default": "none",
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "invalidDestination": {
@@ -6318,6 +6324,8 @@
             ]
           },
           "greetingType": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6852,6 +6860,8 @@
         "properties": {
           "category": {
             "default": "custom",
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "description": {
@@ -6989,6 +6999,8 @@
       "MusicOnHoldUpdate": {
         "properties": {
           "category": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -8345,6 +8357,8 @@
           },
           "strategy": {
             "default": "ring_all",
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -8505,6 +8519,8 @@
             ]
           },
           "strategy": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -10009,6 +10025,7 @@
           "priority": {
             "default": "medium",
             "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "subject": {
@@ -10298,6 +10315,8 @@
           },
           "overrideMode": {
             "default": "none",
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "scheduleId": {
@@ -10323,6 +10342,8 @@
       "TimeConditionOverride": {
         "properties": {
           "overrideMode": {
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -10362,6 +10383,8 @@
             ]
           },
           "overrideMode": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -13354,48 +13377,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -13418,6 +13399,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13743,48 +13766,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -13807,6 +13788,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14130,48 +14153,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -14194,6 +14175,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14511,48 +14534,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -14575,6 +14556,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
