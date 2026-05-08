@@ -54,13 +54,24 @@ class LocationService(service.SQLAlchemyAsyncRepositoryService[m.Location]):
 
     async def to_model_on_update(self, data: ModelDictT[m.Location], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Location]:
         data = service.schema_dump(data)
-        if service.is_dict(data) and "name" in data:
-            data["name"] = data["name"].strip()
-            existing = await self.repository.list(
-                CollectionFilter(field_name="name", values=[data["name"]]),
-            )
-            if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A location with this name already exists.")
+        if service.is_dict(data):
+            if "name" in data:
+                data["name"] = data["name"].strip()
+                existing = await self.repository.list(
+                    CollectionFilter(field_name="name", values=[data["name"]]),
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("A location with this name already exists.")
+            if "location_type" in data:
+                location_type = data["location_type"]
+                if location_type == m.LocationType.PHYSICAL:
+                    for field in ("address_line_1", "address_line_2", "city", "state", "postal_code", "country"):
+                        data.pop(field, None)
+                    if not data.get("parent_id"):
+                        msg = "Physical locations must have a parent_id."
+                        raise ValidationException(msg)
+                elif location_type == m.LocationType.ADDRESSED:
+                    data.pop("parent_id", None)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Location]) -> ModelDictT[m.Location]:
