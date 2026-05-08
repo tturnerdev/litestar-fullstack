@@ -8,6 +8,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class TeamRolePermission(CamelizedBaseStruct):
+    """Team role permission representation."""
+
     id: UUID
     team_id: UUID
     role: TeamRoles

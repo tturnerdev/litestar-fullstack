@@ -9,6 +9,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class SystemHealth(CamelizedBaseStruct, kw_only=True):
+    """System health check response."""
+
     app: str
     database_status: Literal["online", "offline"] = "offline"
     version: str = __version__

@@ -7,6 +7,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class TicketAttachment(CamelizedBaseStruct):
+    """Ticket file attachment representation."""
+
     id: UUID
     file_name: str
     file_size_bytes: int

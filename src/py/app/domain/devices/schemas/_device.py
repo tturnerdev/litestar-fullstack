@@ -90,6 +90,8 @@ class DeviceActionResponse(CamelizedBaseStruct):
 
 
 class DeviceLineAssignmentInput(CamelizedBaseStruct):
+    """Input for a single device line assignment."""
+
     line_number: int
     label: Annotated[str, Meta(min_length=1, max_length=50)]
     extension_id: UUID | None = None
@@ -98,4 +100,6 @@ class DeviceLineAssignmentInput(CamelizedBaseStruct):
 
 
 class SetDeviceLinesRequest(CamelizedBaseStruct):
+    """Request to set all line assignments on a device."""
+
     lines: list[DeviceLineAssignmentInput]

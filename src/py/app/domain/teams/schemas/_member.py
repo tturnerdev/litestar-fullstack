@@ -7,6 +7,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class TeamMember(CamelizedBaseStruct):
+    """Team member representation."""
+
     id: UUID
     user_id: UUID
     email: str

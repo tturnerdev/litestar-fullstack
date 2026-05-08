@@ -77,6 +77,8 @@ class User(CamelizedBaseStruct):
 
 
 class UserCreate(CamelizedBaseStruct):
+    """Schema for creating a user."""
+
     email: Annotated[str, Meta(min_length=1, max_length=255)]
     password: Annotated[str, Meta(min_length=1, max_length=255)]
     name: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
@@ -106,6 +108,8 @@ class UserCreate(CamelizedBaseStruct):
 
 
 class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
+    """Schema for updating a user."""
+
     email: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     password: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
@@ -144,6 +148,8 @@ class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
 
 
 class ProfileUpdate(CamelizedBaseStruct, omit_defaults=True):
+    """Schema for updating user profile."""
+
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     username: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
     phone: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET

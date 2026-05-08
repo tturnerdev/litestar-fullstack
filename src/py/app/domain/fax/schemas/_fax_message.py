@@ -11,6 +11,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class FaxMessage(CamelizedBaseStruct):
+    """Full fax message representation."""
+
     id: UUID
     fax_number_id: UUID
     direction: FaxDirection
@@ -28,6 +30,8 @@ class FaxMessage(CamelizedBaseStruct):
 
 
 class FaxMessageCreate(CamelizedBaseStruct):
+    """Schema for creating a fax message record."""
+
     fax_number_id: UUID
     direction: FaxDirection
     remote_number: Annotated[str, Meta(min_length=1, max_length=20)]
@@ -39,6 +43,8 @@ class FaxMessageCreate(CamelizedBaseStruct):
 
 
 class SendFax(CamelizedBaseStruct):
+    """Schema for sending a fax."""
+
     fax_number_id: UUID
     destination_number: Annotated[str, Meta(min_length=1, max_length=20)]
     team_id: UUID

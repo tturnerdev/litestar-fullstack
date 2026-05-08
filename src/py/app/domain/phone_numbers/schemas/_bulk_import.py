@@ -6,6 +6,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class BulkImportRowPreview(CamelizedBaseStruct, kw_only=True):
+    """Preview of a single row from bulk import."""
+
     row_number: int
     number: str
     user_id: str
@@ -16,11 +18,15 @@ class BulkImportRowPreview(CamelizedBaseStruct, kw_only=True):
 
 
 class BulkImportRowError(CamelizedBaseStruct, kw_only=True):
+    """Validation errors for a single import row."""
+
     row_number: int
     errors: list[str]
 
 
 class BulkImportPhoneNumberPreview(CamelizedBaseStruct, kw_only=True):
+    """Preview summary for a phone number bulk import."""
+
     valid_rows: list[BulkImportRowPreview]
     error_rows: list[BulkImportRowError]
     duplicate_numbers: list[str]
@@ -31,6 +37,8 @@ class BulkImportPhoneNumberPreview(CamelizedBaseStruct, kw_only=True):
 
 
 class BulkImportRowData(CamelizedBaseStruct, kw_only=True):
+    """A single phone number to import."""
+
     number: str
     user_id: UUID
     label: str | None = None
@@ -40,11 +48,15 @@ class BulkImportRowData(CamelizedBaseStruct, kw_only=True):
 
 
 class BulkImportPhoneNumberRequest(CamelizedBaseStruct, kw_only=True):
+    """Request payload for bulk phone number import."""
+
     rows: list[BulkImportRowData]
     skip_duplicates: bool = True
 
 
 class BulkImportPhoneNumberResult(CamelizedBaseStruct, kw_only=True):
+    """Result summary from bulk phone number import."""
+
     created_count: int
     skipped_count: int
     error_count: int

@@ -10,6 +10,8 @@ from app.lib.validation import validate_email, validate_name, validate_password,
 
 
 class AccountLogin(CamelizedBaseStruct):
+    """Login credentials."""
+
     username: Annotated[str, Meta(min_length=1, max_length=255)]
     password: Annotated[str, Meta(min_length=1, max_length=255)]
 
@@ -19,6 +21,8 @@ class AccountLogin(CamelizedBaseStruct):
 
 
 class AccountRegister(CamelizedBaseStruct):
+    """New account registration payload."""
+
     email: Annotated[str, Meta(min_length=1, max_length=255)]
     password: Annotated[str, Meta(min_length=1, max_length=255)]
     name: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
@@ -36,6 +40,8 @@ class AccountRegister(CamelizedBaseStruct):
 
 
 class PasswordUpdate(CamelizedBaseStruct):
+    """Schema for changing password."""
+
     current_password: Annotated[str, Meta(min_length=1, max_length=255)]
     new_password: Annotated[str, Meta(min_length=1, max_length=255)]
 
@@ -45,4 +51,6 @@ class PasswordUpdate(CamelizedBaseStruct):
 
 
 class PasswordVerify(CamelizedBaseStruct):
+    """Schema for verifying current password."""
+
     current_password: Annotated[str, Meta(min_length=1, max_length=255)]
