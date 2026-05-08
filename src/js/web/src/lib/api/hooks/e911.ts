@@ -149,6 +149,7 @@ export function useCreateE911Registration() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["e911"] })
+      toast.success("E911 registration created")
     },
     onError: (error) => {
       toast.error("Unable to create E911 registration", {

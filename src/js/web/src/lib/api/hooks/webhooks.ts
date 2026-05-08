@@ -110,6 +110,7 @@ export function useCreateWebhook() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] })
+      toast.success("Webhook created")
     },
     onError: (error) => {
       toast.error("Unable to create webhook", {

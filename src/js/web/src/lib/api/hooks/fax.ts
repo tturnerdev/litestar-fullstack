@@ -79,6 +79,7 @@ export function useCreateFaxNumber() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
+      toast.success("Fax number created")
     },
     onError: (error) => {
       toast.error("Unable to create fax number", {

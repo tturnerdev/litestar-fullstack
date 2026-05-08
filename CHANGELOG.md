@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.346.0 (2026-05-08)
+
+### Fixed
+- **Create mutation feedback consistency** — Added missing success toast notifications to `useCreateFaxNumber`, `useCreateE911Registration`, `useCreateWebhook`, and `useCreateSchedule` hooks, matching the pattern used by all other create mutations
+
 ## v0.345.0 (2026-05-08)
 
 ### Security
