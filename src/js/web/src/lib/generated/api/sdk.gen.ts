@@ -274,6 +274,9 @@ import type {
   CreateVoicemailBoxErrors,
   CreateVoicemailBoxResponses,
   CreateWebhookData,
+  CreateWebhookEndpointData,
+  CreateWebhookEndpointErrors,
+  CreateWebhookEndpointResponses,
   CreateWebhookErrors,
   CreateWebhookResponses,
   DeleteAttachmentData,
@@ -372,6 +375,9 @@ import type {
   DeleteVoicemailMessageErrors,
   DeleteVoicemailMessageResponses,
   DeleteWebhookData,
+  DeleteWebhookEndpointData,
+  DeleteWebhookEndpointErrors,
+  DeleteWebhookEndpointResponses,
   DeleteWebhookErrors,
   DeleteWebhookResponses,
   DisableMfaData,
@@ -509,6 +515,9 @@ import type {
   GetVoicemailSettingsErrors,
   GetVoicemailSettingsResponses,
   GetWebhookData,
+  GetWebhookEndpointData,
+  GetWebhookEndpointErrors,
+  GetWebhookEndpointResponses,
   GetWebhookErrors,
   GetWebhookResponses,
   GlobalSearchData,
@@ -638,6 +647,11 @@ import type {
   ListWebhookDeliveriesData,
   ListWebhookDeliveriesErrors,
   ListWebhookDeliveriesResponses,
+  ListWebhookEndpointsData,
+  ListWebhookEndpointsErrors,
+  ListWebhookEndpointsResponses,
+  ListWebhookEventTypesData,
+  ListWebhookEventTypesResponses,
   ListWebhooksData,
   ListWebhooksErrors,
   ListWebhooksResponses,
@@ -852,6 +866,9 @@ import type {
   UpdateVoicemailSettingsErrors,
   UpdateVoicemailSettingsResponses,
   UpdateWebhookData,
+  UpdateWebhookEndpointData,
+  UpdateWebhookEndpointErrors,
+  UpdateWebhookEndpointResponses,
   UpdateWebhookErrors,
   UpdateWebhookResponses,
   UploadAttachmentData,
@@ -5945,6 +5962,110 @@ export const createWebhook = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/webhooks",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListEndpoints
+ */
+export const listWebhookEndpoints = <ThrowOnError extends boolean = false>(
+  options?: Options<ListWebhookEndpointsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListWebhookEndpointsResponses,
+    ListWebhookEndpointsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/endpoints",
+    ...options,
+  });
+
+/**
+ * CreateEndpoint
+ */
+export const createWebhookEndpoint = <ThrowOnError extends boolean = false>(
+  options: Options<CreateWebhookEndpointData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateWebhookEndpointResponses,
+    CreateWebhookEndpointErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/endpoints",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListEventTypes
+ */
+export const listWebhookEventTypes = <ThrowOnError extends boolean = false>(
+  options?: Options<ListWebhookEventTypesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListWebhookEventTypesResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/endpoints/event-types",
+    ...options,
+  });
+
+/**
+ * DeleteEndpoint
+ */
+export const deleteWebhookEndpoint = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteWebhookEndpointData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteWebhookEndpointResponses,
+    DeleteWebhookEndpointErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/endpoints/{endpoint_id}",
+    ...options,
+  });
+
+/**
+ * GetEndpoint
+ */
+export const getWebhookEndpoint = <ThrowOnError extends boolean = false>(
+  options: Options<GetWebhookEndpointData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetWebhookEndpointResponses,
+    GetWebhookEndpointErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/endpoints/{endpoint_id}",
+    ...options,
+  });
+
+/**
+ * UpdateEndpoint
+ */
+export const updateWebhookEndpoint = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateWebhookEndpointData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateWebhookEndpointResponses,
+    UpdateWebhookEndpointErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/endpoints/{endpoint_id}",
     ...options,
     headers: {
       "Content-Type": "application/json",

@@ -105,6 +105,9 @@ import type {
   CreateVoicemailBoxErrors,
   CreateVoicemailBoxResponses,
   CreateWebhookData,
+  CreateWebhookEndpointData,
+  CreateWebhookEndpointErrors,
+  CreateWebhookEndpointResponses,
   CreateWebhookErrors,
   CreateWebhookResponses,
   DeleteReadNotificationsData,
@@ -133,6 +136,8 @@ import type {
   InitiateMfaSetupResponses,
   ListActiveTasksData,
   ListActiveTasksResponses,
+  ListWebhookEventTypesData,
+  ListWebhookEventTypesResponses,
   ManageCreatePhoneNumberData,
   ManageCreatePhoneNumberErrors,
   ManageCreatePhoneNumberResponses,
@@ -189,6 +194,7 @@ export type OperationName =
   | 'create_call_record'
   | 'create_connection'
   | 'create_device'
+  | 'create_endpoint'
   | 'create_extension'
   | 'create_fax_number'
   | 'create_ivr_menu'
@@ -233,6 +239,8 @@ export type OperationName =
   | 'list_call_records'
   | 'list_connections'
   | 'list_devices_api_devices'
+  | 'list_endpoints'
+  | 'list_event_types'
   | 'list_extensions'
   | 'list_extensions_api_voice_extensions'
   | 'list_fax_messages'
@@ -286,6 +294,7 @@ export interface OperationDataTypes {
   'create_call_record': CreateCallRecordData
   'create_connection': CreateConnectionData
   'create_device': CreateDeviceData
+  'create_endpoint': CreateWebhookEndpointData
   'create_extension': CreateExtensionData
   'create_fax_number': CreateFaxNumberData
   'create_ivr_menu': CreateIvrMenuData
@@ -330,6 +339,8 @@ export interface OperationDataTypes {
   'list_call_records': CreateCallRecordData
   'list_connections': CreateConnectionData
   'list_devices_api_devices': CreateDeviceData
+  'list_endpoints': CreateWebhookEndpointData
+  'list_event_types': ListWebhookEventTypesData
   'list_extensions': AdminListExtensionsData
   'list_extensions_api_voice_extensions': CreateExtensionData
   'list_fax_messages': AdminListFaxMessagesData
@@ -384,6 +395,7 @@ export interface OperationResponseTypes {
   'create_call_record': CreateCallRecordResponses
   'create_connection': CreateConnectionResponses
   'create_device': CreateDeviceResponses
+  'create_endpoint': CreateWebhookEndpointResponses
   'create_extension': CreateExtensionResponses
   'create_fax_number': CreateFaxNumberResponses
   'create_ivr_menu': CreateIvrMenuResponses
@@ -428,6 +440,8 @@ export interface OperationResponseTypes {
   'list_call_records': CreateCallRecordResponses
   'list_connections': CreateConnectionResponses
   'list_devices_api_devices': CreateDeviceResponses
+  'list_endpoints': CreateWebhookEndpointResponses
+  'list_event_types': ListWebhookEventTypesResponses
   'list_extensions': AdminListExtensionsResponses
   'list_extensions_api_voice_extensions': CreateExtensionResponses
   'list_fax_messages': AdminListFaxMessagesResponses
@@ -482,6 +496,7 @@ export interface OperationErrorTypes {
   'create_call_record': CreateCallRecordErrors
   'create_connection': CreateConnectionErrors
   'create_device': CreateDeviceErrors
+  'create_endpoint': CreateWebhookEndpointErrors
   'create_extension': CreateExtensionErrors
   'create_fax_number': CreateFaxNumberErrors
   'create_ivr_menu': CreateIvrMenuErrors
@@ -526,6 +541,8 @@ export interface OperationErrorTypes {
   'list_call_records': CreateCallRecordErrors
   'list_connections': CreateConnectionErrors
   'list_devices_api_devices': CreateDeviceErrors
+  'list_endpoints': CreateWebhookEndpointErrors
+  'list_event_types': never
   'list_extensions': never
   'list_extensions_api_voice_extensions': CreateExtensionErrors
   'list_fax_messages': never

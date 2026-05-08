@@ -2795,6 +2795,73 @@ export type WebhookDetail = {
 };
 
 /**
+ * WebhookEndpoint
+ */
+export type WebhookEndpoint = {
+  createdAt?: string | null;
+  description?: string | null;
+  events?: Array<string>;
+  headers?: {
+    [key: string]: unknown;
+  } | null;
+  id: string;
+  isActive?: boolean;
+  teamId?: string | null;
+  updatedAt?: string | null;
+  url: string;
+};
+
+/**
+ * WebhookEndpointCreate
+ */
+export type WebhookEndpointCreate = {
+  description?: string | null;
+  events?: Array<string>;
+  headers?: {
+    [key: string]: unknown;
+  } | null;
+  isActive?: boolean;
+  secret?: string | null;
+  teamId?: string | null;
+  url: string;
+};
+
+/**
+ * WebhookEndpointList
+ */
+export type WebhookEndpointList = {
+  createdAt?: string | null;
+  description?: string | null;
+  events?: Array<string>;
+  id: string;
+  isActive?: boolean;
+  teamId?: string | null;
+  url: string;
+};
+
+/**
+ * WebhookEndpointUpdate
+ */
+export type WebhookEndpointUpdate = {
+  description?: string | null;
+  events?: Array<string> | null;
+  headers?: {
+    [key: string]: unknown;
+  } | null;
+  isActive?: boolean | null;
+  secret?: string | null;
+  url?: string | null;
+};
+
+/**
+ * WebhookEventTypeInfo
+ */
+export type WebhookEventTypeInfo = {
+  description: string;
+  event: string;
+};
+
+/**
  * WebhookList
  */
 export type WebhookList = {
@@ -3232,9 +3299,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3311,9 +3378,9 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3379,9 +3446,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3459,9 +3526,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -5363,9 +5430,9 @@ export type GetCallsByExtensionData = {
   body?: never;
   path?: never;
   query: {
-    teamId: string;
-    startDate: string;
-    endDate: string;
+    team_id: string;
+    start_date: string;
+    end_date: string;
   };
   url: "/api/analytics/by-extension";
 };
@@ -5426,14 +5493,14 @@ export type ListCallRecordsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    startDate?: string | null;
-    endDate?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
     direction?: string | null;
     disposition?: string | null;
     source?: string | null;
     destination?: string | null;
-    minDuration?: number | null;
-    maxDuration?: number | null;
+    min_duration?: number | null;
+    max_duration?: number | null;
   };
   url: "/api/analytics/cdrs";
 };
@@ -5521,8 +5588,8 @@ export type ExportCallRecordsData = {
   body?: never;
   path?: never;
   query?: {
-    startDate?: string | null;
-    endDate?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
     direction?: string | null;
     disposition?: string | null;
   };
@@ -5604,9 +5671,9 @@ export type GetCallSummaryData = {
   body?: never;
   path?: never;
   query: {
-    teamId: string;
-    startDate: string;
-    endDate: string;
+    team_id: string;
+    start_date: string;
+    end_date: string;
   };
   url: "/api/analytics/summary";
 };
@@ -5644,9 +5711,9 @@ export type GetCallVolumeData = {
   body?: never;
   path?: never;
   query: {
-    teamId: string;
-    startDate: string;
-    endDate: string;
+    team_id: string;
+    start_date: string;
+    end_date: string;
     interval?: string;
   };
   url: "/api/analytics/volume";
@@ -15591,6 +15658,248 @@ export type CreateWebhookResponses = {
 
 export type CreateWebhookResponse =
   CreateWebhookResponses[keyof CreateWebhookResponses];
+
+export type ListWebhookEndpointsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/webhooks/endpoints";
+};
+
+export type ListWebhookEndpointsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListWebhookEndpointsError =
+  ListWebhookEndpointsErrors[keyof ListWebhookEndpointsErrors];
+
+export type ListWebhookEndpointsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<WebhookEndpointList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListWebhookEndpointsResponse =
+  ListWebhookEndpointsResponses[keyof ListWebhookEndpointsResponses];
+
+export type CreateWebhookEndpointData = {
+  body: WebhookEndpointCreate;
+  path?: never;
+  query?: never;
+  url: "/api/webhooks/endpoints";
+};
+
+export type CreateWebhookEndpointErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateWebhookEndpointError =
+  CreateWebhookEndpointErrors[keyof CreateWebhookEndpointErrors];
+
+export type CreateWebhookEndpointResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: WebhookEndpoint;
+};
+
+export type CreateWebhookEndpointResponse =
+  CreateWebhookEndpointResponses[keyof CreateWebhookEndpointResponses];
+
+export type ListWebhookEventTypesData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/webhooks/endpoints/event-types";
+};
+
+export type ListWebhookEventTypesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<WebhookEventTypeInfo>;
+};
+
+export type ListWebhookEventTypesResponse =
+  ListWebhookEventTypesResponses[keyof ListWebhookEventTypesResponses];
+
+export type DeleteWebhookEndpointData = {
+  body?: never;
+  path: {
+    /**
+     * Endpoint ID
+     */
+    endpoint_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/endpoints/{endpoint_id}";
+};
+
+export type DeleteWebhookEndpointErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteWebhookEndpointError =
+  DeleteWebhookEndpointErrors[keyof DeleteWebhookEndpointErrors];
+
+export type DeleteWebhookEndpointResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteWebhookEndpointResponse =
+  DeleteWebhookEndpointResponses[keyof DeleteWebhookEndpointResponses];
+
+export type GetWebhookEndpointData = {
+  body?: never;
+  path: {
+    /**
+     * Endpoint ID
+     */
+    endpoint_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/endpoints/{endpoint_id}";
+};
+
+export type GetWebhookEndpointErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetWebhookEndpointError =
+  GetWebhookEndpointErrors[keyof GetWebhookEndpointErrors];
+
+export type GetWebhookEndpointResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: WebhookEndpoint;
+};
+
+export type GetWebhookEndpointResponse =
+  GetWebhookEndpointResponses[keyof GetWebhookEndpointResponses];
+
+export type UpdateWebhookEndpointData = {
+  body: WebhookEndpointUpdate;
+  path: {
+    /**
+     * Endpoint ID
+     */
+    endpoint_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/endpoints/{endpoint_id}";
+};
+
+export type UpdateWebhookEndpointErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateWebhookEndpointError =
+  UpdateWebhookEndpointErrors[keyof UpdateWebhookEndpointErrors];
+
+export type UpdateWebhookEndpointResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: WebhookEndpoint;
+};
+
+export type UpdateWebhookEndpointResponse =
+  UpdateWebhookEndpointResponses[keyof UpdateWebhookEndpointResponses];
 
 export type DeleteWebhookData = {
   body?: never;

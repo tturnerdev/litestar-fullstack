@@ -100,6 +100,7 @@ import {
   createUser,
   createVoicemailBox,
   createWebhook,
+  createWebhookEndpoint,
   deleteAttachment,
   deleteCallQueue,
   deleteCallQueueMember,
@@ -133,6 +134,7 @@ import {
   deleteVoicemailMessage,
   deleteVoicemailMessageById,
   deleteWebhook,
+  deleteWebhookEndpoint,
   disableMfa,
   exportCallRecords,
   forgotPassword,
@@ -182,6 +184,7 @@ import {
   getVoicemailMessageById,
   getVoicemailSettings,
   getWebhook,
+  getWebhookEndpoint,
   globalSearch,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
@@ -225,6 +228,8 @@ import {
   listVoicemailBoxMessages,
   listVoicemailMessages,
   listWebhookDeliveries,
+  listWebhookEndpoints,
+  listWebhookEventTypes,
   listWebhooks,
   lookupDeviceTemplate,
   manageCreatePhoneNumber,
@@ -300,6 +305,7 @@ import {
   updateVoicemailMessage,
   updateVoicemailSettings,
   updateWebhook,
+  updateWebhookEndpoint,
   uploadAttachment,
   validateE911Registration,
   validateResetToken,
@@ -568,6 +574,9 @@ import type {
   CreateVoicemailBoxError,
   CreateVoicemailBoxResponse,
   CreateWebhookData,
+  CreateWebhookEndpointData,
+  CreateWebhookEndpointError,
+  CreateWebhookEndpointResponse,
   CreateWebhookError,
   CreateWebhookResponse,
   DeleteAttachmentData,
@@ -666,6 +675,9 @@ import type {
   DeleteVoicemailMessageError,
   DeleteVoicemailMessageResponse,
   DeleteWebhookData,
+  DeleteWebhookEndpointData,
+  DeleteWebhookEndpointError,
+  DeleteWebhookEndpointResponse,
   DeleteWebhookError,
   DeleteWebhookResponse,
   DisableMfaData,
@@ -803,6 +815,9 @@ import type {
   GetVoicemailSettingsError,
   GetVoicemailSettingsResponse,
   GetWebhookData,
+  GetWebhookEndpointData,
+  GetWebhookEndpointError,
+  GetWebhookEndpointResponse,
   GetWebhookError,
   GetWebhookResponse,
   GlobalSearchData,
@@ -932,6 +947,11 @@ import type {
   ListWebhookDeliveriesData,
   ListWebhookDeliveriesError,
   ListWebhookDeliveriesResponse,
+  ListWebhookEndpointsData,
+  ListWebhookEndpointsError,
+  ListWebhookEndpointsResponse,
+  ListWebhookEventTypesData,
+  ListWebhookEventTypesResponse,
   ListWebhooksData,
   ListWebhooksError,
   ListWebhooksResponse,
@@ -1146,6 +1166,9 @@ import type {
   UpdateVoicemailSettingsError,
   UpdateVoicemailSettingsResponse,
   UpdateWebhookData,
+  UpdateWebhookEndpointData,
+  UpdateWebhookEndpointError,
+  UpdateWebhookEndpointResponse,
   UpdateWebhookError,
   UpdateWebhookResponse,
   UploadAttachmentData,
@@ -8989,6 +9012,171 @@ export const createWebhookMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await createWebhook({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listWebhookEndpointsQueryKey = (
+  options?: Options<ListWebhookEndpointsData>,
+) => createQueryKey("listWebhookEndpoints", options);
+
+/**
+ * ListEndpoints
+ */
+export const listWebhookEndpointsOptions = (
+  options?: Options<ListWebhookEndpointsData>,
+) =>
+  queryOptions<
+    ListWebhookEndpointsResponse,
+    ListWebhookEndpointsError,
+    ListWebhookEndpointsResponse,
+    ReturnType<typeof listWebhookEndpointsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listWebhookEndpoints({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listWebhookEndpointsQueryKey(options),
+  });
+
+/**
+ * CreateEndpoint
+ */
+export const createWebhookEndpointMutation = (
+  options?: Partial<Options<CreateWebhookEndpointData>>,
+): UseMutationOptions<
+  CreateWebhookEndpointResponse,
+  CreateWebhookEndpointError,
+  Options<CreateWebhookEndpointData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateWebhookEndpointResponse,
+    CreateWebhookEndpointError,
+    Options<CreateWebhookEndpointData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createWebhookEndpoint({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listWebhookEventTypesQueryKey = (
+  options?: Options<ListWebhookEventTypesData>,
+) => createQueryKey("listWebhookEventTypes", options);
+
+/**
+ * ListEventTypes
+ */
+export const listWebhookEventTypesOptions = (
+  options?: Options<ListWebhookEventTypesData>,
+) =>
+  queryOptions<
+    ListWebhookEventTypesResponse,
+    DefaultError,
+    ListWebhookEventTypesResponse,
+    ReturnType<typeof listWebhookEventTypesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listWebhookEventTypes({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listWebhookEventTypesQueryKey(options),
+  });
+
+/**
+ * DeleteEndpoint
+ */
+export const deleteWebhookEndpointMutation = (
+  options?: Partial<Options<DeleteWebhookEndpointData>>,
+): UseMutationOptions<
+  DeleteWebhookEndpointResponse,
+  DeleteWebhookEndpointError,
+  Options<DeleteWebhookEndpointData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteWebhookEndpointResponse,
+    DeleteWebhookEndpointError,
+    Options<DeleteWebhookEndpointData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteWebhookEndpoint({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getWebhookEndpointQueryKey = (
+  options: Options<GetWebhookEndpointData>,
+) => createQueryKey("getWebhookEndpoint", options);
+
+/**
+ * GetEndpoint
+ */
+export const getWebhookEndpointOptions = (
+  options: Options<GetWebhookEndpointData>,
+) =>
+  queryOptions<
+    GetWebhookEndpointResponse,
+    GetWebhookEndpointError,
+    GetWebhookEndpointResponse,
+    ReturnType<typeof getWebhookEndpointQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getWebhookEndpoint({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getWebhookEndpointQueryKey(options),
+  });
+
+/**
+ * UpdateEndpoint
+ */
+export const updateWebhookEndpointMutation = (
+  options?: Partial<Options<UpdateWebhookEndpointData>>,
+): UseMutationOptions<
+  UpdateWebhookEndpointResponse,
+  UpdateWebhookEndpointError,
+  Options<UpdateWebhookEndpointData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateWebhookEndpointResponse,
+    UpdateWebhookEndpointError,
+    Options<UpdateWebhookEndpointData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateWebhookEndpoint({
         ...options,
         ...fnOptions,
         throwOnError: true,

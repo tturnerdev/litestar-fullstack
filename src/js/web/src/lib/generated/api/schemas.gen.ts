@@ -10360,6 +10360,291 @@ export const WebhookDetailSchema = {
   type: "object",
 } as const;
 
+export const WebhookEndpointSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    events: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    headers: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      type: "string",
+    },
+  },
+  required: ["id", "url"],
+  title: "WebhookEndpoint",
+  type: "object",
+} as const;
+
+export const WebhookEndpointCreateSchema = {
+  properties: {
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    events: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    headers: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    secret: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      type: "string",
+    },
+  },
+  required: ["url"],
+  title: "WebhookEndpointCreate",
+  type: "object",
+} as const;
+
+export const WebhookEndpointListSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    events: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      type: "string",
+    },
+  },
+  required: ["id", "url"],
+  title: "WebhookEndpointList",
+  type: "object",
+} as const;
+
+export const WebhookEndpointUpdateSchema = {
+  properties: {
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    events: {
+      oneOf: [
+        {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    headers: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    secret: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "WebhookEndpointUpdate",
+  type: "object",
+} as const;
+
+export const WebhookEventTypeInfoSchema = {
+  properties: {
+    description: {
+      type: "string",
+    },
+    event: {
+      type: "string",
+    },
+  },
+  required: ["description", "event"],
+  title: "WebhookEventTypeInfo",
+  type: "object",
+} as const;
+
 export const WebhookListSchema = {
   properties: {
     createdAt: {

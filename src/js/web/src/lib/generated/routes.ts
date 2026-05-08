@@ -31,6 +31,7 @@ export type RouteName =
   | 'create_call_record'
   | 'create_connection'
   | 'create_device'
+  | 'create_endpoint'
   | 'create_entry'
   | 'create_extension'
   | 'create_fax_email_route'
@@ -62,6 +63,7 @@ export type RouteName =
   | 'delete_call_queue'
   | 'delete_connection'
   | 'delete_device'
+  | 'delete_endpoint'
   | 'delete_entry'
   | 'delete_extension'
   | 'delete_fax_email_route'
@@ -113,6 +115,7 @@ export type RouteName =
   | 'get_device_data'
   | 'get_device_screenshot'
   | 'get_dnd_settings'
+  | 'get_endpoint'
   | 'get_extension'
   | 'get_extension_data'
   | 'get_fax_message'
@@ -178,7 +181,9 @@ export type RouteName =
   | 'list_device_lines'
   | 'list_devices'
   | 'list_devices_api_devices'
+  | 'list_endpoints'
   | 'list_entries'
+  | 'list_event_types'
   | 'list_extension_devices'
   | 'list_extensions'
   | 'list_extensions_api_voice_extensions'
@@ -275,6 +280,7 @@ export type RouteName =
   | 'update_connection'
   | 'update_device'
   | 'update_dnd_settings'
+  | 'update_endpoint'
   | 'update_entry'
   | 'update_extension'
   | 'update_fax_email_route'
@@ -361,6 +367,7 @@ export interface RoutePathParams {
   'create_call_record': Record<string, never>;
   'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_endpoint': Record<string, never>;
   'create_entry': {
     schedule_id: UUID;
   };
@@ -417,6 +424,9 @@ export interface RoutePathParams {
   };
   'delete_device': {
     device_id: UUID;
+  };
+  'delete_endpoint': {
+    endpoint_id: UUID;
   };
   'delete_entry': {
     entry_id: UUID;
@@ -563,6 +573,9 @@ export interface RoutePathParams {
   'get_dnd_settings': {
     ext_id: UUID;
   };
+  'get_endpoint': {
+    endpoint_id: UUID;
+  };
   'get_extension': {
     ext_id: UUID;
   };
@@ -705,9 +718,11 @@ export interface RoutePathParams {
   };
   'list_devices': Record<string, never>;
   'list_devices_api_devices': Record<string, never>;
+  'list_endpoints': Record<string, never>;
   'list_entries': {
     schedule_id: UUID;
   };
+  'list_event_types': Record<string, never>;
   'list_extension_devices': {
     ext_id: UUID;
   };
@@ -881,6 +896,9 @@ export interface RoutePathParams {
   };
   'update_dnd_settings': {
     ext_id: UUID;
+  };
+  'update_endpoint': {
+    endpoint_id: UUID;
   };
   'update_entry': {
     entry_id: UUID;
@@ -1058,6 +1076,7 @@ export interface RouteQueryParams {
   'create_call_record': Record<string, never>;
   'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_endpoint': Record<string, never>;
   'create_entry': Record<string, never>;
   'create_extension': Record<string, never>;
   'create_fax_email_route': Record<string, never>;
@@ -1089,6 +1108,7 @@ export interface RouteQueryParams {
   'delete_call_queue': Record<string, never>;
   'delete_connection': Record<string, never>;
   'delete_device': Record<string, never>;
+  'delete_endpoint': Record<string, never>;
   'delete_entry': Record<string, never>;
   'delete_extension': Record<string, never>;
   'delete_fax_email_route': Record<string, never>;
@@ -1130,8 +1150,8 @@ export interface RouteQueryParams {
   'export_call_records': {
     direction?: string;
     disposition?: string;
-    endDate?: DateTime;
-    startDate?: DateTime;
+    end_date?: DateTime;
+    start_date?: DateTime;
   };
   'export_logs': {
     action?: string;
@@ -1158,9 +1178,9 @@ export interface RouteQueryParams {
   };
   'get_attachment': Record<string, never>;
   'get_by_extension': {
-    endDate: DateTime;
-    startDate: DateTime;
-    teamId: UUID;
+    end_date: DateTime;
+    start_date: DateTime;
+    team_id: UUID;
   };
   'get_call_queue': Record<string, never>;
   'get_call_record': Record<string, never>;
@@ -1171,6 +1191,7 @@ export interface RouteQueryParams {
   };
   'get_device_screenshot': Record<string, never>;
   'get_dnd_settings': Record<string, never>;
+  'get_endpoint': Record<string, never>;
   'get_extension': Record<string, never>;
   'get_extension_data': {
     refresh?: boolean;
@@ -1210,9 +1231,9 @@ export interface RouteQueryParams {
   'get_stats_api_admin_support_stats': Record<string, never>;
   'get_stats_api_admin_voice_stats': Record<string, never>;
   'get_summary': {
-    endDate: DateTime;
-    startDate: DateTime;
-    teamId: UUID;
+    end_date: DateTime;
+    start_date: DateTime;
+    team_id: UUID;
   };
   'get_system_status': Record<string, never>;
   'get_tag': Record<string, never>;
@@ -1268,10 +1289,10 @@ export interface RouteQueryParams {
   'get_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
   'get_voicemail_settings': Record<string, never>;
   'get_volume': {
-    endDate: DateTime;
+    end_date: DateTime;
     interval?: string;
-    startDate: DateTime;
-    teamId: UUID;
+    start_date: DateTime;
+    team_id: UUID;
   };
   'get_webhook': Record<string, never>;
   'import_devices': Record<string, never>;
@@ -1320,17 +1341,17 @@ export interface RouteQueryParams {
     destination?: string;
     direction?: string;
     disposition?: string;
-    endDate?: DateTime;
+    end_date?: DateTime;
     ids?: string[];
-    maxDuration?: number;
-    minDuration?: number;
+    max_duration?: number;
+    min_duration?: number;
     orderBy?: string;
     pageSize?: number;
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
     source?: string;
-    startDate?: DateTime;
+    start_date?: DateTime;
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
@@ -1376,7 +1397,19 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_endpoints': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_entries': Record<string, never>;
+  'list_event_types': Record<string, never>;
   'list_extension_devices': Record<string, never>;
   'list_extensions': Record<string, never>;
   'list_extensions_api_voice_extensions': {
@@ -1904,6 +1937,7 @@ export interface RouteQueryParams {
   'update_connection': Record<string, never>;
   'update_device': Record<string, never>;
   'update_dnd_settings': Record<string, never>;
+  'update_endpoint': Record<string, never>;
   'update_entry': Record<string, never>;
   'update_extension': Record<string, never>;
   'update_fax_email_route': Record<string, never>;
@@ -2060,6 +2094,13 @@ export const routeDefinitions = {
   },
   'create_device': {
     path: '/api/devices',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_endpoint': {
+    path: '/api/webhooks/endpoints',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -2280,6 +2321,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['device_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_endpoint': {
+    path: '/api/webhooks/endpoints/{endpoint_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['endpoint_id'] as const,
     queryParams: [] as const,
   },
   'delete_entry': {
@@ -2553,7 +2601,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['direction', 'disposition', 'endDate', 'startDate'] as const,
+    queryParams: ['direction', 'disposition', 'end_date', 'start_date'] as const,
   },
   'export_logs': {
     path: '/api/admin/audit/export',
@@ -2588,7 +2636,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['endDate', 'startDate', 'teamId'] as const,
+    queryParams: ['end_date', 'start_date', 'team_id'] as const,
   },
   'get_call_queue': {
     path: '/api/call-queues/{call_queue_id}',
@@ -2637,6 +2685,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_endpoint': {
+    path: '/api/webhooks/endpoints/{endpoint_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['endpoint_id'] as const,
     queryParams: [] as const,
   },
   'get_extension': {
@@ -2833,7 +2888,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['endDate', 'startDate', 'teamId'] as const,
+    queryParams: ['end_date', 'start_date', 'team_id'] as const,
   },
   'get_system_status': {
     path: '/api/admin/system/status',
@@ -2987,7 +3042,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['endDate', 'interval', 'startDate', 'teamId'] as const,
+    queryParams: ['end_date', 'interval', 'start_date', 'team_id'] as const,
   },
   'get_webhook': {
     path: '/api/webhooks/{webhook_id}',
@@ -3057,7 +3112,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'destination', 'direction', 'disposition', 'endDate', 'ids', 'maxDuration', 'minDuration', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'source', 'startDate', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'destination', 'direction', 'disposition', 'end_date', 'ids', 'max_duration', 'min_duration', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'source', 'start_date', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_connections': {
     path: '/api/connections',
@@ -3094,11 +3149,25 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_endpoints': {
+    path: '/api/webhooks/endpoints',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_entries': {
     path: '/api/schedules/{schedule_id}/entries',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['schedule_id'] as const,
+    queryParams: [] as const,
+  },
+  'list_event_types': {
+    path: '/api/webhooks/endpoints/event-types',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'list_extension_devices': {
@@ -3774,6 +3843,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_endpoint': {
+    path: '/api/webhooks/endpoints/{endpoint_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['endpoint_id'] as const,
     queryParams: [] as const,
   },
   'update_entry': {
