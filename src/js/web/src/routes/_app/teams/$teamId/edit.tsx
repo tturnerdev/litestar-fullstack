@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
@@ -190,6 +191,7 @@ function EditTeamPage() {
     justSubmittedRef.current = true
     updateTeam.mutate(payload, {
       onSuccess: () => {
+        toast.success("Team updated")
         router.navigate({ to: "/teams/$teamId", params: { teamId } })
       },
       onError: () => {

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, ChevronRight, Globe, Headphones, Info, KeyRound, Loader2, Lock, Network, Phone, Plug, ShieldCheck } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -497,6 +498,7 @@ function EditConnectionPage() {
     justSubmittedRef.current = true
     updateConnection.mutate(payload, {
       onSuccess: () => {
+        toast.success("Connection updated")
         router.navigate({
           to: "/connections/$connectionId",
           params: { connectionId },

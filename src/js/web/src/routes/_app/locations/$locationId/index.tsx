@@ -132,6 +132,7 @@ function LocationDetailPage() {
     }
     updateLocation.mutate(payload, {
       onSuccess: () => {
+        toast.success("Location updated")
         setEditing(false)
       },
     })
