@@ -39,6 +39,8 @@ class PhoneNumberDetail(CamelizedBaseStruct, kw_only=True):
 
 
 class PhoneNumberCreate(CamelizedBaseStruct, kw_only=True):
+    """Schema for creating a phone number."""
+
     number: Annotated[str, Meta(min_length=1, max_length=20)]
     user_id: UUID
     label: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
@@ -49,6 +51,8 @@ class PhoneNumberCreate(CamelizedBaseStruct, kw_only=True):
 
 
 class PhoneNumberUpdate(CamelizedBaseStruct, gc=False, omit_defaults=True):
+    """Schema for updating a phone number."""
+
     label: Annotated[str, Meta(min_length=1, max_length=100)] | UnsetType | None = UNSET
     number_type: Annotated[str, Meta(min_length=1, max_length=50)] | UnsetType = UNSET
     caller_id_name: Annotated[str, Meta(min_length=1, max_length=50)] | UnsetType | None = UNSET

@@ -20,6 +20,8 @@ class TicketUser(CamelizedBaseStruct):
 
 
 class Ticket(CamelizedBaseStruct):
+    """Full support ticket representation."""
+
     id: UUID
     ticket_number: str
     subject: str
@@ -39,16 +41,20 @@ class Ticket(CamelizedBaseStruct):
 
 
 class TicketCreate(CamelizedBaseStruct):
+    """Schema for creating a support ticket."""
+
     subject: Annotated[str, Meta(min_length=1, max_length=255)]
     body_markdown: Annotated[str, Meta(min_length=1, max_length=50000)]
     priority: Annotated[str, Meta(min_length=1, max_length=50)] = "medium"
-    category: Annotated[str, Meta(max_length=100)] | None = None
+    category: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     team_id: UUID | None = None
 
 
 class TicketUpdate(CamelizedBaseStruct, omit_defaults=True):
+    """Schema for updating a support ticket."""
+
     subject: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     status: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     priority: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    category: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    category: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     assigned_to_id: UUID | msgspec.UnsetType | None = msgspec.UNSET

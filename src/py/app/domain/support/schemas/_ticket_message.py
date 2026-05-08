@@ -12,6 +12,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class TicketMessage(CamelizedBaseStruct):
+    """Full ticket message representation."""
+
     id: UUID
     body_markdown: str
     body_html: str
@@ -24,5 +26,7 @@ class TicketMessage(CamelizedBaseStruct):
 
 
 class TicketMessageCreate(CamelizedBaseStruct):
+    """Schema for creating a ticket message."""
+
     body_markdown: Annotated[str, Meta(min_length=1, max_length=50000)]
     is_internal_note: bool = False

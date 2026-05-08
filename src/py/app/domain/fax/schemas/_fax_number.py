@@ -11,6 +11,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class FaxNumber(CamelizedBaseStruct):
+    """Full fax number representation."""
+
     id: UUID
     user_id: UUID
     number: str
@@ -22,6 +24,8 @@ class FaxNumber(CamelizedBaseStruct):
 
 
 class FaxNumberCreate(CamelizedBaseStruct):
+    """Schema for creating a fax number."""
+
     number: Annotated[str, Meta(min_length=1, max_length=20)]
     label: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     is_active: bool = True
@@ -29,5 +33,7 @@ class FaxNumberCreate(CamelizedBaseStruct):
 
 
 class FaxNumberUpdate(CamelizedBaseStruct, omit_defaults=True):
+    """Schema for updating a fax number."""
+
     label: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

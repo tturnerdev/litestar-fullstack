@@ -11,6 +11,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class E911Registration(CamelizedBaseStruct, kw_only=True):
+    """Full E911 registration representation."""
+
     id: UUID
     team_id: UUID
     address_line_1: str
@@ -32,6 +34,8 @@ class E911Registration(CamelizedBaseStruct, kw_only=True):
 
 
 class E911RegistrationCreate(CamelizedBaseStruct, kw_only=True):
+    """Schema for creating an E911 registration."""
+
     team_id: UUID
     address_line_1: Annotated[str, Meta(min_length=1, max_length=255)]
     city: Annotated[str, Meta(min_length=1, max_length=255)]
@@ -40,14 +44,16 @@ class E911RegistrationCreate(CamelizedBaseStruct, kw_only=True):
     country: Annotated[str, Meta(min_length=2, max_length=2)] = "US"
     phone_number_id: UUID | None = None
     location_id: UUID | None = None
-    address_line_2: Annotated[str, Meta(max_length=255)] | None = None
+    address_line_2: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
 
 
 class E911RegistrationUpdate(CamelizedBaseStruct, omit_defaults=True):
+    """Schema for updating an E911 registration."""
+
     phone_number_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     location_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     address_line_1: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    address_line_2: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    address_line_2: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     city: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     state: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     postal_code: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType = msgspec.UNSET
@@ -55,6 +61,8 @@ class E911RegistrationUpdate(CamelizedBaseStruct, omit_defaults=True):
 
 
 class UnregisteredPhoneNumber(CamelizedBaseStruct, kw_only=True):
+    """Phone number without an E911 registration."""
+
     id: UUID
     number: str
     number_type: str
