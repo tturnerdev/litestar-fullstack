@@ -2564,6 +2564,7 @@ export const CallRecordCreateSchema = {
   properties: {
     billableSeconds: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
     callDate: {
@@ -2612,16 +2613,23 @@ export const CallRecordCreateSchema = {
       ],
     },
     destination: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     direction: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     disposition: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     duration: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
     notes: {
@@ -2645,6 +2653,8 @@ export const CallRecordCreateSchema = {
       ],
     },
     source: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     teamId: {
