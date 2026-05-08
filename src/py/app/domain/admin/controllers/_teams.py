@@ -157,7 +157,7 @@ class AdminTeamsController(Controller):
         """
         team = await teams_service.get(team_id)
         team_name = team.name
-        await teams_service.delete(team.id)
+        await teams_service.delete(team.id, auto_commit=True)
         await log_audit(
             audit_service,
             action="admin.team.deleted",

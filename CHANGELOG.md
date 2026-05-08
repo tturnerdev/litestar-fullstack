@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.311.0 (2026-05-08)
+
+### Security
+- **E911 phone number team validation** — `list_unregistered_e911` now validates the caller belongs to the requested team (or is superuser), preventing cross-team enumeration
+
+### Fixed
+- **Consistent `auto_commit` on deletes** — Phone number, admin user, and admin team delete operations now explicitly commit, matching their create/update counterparts
+- **GettingStarted loading flash** — Component now hides during initial data load instead of briefly showing "0 of 4 steps completed"
+
 ## v0.310.0 (2026-05-08)
 
 ### Fixed

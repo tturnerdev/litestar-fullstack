@@ -117,6 +117,10 @@ class PhoneNumberController(Controller):
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")],
     ) -> list[PhoneNumber]:
         """List active phone numbers without E911 registration."""
+        if not current_user.is_superuser and not any(tm.team_id == team_id for tm in current_user.teams):
+            from litestar.exceptions import PermissionDeniedException
+
+            raise PermissionDeniedException(detail="You do not have access to this team")
         results = await phone_numbers_service.get_unregistered_e911_numbers(team_id)
         return phone_numbers_service.to_schema_enriched(results)
 

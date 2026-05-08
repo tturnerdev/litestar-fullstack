@@ -176,7 +176,7 @@ class AdminUsersController(Controller):
         if user.id == request.user.id:
             raise NotAuthorizedException(detail="Cannot delete your own account")
         user_email = user.email
-        await users_service.delete(user_id)
+        await users_service.delete(user_id, auto_commit=True)
         await log_audit(
             audit_service,
             action="admin.user.deleted",

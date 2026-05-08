@@ -28,7 +28,7 @@ export function GettingStarted() {
     }
   })
 
-  const { data: teams = [] } = useQuery({
+  const { data: teams = [], isLoading: teamsLoading } = useQuery({
     queryKey: ["teams"],
     queryFn: async () => {
       const response = await listTeams()
@@ -37,7 +37,7 @@ export function GettingStarted() {
     enabled: isAuthenticated,
   })
 
-  const { data: deviceCount = 0 } = useQuery({
+  const { data: deviceCount = 0, isLoading: devicesLoading } = useQuery({
     queryKey: ["getting-started", "devices"],
     queryFn: async () => {
       const response = await listDevices({ query: { pageSize: 1 } })
@@ -47,7 +47,7 @@ export function GettingStarted() {
     staleTime: 60_000,
   })
 
-  const { data: extensionCount = 0 } = useQuery({
+  const { data: extensionCount = 0, isLoading: extensionsLoading } = useQuery({
     queryKey: ["getting-started", "extensions"],
     queryFn: async () => {
       const response = await listExtensions({ query: { pageSize: 1 } })
@@ -56,6 +56,8 @@ export function GettingStarted() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   })
+
+  const isLoading = teamsLoading || devicesLoading || extensionsLoading
 
   const hasProfile = !!(user?.name && user.name.trim().length > 0)
   const hasTeam = teams.length > 0
@@ -109,7 +111,7 @@ export function GettingStarted() {
     setIsDismissed(true)
   }
 
-  if (isDismissed) {
+  if (isDismissed || isLoading) {
     return null
   }
 
