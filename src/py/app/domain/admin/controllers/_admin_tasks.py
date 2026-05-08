@@ -159,6 +159,7 @@ class AdminTasksController(Controller):
     ) -> None:
         """Delete a completed/failed/cancelled task (admin)."""
         db_obj = await task_service.get(task_id)
+        request.app.emit(event_id="background_task_deleted", task_id=task_id)
         await task_service.delete(task_id)
         await log_audit(
             audit_service,

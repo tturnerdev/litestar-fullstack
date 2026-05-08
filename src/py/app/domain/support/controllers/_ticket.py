@@ -225,6 +225,7 @@ class TicketController(Controller):
         db_obj = await tickets_service.get(ticket_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.subject
+        request.app.emit(event_id="ticket_deleted", ticket_id=ticket_id)
         await tickets_service.delete(ticket_id)
         await log_audit(
             audit_service,

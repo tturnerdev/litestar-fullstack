@@ -203,6 +203,7 @@ class AdminMusicOnHoldController(Controller):
         db_obj = await moh_service.get(moh_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="music_on_hold_deleted", music_on_hold_id=moh_id)
         await moh_service.delete(moh_id)
         await log_audit(
             audit_service,

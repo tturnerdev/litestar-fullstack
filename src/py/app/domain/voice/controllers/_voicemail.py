@@ -257,6 +257,7 @@ class VoicemailController(Controller):
         db_obj = await voicemail_messages_service.get_one(id=msg_id, voicemail_box_id=voicemail_box.id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.caller_number
+        request.app.emit(event_id="voicemail_message_deleted", message_id=msg_id)
         await voicemail_messages_service.delete(msg_id)
         await log_audit(
             audit_service,

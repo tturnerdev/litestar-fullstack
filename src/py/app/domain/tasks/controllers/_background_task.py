@@ -182,6 +182,7 @@ class BackgroundTaskController(Controller):
             raise PermissionDeniedException(
                 detail=f"Cannot delete a task with status '{existing.status}'. Only completed, failed, or cancelled tasks may be deleted.",
             )
+        request.app.emit(event_id="background_task_deleted", task_id=task_id)
         db_obj = await task_service.delete(task_id)
         await log_audit(
             audit_service,

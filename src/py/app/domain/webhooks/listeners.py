@@ -51,6 +51,7 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "device_updated": WebhookEventType.DEVICE_UPDATED,
     "device_deleted": WebhookEventType.DEVICE_DELETED,
     "device_template_created": WebhookEventType.DEVICE_TEMPLATE_CREATED,
+    "device_template_deleted": WebhookEventType.DEVICE_TEMPLATE_DELETED,
     # Connection events
     "connection_created": WebhookEventType.CONNECTION_CREATED,
     "connection_updated": WebhookEventType.CONNECTION_UPDATED,
@@ -126,13 +127,23 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "fax_message_deleted": WebhookEventType.FAX_MESSAGE_DELETED,
     # Support — ticket events
     "ticket_created": WebhookEventType.TICKET_CREATED,
+    "ticket_deleted": WebhookEventType.TICKET_DELETED,
     "ticket_status_changed": WebhookEventType.TICKET_STATUS_CHANGED,
     "ticket_assigned": WebhookEventType.TICKET_ASSIGNED,
     "ticket_message_created": WebhookEventType.TICKET_MESSAGE_CREATED,
+    "ticket_message_deleted": WebhookEventType.TICKET_MESSAGE_DELETED,
+    "ticket_attachment_deleted": WebhookEventType.TICKET_ATTACHMENT_DELETED,
+    # Tag events
+    "tag_deleted": WebhookEventType.TAG_DELETED,
+    # Notification events
+    "notification_deleted": WebhookEventType.NOTIFICATION_DELETED,
     # Analytics events
     "call_record_created": WebhookEventType.CALL_RECORD_CREATED,
     # Admin — music on hold events
     "music_on_hold_created": WebhookEventType.MUSIC_ON_HOLD_CREATED,
+    "music_on_hold_deleted": WebhookEventType.MUSIC_ON_HOLD_DELETED,
+    # Background task events
+    "background_task_deleted": WebhookEventType.BACKGROUND_TASK_DELETED,
 }
 
 

@@ -211,6 +211,7 @@ class AdminDeviceTemplatesController(Controller):
         db_obj = await template_service.get(template_id)
         before = capture_snapshot(db_obj)
         target_label = f"{db_obj.manufacturer} {db_obj.model}"
+        request.app.emit(event_id="device_template_deleted", template_id=template_id)
         await template_service.delete(template_id)
         await log_audit(
             audit_service,

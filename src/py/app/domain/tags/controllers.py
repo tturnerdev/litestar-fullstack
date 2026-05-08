@@ -252,6 +252,7 @@ class TagController(Controller):
         db_obj = await tags_service.get(tag_id)
         before = _capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="tag_deleted", tag_id=tag_id)
         await tags_service.delete(tag_id)
         await _log_audit(
             audit_service,

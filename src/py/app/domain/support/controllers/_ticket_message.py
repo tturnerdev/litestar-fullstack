@@ -170,6 +170,7 @@ class TicketMessageController(Controller):
         """Delete a message (own, within time window)."""
         db_obj = await messages_service.get(msg_id)
         before = capture_snapshot(db_obj)
+        request.app.emit(event_id="ticket_message_deleted", message_id=msg_id)
         await messages_service.delete(msg_id)
         await log_audit(
             audit_service,

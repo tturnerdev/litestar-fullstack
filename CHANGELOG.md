@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.298.0 (2026-05-08)
+
+### Added
+- **Delete event emissions on 11 endpoints** — Tags, tickets, ticket messages/attachments, notifications (single + bulk), voicemail messages, device templates, music on hold, and background tasks now emit events before deletion
+- **9 new webhook event types** — Registered delete event types for all newly emitting controllers with descriptions and listener mappings
+
 ## v0.297.0 (2026-05-08)
 
 ### Added

@@ -229,6 +229,7 @@ class NotificationController(Controller):
         audit_service: AuditLogService,
         current_user: m.User,
     ) -> None:
+        request.app.emit(event_id="notifications_bulk_deleted")
         await notifications_service.delete_read(current_user.id)
         await _log_audit(
             audit_service,
@@ -267,6 +268,7 @@ class NotificationController(Controller):
             raise PermissionDeniedException(detail="Cannot access this notification.")
         before = _capture_snapshot(db_obj)
         target_label = db_obj.title
+        request.app.emit(event_id="notification_deleted", notification_id=notification_id)
         _ = await notifications_service.delete(notification_id)
         await _log_audit(
             audit_service,

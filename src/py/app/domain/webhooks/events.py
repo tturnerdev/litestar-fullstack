@@ -50,6 +50,7 @@ class WebhookEventType(StrEnum):
     DEVICE_UPDATED = "device.updated"
     DEVICE_DELETED = "device.deleted"
     DEVICE_TEMPLATE_CREATED = "device.template.created"
+    DEVICE_TEMPLATE_DELETED = "device_template.deleted"
 
     # Connection events
     CONNECTION_CREATED = "connection.created"
@@ -142,15 +143,28 @@ class WebhookEventType(StrEnum):
 
     # Support — ticket events
     TICKET_CREATED = "ticket.created"
+    TICKET_DELETED = "ticket.deleted"
     TICKET_STATUS_CHANGED = "ticket.status.changed"
     TICKET_ASSIGNED = "ticket.assigned"
     TICKET_MESSAGE_CREATED = "ticket.message.created"
+    TICKET_MESSAGE_DELETED = "ticket.message.deleted"
+    TICKET_ATTACHMENT_DELETED = "ticket.attachment.deleted"
+
+    # Tag events
+    TAG_DELETED = "tag.deleted"
+
+    # Notification events
+    NOTIFICATION_DELETED = "notification.deleted"
 
     # Analytics events
     CALL_RECORD_CREATED = "call_record.created"
 
     # Admin — music on hold events
     MUSIC_ON_HOLD_CREATED = "music_on_hold.created"
+    MUSIC_ON_HOLD_DELETED = "music_on_hold.deleted"
+
+    # Background task events
+    BACKGROUND_TASK_DELETED = "background_task.deleted"
 
 
 # Human-readable descriptions for each event type, useful for UI display
@@ -188,6 +202,7 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.DEVICE_UPDATED: "A device was updated",
     WebhookEventType.DEVICE_DELETED: "A device was deleted",
     WebhookEventType.DEVICE_TEMPLATE_CREATED: "A new device template was created",
+    WebhookEventType.DEVICE_TEMPLATE_DELETED: "A device template was deleted",
     # Connection events
     WebhookEventType.CONNECTION_CREATED: "A new connection was created",
     WebhookEventType.CONNECTION_UPDATED: "A connection was updated",
@@ -263,13 +278,23 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.FAX_MESSAGE_DELETED: "A fax message was deleted",
     # Support — ticket events
     WebhookEventType.TICKET_CREATED: "A new support ticket was created",
+    WebhookEventType.TICKET_DELETED: "A support ticket was deleted",
     WebhookEventType.TICKET_STATUS_CHANGED: "A support ticket status was changed",
     WebhookEventType.TICKET_ASSIGNED: "A support ticket was assigned",
     WebhookEventType.TICKET_MESSAGE_CREATED: "A new message was added to a support ticket",
+    WebhookEventType.TICKET_MESSAGE_DELETED: "A ticket message was deleted",
+    WebhookEventType.TICKET_ATTACHMENT_DELETED: "A ticket attachment was deleted",
+    # Tag events
+    WebhookEventType.TAG_DELETED: "A tag was deleted",
+    # Notification events
+    WebhookEventType.NOTIFICATION_DELETED: "A notification was deleted",
     # Analytics events
     WebhookEventType.CALL_RECORD_CREATED: "A new call record was created",
     # Admin — music on hold events
     WebhookEventType.MUSIC_ON_HOLD_CREATED: "A new music on hold entry was created",
+    WebhookEventType.MUSIC_ON_HOLD_DELETED: "A music on hold entry was deleted",
+    # Background task events
+    WebhookEventType.BACKGROUND_TASK_DELETED: "A background task was deleted",
 }
 
 
