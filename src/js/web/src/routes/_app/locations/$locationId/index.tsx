@@ -368,7 +368,7 @@ function LocationDetailPage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Description</Label>
-                        <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} />
+                        <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} maxLength={500} />
                       </div>
                       {isAddressed && (
                         <>

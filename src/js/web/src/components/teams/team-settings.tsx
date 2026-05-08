@@ -171,7 +171,7 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="What does this team do?" className="resize-none" rows={3} />
+                      <Textarea {...field} placeholder="What does this team do?" className="resize-none" rows={3} maxLength={DESCRIPTION_MAX} />
                     </FormControl>
                     <div className="flex items-center justify-between">
                       <FormDescription>A short summary of this team's purpose. Visible to all members.</FormDescription>
