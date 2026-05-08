@@ -9,7 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -214,6 +214,7 @@ class VoicemailBoxController(Controller):
         operation_id="DeleteVoicemailBox",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_voicemail_box(
         self,

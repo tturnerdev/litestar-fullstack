@@ -9,7 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import selectinload
 
@@ -231,7 +231,7 @@ class TagController(Controller):
         )
         return tags_service.to_schema(fresh_obj, schema_type=Tag)
 
-    @delete(operation_id="DeleteTag", summary="Delete a tag", path="/{tag_id:uuid}", guards=[requires_superuser], return_dto=None)
+    @delete(operation_id="DeleteTag", summary="Delete a tag", path="/{tag_id:uuid}", guards=[requires_superuser], return_dto=None, status_code=HTTP_204_NO_CONTENT)
     async def delete_tag(
         self,
         request: Request[m.User, Token, Any],

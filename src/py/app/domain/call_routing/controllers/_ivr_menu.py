@@ -8,7 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -209,6 +209,7 @@ class IvrMenuController(Controller):
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_ivr_menu(
         self,
@@ -384,6 +385,7 @@ class IvrMenuController(Controller):
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_option(
         self,

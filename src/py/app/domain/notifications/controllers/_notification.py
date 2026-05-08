@@ -10,6 +10,7 @@ from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
@@ -241,7 +242,7 @@ class NotificationController(Controller):
             request=request,
         )
 
-    @delete(operation_id="DeleteNotification", summary="Delete a notification", path="/{notification_id:uuid}", return_dto=None)
+    @delete(operation_id="DeleteNotification", summary="Delete a notification", path="/{notification_id:uuid}", return_dto=None, status_code=HTTP_204_NO_CONTENT)
     async def delete_notification(
         self,
         request: Request[m.User, Any, Any],

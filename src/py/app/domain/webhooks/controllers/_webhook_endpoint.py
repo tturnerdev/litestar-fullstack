@@ -8,7 +8,7 @@ from uuid import UUID
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.domain.accounts.guards import requires_superuser
 from app.domain.webhooks.events import get_all_event_types
@@ -87,7 +87,7 @@ class WebhookEndpointController(Controller):
         request.app.emit(event_id="webhook_endpoint_updated", entity_id=db_obj.id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @delete(operation_id="DeleteWebhookEndpoint", summary="Delete a webhook endpoint", path="/{endpoint_id:uuid}", return_dto=None)
+    @delete(operation_id="DeleteWebhookEndpoint", summary="Delete a webhook endpoint", path="/{endpoint_id:uuid}", return_dto=None, status_code=HTTP_204_NO_CONTENT)
     async def delete_endpoint(
         self,
         request: Request[Any, Any, Any],

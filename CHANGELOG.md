@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.302.0 (2026-05-08)
+
+### Fixed
+- **HTTP 204 on DELETE endpoints** — All 37 void-returning DELETE endpoints now return 204 No Content instead of 200, matching REST conventions
+
 ## v0.301.0 (2026-05-08)
 
 ### Fixed

@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, put
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -193,6 +194,7 @@ class VoicemailMessageController(Controller):
         operation_id="DeleteVoicemailMessageById",
         path="/api/voicemail/messages/{message_id:uuid}",
         guards=[requires_voicemail_message_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_voicemail_message(
         self,

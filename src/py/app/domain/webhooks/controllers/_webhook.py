@@ -11,7 +11,7 @@ from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_active_user
@@ -240,6 +240,7 @@ class WebhookController(Controller):
         operation_id="DeleteWebhook",
         summary="Delete a webhook",
         path="/api/webhooks/{webhook_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_webhook(
         self,

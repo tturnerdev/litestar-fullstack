@@ -10,6 +10,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
@@ -199,7 +200,7 @@ class AdminDeviceTemplatesController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", path="/{template_id:uuid}")
+    @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", path="/{template_id:uuid}", status_code=HTTP_204_NO_CONTENT)
     async def delete_template(
         self,
         request: Request[m.User, Token, Any],

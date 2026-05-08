@@ -9,7 +9,7 @@ from litestar import Controller, Request, delete, get, post
 from litestar.di import Provide
 from litestar.exceptions import HTTPException
 from litestar.params import Dependency
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -162,7 +162,7 @@ class TeamInvitationController(Controller):
         db_objs, total = await team_invitations_service.list_and_count(*filters, m.TeamInvitation.team_id == team_id)
         return team_invitations_service.to_schema(db_objs, total, filters, schema_type=TeamInvitation)
 
-    @delete(operation_id="DeleteTeamInvitation", summary="Delete a team invitation", path="/{invitation_id:uuid}")
+    @delete(operation_id="DeleteTeamInvitation", summary="Delete a team invitation", path="/{invitation_id:uuid}", status_code=HTTP_204_NO_CONTENT)
     async def delete_team_invitation(
         self,
         request: Request[m.User, Token, Any],

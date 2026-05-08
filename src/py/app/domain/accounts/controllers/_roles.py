@@ -11,7 +11,7 @@ from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.exceptions import HTTPException, NotFoundException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
@@ -177,7 +177,7 @@ class RoleController(Controller):
         )
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @delete(operation_id="DeleteRole", summary="Delete a role", path="/{role_id:uuid}")
+    @delete(operation_id="DeleteRole", summary="Delete a role", path="/{role_id:uuid}", status_code=HTTP_204_NO_CONTENT)
     async def delete_role(
         self,
         request: Request[m.User, Token, Any],

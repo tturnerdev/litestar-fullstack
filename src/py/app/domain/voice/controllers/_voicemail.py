@@ -9,6 +9,7 @@ import msgspec
 from litestar import Controller, delete, get, patch
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 from structlog import get_logger
 
@@ -239,6 +240,7 @@ class VoicemailController(Controller):
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_voicemail_message(
         self,

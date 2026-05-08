@@ -10,6 +10,7 @@ from litestar import Controller, delete, get, post
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
@@ -149,7 +150,7 @@ class AdminTasksController(Controller):
         )
         return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
 
-    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", path="/{task_id:uuid}")
+    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", path="/{task_id:uuid}", status_code=HTTP_204_NO_CONTENT)
     async def delete_task(
         self,
         request: Request[m.User, Token, Any],

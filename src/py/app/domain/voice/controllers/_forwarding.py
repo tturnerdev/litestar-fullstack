@@ -8,7 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post, put
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -209,6 +209,7 @@ class ForwardingController(Controller):
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_forwarding_rule(
         self,

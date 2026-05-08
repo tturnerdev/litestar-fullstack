@@ -10,6 +10,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import PermissionDeniedException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -235,6 +236,7 @@ class FaxNumberController(Controller):
         summary="Delete a fax number",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_fax_number(
         self,

@@ -8,7 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post, put
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -207,6 +207,7 @@ class TimeConditionController(Controller):
         path="/api/time-conditions/{time_condition_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_time_condition(
         self,

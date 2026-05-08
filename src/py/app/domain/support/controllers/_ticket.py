@@ -9,7 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -212,6 +212,7 @@ class TicketController(Controller):
         summary="Delete a ticket",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_support_agent],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_ticket(
         self,

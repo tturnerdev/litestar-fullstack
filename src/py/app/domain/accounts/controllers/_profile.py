@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 import structlog
 from litestar import Controller, Request, delete, get, patch
 from litestar.di import Provide
+from litestar.status_codes import HTTP_204_NO_CONTENT
 
 from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.guards import requires_active_user
@@ -220,7 +221,7 @@ class ProfileController(Controller):
 
         return Message(message="Your password was successfully modified.")
 
-    @delete(operation_id="AccountDelete", summary="Delete account", path="/api/me")
+    @delete(operation_id="AccountDelete", summary="Delete account", path="/api/me", status_code=HTTP_204_NO_CONTENT)
     async def remove_account(
         self,
         request: Request[m.User, Token, Any],

@@ -10,7 +10,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -291,6 +291,7 @@ class DeviceController(Controller):
         summary="Delete a device",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_device(
         self,

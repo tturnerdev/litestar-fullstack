@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import joinedload
 
 from app.db import models as m
@@ -167,6 +168,7 @@ class PhoneNumberController(Controller):
         path="/{phone_number_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
         return_dto=None,
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_phone_number(
         self,

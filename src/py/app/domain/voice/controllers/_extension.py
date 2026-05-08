@@ -9,7 +9,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import joinedload
 from structlog import get_logger
 
@@ -256,6 +256,7 @@ class ExtensionController(Controller):
         path="/{ext_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
         return_dto=None,
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_extension(
         self,

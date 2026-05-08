@@ -9,7 +9,7 @@ from uuid import UUID
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -252,7 +252,7 @@ class TeamController(Controller):
 
         return teams_service.to_schema(fresh_obj, schema_type=Team)
 
-    @delete(operation_id="DeleteTeam", summary="Delete a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership])
+    @delete(operation_id="DeleteTeam", summary="Delete a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership], status_code=HTTP_204_NO_CONTENT)
     async def delete_team(
         self,
         request: Request[m.User, Token, Any],

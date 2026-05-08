@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, post
 from litestar.di import Provide
 from litestar.params import Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -79,6 +80,7 @@ class TicketAttachmentController(Controller):
         summary="Delete an attachment",
         path="/api/support/attachments/{attachment_id:uuid}",
         guards=[requires_feature_permission("support", "edit")],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_attachment(
         self,

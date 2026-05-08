@@ -8,7 +8,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import HTTPException, NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_201_CREATED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -228,6 +228,7 @@ class FaxEmailRouteController(Controller):
         summary="Delete a fax email route",
         path="/{route_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+        status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_fax_email_route(
         self,
