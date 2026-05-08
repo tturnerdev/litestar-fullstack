@@ -39,6 +39,7 @@ class AdminVoiceController(Controller):
             "pagination_type": "limit_offset",
             "pagination_size": 25,
             "created_at": True,
+            "updated_at": True,
             "sort_field": "created_at",
             "sort_order": "desc",
         },

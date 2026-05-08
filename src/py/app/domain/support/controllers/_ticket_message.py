@@ -42,6 +42,7 @@ class TicketMessageController(Controller):
             "pagination_type": "limit_offset",
             "pagination_size": 50,
             "created_at": True,
+            "updated_at": True,
             "sort_field": "created_at",
             "sort_order": "asc",
             "search": "body_markdown",
