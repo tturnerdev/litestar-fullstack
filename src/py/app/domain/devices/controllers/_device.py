@@ -10,6 +10,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -163,6 +164,7 @@ class DeviceController(Controller):
         summary="Register a device",
         path="/api/devices",
         guards=[requires_feature_permission("devices", "edit")],
+        status_code=HTTP_201_CREATED,
     )
     async def create_device(
         self,

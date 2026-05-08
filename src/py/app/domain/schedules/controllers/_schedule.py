@@ -9,6 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -103,6 +104,7 @@ class ScheduleController(Controller):
         summary="Create a schedule",
         path="/api/schedules",
         guards=[requires_feature_permission("schedules", "edit")],
+        status_code=HTTP_201_CREATED,
     )
     async def create_schedule(
         self,
@@ -315,6 +317,7 @@ class ScheduleController(Controller):
         summary="Create a schedule entry",
         path="/api/schedules/{schedule_id:uuid}/entries",
         guards=[requires_feature_permission("schedules", "edit")],
+        status_code=HTTP_201_CREATED,
     )
     async def create_entry(
         self,

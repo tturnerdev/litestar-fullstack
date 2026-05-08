@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 
 from app.domain.accounts.guards import requires_superuser
 from app.domain.webhooks.events import get_all_event_types
@@ -63,7 +64,7 @@ class WebhookEndpointController(Controller):
         db_obj = await webhook_service.get(endpoint_id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @post(operation_id="CreateWebhookEndpoint", summary="Create a webhook endpoint")
+    @post(operation_id="CreateWebhookEndpoint", summary="Create a webhook endpoint", status_code=HTTP_201_CREATED)
     async def create_endpoint(
         self,
         request: Request[Any, Any, Any],

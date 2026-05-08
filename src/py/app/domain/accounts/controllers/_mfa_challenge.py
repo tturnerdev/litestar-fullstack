@@ -9,6 +9,7 @@ from uuid import uuid4
 from litestar import Controller, Response, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException, NotAuthorizedException
+from litestar.params import Parameter
 from litestar.security.jwt import Token as JWTToken
 from sqlalchemy.orm import undefer_group
 
@@ -58,6 +59,7 @@ class MfaChallengeController(Controller):
         audit_service: AuditLogService,
         settings: AppSettings,
         data: MfaChallenge,
+        user_agent: str = Parameter(header="user-agent", default=""),
     ) -> Response[OAuth2Login]:
         """Verify MFA code during login flow.
 
@@ -109,7 +111,7 @@ class MfaChallengeController(Controller):
             request=request,
         )
 
-        device_info = request.headers.get("user-agent", "")[:255] if request.headers.get("user-agent") else None
+        device_info = user_agent[:255] if user_agent else None
 
         raw_refresh_token, _ = await refresh_token_service.create_refresh_token(
             user_id=user.id,

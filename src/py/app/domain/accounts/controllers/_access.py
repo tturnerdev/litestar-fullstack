@@ -11,7 +11,7 @@ from advanced_alchemy.utils.text import slugify
 from litestar import Controller, Request, Response, delete, get, post
 from litestar.di import Provide
 from litestar.enums import RequestEncodingType
-from litestar.exceptions import ClientException, NotAuthorizedException
+from litestar.exceptions import ClientException, NotAuthorizedException, PermissionDeniedException
 from litestar.params import Body, Dependency, Parameter
 from litestar.security.jwt import Token as JWTToken
 from sqlalchemy.orm import selectinload
@@ -63,6 +63,8 @@ logger = logging.getLogger(__name__)
 
 REFRESH_COOKIE_NAME = "refresh_token"
 REFRESH_TOKEN_MAX_AGE = 604800 # 7 days
+LOGIN_RATE_LIMIT_WINDOW_MINUTES = 15
+LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 10
 
 
 class AccessController(Controller):
@@ -101,6 +103,7 @@ class AccessController(Controller):
         audit_service: AuditLogService,
         settings: AppSettings,
         data: Annotated[AccountLogin, Body(title="OAuth2 Login", media_type=RequestEncodingType.URL_ENCODED)],
+        user_agent: str = Parameter(header="user-agent", default=""),
     ) -> Response[OAuth2Login] | Response[LoginMfaChallenge]:
         """Authenticate a user.
 
@@ -117,7 +120,34 @@ class AccessController(Controller):
         Returns:
             OAuth2 Login Response with refresh token cookie, or MFA challenge
         """
-        user = await users_service.authenticate(data.username, data.password)
+        existing_user = await users_service.get_one_or_none(email=data.username)
+        if existing_user is not None:
+            failed_attempts = await audit_service.count_recent_actions(
+                action="account.login.failed",
+                actor_id=existing_user.id,
+                window_minutes=LOGIN_RATE_LIMIT_WINDOW_MINUTES,
+            )
+            if failed_attempts >= LOGIN_RATE_LIMIT_MAX_ATTEMPTS:
+                raise ClientException(
+                    detail="Too many login attempts. Please try again later.",
+                    status_code=429,
+                )
+
+        try:
+            user = await users_service.authenticate(data.username, data.password)
+        except PermissionDeniedException:
+            if existing_user is not None:
+                await log_audit(
+                    audit_service,
+                    action="account.login.failed",
+                    actor_id=existing_user.id,
+                    actor_email=existing_user.email,
+                    target_type="user",
+                    target_id=existing_user.id,
+                    target_label=existing_user.email,
+                    request=request,
+                )
+            raise
 
         if user.is_two_factor_enabled and user.totp_secret:
             mfa_challenge_token = JWTToken(
@@ -152,7 +182,7 @@ class AccessController(Controller):
             )
             return response
 
-        device_info = request.headers.get("user-agent", "")[:255] if request.headers.get("user-agent") else None
+        device_info = user_agent[:255] if user_agent else None
 
         raw_refresh_token, _ = await refresh_token_service.create_refresh_token(
             user_id=user.id,
@@ -255,6 +285,7 @@ class AccessController(Controller):
         refresh_token_service: RefreshTokenService,
         users_service: UserService,
         settings: AppSettings,
+        user_agent: str = Parameter(header="user-agent", default=""),
     ) -> Response[OAuth2Login]:
         """Refresh access token using refresh token.
 
@@ -276,7 +307,7 @@ class AccessController(Controller):
         if not (raw_refresh_token := request.cookies.get(REFRESH_COOKIE_NAME)):
             raise NotAuthorizedException(detail="No refresh token provided")
 
-        device_info = request.headers.get("user-agent", "")[:255] if request.headers.get("user-agent") else None
+        device_info = user_agent[:255] if user_agent else None
 
         new_raw_token, new_token_model = await refresh_token_service.rotate_refresh_token(
             raw_token=raw_refresh_token,

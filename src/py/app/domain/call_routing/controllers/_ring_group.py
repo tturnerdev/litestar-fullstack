@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -89,6 +90,7 @@ class RingGroupController(Controller):
         summary="Create a ring group",
         path="/api/ring-groups",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        status_code=HTTP_201_CREATED,
     )
     async def create_ring_group(
         self,
@@ -277,6 +279,7 @@ class RingGroupController(Controller):
         summary="Add a ring group member",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        status_code=HTTP_201_CREATED,
     )
     async def create_member(
         self,

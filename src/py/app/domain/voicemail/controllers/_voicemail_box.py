@@ -9,6 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -89,7 +90,7 @@ class VoicemailBoxController(Controller):
             )
         return voicemail_boxes_service.to_schema(results, total, filters, schema_type=VoicemailBox)
 
-    @post(operation_id="CreateVoicemailBox", path="/api/voicemail/boxes")
+    @post(operation_id="CreateVoicemailBox", path="/api/voicemail/boxes", status_code=HTTP_201_CREATED)
     async def create_voicemail_box(
         self,
         request: Request[m.User, Token, Any],

@@ -9,6 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import selectinload
 
@@ -155,7 +156,7 @@ class TagController(Controller):
         db_obj = await tags_service.get(tag_id)
         return tags_service.to_schema(db_obj, schema_type=Tag)
 
-    @post(operation_id="CreateTag", summary="Create a tag", path="", guards=[requires_superuser])
+    @post(operation_id="CreateTag", summary="Create a tag", path="", guards=[requires_superuser], status_code=HTTP_201_CREATED)
     async def create_tag(
         self,
         request: Request[m.User, Token, Any],

@@ -11,6 +11,7 @@ from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_active_user
@@ -115,7 +116,7 @@ class WebhookController(Controller):
         )
         return webhooks_service.to_schema(results, total, filters, schema_type=WebhookList)
 
-    @post(operation_id="CreateWebhook", summary="Create a webhook", path="/api/webhooks")
+    @post(operation_id="CreateWebhook", summary="Create a webhook", path="/api/webhooks", status_code=HTTP_201_CREATED)
     async def create_webhook(
         self,
         request: Request[m.User, Token, Any],

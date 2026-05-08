@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.297.0 (2026-05-08)
+
+### Added
+- **HTTP 201 Created on resource creation** — All 27 POST endpoints that create resources now return 201 instead of 200, across 22 controllers
+- **Login rate limiting** — Failed login attempts are tracked via audit log; after 10 failures within 15 minutes the account is temporarily locked with HTTP 429
+- **Litestar parameter injection for User-Agent** — Login, token refresh, and MFA challenge endpoints now use `Parameter(header=...)` instead of direct `request.headers.get()` access
+
 ## v0.296.0 (2026-05-08)
 
 ### Added

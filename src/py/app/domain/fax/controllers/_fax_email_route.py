@@ -8,6 +8,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import HTTPException, NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -117,6 +118,7 @@ class FaxEmailRouteController(Controller):
         summary="Create a fax email route",
         path="",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+        status_code=HTTP_201_CREATED,
     )
     async def create_fax_email_route(
         self,

@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -87,6 +88,7 @@ class LocationController(Controller):
         summary="Create a location",
         path="/api/teams/{team_id:uuid}/locations",
         guards=[requires_feature_permission("locations", "edit")],
+        status_code=HTTP_201_CREATED,
     )
     async def create_location(
         self,

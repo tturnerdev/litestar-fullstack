@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -97,6 +98,7 @@ class ConnectionController(Controller):
         summary="Create a connection",
         path="/api/connections",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
+        status_code=HTTP_201_CREATED,
     )
     async def create_connection(
         self,

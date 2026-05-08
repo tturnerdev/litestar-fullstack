@@ -11,6 +11,7 @@ from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.exceptions import HTTPException, NotFoundException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
@@ -95,7 +96,7 @@ class RoleController(Controller):
         db_obj = await roles_service.get(role_id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @post(operation_id="CreateRole", summary="Create a role", path="")
+    @post(operation_id="CreateRole", summary="Create a role", path="", status_code=HTTP_201_CREATED)
     async def create_role(
         self,
         request: Request[m.User, Token, Any],

@@ -9,6 +9,7 @@ from uuid import UUID
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -144,7 +145,7 @@ class TeamController(Controller):
             results, total = await teams_service.list_and_count(*filters)
         return teams_service.to_schema(results, total, filters, schema_type=Team)
 
-    @post(operation_id="CreateTeam", summary="Create a team", path="/api/teams")
+    @post(operation_id="CreateTeam", summary="Create a team", path="/api/teams", status_code=HTTP_201_CREATED)
     async def create_team(
         self,
         request: Request[m.User, Token, Any],

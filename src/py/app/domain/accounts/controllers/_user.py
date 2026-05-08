@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import joinedload, load_only, selectinload
 
 from app.db import models as m
@@ -91,7 +92,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @post(operation_id="CreateUser", summary="Create a user")
+    @post(operation_id="CreateUser", summary="Create a user", status_code=HTTP_201_CREATED)
     async def create_user(
         self,
         request: Request[m.User, Token, Any],

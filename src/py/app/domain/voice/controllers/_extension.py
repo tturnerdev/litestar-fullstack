@@ -9,6 +9,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import joinedload
 from structlog import get_logger
 
@@ -91,6 +92,7 @@ class ExtensionController(Controller):
         operation_id="CreateExtension",
         summary="Create an extension",
         guards=[requires_feature_permission("voice", "edit")],
+        status_code=HTTP_201_CREATED,
     )
     async def create_extension(
         self,

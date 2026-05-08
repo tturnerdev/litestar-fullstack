@@ -9,7 +9,7 @@ from advanced_alchemy.exceptions import IntegrityError
 from litestar import Controller, Request, delete, patch, post
 from litestar.di import Provide
 from litestar.params import Parameter
-from litestar.status_codes import HTTP_202_ACCEPTED
+from litestar.status_codes import HTTP_201_CREATED, HTTP_202_ACCEPTED
 
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
@@ -46,7 +46,7 @@ class TeamMemberController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @post(operation_id="AddMemberToTeam", summary="Add a team member", path="/api/teams/{team_id:uuid}/members")
+    @post(operation_id="AddMemberToTeam", summary="Add a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_201_CREATED)
     async def add_member_to_team(
         self,
         request: Request[m.User, Token, Any],

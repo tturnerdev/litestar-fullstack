@@ -9,6 +9,7 @@ from litestar import Controller, Request, delete, get, post
 from litestar.di import Provide
 from litestar.exceptions import HTTPException
 from litestar.params import Dependency
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -70,7 +71,7 @@ class TeamInvitationController(Controller):
         "users_service": Provide(provide_users_service),
     }
 
-    @post(operation_id="CreateTeamInvitation", summary="Create a team invitation", path="")
+    @post(operation_id="CreateTeamInvitation", summary="Create a team invitation", path="", status_code=HTTP_201_CREATED)
     async def create_team_invitation(
         self,
         current_user: m.User,

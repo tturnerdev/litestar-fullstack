@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy.orm import joinedload
 
 from app.db import models as m
@@ -93,6 +94,7 @@ class E911RegistrationController(Controller):
         summary="Create an E911 registration",
         path="/api/e911",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
+        status_code=HTTP_201_CREATED,
     )
     async def create_registration(
         self,
