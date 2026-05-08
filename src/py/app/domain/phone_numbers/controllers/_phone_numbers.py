@@ -12,8 +12,8 @@ from litestar.params import Dependency
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
-from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.phone_numbers.schemas import (
     PhoneNumberCreate,
     PhoneNumberDetail,
@@ -38,7 +38,7 @@ class PhoneNumberController(Controller):
 
     tags = ["Phone Numbers"]
     path = "/api/phone-numbers"
-    guards = [requires_active_user]
+    guards = [requires_feature_permission("voice", "view")]
     dependencies = create_service_dependencies(
         PhoneNumberService,
         key="phone_number_service",
@@ -96,7 +96,7 @@ class PhoneNumberController(Controller):
         result = await phone_number_service.get(phone_number_id)
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @post(operation_id="ManageCreatePhoneNumber", summary="Create a phone number", path="/", status_code=HTTP_201_CREATED)
+    @post(operation_id="ManageCreatePhoneNumber", summary="Create a phone number", path="/", status_code=HTTP_201_CREATED, guards=[requires_feature_permission("voice", "edit")])
     async def create_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -134,7 +134,7 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @patch(operation_id="ManageUpdatePhoneNumber", summary="Update a phone number", path="/{phone_number_id:uuid}")
+    @patch(operation_id="ManageUpdatePhoneNumber", summary="Update a phone number", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit")])
     async def update_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -182,7 +182,7 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(fresh_obj, schema_type=PhoneNumberDetail)
 
-    @delete(operation_id="ManageDeletePhoneNumber", summary="Delete a phone number", path="/{phone_number_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(operation_id="ManageDeletePhoneNumber", summary="Delete a phone number", path="/{phone_number_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None, guards=[requires_feature_permission("voice", "edit")])
     async def delete_phone_number(
         self,
         request: Request[m.User, Token, Any],
