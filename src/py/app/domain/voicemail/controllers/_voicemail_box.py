@@ -42,6 +42,7 @@ class VoicemailBoxController(Controller):
         key="voicemail_boxes_service",
         load=[selectinload(m.VoicemailBox.extension)],
         filters={
+            "search": "email_address",
             "id_filter": UUID,
             "pagination_type": "limit_offset",
             "pagination_size": 20,

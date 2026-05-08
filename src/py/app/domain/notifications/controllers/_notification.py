@@ -100,6 +100,7 @@ class NotificationController(Controller):
         NotificationService,
         key="notifications_service",
         filters={
+            "search": "title",
             "id_filter": UUID,
             "pagination_type": "limit_offset",
             "pagination_size": 20,

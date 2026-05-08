@@ -58,6 +58,7 @@ class FaxNumberController(Controller):
         key="fax_numbers_service",
         load=[selectinload(m.FaxNumber.email_routes)],
         filters={
+            "search": "number,label",
             "id_filter": UUID,
             "pagination_type": "limit_offset",
             "pagination_size": 20,

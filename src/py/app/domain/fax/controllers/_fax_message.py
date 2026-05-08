@@ -52,6 +52,7 @@ class FaxMessageController(Controller):
         key="fax_messages_service",
         load=[selectinload(m.FaxMessage.fax_number)],
         filters={
+            "search": "remote_number,remote_name",
             "id_filter": UUID,
             "pagination_type": "limit_offset",
             "pagination_size": 20,

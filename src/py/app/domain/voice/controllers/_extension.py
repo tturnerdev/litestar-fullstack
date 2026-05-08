@@ -54,6 +54,7 @@ class ExtensionController(Controller):
         key="extensions_service",
         load=[joinedload(m.Extension.phone_number).joinedload(m.PhoneNumber.e911_registration)],
         filters={
+            "search": "extension_number,display_name",
             "id_filter": UUID,
             "pagination_type": "limit_offset",
             "pagination_size": 20,

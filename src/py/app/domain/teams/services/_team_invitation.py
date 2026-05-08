@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
@@ -20,6 +21,13 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
         self, data: service.ModelDictT[m.TeamInvitation]
     ) -> service.ModelDictT[m.TeamInvitation]:
         data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                m.TeamInvitation.team_id == data["team_id"],
+                m.TeamInvitation.email == data["email"],
+            )
+            if existing:
+                raise ValidationException("An invitation for this email already exists in this team.")
         return await self._populate_inviter(data)
 
     async def to_model_on_update(

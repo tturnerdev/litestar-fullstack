@@ -17,6 +17,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -203,7 +204,7 @@ function TeamsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Query
-  const { data, isLoading, isError, refetch, isRefetching } = useTeams({
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useTeams({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -368,6 +369,7 @@ function TeamsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
