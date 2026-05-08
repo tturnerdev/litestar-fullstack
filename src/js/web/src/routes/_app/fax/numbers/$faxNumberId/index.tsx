@@ -20,7 +20,7 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
@@ -100,6 +100,26 @@ function ActiveStatusBadge({ isActive }: { isActive: boolean }) {
       Inactive
     </Badge>
   )
+}
+
+// ── Validation ─────────────────────────────────────────────────────────
+
+interface FaxNumberFieldErrors {
+  label?: string
+}
+
+function validateFaxNumberField(field: keyof FaxNumberFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "label":
+      if (value.trim() !== "" && value.trim().length < 2) return "Label must be at least 2 characters"
+      if (value.trim().length > 100) return "Label must be 100 characters or fewer"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
 }
 
 // ── Main page ───────────────────────────────────────────────────────────
@@ -540,6 +560,26 @@ function FaxNumberSettingsCard({
     isActive: true,
   })
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<FaxNumberFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof FaxNumberFieldErrors, value: string) => {
+    const error = validateFaxNumberField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof FaxNumberFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   const syncFormFromData = useCallback(() => {
     if (data) {
       setFormData({
@@ -552,6 +592,14 @@ function FaxNumberSettingsCard({
   useEffect(() => {
     syncFormFromData()
   }, [syncFormFromData])
+
+  // Clear validation state when entering edit mode
+  useEffect(() => {
+    if (editing) {
+      setFieldErrors({})
+      touchedRef.current = {}
+    }
+  }, [editing])
 
   const formDirty = useMemo(() => {
     if (!editing || !data) return false
@@ -603,6 +651,12 @@ function FaxNumberSettingsCard({
 
   function handleSave() {
     if (!data) return
+
+    // Validate all fields before submit
+    const labelErr = validateField("label", formData.label)
+    touchedRef.current.label = true
+    if (labelErr) return
+
     const payload: Record<string, unknown> = {}
     const trimmedLabel = formData.label.trim()
     if (trimmedLabel !== (data.label ?? "")) payload.label = trimmedLabel || null
@@ -617,17 +671,25 @@ function FaxNumberSettingsCard({
       onSuccess: () => {
         toast.success("Fax number updated successfully")
         setEditing(false)
+        setFieldErrors({})
+        touchedRef.current = {}
       },
     })
   }
 
   function handleCancel() {
     syncFormFromData()
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(false)
   }
 
   function updateField<K extends keyof SettingsFormData>(field: K, value: SettingsFormData[K]) {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    // Re-validate on change if the field has been touched
+    if (typeof value === "string" && field in touchedRef.current && touchedRef.current[field]) {
+      validateField(field as keyof FaxNumberFieldErrors, value)
+    }
   }
 
   return (
@@ -659,7 +721,7 @@ function FaxNumberSettingsCard({
                   <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateMutation.isPending}>
                     <X className="mr-2 h-4 w-4" /> Cancel
                   </Button>
-                  <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+                  <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || hasValidationErrors}>
                     {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     {updateMutation.isPending ? "Saving..." : "Save changes"}
                   </Button>
@@ -691,14 +753,19 @@ function FaxNumberSettingsCard({
             <Label htmlFor="fax-label">Label</Label>
             <p className="text-xs text-muted-foreground">A friendly name to identify this fax number.</p>
             {editing ? (
-              <Input
-                id="fax-label"
-                placeholder="e.g. Main Fax, Billing Dept"
-                value={formData.label}
-                onChange={(e) => updateField("label", e.target.value)}
-                disabled={updateMutation.isPending}
-                maxLength={100}
-              />
+              <>
+                <Input
+                  id="fax-label"
+                  placeholder="e.g. Main Fax, Billing Dept"
+                  value={formData.label}
+                  onChange={(e) => updateField("label", e.target.value)}
+                  onBlur={() => handleFieldBlur("label", formData.label)}
+                  aria-invalid={!!fieldErrors.label}
+                  disabled={updateMutation.isPending}
+                  maxLength={100}
+                />
+                <FieldError message={fieldErrors.label} />
+              </>
             ) : (
               <p className="text-sm">{data.label || <span className="text-muted-foreground italic">Not set</span>}</p>
             )}

@@ -73,6 +73,46 @@ interface HeaderPair {
 }
 
 // ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+interface WebhookFieldErrors {
+  name?: string
+  url?: string
+  description?: string
+}
+
+function validateWebhookField(field: keyof WebhookFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      if (value.length > 200) return "Name must be 200 characters or less"
+      return undefined
+    case "url": {
+      if (value.trim() === "") return "URL is required"
+      try {
+        const parsed = new URL(value)
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+          return "URL must start with https:// or http://"
+        }
+      } catch {
+        return "Enter a valid URL (e.g., https://example.com/webhook)"
+      }
+      return undefined
+    }
+    case "description":
+      if (value.length > 500) return "Description must be 500 characters or less"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -90,6 +130,24 @@ function NewWebhookPage() {
   const [events, setEvents] = useState<string[]>([])
   const [isActive, setIsActive] = useState(true)
   const [headers, setHeaders] = useState<HeaderPair[]>([])
+
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<WebhookFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof WebhookFieldErrors, value: string) => {
+    const error = validateWebhookField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof WebhookFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
 
   // Dirty check
   const formDirty =
@@ -119,13 +177,21 @@ function NewWebhookPage() {
     setHeaders((prev) => prev.map((h, i) => (i === index ? { ...h, [field]: val } : h)))
   }, [])
 
-  // Validation
-  const isValid = name.trim() !== "" && url.trim() !== ""
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+  const isValid = name.trim().length >= 2 && url.trim() !== "" && !hasValidationErrors
 
   // Submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isValid) return
+
+    // Pre-submit validation
+    const nameErr = validateField("name", name)
+    const urlErr = validateField("url", url)
+    const descErr = validateField("description", description)
+    for (const f of ["name", "url", "description"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || urlErr || descErr) return
 
     justSubmittedRef.current = true
 
@@ -212,11 +278,17 @@ function NewWebhookPage() {
                       id="webhook-name"
                       placeholder="e.g., Slack Notifications"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value)
+                        if (touchedRef.current.name) validateField("name", e.target.value)
+                      }}
+                      onBlur={() => handleFieldBlur("name", name)}
                       maxLength={NAME_MAX}
                       required
                       autoFocus
+                      aria-invalid={!!fieldErrors.name}
                     />
+                    <FieldError message={fieldErrors.name} />
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">A friendly name to identify this webhook.</p>
                       <p className={cn("text-xs", name.length >= NAME_MAX ? "text-destructive" : "text-muted-foreground")}>
@@ -235,10 +307,16 @@ function NewWebhookPage() {
                       type="url"
                       placeholder="https://example.com/webhook"
                       value={url}
-                      onChange={(e) => setUrl(e.target.value)}
+                      onChange={(e) => {
+                        setUrl(e.target.value)
+                        if (touchedRef.current.url) validateField("url", e.target.value)
+                      }}
+                      onBlur={() => handleFieldBlur("url", url)}
                       maxLength={URL_MAX}
                       required
+                      aria-invalid={!!fieldErrors.url}
                     />
+                    <FieldError message={fieldErrors.url} />
                     <p className="text-xs text-muted-foreground">Must be an HTTPS URL that accepts POST requests with a JSON body.</p>
                   </div>
 
@@ -249,11 +327,17 @@ function NewWebhookPage() {
                       id="webhook-description"
                       placeholder="What is this webhook used for?"
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => {
+                        setDescription(e.target.value)
+                        if (touchedRef.current.description) validateField("description", e.target.value)
+                      }}
+                      onBlur={() => handleFieldBlur("description", description)}
                       maxLength={DESC_MAX}
                       rows={2}
                       className="resize-none"
+                      aria-invalid={!!fieldErrors.description}
                     />
+                    <FieldError message={fieldErrors.description} />
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">Optional notes about this webhook's purpose.</p>
                       <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : "text-muted-foreground")}>

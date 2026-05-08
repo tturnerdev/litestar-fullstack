@@ -58,6 +58,44 @@ export const Route = createFileRoute("/_app/webhooks/$webhookId")({
   component: WebhookDetailPage,
 })
 
+// -- Validation ---------------------------------------------------------------
+
+interface WebhookFieldErrors {
+  name?: string
+  url?: string
+  description?: string
+}
+
+function validateWebhookField(field: keyof WebhookFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      if (value.length > 200) return "Name must be 200 characters or less"
+      return undefined
+    case "url": {
+      if (value.trim() === "") return "URL is required"
+      try {
+        const parsed = new URL(value)
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+          return "URL must start with https:// or http://"
+        }
+      } catch {
+        return "Enter a valid URL (e.g., https://example.com/webhook)"
+      }
+      return undefined
+    }
+    case "description":
+      if (value.length > 500) return "Description must be 500 characters or less"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Helpers ------------------------------------------------------------------
 
 function statusCodeBadge(code: number | null | undefined): React.ReactNode {
@@ -126,6 +164,27 @@ function WebhookDetailPage() {
   const [editEvents, setEditEvents] = useState<string[]>([])
   const justSavedRef = useRef(false)
 
+  // -- Inline validation state ------------------------------------------------
+
+  const [fieldErrors, setFieldErrors] = useState<WebhookFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof WebhookFieldErrors, value: string) => {
+    const error = validateWebhookField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof WebhookFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   const formDirty = useMemo(() => {
     if (!editing || !data) return false
     return (
@@ -149,15 +208,29 @@ function WebhookDetailPage() {
     setEditDescription(data.description ?? "")
     setEditActive(data.isActive)
     setEditEvents([...data.events])
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(true)
   }, [data])
 
   const handleCancelEditing = useCallback(() => {
     setEditing(false)
+    setFieldErrors({})
+    touchedRef.current = {}
   }, [])
 
   const handleSaveEditing = useCallback(() => {
     if (!data) return
+
+    // Pre-submit validation
+    const nameErr = validateField("name", editName)
+    const urlErr = validateField("url", editUrl)
+    const descErr = validateField("description", editDescription)
+    for (const f of ["name", "url", "description"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || urlErr || descErr) return
+
     justSavedRef.current = true
     const payload: Record<string, unknown> = {}
     if (editName !== data.name) payload.name = editName
@@ -180,7 +253,7 @@ function WebhookDetailPage() {
         justSavedRef.current = false
       },
     })
-  }, [data, editName, editUrl, editDescription, editActive, editEvents, updateWebhook])
+  }, [data, editName, editUrl, editDescription, editActive, editEvents, updateWebhook, validateField])
 
   // -- Loading state ----------------------------------------------------------
 
@@ -340,7 +413,7 @@ function WebhookDetailPage() {
                 <Button size="sm" variant="outline" onClick={handleCancelEditing} disabled={updateWebhook.isPending}>
                   <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-                <Button size="sm" onClick={handleSaveEditing} disabled={updateWebhook.isPending}>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateWebhook.isPending || hasValidationErrors}>
                   {updateWebhook.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {updateWebhook.isPending ? "Saving..." : "Save changes"}
                 </Button>
@@ -406,7 +479,21 @@ function WebhookDetailPage() {
                 <div>
                   <p className="text-muted-foreground">Name</p>
                   {editing ? (
-                    <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Webhook name" className="mt-1" disabled={updateWebhook.isPending} />
+                    <>
+                      <Input
+                        value={editName}
+                        onChange={(e) => {
+                          setEditName(e.target.value)
+                          if (touchedRef.current.name) validateField("name", e.target.value)
+                        }}
+                        onBlur={() => handleFieldBlur("name", editName)}
+                        placeholder="Webhook name"
+                        className="mt-1"
+                        disabled={updateWebhook.isPending}
+                        aria-invalid={!!fieldErrors.name}
+                      />
+                      <FieldError message={fieldErrors.name} />
+                    </>
                   ) : (
                     <p className="font-medium">{data.name}</p>
                   )}
@@ -416,14 +503,22 @@ function WebhookDetailPage() {
                 <div className="md:col-span-2 lg:col-span-2">
                   <p className="text-muted-foreground">URL</p>
                   {editing ? (
-                    <Input
-                      type="url"
-                      value={editUrl}
-                      onChange={(e) => setEditUrl(e.target.value)}
-                      placeholder="https://example.com/webhook"
-                      className="mt-1 font-mono text-xs"
-                      disabled={updateWebhook.isPending}
-                    />
+                    <>
+                      <Input
+                        type="url"
+                        value={editUrl}
+                        onChange={(e) => {
+                          setEditUrl(e.target.value)
+                          if (touchedRef.current.url) validateField("url", e.target.value)
+                        }}
+                        onBlur={() => handleFieldBlur("url", editUrl)}
+                        placeholder="https://example.com/webhook"
+                        className="mt-1 font-mono text-xs"
+                        disabled={updateWebhook.isPending}
+                        aria-invalid={!!fieldErrors.url}
+                      />
+                      <FieldError message={fieldErrors.url} />
+                    </>
                   ) : (
                     <div className="flex items-center gap-1">
                       <p className="font-mono text-xs break-all">{data.url}</p>
@@ -436,14 +531,22 @@ function WebhookDetailPage() {
                 <div className="md:col-span-2 lg:col-span-3">
                   <p className="text-muted-foreground">Description</p>
                   {editing ? (
-                    <Textarea
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      placeholder="What is this webhook used for?"
-                      className="mt-1 resize-none"
-                      rows={2}
-                      disabled={updateWebhook.isPending}
-                    />
+                    <>
+                      <Textarea
+                        value={editDescription}
+                        onChange={(e) => {
+                          setEditDescription(e.target.value)
+                          if (touchedRef.current.description) validateField("description", e.target.value)
+                        }}
+                        onBlur={() => handleFieldBlur("description", editDescription)}
+                        placeholder="What is this webhook used for?"
+                        className="mt-1 resize-none"
+                        rows={2}
+                        disabled={updateWebhook.isPending}
+                        aria-invalid={!!fieldErrors.description}
+                      />
+                      <FieldError message={fieldErrors.description} />
+                    </>
                   ) : (
                     <p>{data.description || <span className="text-muted-foreground italic">Not set</span>}</p>
                   )}

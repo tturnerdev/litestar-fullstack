@@ -35,8 +35,13 @@ export const Route = createFileRoute("/_app/voice/extensions/new")({
 })
 
 const createExtensionSchema = z.object({
-  extensionNumber: z.string().min(1, "Extension number is required"),
-  displayName: z.string().optional(),
+  extensionNumber: z
+    .string()
+    .min(1, "Extension number is required")
+    .min(2, "Extension number must be at least 2 digits")
+    .max(6, "Extension number must be at most 6 digits")
+    .regex(/^\d+$/, "Extension number must contain only digits"),
+  displayName: z.string().max(100, "Display name must be 100 characters or fewer").optional(),
   isActive: z.boolean(),
   phoneNumberId: z.string().optional(),
 })
@@ -134,9 +139,22 @@ function NewExtensionPage() {
                       <FormItem>
                         <FormLabel>Extension Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="1001" autoFocus {...field} />
+                          <Input
+                            placeholder="1001"
+                            autoFocus
+                            inputMode="numeric"
+                            maxLength={6}
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e)
+                              // Clear the error when the user starts fixing
+                              if (form.formState.errors.extensionNumber) {
+                                form.trigger("extensionNumber")
+                              }
+                            }}
+                          />
                         </FormControl>
-                        <FormDescription>A unique number used to dial this extension internally.</FormDescription>
+                        <FormDescription>A unique 2-6 digit number used to dial this extension internally.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -148,9 +166,25 @@ function NewExtensionPage() {
                       <FormItem>
                         <FormLabel>Display Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Front Desk" {...field} />
+                          <Input
+                            placeholder="Front Desk"
+                            maxLength={100}
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e.target.value.slice(0, 100))
+                            }}
+                          />
                         </FormControl>
-                        <FormDescription>This name appears in the directory and call logs.</FormDescription>
+                        <div className="flex items-center justify-between">
+                          <FormDescription>This name appears in the directory and call logs.</FormDescription>
+                          {(field.value?.length ?? 0) > 0 && (
+                            <span
+                              className={`shrink-0 text-xs ${(field.value?.length ?? 0) >= 100 ? "text-destructive" : (field.value?.length ?? 0) >= 80 ? "text-amber-500" : "text-muted-foreground"}`}
+                            >
+                              {field.value?.length ?? 0}/100
+                            </span>
+                          )}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -32,7 +32,7 @@ const DESC_MAX = 500
 
 const createLocationSchema = z
   .object({
-    name: z.string().min(1, "Location name is required").max(NAME_MAX, "Name must be 100 characters or fewer"),
+    name: z.string().min(1, "Location name is required").min(2, "Name must be at least 2 characters").max(NAME_MAX, "Name must be 100 characters or fewer"),
     locationType: z.enum(["ADDRESSED", "PHYSICAL"], { message: "Location type is required" }),
     description: z.string().max(DESC_MAX, "Description must be 500 characters or fewer").optional(),
     parentId: z.string().optional(),
@@ -43,24 +43,31 @@ const createLocationSchema = z
     postalCode: z.string().optional(),
     country: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.locationType === "ADDRESSED") {
-        return !!data.addressLine1 && !!data.city && !!data.state && !!data.postalCode
+  .superRefine((data, ctx) => {
+    if (data.locationType === "ADDRESSED") {
+      if (!data.addressLine1 || data.addressLine1.trim() === "") {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Address is required", path: ["addressLine1"] })
+      } else if (data.addressLine1.trim().length < 3) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Address must be at least 3 characters", path: ["addressLine1"] })
       }
-      return true
-    },
-    { message: "Address fields are required for addressed locations", path: ["addressLine1"] },
-  )
-  .refine(
-    (data) => {
-      if (data.locationType === "PHYSICAL") {
-        return !!data.parentId
+      if (!data.city || data.city.trim() === "") {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "City is required", path: ["city"] })
       }
-      return true
-    },
-    { message: "A parent location is required for physical locations", path: ["parentId"] },
-  )
+      if (!data.state || data.state.trim() === "") {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "State is required", path: ["state"] })
+      }
+      if (!data.postalCode || data.postalCode.trim() === "") {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Postal code is required", path: ["postalCode"] })
+      } else if (!/^\d{5}(-\d{4})?$/.test(data.postalCode.trim()) && !/^[A-Za-z0-9\s-]{3,10}$/.test(data.postalCode.trim())) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Enter a valid postal code (e.g., 12345 or 12345-6789)", path: ["postalCode"] })
+      }
+    }
+    if (data.locationType === "PHYSICAL") {
+      if (!data.parentId) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "A parent location is required for physical locations", path: ["parentId"] })
+      }
+    }
+  })
 
 type CreateLocationFormData = z.infer<typeof createLocationSchema>
 
@@ -84,6 +91,7 @@ export function CreateLocationForm() {
 
   const form = useForm<CreateLocationFormData>({
     resolver: zodResolver(createLocationSchema),
+    mode: "onTouched",
     defaultValues: {
       name: "",
       locationType: "ADDRESSED",

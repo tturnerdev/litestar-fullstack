@@ -1,5 +1,5 @@
 import { Loader2, Phone } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,27 @@ const DISPLAY_NAME_MAX = 100
 /** Sentinel value used for the "None" phone-number option. */
 const PHONE_NONE = "__none__"
 
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+interface EditExtensionFieldErrors {
+  displayName?: string
+}
+
+function validateEditExtensionField(field: keyof EditExtensionFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "displayName":
+      if (value.length > DISPLAY_NAME_MAX) return `Display name must be ${DISPLAY_NAME_MAX} characters or fewer`
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 interface EditExtensionDialogProps {
   extension: Extension
   open: boolean
@@ -28,12 +49,32 @@ export function EditExtensionDialog({ extension, open, onOpenChange }: EditExten
   const updateExtension = useUpdateExtension(extension.id)
   const { data: phoneNumbers } = usePhoneNumbers(1, 100)
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<EditExtensionFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof EditExtensionFieldErrors, value: string) => {
+    const error = validateEditExtensionField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof EditExtensionFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
   // Reset form state when the dialog opens or the extension changes
   useEffect(() => {
     if (open) {
       setDisplayName(extension.displayName ?? "")
       setIsActive(extension.isActive)
       setPhoneNumberId(extension.phoneNumberId ?? PHONE_NONE)
+      setFieldErrors({})
+      touchedRef.current = {}
     }
   }, [open, extension])
 
@@ -45,8 +86,15 @@ export function EditExtensionDialog({ extension, open, onOpenChange }: EditExten
     return false
   }, [displayName, isActive, phoneNumberId, extension])
 
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate all fields before submit
+    const displayNameErr = validateField("displayName", displayName)
+    touchedRef.current.displayName = true
+    if (displayNameErr) return
 
     const payload: Record<string, unknown> = {}
     if (displayName !== (extension.displayName ?? "")) {
@@ -103,10 +151,19 @@ export function EditExtensionDialog({ extension, open, onOpenChange }: EditExten
               <Input
                 id="edit-ext-name"
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value.slice(0, DISPLAY_NAME_MAX))}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, DISPLAY_NAME_MAX)
+                  setDisplayName(val)
+                  if (touchedRef.current.displayName) {
+                    validateField("displayName", val)
+                  }
+                }}
+                onBlur={() => handleFieldBlur("displayName", displayName)}
                 placeholder="Front Desk"
                 maxLength={DISPLAY_NAME_MAX}
+                aria-invalid={!!fieldErrors.displayName}
               />
+              <FieldError message={fieldErrors.displayName} />
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">Name shown in the directory and call logs.</p>
                 <p
@@ -156,7 +213,7 @@ export function EditExtensionDialog({ extension, open, onOpenChange }: EditExten
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!isDirty || updateExtension.isPending}>
+            <Button type="submit" disabled={!isDirty || hasValidationErrors || updateExtension.isPending}>
               {updateExtension.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {updateExtension.isPending ? "Saving..." : "Save changes"}
             </Button>

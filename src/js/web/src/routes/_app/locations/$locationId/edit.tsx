@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,39 @@ const DESC_MAX = 500
 export const Route = createFileRoute("/_app/locations/$locationId/edit")({
   component: EditLocationPage,
 })
+
+// ── Validation ──────────────────────────────────────────────────────────
+
+interface LocationFieldErrors {
+  name?: string
+  addressLine1?: string
+  city?: string
+  state?: string
+  postalCode?: string
+}
+
+function validateLocationField(field: keyof LocationFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "addressLine1":
+      if (value.trim() === "") return "Address is required"
+      if (value.trim().length < 3) return "Address must be at least 3 characters"
+      return undefined
+    case "city":
+      if (value.trim() === "") return "City is required"
+      return undefined
+    case "state":
+      if (value.trim() === "") return "State is required"
+      return undefined
+    case "postalCode":
+      if (value.trim() === "") return "Postal code is required"
+      if (!/^\d{5}(-\d{4})?$/.test(value.trim()) && !/^[A-Za-z0-9\s-]{3,10}$/.test(value.trim())) return "Enter a valid postal code (e.g., 12345 or 12345-6789)"
+      return undefined
+  }
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -66,15 +99,41 @@ function EditLocationPage() {
   const [initialized, setInitialized] = useState(false)
 
   // Validation state
-  const [nameError, setNameError] = useState<string | undefined>()
-  const [nameTouched, setNameTouched] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<LocationFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof LocationFieldErrors, value: string) => {
+    const error = validateLocationField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof LocationFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof LocationFieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
 
   // Reset form state when navigating to a different location
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setInitialized(false)
-    setNameTouched(false)
-    setNameError(undefined)
+    setFieldErrors({})
+    touchedRef.current = {}
   }, [locationId])
 
   // Pre-populate form fields when data loads
@@ -119,34 +178,29 @@ function EditLocationPage() {
     withResolver: true,
   })
 
-  // ── Validation ──────────────────────────────────────────────────────
-
-  const validateName = (value: string) => {
-    const error = value.trim() === "" ? "Name is required" : undefined
-    setNameError(error)
-    return error
-  }
-
-  const handleNameChange = (value: string) => {
-    setName(value)
-    if (nameTouched) validateName(value)
-  }
-
-  const handleNameBlur = () => {
-    setNameTouched(true)
-    validateName(name)
-  }
-
   // ── Submit ──────────────────────────────────────────────────────────
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!data) return
 
-    // Validate
-    const error = validateName(name)
-    setNameTouched(true)
-    if (error) return
+    // Validate all required fields before submit
+    const nameErr = validateField("name", name)
+    touchedRef.current.name = true
+
+    let addressErrs = false
+    if (data.locationType === "ADDRESSED") {
+      const addr1Err = validateField("addressLine1", addressLine1)
+      const cityErr = validateField("city", city)
+      const stateErr = validateField("state", state)
+      const postalErr = validateField("postalCode", postalCode)
+      for (const f of ["addressLine1", "city", "state", "postalCode"] as const) {
+        touchedRef.current[f] = true
+      }
+      addressErrs = !!(addr1Err || cityErr || stateErr || postalErr)
+    }
+
+    if (nameErr || addressErrs) return
 
     const payload: LocationUpdate = {}
 
@@ -180,7 +234,7 @@ function EditLocationPage() {
     })
   }
 
-  const isValid = name.trim() !== ""
+  const isValid = name.trim().length >= 2 && !hasValidationErrors
   const isAddressed = data?.locationType === "ADDRESSED"
 
   // ── Loading state ───────────────────────────────────────────────────
@@ -285,14 +339,14 @@ function EditLocationPage() {
                     id="location-name"
                     placeholder="e.g., Main Office"
                     value={name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    onBlur={handleNameBlur}
-                    aria-invalid={!!nameError}
+                    onChange={(e) => handleFieldChange("name", e.target.value, setName)}
+                    onBlur={() => handleFieldBlur("name", name)}
+                    aria-invalid={!!fieldErrors.name}
                     maxLength={NAME_MAX}
                     required
                   />
                   <div className="flex items-center justify-between">
-                    {nameError ? <FieldError message={nameError} /> : <FieldHint>A descriptive name for this location.</FieldHint>}
+                    {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <FieldHint>A descriptive name for this location.</FieldHint>}
                     <p
                       className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}
                     >
@@ -333,8 +387,18 @@ function EditLocationPage() {
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="location-address1">Address Line 1</Label>
-                        <Input id="location-address1" placeholder="e.g., 123 Main Street" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} />
+                        <Label htmlFor="location-address1">
+                          Address Line 1 <RequiredMark />
+                        </Label>
+                        <Input
+                          id="location-address1"
+                          placeholder="e.g., 123 Main Street"
+                          value={addressLine1}
+                          onChange={(e) => handleFieldChange("addressLine1", e.target.value, setAddressLine1)}
+                          onBlur={() => handleFieldBlur("addressLine1", addressLine1)}
+                          aria-invalid={!!fieldErrors.addressLine1}
+                        />
+                        <FieldError message={fieldErrors.addressLine1} />
                       </div>
 
                       <div className="space-y-2">
@@ -344,19 +408,49 @@ function EditLocationPage() {
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="location-city">City</Label>
-                          <Input id="location-city" placeholder="e.g., San Francisco" value={city} onChange={(e) => setCity(e.target.value)} />
+                          <Label htmlFor="location-city">
+                            City <RequiredMark />
+                          </Label>
+                          <Input
+                            id="location-city"
+                            placeholder="e.g., San Francisco"
+                            value={city}
+                            onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
+                            onBlur={() => handleFieldBlur("city", city)}
+                            aria-invalid={!!fieldErrors.city}
+                          />
+                          <FieldError message={fieldErrors.city} />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="location-state">State</Label>
-                          <Input id="location-state" placeholder="e.g., CA" value={state} onChange={(e) => setState(e.target.value)} />
+                          <Label htmlFor="location-state">
+                            State <RequiredMark />
+                          </Label>
+                          <Input
+                            id="location-state"
+                            placeholder="e.g., CA"
+                            value={state}
+                            onChange={(e) => handleFieldChange("state", e.target.value, setState)}
+                            onBlur={() => handleFieldBlur("state", state)}
+                            aria-invalid={!!fieldErrors.state}
+                          />
+                          <FieldError message={fieldErrors.state} />
                         </div>
                       </div>
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="location-postal">Postal Code</Label>
-                          <Input id="location-postal" placeholder="e.g., 94105" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
+                          <Label htmlFor="location-postal">
+                            Postal Code <RequiredMark />
+                          </Label>
+                          <Input
+                            id="location-postal"
+                            placeholder="e.g., 94105"
+                            value={postalCode}
+                            onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)}
+                            onBlur={() => handleFieldBlur("postalCode", postalCode)}
+                            aria-invalid={!!fieldErrors.postalCode}
+                          />
+                          <FieldError message={fieldErrors.postalCode} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="location-country">Country</Label>
