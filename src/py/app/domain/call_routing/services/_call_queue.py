@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 
 from app.db import models as m
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 
 class CallQueueService(service.SQLAlchemyAsyncRepositoryService[m.CallQueue]):
@@ -28,3 +34,14 @@ class CallQueueMemberService(service.SQLAlchemyAsyncRepositoryService[m.CallQueu
         model_type = m.CallQueueMember
 
     repository_type = Repo
+
+    async def to_model_on_create(self, data: ModelDictT[m.CallQueueMember]) -> ModelDictT[m.CallQueueMember]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                m.CallQueueMember.call_queue_id == data["call_queue_id"],
+                m.CallQueueMember.extension_id == data["extension_id"],
+            )
+            if existing:
+                raise ValidationException("This extension is already a member of this call queue.")
+        return data

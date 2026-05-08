@@ -17,7 +17,11 @@ export function SortableHeader({ label, sortKey, currentSort, currentDirection, 
   const isActive = currentSort === sortKey
 
   return (
-    <TableHead className={cn("cursor-pointer select-none", className)} onClick={() => onSort(sortKey)}>
+    <TableHead
+      className={cn("cursor-pointer select-none", className)}
+      onClick={() => onSort(sortKey)}
+      aria-sort={isActive ? (currentDirection === "asc" ? "ascending" : "descending") : "none"}
+    >
       <div className="flex items-center gap-1">
         {label}
         {isActive && currentDirection === "asc" ? (

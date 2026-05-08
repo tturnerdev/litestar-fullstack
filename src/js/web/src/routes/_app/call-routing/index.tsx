@@ -27,6 +27,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
@@ -413,6 +414,17 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [timeConditionToDelete, setTimeConditionToDelete] = useState<{ id: string; name: string } | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
@@ -435,6 +447,16 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
   const items = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
+
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return items
+    return [...items].sort((a, b) => {
+      const aVal = (a as unknown as Record<string, unknown>)[sortKey] ?? ""
+      const bVal = (b as unknown as Record<string, unknown>)[sortKey] ?? ""
+      const cmp = String(aVal).localeCompare(String(bVal), undefined, { numeric: true })
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [items, sortKey, sortDir])
 
   const allVisibleIds = useMemo(() => items.map((tc) => tc.id), [items])
   const allSelected = items.length > 0 && items.every((tc) => selectedIds.has(tc.id))
@@ -558,15 +580,29 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
                   <TableHead className="w-10">
                     <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all time conditions" />
                   </TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Match Destination</TableHead>
-                  <TableHead className="hidden md:table-cell">No Match Destination</TableHead>
-                  <TableHead className="hidden lg:table-cell">Override</TableHead>
+                  <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader
+                    label="Match Destination"
+                    sortKey="matchDestination"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                    className="hidden md:table-cell"
+                  />
+                  <SortableHeader
+                    label="No Match Destination"
+                    sortKey="noMatchDestination"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                    className="hidden md:table-cell"
+                  />
+                  <SortableHeader label="Override" sortKey="overrideMode" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden lg:table-cell" />
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((tc: TimeCondition, index: number) => (
+                {sortedItems.map((tc: TimeCondition, index: number) => (
                   <TableRow
                     key={tc.id}
                     data-state={selectedIds.has(tc.id) ? "selected" : undefined}
@@ -700,6 +736,17 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [ivrMenuToDelete, setIvrMenuToDelete] = useState<{ id: string; name: string } | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
@@ -722,6 +769,23 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
   const items = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
+
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return items
+    return [...items].sort((a, b) => {
+      let aVal: unknown
+      let bVal: unknown
+      if (sortKey === "options") {
+        aVal = a.options?.length ?? 0
+        bVal = b.options?.length ?? 0
+      } else {
+        aVal = (a as unknown as Record<string, unknown>)[sortKey] ?? ""
+        bVal = (b as unknown as Record<string, unknown>)[sortKey] ?? ""
+      }
+      const cmp = String(aVal).localeCompare(String(bVal), undefined, { numeric: true })
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [items, sortKey, sortDir])
 
   const allVisibleIds = useMemo(() => items.map((ivr) => ivr.id), [items])
   const allSelected = items.length > 0 && items.every((ivr) => selectedIds.has(ivr.id))
@@ -845,15 +909,15 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
                   <TableHead className="w-10">
                     <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all IVR menus" />
                   </TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Greeting</TableHead>
-                  <TableHead className="hidden md:table-cell">Options</TableHead>
-                  <TableHead className="hidden lg:table-cell">Timeout</TableHead>
+                  <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Greeting" sortKey="greetingType" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  <SortableHeader label="Options" sortKey="options" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  <SortableHeader label="Timeout" sortKey="timeoutSeconds" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden lg:table-cell" />
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((ivr: IvrMenu, index: number) => (
+                {sortedItems.map((ivr: IvrMenu, index: number) => (
                   <TableRow
                     key={ivr.id}
                     data-state={selectedIds.has(ivr.id) ? "selected" : undefined}
@@ -982,6 +1046,17 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [callQueueToDelete, setCallQueueToDelete] = useState<{ id: string; name: string } | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
@@ -1004,6 +1079,23 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
   const items = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
+
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return items
+    return [...items].sort((a, b) => {
+      let aVal: unknown
+      let bVal: unknown
+      if (sortKey === "members") {
+        aVal = a.members?.length ?? 0
+        bVal = b.members?.length ?? 0
+      } else {
+        aVal = (a as unknown as Record<string, unknown>)[sortKey] ?? ""
+        bVal = (b as unknown as Record<string, unknown>)[sortKey] ?? ""
+      }
+      const cmp = String(aVal).localeCompare(String(bVal), undefined, { numeric: true })
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [items, sortKey, sortDir])
 
   const allVisibleIds = useMemo(() => items.map((q) => q.id), [items])
   const allSelected = items.length > 0 && items.every((q) => selectedIds.has(q.id))
@@ -1127,16 +1219,16 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
                   <TableHead className="w-10">
                     <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all call queues" />
                   </TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Number</TableHead>
-                  <TableHead>Strategy</TableHead>
-                  <TableHead className="hidden md:table-cell">Members</TableHead>
-                  <TableHead className="hidden lg:table-cell">Ring Time</TableHead>
+                  <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  <SortableHeader label="Strategy" sortKey="strategy" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Members" sortKey="members" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  <SortableHeader label="Ring Time" sortKey="ringTime" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden lg:table-cell" />
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((q: CallQueue, index: number) => (
+                {sortedItems.map((q: CallQueue, index: number) => (
                   <TableRow
                     key={q.id}
                     data-state={selectedIds.has(q.id) ? "selected" : undefined}
@@ -1271,6 +1363,17 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [ringGroupToDelete, setRingGroupToDelete] = useState<{ id: string; name: string } | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
@@ -1293,6 +1396,23 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
   const items = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
+
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return items
+    return [...items].sort((a, b) => {
+      let aVal: unknown
+      let bVal: unknown
+      if (sortKey === "members") {
+        aVal = a.members?.length ?? 0
+        bVal = b.members?.length ?? 0
+      } else {
+        aVal = (a as unknown as Record<string, unknown>)[sortKey] ?? ""
+        bVal = (b as unknown as Record<string, unknown>)[sortKey] ?? ""
+      }
+      const cmp = String(aVal).localeCompare(String(bVal), undefined, { numeric: true })
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [items, sortKey, sortDir])
 
   const allVisibleIds = useMemo(() => items.map((rg) => rg.id), [items])
   const allSelected = items.length > 0 && items.every((rg) => selectedIds.has(rg.id))
@@ -1416,16 +1536,16 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
                   <TableHead className="w-10">
                     <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all ring groups" />
                   </TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Number</TableHead>
-                  <TableHead>Strategy</TableHead>
-                  <TableHead className="hidden md:table-cell">Members</TableHead>
-                  <TableHead className="hidden lg:table-cell">Ring Time</TableHead>
+                  <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  <SortableHeader label="Strategy" sortKey="strategy" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Members" sortKey="members" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  <SortableHeader label="Ring Time" sortKey="ringTime" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden lg:table-cell" />
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((rg: RingGroup, index: number) => (
+                {sortedItems.map((rg: RingGroup, index: number) => (
                   <TableRow
                     key={rg.id}
                     data-state={selectedIds.has(rg.id) ? "selected" : undefined}

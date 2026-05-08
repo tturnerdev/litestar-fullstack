@@ -7,6 +7,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -28,23 +29,33 @@ function VoiceOverviewPage() {
         breadcrumbs={<VoiceBreadcrumbs />}
       />
       <PageSection>
-        <SummaryCards />
+        <SectionErrorBoundary name="Summary Cards">
+          <SummaryCards />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.1}>
-        <VoiceResourceCharts />
+        <SectionErrorBoundary name="Voice Resource Charts">
+          <VoiceResourceCharts />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.15}>
-        <StatusOverview />
+        <SectionErrorBoundary name="Status Overview">
+          <StatusOverview />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.25}>
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold tracking-tight">Quick Actions</h2>
-          <p className="text-sm text-muted-foreground">Jump to the section you need</p>
-        </div>
-        <QuickLinks />
+        <SectionErrorBoundary name="Quick Actions">
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold tracking-tight">Quick Actions</h2>
+            <p className="text-sm text-muted-foreground">Jump to the section you need</p>
+          </div>
+          <QuickLinks />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection delay={0.35}>
-        <RecentExtensions />
+        <SectionErrorBoundary name="Recent Extensions">
+          <RecentExtensions />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )
