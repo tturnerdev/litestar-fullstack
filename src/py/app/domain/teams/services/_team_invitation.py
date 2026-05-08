@@ -22,6 +22,8 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
     ) -> service.ModelDictT[m.TeamInvitation]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            if "email" in data:
+                data["email"] = data["email"].strip().lower()
             existing = await self.repository.list(
                 m.TeamInvitation.team_id == data["team_id"],
                 m.TeamInvitation.email == data["email"],
@@ -34,6 +36,8 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
         self, data: service.ModelDictT[m.TeamInvitation]
     ) -> service.ModelDictT[m.TeamInvitation]:
         data = service.schema_dump(data)
+        if service.is_dict(data) and "email" in data:
+            data["email"] = data["email"].strip().lower()
         return await self._populate_inviter(data)
 
     async def to_model_on_upsert(

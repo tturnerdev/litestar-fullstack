@@ -40,16 +40,22 @@ class TeamService(
 
     async def to_model_on_create(self, data: ModelDictT[m.Team]) -> ModelDictT[m.Team]:
         data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
         data = await self._populate_slug(data)
         return await self._populate_with_owner_and_tags(data, "create")
 
     async def to_model_on_update(self, data: ModelDictT[m.Team]) -> ModelDictT[m.Team]:
         data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
         data = await self._populate_slug(data)
         return await self._populate_with_owner_and_tags(data, "update")
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Team]) -> ModelDictT[m.Team]:
         data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
         data = await self._populate_slug(data)
         return await self._populate_with_owner_and_tags(data, "upsert")
 

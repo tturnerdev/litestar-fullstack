@@ -216,7 +216,9 @@ export function useUpdateNotificationPreferences() {
       if (context?.previous) {
         queryClient.setQueryData(PREFERENCES_QUERY_KEY, context.previous)
       }
-      toast.error("Failed to update notification preferences")
+      toast.error("Failed to update notification preferences", {
+        description: _err instanceof Error ? _err.message : undefined,
+      })
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: PREFERENCES_QUERY_KEY })
