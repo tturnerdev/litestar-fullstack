@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.352.0 (2026-05-08)
+
+### Fixed
+- **Name whitespace bypass (round 2)** — Strip leading/trailing whitespace from names before duplicate checks in call queue, IVR menu, ring group, time condition, role, webhook, and music on hold services — completing coverage across all name-validated services
+
 ## v0.351.0 (2026-05-08)
 
 ### Fixed

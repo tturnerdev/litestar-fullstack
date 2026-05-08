@@ -28,6 +28,7 @@ class IvrMenuService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenu]):
     async def to_model_on_create(self, data: ModelDictT[m.IvrMenu]) -> ModelDictT[m.IvrMenu]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["name"] = data["name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
@@ -38,6 +39,7 @@ class IvrMenuService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenu]):
     async def to_model_on_update(self, data: ModelDictT[m.IvrMenu], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.IvrMenu]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )

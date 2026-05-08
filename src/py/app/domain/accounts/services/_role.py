@@ -29,6 +29,7 @@ class RoleService(AutoSlugServiceMixin[m.Role], service.SQLAlchemyAsyncRepositor
     ) -> service.ModelDictT[m.Role]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["name"] = data["name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
@@ -40,6 +41,7 @@ class RoleService(AutoSlugServiceMixin[m.Role], service.SQLAlchemyAsyncRepositor
         """Validate that no other role with the same name already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )

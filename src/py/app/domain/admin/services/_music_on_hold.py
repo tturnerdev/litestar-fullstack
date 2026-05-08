@@ -28,6 +28,7 @@ class MusicOnHoldService(service.SQLAlchemyAsyncRepositoryService[m.MusicOnHold]
     async def to_model_on_create(self, data: ModelDictT[m.MusicOnHold]) -> ModelDictT[m.MusicOnHold]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["name"] = data["name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
@@ -38,6 +39,7 @@ class MusicOnHoldService(service.SQLAlchemyAsyncRepositoryService[m.MusicOnHold]
     async def to_model_on_update(self, data: ModelDictT[m.MusicOnHold], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.MusicOnHold]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
