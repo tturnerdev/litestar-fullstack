@@ -3019,6 +3019,8 @@
             "type": "string"
           },
           "connectionType": {
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "credentials": {
@@ -3071,6 +3073,8 @@
             ]
           },
           "provider": {
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "settings": {
@@ -3373,6 +3377,8 @@
             ]
           },
           "connectionType": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -3436,6 +3442,8 @@
             ]
           },
           "provider": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -9122,6 +9130,7 @@
           },
           "destinationNumber": {
             "maxLength": 20,
+            "minLength": 1,
             "type": "string"
           },
           "faxNumberId": {
@@ -10836,6 +10845,8 @@
           },
           "maxMessageLengthSeconds": {
             "default": 120,
+            "maximum": 600.0,
+            "minimum": 10.0,
             "type": "integer"
           },
           "pin": {
@@ -10920,6 +10931,8 @@
             ]
           },
           "maxMessageLengthSeconds": {
+            "maximum": 600,
+            "minimum": 10,
             "oneOf": [
               {
                 "type": "integer"
@@ -13263,7 +13276,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13284,7 +13297,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13326,7 +13339,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13652,7 +13665,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13673,7 +13686,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13715,7 +13728,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14039,7 +14052,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14060,7 +14073,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14102,7 +14115,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14420,7 +14433,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14441,7 +14454,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14483,7 +14496,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [

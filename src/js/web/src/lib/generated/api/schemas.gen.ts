@@ -2930,6 +2930,8 @@ export const ConnectionCreateSchema = {
       type: "string",
     },
     connectionType: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     credentials: {
@@ -2982,6 +2984,8 @@ export const ConnectionCreateSchema = {
       ],
     },
     provider: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     settings: {
@@ -3276,6 +3280,8 @@ export const ConnectionUpdateSchema = {
       ],
     },
     connectionType: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -3339,6 +3345,8 @@ export const ConnectionUpdateSchema = {
       ],
     },
     provider: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8867,6 +8875,7 @@ export const SendFaxSchema = {
     },
     destinationNumber: {
       maxLength: 20,
+      minLength: 1,
       type: "string",
     },
     faxNumberId: {
@@ -10491,6 +10500,8 @@ export const VoicemailBoxCreateSchema = {
     },
     maxMessageLengthSeconds: {
       default: 120,
+      maximum: 600,
+      minimum: 10,
       type: "integer",
     },
     pin: {
@@ -10574,6 +10585,8 @@ export const VoicemailBoxUpdateSchema = {
       ],
     },
     maxMessageLengthSeconds: {
+      maximum: 600,
+      minimum: 10,
       oneOf: [
         {
           type: "integer",
