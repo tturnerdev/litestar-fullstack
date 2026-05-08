@@ -674,6 +674,8 @@ function WebhookDetailPage() {
                         className="mt-1"
                         disabled={updateWebhook.isPending}
                         aria-invalid={!!fieldErrors.name}
+                        required
+                        maxLength={100}
                       />
                       <FieldError message={fieldErrors.name} />
                     </>
@@ -699,6 +701,8 @@ function WebhookDetailPage() {
                         className="mt-1 font-mono text-xs"
                         disabled={updateWebhook.isPending}
                         aria-invalid={!!fieldErrors.url}
+                        required
+                        maxLength={500}
                       />
                       <FieldError message={fieldErrors.url} />
                     </>

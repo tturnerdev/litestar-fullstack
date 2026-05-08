@@ -124,12 +124,12 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-user-name">Name</Label>
-            <Input id="edit-user-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
+            <Input id="edit-user-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" maxLength={100} />
             <p className="text-xs text-muted-foreground">User's display name</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-user-username">Username</Label>
-            <Input id="edit-user-username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" />
+            <Input id="edit-user-username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" maxLength={30} />
             <p className="text-xs text-muted-foreground">Login username</p>
           </div>
           <div className="flex items-center justify-between">

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.360.0 (2026-05-08)
+
+### Fixed
+- **Webhook edit form validation** — Add missing `required` and `maxLength` attributes to name (100) and URL (500) inputs on webhook detail edit form
+- **Admin user form constraints** — Add `maxLength` to name (100) and username (30) inputs in admin edit user dialog, matching database column limits
+
 ## v0.359.0 (2026-05-08)
 
 ### Enhanced
