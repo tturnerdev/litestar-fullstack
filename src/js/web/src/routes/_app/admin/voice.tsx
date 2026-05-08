@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowRight, Download, Hash, Phone, PhoneOff, Search, Signal, X } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminExtensions, useAdminPhoneNumbers, useAdminVoiceStats } from "@/lib/api/hooks/admin"
@@ -125,9 +126,58 @@ function AdminVoicePage() {
     refetchExtensions()
   }, [refetchStats, refetchPhones, refetchExtensions])
 
-  const phoneNumbers = phoneData?.items ?? []
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
+  const rawPhoneNumbers = phoneData?.items ?? []
   const phoneTotal = phoneData?.total ?? 0
   const phoneTotalPages = Math.max(1, Math.ceil(phoneTotal / PAGE_SIZE))
+
+  // Client-side sorting for phone numbers
+  const phoneNumbers = useMemo(() => {
+    if (!sortKey || !sortDir) return rawPhoneNumbers
+    const sorted = [...rawPhoneNumbers]
+    sorted.sort((a, b) => {
+      let cmp: number
+      switch (sortKey) {
+        case "number":
+          cmp = a.number.localeCompare(b.number, undefined, { numeric: true })
+          break
+        case "label":
+          cmp = (a.label ?? "").toLowerCase().localeCompare((b.label ?? "").toLowerCase())
+          break
+        case "type":
+          cmp = a.numberType.toLowerCase().localeCompare(b.numberType.toLowerCase())
+          break
+        case "team":
+          cmp = (a.teamName ?? "").toLowerCase().localeCompare((b.teamName ?? "").toLowerCase())
+          break
+        case "owner":
+          cmp = (a.ownerEmail ?? "").toLowerCase().localeCompare((b.ownerEmail ?? "").toLowerCase())
+          break
+        case "status": {
+          const aStatus = a.isActive ? "active" : "inactive"
+          const bStatus = b.isActive ? "active" : "inactive"
+          cmp = aStatus.localeCompare(bStatus)
+          break
+        }
+        default:
+          return 0
+      }
+      return sortDir === "asc" ? cmp : -cmp
+    })
+    return sorted
+  }, [rawPhoneNumbers, sortKey, sortDir])
 
   const typedExtensions = (Array.isArray(extensions) ? extensions : []) as AdminExtensionSummary[]
   const recentExtensions = typedExtensions.slice(0, 8)
@@ -291,12 +341,12 @@ function AdminVoicePage() {
                     <Table aria-label="Phone numbers">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Number</TableHead>
-                          <TableHead>Label</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Team</TableHead>
-                          <TableHead>Owner</TableHead>
-                          <TableHead>Status</TableHead>
+                          <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Label" sortKey="label" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Type" sortKey="type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Team" sortKey="team" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Owner" sortKey="owner" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                         </TableRow>
                       </TableHeader>
                       <TableBody>

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Check, Download, Loader2, Music, Plus, Search, Trash2, X } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -27,6 +27,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
@@ -284,6 +285,19 @@ function AdminMusicOnHoldPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   // Sync URL when debounced search value settles
   useEffect(() => {
     setPage(1)
@@ -304,9 +318,54 @@ function AdminMusicOnHoldPage() {
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminMusicOnHold(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteMutation = useDeleteMusicOnHold()
 
-  const items = data?.items ?? []
+  const rawItems = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // Client-side sorting
+  const items = useMemo(() => {
+    if (!sortKey || !sortDir) return rawItems
+    const sorted = [...rawItems]
+    sorted.sort((a, b) => {
+      switch (sortKey) {
+        case "name": {
+          const aVal = a.name.toLowerCase()
+          const bVal = b.name.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "category": {
+          const aVal = a.category.toLowerCase()
+          const bVal = b.category.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "files": {
+          const aVal = a.fileCount
+          const bVal = b.fileCount
+          return sortDir === "asc" ? aVal - bVal : bVal - aVal
+        }
+        case "isDefault": {
+          const aVal = a.isDefault ? 1 : 0
+          const bVal = b.isDefault ? 1 : 0
+          return sortDir === "asc" ? aVal - bVal : bVal - aVal
+        }
+        case "isActive": {
+          const aVal = a.isActive ? 1 : 0
+          const bVal = b.isActive ? 1 : 0
+          return sortDir === "asc" ? aVal - bVal : bVal - aVal
+        }
+        case "createdAt": {
+          const aVal = a.createdAt
+          const bVal = b.createdAt
+          if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+          if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+          return 0
+        }
+        default:
+          return 0
+      }
+    })
+    return sorted
+  }, [rawItems, sortKey, sortDir])
 
   const handleExport = useCallback(() => {
     exportToCsv("music-on-hold", csvHeaders, items)
@@ -403,12 +462,12 @@ function AdminMusicOnHoldPage() {
                     <Table aria-label="Music on Hold classes">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Files</TableHead>
-                          <TableHead>Default</TableHead>
-                          <TableHead>Active</TableHead>
-                          <TableHead>Created</TableHead>
+                          <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Category" sortKey="category" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Files" sortKey="files" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Default" sortKey="isDefault" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Active" sortKey="isActive" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                           <TableHead className="w-[60px]" />
                         </TableRow>
                       </TableHeader>

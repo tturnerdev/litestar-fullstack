@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Check, Cpu, Download, Loader2, Plus, Search, Trash2, X } from "lucide-react"
+import { AlertCircle, AlertTriangle, Check, Cpu, Download, Loader2, Plus, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
@@ -20,6 +20,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -92,6 +93,26 @@ const csvHeaders: CsvHeader<DeviceTemplateList>[] = [
   { label: "Created At", accessor: (t) => t.createdAt },
   { label: "Updated At", accessor: (t) => t.updatedAt },
 ]
+
+// ── Column visibility ────────────────────────────────────────────────────
+
+const COLUMN_VISIBILITY_KEY = "device-templates-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "type", label: "Type" },
+  { key: "active", label: "Active" },
+  { key: "created", label: "Created" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Create / Edit Dialog
@@ -365,6 +386,17 @@ function AdminDeviceTemplatesPage() {
     [sortKey, sortDir],
   )
 
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
   // Persist page size preference
   const handlePageSizeChange = useCallback((value: string) => {
     const size = Number(value)
@@ -446,6 +478,23 @@ function AdminDeviceTemplatesPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExport} disabled={!templates.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -534,9 +583,9 @@ function AdminDeviceTemplatesPage() {
                           <SortableHeader label="Display Name" sortKey="displayName" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                           <TableHead>Manufacturer</TableHead>
                           <TableHead>Model</TableHead>
-                          <SortableHeader label="Type" sortKey="deviceType" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <TableHead>Active</TableHead>
-                          <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          {isColumnVisible("type") && <SortableHeader label="Type" sortKey="deviceType" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("active") && <TableHead>Active</TableHead>}
+                          {isColumnVisible("created") && <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                           <TableHead className="w-[60px]" />
                         </TableRow>
                       </TableHeader>
@@ -550,11 +599,15 @@ function AdminDeviceTemplatesPage() {
                             <TableCell className="font-medium">{tmpl.displayName}</TableCell>
                             <TableCell className="text-muted-foreground">{tmpl.manufacturer}</TableCell>
                             <TableCell className="text-muted-foreground">{tmpl.model}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{deviceTypeLabels[tmpl.deviceType] ?? tmpl.deviceType}</Badge>
-                            </TableCell>
-                            <TableCell>{tmpl.isActive ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-muted-foreground" />}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">{formatDateTime(tmpl.createdAt)}</TableCell>
+                            {isColumnVisible("type") && (
+                              <TableCell>
+                                <Badge variant="outline">{deviceTypeLabels[tmpl.deviceType] ?? tmpl.deviceType}</Badge>
+                              </TableCell>
+                            )}
+                            {isColumnVisible("active") && (
+                              <TableCell>{tmpl.isActive ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-muted-foreground" />}</TableCell>
+                            )}
+                            {isColumnVisible("created") && <TableCell className="text-muted-foreground text-sm">{formatDateTime(tmpl.createdAt)}</TableCell>}
                             <TableCell>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>

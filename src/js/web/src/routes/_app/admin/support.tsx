@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowRight, CheckCircle2, Clock, Download, Loader2, Lock, Search, TicketCheck, X } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
@@ -145,9 +146,52 @@ function AdminSupportPage() {
     refetchTickets()
   }, [refetchStats, refetchTickets])
 
-  const tickets = data?.items ?? []
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
+  const rawTickets = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // Client-side sorting
+  const tickets = useMemo(() => {
+    if (!sortKey || !sortDir) return rawTickets
+    const sorted = [...rawTickets]
+    sorted.sort((a, b) => {
+      let cmp: number
+      switch (sortKey) {
+        case "ticketNumber":
+          cmp = a.ticketNumber.localeCompare(b.ticketNumber, undefined, { numeric: true })
+          break
+        case "subject":
+          cmp = a.subject.toLowerCase().localeCompare(b.subject.toLowerCase())
+          break
+        case "priority":
+          cmp = (a.priority ?? "").toLowerCase().localeCompare((b.priority ?? "").toLowerCase())
+          break
+        case "status":
+          cmp = (a.status ?? "").toLowerCase().localeCompare((b.status ?? "").toLowerCase())
+          break
+        case "createdAt":
+          cmp = a.createdAt.localeCompare(b.createdAt)
+          break
+        default:
+          return 0
+      }
+      return sortDir === "asc" ? cmp : -cmp
+    })
+    return sorted
+  }, [rawTickets, sortKey, sortDir])
 
   const recentTickets = tickets.slice(0, 8)
 
@@ -269,11 +313,11 @@ function AdminSupportPage() {
                   <Table aria-label="Recent support tickets">
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Ticket #</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Created</TableHead>
+                        <SortableHeader label="Ticket #" sortKey="ticketNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -400,13 +444,13 @@ function AdminSupportPage() {
                     <Table aria-label="All support tickets">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Ticket #</TableHead>
-                          <TableHead>Subject</TableHead>
+                          <SortableHeader label="Ticket #" sortKey="ticketNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                           <TableHead>Creator</TableHead>
                           <TableHead>Assigned To</TableHead>
-                          <TableHead>Priority</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Created</TableHead>
+                          <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                         </TableRow>
                       </TableHeader>
                       <TableBody>
