@@ -144,9 +144,9 @@ class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
 
 
 class ProfileUpdate(CamelizedBaseStruct, omit_defaults=True):
-    name: str | msgspec.UnsetType | None = msgspec.UNSET
-    username: str | msgspec.UnsetType | None = msgspec.UNSET
-    phone: str | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    username: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
 
     def __post_init__(self) -> None:
         """Validate fields if provided."""

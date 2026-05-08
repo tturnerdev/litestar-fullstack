@@ -3871,9 +3871,13 @@ export const DeviceLineAssignmentInputSchema = {
 export const DeviceTemplateCreateSchema = {
   properties: {
     deviceType: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     displayName: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     imageUrl: {
@@ -3891,9 +3895,13 @@ export const DeviceTemplateCreateSchema = {
       type: "boolean",
     },
     manufacturer: {
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
     model: {
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
     provisioningTemplate: {
@@ -4136,6 +4144,8 @@ export const DeviceTemplateLookupSchema = {
 export const DeviceTemplateUpdateSchema = {
   properties: {
     deviceType: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4143,6 +4153,8 @@ export const DeviceTemplateUpdateSchema = {
       ],
     },
     displayName: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4167,6 +4179,8 @@ export const DeviceTemplateUpdateSchema = {
       ],
     },
     manufacturer: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4174,6 +4188,8 @@ export const DeviceTemplateUpdateSchema = {
       ],
     },
     model: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -5650,6 +5666,8 @@ export const FeatureAreaSchema = {
 export const ForgotPasswordRequestSchema = {
   properties: {
     email: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
   },
@@ -7956,12 +7974,18 @@ export const RedisInfoSchema = {
 export const ResetPasswordRequestSchema = {
   properties: {
     password: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     password_confirm: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     token: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
   },
@@ -8296,6 +8320,8 @@ export const RoleSchema = {
 export const RoleCreateSchema = {
   properties: {
     name: {
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
   },
@@ -9221,6 +9247,8 @@ export const TeamInvitationSchema = {
 export const TeamInvitationCreateSchema = {
   properties: {
     email: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     role: {

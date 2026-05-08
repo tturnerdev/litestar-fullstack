@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -30,10 +31,10 @@ class NotificationCreate(CamelizedBaseStruct):
     """Schema for creating a notification (internal use)."""
 
     user_id: UUID
-    title: str
-    message: str
-    category: str
-    action_url: str | None = None
+    title: Annotated[str, Meta(min_length=1, max_length=255)]
+    message: Annotated[str, Meta(min_length=1, max_length=5000)]
+    category: Annotated[str, Meta(min_length=1, max_length=50)]
+    action_url: Annotated[str, Meta(max_length=2048)] | None = None
     metadata_: dict[str, Any] | None = None
 
 

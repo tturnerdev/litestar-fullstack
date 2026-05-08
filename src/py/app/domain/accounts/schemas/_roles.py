@@ -1,9 +1,11 @@
 """Role-related schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -34,8 +36,8 @@ class Role(CamelizedBaseStruct):
 
 
 class RoleCreate(CamelizedBaseStruct):
-    name: str
+    name: Annotated[str, Meta(min_length=1, max_length=100)]
 
 
 class RoleUpdate(CamelizedBaseStruct, omit_defaults=True):
-    name: str | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET

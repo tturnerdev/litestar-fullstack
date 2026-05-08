@@ -1,9 +1,11 @@
 """Admin team schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.domain.accounts.schemas import User
 from app.lib.schema import CamelizedBaseStruct
@@ -56,6 +58,6 @@ class AdminTeamDetail(CamelizedBaseStruct, kw_only=True):
 class AdminTeamUpdate(msgspec.Struct, gc=False, omit_defaults=True):
     """Update payload for admin team management."""
 
-    name: str | msgspec.UnsetType | None = msgspec.UNSET
-    description: str | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

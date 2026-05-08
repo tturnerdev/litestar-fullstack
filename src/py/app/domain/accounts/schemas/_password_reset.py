@@ -1,8 +1,10 @@
 """Password reset schemas."""
 
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 from app.lib.validation import validate_email, validate_password
@@ -11,7 +13,7 @@ from app.lib.validation import validate_email, validate_password
 class ForgotPasswordRequest(msgspec.Struct, gc=False, omit_defaults=True):
     """Request to initiate password reset flow."""
 
-    email: str
+    email: Annotated[str, Meta(min_length=1, max_length=255)]
 
     def __post_init__(self) -> None:
         """Validate email."""
@@ -28,7 +30,7 @@ class PasswordResetSent(CamelizedBaseStruct):
 class ValidateResetTokenRequest(msgspec.Struct, gc=False, omit_defaults=True):
     """Request to validate a reset token."""
 
-    token: str
+    token: Annotated[str, Meta(min_length=1, max_length=255)]
 
 
 class ResetTokenValidation(CamelizedBaseStruct):
@@ -42,9 +44,9 @@ class ResetTokenValidation(CamelizedBaseStruct):
 class ResetPasswordRequest(msgspec.Struct, gc=False, omit_defaults=True):
     """Request to reset password with token."""
 
-    token: str
-    password: str
-    password_confirm: str
+    token: Annotated[str, Meta(min_length=1, max_length=255)]
+    password: Annotated[str, Meta(min_length=1, max_length=255)]
+    password_confirm: Annotated[str, Meta(min_length=1, max_length=255)]
 
     def __post_init__(self) -> None:
         """Validate passwords match and password strength."""

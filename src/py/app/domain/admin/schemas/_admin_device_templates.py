@@ -1,10 +1,11 @@
 """Admin device template schemas."""
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -43,28 +44,28 @@ class DeviceTemplateDetail(CamelizedBaseStruct, kw_only=True):
 class DeviceTemplateCreate(CamelizedBaseStruct):
     """Schema for creating a device template."""
 
-    manufacturer: str
-    model: str
-    display_name: str
-    device_type: str
+    manufacturer: Annotated[str, Meta(min_length=1, max_length=100)]
+    model: Annotated[str, Meta(min_length=1, max_length=100)]
+    display_name: Annotated[str, Meta(min_length=1, max_length=255)]
+    device_type: Annotated[str, Meta(min_length=1, max_length=50)]
     wireframe_data: dict[str, Any]
-    provisioning_template: str | None = None
+    provisioning_template: Annotated[str, Meta(max_length=50000)] | None = None
     template_variables: dict[str, Any] | None = None
-    image_url: str | None = None
+    image_url: Annotated[str, Meta(max_length=2048)] | None = None
     is_active: bool = True
 
 
 class DeviceTemplateUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a device template."""
 
-    manufacturer: str | msgspec.UnsetType = msgspec.UNSET
-    model: str | msgspec.UnsetType = msgspec.UNSET
-    display_name: str | msgspec.UnsetType = msgspec.UNSET
-    device_type: str | msgspec.UnsetType = msgspec.UNSET
+    manufacturer: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
+    model: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
+    display_name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    device_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     wireframe_data: dict[str, Any] | msgspec.UnsetType = msgspec.UNSET
-    provisioning_template: str | msgspec.UnsetType | None = msgspec.UNSET
+    provisioning_template: Annotated[str, Meta(max_length=50000)] | msgspec.UnsetType | None = msgspec.UNSET
     template_variables: dict[str, Any] | msgspec.UnsetType | None = msgspec.UNSET
-    image_url: str | msgspec.UnsetType | None = msgspec.UNSET
+    image_url: Annotated[str, Meta(max_length=2048)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
 
 
