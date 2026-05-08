@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type E911RegistrationCreate, type UnregisteredPhoneNumber, useCreateE911Registration, useUnregisteredPhoneNumbers } from "@/lib/api/hooks/e911"
 import { type Location, useLocations } from "@/lib/api/hooks/locations"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/e911/new")({
   component: NewE911RegistrationPage,
@@ -260,17 +261,38 @@ function NewE911RegistrationPage() {
                       autoFocus
                       maxLength={255}
                     />
-                    {showError("addressLine1", addressLine1) ? (
-                      <p className="text-xs text-destructive">Address line 1 is required</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">The street address where the phone is located.</p>
-                    )}
+                    <div className="flex items-center justify-between">
+                      {showError("addressLine1", addressLine1) ? (
+                        <p className="text-xs text-destructive">Address line 1 is required</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">The street address where the phone is located.</p>
+                      )}
+                      <p
+                        className={cn(
+                          "shrink-0 text-xs",
+                          addressLine1.length >= 255 ? "text-destructive" : addressLine1.length >= 200 ? "text-amber-500" : "text-muted-foreground",
+                        )}
+                      >
+                        {addressLine1.length}/255
+                      </p>
+                    </div>
                   </div>
 
                   {/* Address Line 2 */}
                   <div className="space-y-2">
                     <Label htmlFor="address-line-2">Address Line 2</Label>
                     <Input id="address-line-2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Suite 100, Floor 2, etc." maxLength={255} />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">Apartment, suite, floor, etc.</p>
+                      <p
+                        className={cn(
+                          "shrink-0 text-xs",
+                          addressLine2.length >= 255 ? "text-destructive" : addressLine2.length >= 200 ? "text-amber-500" : "text-muted-foreground",
+                        )}
+                      >
+                        {addressLine2.length}/255
+                      </p>
+                    </div>
                   </div>
 
                   {/* City / State row */}
@@ -286,7 +308,12 @@ function NewE911RegistrationPage() {
                         aria-invalid={showError("city", city)}
                         maxLength={100}
                       />
-                      {showError("city", city) && <p className="text-xs text-destructive">City is required</p>}
+                      <div className="flex items-center justify-between">
+                        {showError("city", city) ? <p className="text-xs text-destructive">City is required</p> : <span />}
+                        <p className={cn("shrink-0 text-xs", city.length >= 100 ? "text-destructive" : city.length >= 80 ? "text-amber-500" : "text-muted-foreground")}>
+                          {city.length}/100
+                        </p>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="state">State *</Label>
@@ -332,13 +359,18 @@ function NewE911RegistrationPage() {
                     <div className="space-y-2">
                       <Label htmlFor="country">Country</Label>
                       <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="US" maxLength={100} />
-                      <p className="text-xs text-muted-foreground">Defaults to US</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">Defaults to US</p>
+                        <p className={cn("shrink-0 text-xs", country.length >= 100 ? "text-destructive" : country.length >= 80 ? "text-amber-500" : "text-muted-foreground")}>
+                          {country.length}/100
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/e911" })}>
+                    <Button type="button" variant="ghost" disabled={createMutation.isPending} onClick={() => router.navigate({ to: "/e911" })}>
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || createMutation.isPending}>
