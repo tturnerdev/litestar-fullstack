@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.325.0 (2026-05-08)
+
+### Security
+- **HSTS header** — Added `Strict-Transport-Security: max-age=31536000; includeSubDomains` to all HTTP responses
+- **Auth schema validation** — Login, registration, password update, and MFA schemas now enforce min/max length on all string fields
+- **Input validation sweep** — Added constraints to voicemail box (pin 4-8, max message length 10-600s), fax message (non-empty phone numbers, non-negative sizes), connection (port 1-65535), schedule (timezone, day_of_week 0-6), call routing (queue timing, IVR timeouts, ring group ring time, time condition destinations), device (non-empty type), and extension (ring count 1-20) schemas
+
+## v0.323.0 (2026-05-08)
+
+### Fixed
+- **Schema validation** — Added input validation constraints to call routing schemas: queue number/strategy/timing, IVR digit/label/destination/timeouts, time condition destinations, ring group number/ring_time; device type min_length; extension ring count bounds
+
 ## v0.322.0 (2026-05-08)
 
 ### Fixed
