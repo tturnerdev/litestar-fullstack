@@ -1,17 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { AlertCircle, Download, HardDrive, Monitor, Search, Signal, SignalZero, Wifi, X } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { AlertCircle, Download, HardDrive, Monitor, Search, Signal, SignalZero, SlidersHorizontal, Wifi, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -86,6 +88,30 @@ const csvHeaders: CsvHeader<AdminDeviceSummary>[] = [
   { label: "Created At", accessor: (d) => d.createdAt },
 ]
 
+// -- Column visibility --------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "admin-devices-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "macAddress", label: "MAC Address" },
+  { key: "model", label: "Model" },
+  { key: "team", label: "Team" },
+  { key: "status", label: "Status" },
+  { key: "lastSeen", label: "Last Seen" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 function StatsCardSkeleton() {
   return (
     <Card>
@@ -107,6 +133,30 @@ function AdminDevicesPage() {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when search changes
   useEffect(() => {
     setPage(1)
@@ -118,6 +168,51 @@ function AdminDevicesPage() {
   const devices = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // Client-side sorting for the "All Devices" table
+  const sortedDevices = useMemo(() => {
+    if (!sortKey || !sortDir) return devices
+    const sorted = [...devices]
+    sorted.sort((a, b) => {
+      switch (sortKey) {
+        case "name": {
+          const aVal = a.name.toLowerCase()
+          const bVal = b.name.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "macAddress": {
+          const aVal = (a.macAddress ?? "").toLowerCase()
+          const bVal = (b.macAddress ?? "").toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "model": {
+          const aVal = (a.model ?? "").toLowerCase()
+          const bVal = (b.model ?? "").toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "team": {
+          const aVal = (a.teamName ?? "").toLowerCase()
+          const bVal = (b.teamName ?? "").toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "status": {
+          const aVal = a.status.toLowerCase()
+          const bVal = b.status.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "lastSeen": {
+          const aVal = a.lastSeenAt ?? ""
+          const bVal = b.lastSeenAt ?? ""
+          if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+          if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+          return 0
+        }
+        default:
+          return 0
+      }
+    })
+    return sorted
+  }, [devices, sortKey, sortDir])
 
   const handleExport = useCallback(() => {
     exportToCsv("admin-devices", csvHeaders, devices)
@@ -135,6 +230,23 @@ function AdminDevicesPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExport} disabled={!devices.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -233,33 +345,35 @@ function AdminDevicesPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>
-                        <TableHead>MAC Address</TableHead>
-                        <TableHead>Model</TableHead>
-                        <TableHead>Team</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Last Seen</TableHead>
+                        {isColumnVisible("macAddress") && <TableHead>MAC Address</TableHead>}
+                        {isColumnVisible("model") && <TableHead>Model</TableHead>}
+                        {isColumnVisible("team") && <TableHead>Team</TableHead>}
+                        {isColumnVisible("status") && <TableHead>Status</TableHead>}
+                        {isColumnVisible("lastSeen") && <TableHead>Last Seen</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {recentDevices.map((device, index) => (
                         <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                           <TableCell className="font-medium">{device.name}</TableCell>
-                          <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
-                          <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
-                          <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
-                          <TableCell>
-                            <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
-                              <span
-                                className={cn("h-1.5 w-1.5 rounded-full", {
-                                  "bg-emerald-500": device.status === "online",
-                                  "bg-red-500": device.status === "offline" || device.status === "error",
-                                  "bg-amber-500": device.status === "provisioning",
-                                })}
-                              />
-                              {device.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">{formatDateTime(device.lastSeenAt, "Never")}</TableCell>
+                          {isColumnVisible("macAddress") && <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>}
+                          {isColumnVisible("model") && <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>}
+                          {isColumnVisible("team") && <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>}
+                          {isColumnVisible("status") && (
+                            <TableCell>
+                              <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
+                                <span
+                                  className={cn("h-1.5 w-1.5 rounded-full", {
+                                    "bg-emerald-500": device.status === "online",
+                                    "bg-red-500": device.status === "offline" || device.status === "error",
+                                    "bg-amber-500": device.status === "provisioning",
+                                  })}
+                                />
+                                {device.status}
+                              </Badge>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("lastSeen") && <TableCell className="text-muted-foreground">{formatDateTime(device.lastSeenAt, "Never")}</TableCell>}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -342,34 +456,40 @@ function AdminDevicesPage() {
                     <Table aria-label="All devices">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>MAC Address</TableHead>
-                          <TableHead>Model</TableHead>
-                          <TableHead>Team</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Last Seen</TableHead>
+                          <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          {isColumnVisible("macAddress") && (
+                            <SortableHeader label="MAC Address" sortKey="macAddress" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
+                          {isColumnVisible("model") && <SortableHeader label="Model" sortKey="model" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("team") && <SortableHeader label="Team" sortKey="team" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("lastSeen") && (
+                            <SortableHeader label="Last Seen" sortKey="lastSeen" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {devices.map((device, index) => (
+                        {sortedDevices.map((device, index) => (
                           <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                             <TableCell className="font-medium">{device.name}</TableCell>
-                            <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
-                            <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
-                            <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
-                            <TableCell>
-                              <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
-                                <span
-                                  className={cn("h-1.5 w-1.5 rounded-full", {
-                                    "bg-emerald-500": device.status === "online",
-                                    "bg-red-500": device.status === "offline" || device.status === "error",
-                                    "bg-amber-500": device.status === "provisioning",
-                                  })}
-                                />
-                                {device.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">{formatDateTime(device.lastSeenAt, "Never")}</TableCell>
+                            {isColumnVisible("macAddress") && <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>}
+                            {isColumnVisible("model") && <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>}
+                            {isColumnVisible("team") && <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>}
+                            {isColumnVisible("status") && (
+                              <TableCell>
+                                <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
+                                  <span
+                                    className={cn("h-1.5 w-1.5 rounded-full", {
+                                      "bg-emerald-500": device.status === "online",
+                                      "bg-red-500": device.status === "offline" || device.status === "error",
+                                      "bg-amber-500": device.status === "provisioning",
+                                    })}
+                                  />
+                                  {device.status}
+                                </Badge>
+                              </TableCell>
+                            )}
+                            {isColumnVisible("lastSeen") && <TableCell className="text-muted-foreground">{formatDateTime(device.lastSeenAt, "Never")}</TableCell>}
                           </TableRow>
                         ))}
                       </TableBody>

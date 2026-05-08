@@ -29,6 +29,7 @@ import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
@@ -163,7 +164,7 @@ function AdminRolesPage() {
   useDocumentTitle("Roles & Permissions")
 
   const queryClient = useQueryClient()
-  const { data, isLoading, isError, refetch } = useAdminTeams({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminTeams({
     page: 1,
     pageSize: 100,
   })
@@ -200,26 +201,31 @@ function AdminRolesPage() {
         description="Configure feature-level permissions for team roles across the system."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!teams.length}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!teams.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         }
       />
       <AdminNav />
 
       {/* Overview */}
       <PageSection>
-        <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
-          <Info className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
-            <p className="font-medium">How permissions work</p>
-            <p className="mt-1 text-xs">
-              Each team has its own permission matrix that controls what <strong>ADMIN</strong> and <strong>MEMBER</strong> roles can access. Permissions are checked per feature
-              area (Devices, Voice, Fax, etc.) with separate View and Edit grants. Superusers bypass all permission checks.
-            </p>
+        <SectionErrorBoundary name="Permissions Overview">
+          <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-medium">How permissions work</p>
+              <p className="mt-1 text-xs">
+                Each team has its own permission matrix that controls what <strong>ADMIN</strong> and <strong>MEMBER</strong> roles can access. Permissions are checked per feature
+                area (Devices, Voice, Fax, etc.) with separate View and Edit grants. Superusers bypass all permission checks.
+              </p>
+            </div>
           </div>
-        </div>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Team permission cards */}
@@ -255,51 +261,53 @@ function AdminRolesPage() {
 
       {/* Permissions reference matrix */}
       <PageSection delay={0.2}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Permissions Reference</CardTitle>
-            <CardDescription>
-              A quick-reference guide showing the default capabilities for each system role. Superusers have full access and bypass all permission checks. Team-level overrides
-              configured above take precedence for Admin and Member roles.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto rounded-md border">
-              <Table aria-label="Permissions reference matrix">
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="min-w-[200px]">Capability</TableHead>
-                    <TableHead className="w-[120px] text-center">
-                      <span className="font-semibold">Superuser</span>
-                    </TableHead>
-                    <TableHead className="w-[120px] text-center">
-                      <span className="font-semibold">Admin</span>
-                    </TableHead>
-                    <TableHead className="w-[120px] text-center">
-                      <span className="font-semibold">Member</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {permissionMatrix.map((row, idx) => (
-                    <TableRow key={row.permission} className={idx % 2 === 0 ? "bg-muted/30" : ""}>
-                      <TableCell className="text-sm font-medium">{row.permission}</TableCell>
-                      <TableCell className="text-center">
-                        <PermissionIndicator allowed={row.superuser} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <PermissionIndicator allowed={row.admin} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <PermissionIndicator allowed={row.member} />
-                      </TableCell>
+        <SectionErrorBoundary name="Permissions Reference">
+          <Card>
+            <CardHeader>
+              <CardTitle>Permissions Reference</CardTitle>
+              <CardDescription>
+                A quick-reference guide showing the default capabilities for each system role. Superusers have full access and bypass all permission checks. Team-level overrides
+                configured above take precedence for Admin and Member roles.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto rounded-md border">
+                <Table aria-label="Permissions reference matrix">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="min-w-[200px]">Capability</TableHead>
+                      <TableHead className="w-[120px] text-center">
+                        <span className="font-semibold">Superuser</span>
+                      </TableHead>
+                      <TableHead className="w-[120px] text-center">
+                        <span className="font-semibold">Admin</span>
+                      </TableHead>
+                      <TableHead className="w-[120px] text-center">
+                        <span className="font-semibold">Member</span>
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {permissionMatrix.map((row, idx) => (
+                      <TableRow key={row.permission} className={idx % 2 === 0 ? "bg-muted/30" : ""}>
+                        <TableCell className="text-sm font-medium">{row.permission}</TableCell>
+                        <TableCell className="text-center">
+                          <PermissionIndicator allowed={row.superuser} />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <PermissionIndicator allowed={row.admin} />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <PermissionIndicator allowed={row.member} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

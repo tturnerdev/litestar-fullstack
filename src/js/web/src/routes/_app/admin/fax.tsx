@@ -1,17 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Download, FileText, Inbox, Printer, Search, Send, X, XCircle } from "lucide-react"
-import { useCallback, useState } from "react"
+import { AlertCircle, ArrowRight, Download, FileText, Inbox, Printer, Search, Send, SlidersHorizontal, X, XCircle } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -87,6 +89,28 @@ const statConfig = [
   },
 ]
 
+// -- Column visibility --------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "admin-fax-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "pages", label: "Pages" },
+  { key: "status", label: "Status" },
+  { key: "received", label: "Received" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 function StatsCardSkeleton() {
   return (
     <Card>
@@ -107,6 +131,17 @@ function AdminFaxPage() {
   const navigate = useNavigate()
   const [numberPage, setNumberPage] = useState(1)
   const [numberSearch, setNumberSearch] = useState("")
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminFaxStats()
   const {
@@ -129,8 +164,66 @@ function AdminFaxPage() {
   const numberTotal = numberData?.total ?? 0
   const numberTotalPages = Math.max(1, Math.ceil(numberTotal / PAGE_SIZE))
 
+  // Sort state for recent fax activity table
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   const faxMessages = Array.isArray(messages) ? messages : []
   const recentMessages = faxMessages.slice(0, 10)
+
+  // Client-side sorting for recent fax activity
+  const sortedMessages = useMemo(() => {
+    if (!sortKey || !sortDir) return recentMessages
+    const sorted = [...recentMessages]
+    sorted.sort((a, b) => {
+      switch (sortKey) {
+        case "direction": {
+          const aVal = a.direction.toLowerCase()
+          const bVal = b.direction.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "faxNumber": {
+          const aVal = a.faxNumber.toLowerCase()
+          const bVal = b.faxNumber.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "remoteNumber": {
+          const aVal = a.remoteNumber.toLowerCase()
+          const bVal = b.remoteNumber.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "pages": {
+          const aVal = a.pageCount
+          const bVal = b.pageCount
+          return sortDir === "asc" ? aVal - bVal : bVal - aVal
+        }
+        case "status": {
+          const aVal = a.status.toLowerCase()
+          const bVal = b.status.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "receivedAt": {
+          const aVal = a.receivedAt
+          const bVal = b.receivedAt
+          if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+          if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+          return 0
+        }
+        default:
+          return 0
+      }
+    })
+    return sorted
+  }, [recentMessages, sortKey, sortDir])
 
   const handleExport = useCallback(() => {
     if (!faxNumbers.length) return
@@ -147,6 +240,23 @@ function AdminFaxPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={handleRefreshAll} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExport} disabled={!faxNumbers.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -250,16 +360,18 @@ function AdminFaxPage() {
                   <Table aria-label="Recent fax activity">
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Direction</TableHead>
-                        <TableHead>Fax Number</TableHead>
-                        <TableHead>Remote Number</TableHead>
-                        <TableHead>Pages</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Received</TableHead>
+                        <SortableHeader label="Direction" sortKey="direction" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Remote Number" sortKey="remoteNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        {isColumnVisible("pages") && <SortableHeader label="Pages" sortKey="pages" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                        {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                        {isColumnVisible("received") && (
+                          <SortableHeader label="Received" sortKey="receivedAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {recentMessages.map((msg, index) => (
+                      {sortedMessages.map((msg, index) => (
                         <TableRow
                           key={msg.id}
                           className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}
@@ -279,28 +391,32 @@ function AdminFaxPage() {
                           </TableCell>
                           <TableCell className="font-mono font-medium">{msg.faxNumber}</TableCell>
                           <TableCell className="font-mono text-muted-foreground">{msg.remoteNumber}</TableCell>
-                          <TableCell className="text-muted-foreground">{msg.pageCount}</TableCell>
-                          <TableCell>
-                            <Badge variant={statusVariant[msg.status] ?? "outline"} className="gap-1.5">
-                              <span
-                                className={cn("h-1.5 w-1.5 rounded-full", {
-                                  "bg-emerald-500": msg.status === "completed" || msg.status === "delivered",
-                                  "bg-amber-500": msg.status === "sending",
-                                  "bg-gray-400": msg.status === "queued",
-                                  "bg-red-500": msg.status === "failed",
-                                })}
-                              />
-                              {msg.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>{formatRelativeTimeShort(msg.receivedAt)}</span>
-                              </TooltipTrigger>
-                              <TooltipContent>{formatDateTime(msg.receivedAt)}</TooltipContent>
-                            </Tooltip>
-                          </TableCell>
+                          {isColumnVisible("pages") && <TableCell className="text-muted-foreground">{msg.pageCount}</TableCell>}
+                          {isColumnVisible("status") && (
+                            <TableCell>
+                              <Badge variant={statusVariant[msg.status] ?? "outline"} className="gap-1.5">
+                                <span
+                                  className={cn("h-1.5 w-1.5 rounded-full", {
+                                    "bg-emerald-500": msg.status === "completed" || msg.status === "delivered",
+                                    "bg-amber-500": msg.status === "sending",
+                                    "bg-gray-400": msg.status === "queued",
+                                    "bg-red-500": msg.status === "failed",
+                                  })}
+                                />
+                                {msg.status}
+                              </Badge>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("received") && (
+                            <TableCell className="text-muted-foreground">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>{formatRelativeTimeShort(msg.receivedAt)}</span>
+                                </TooltipTrigger>
+                                <TooltipContent>{formatDateTime(msg.receivedAt)}</TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))}
                     </TableBody>
