@@ -92,7 +92,7 @@ class AccessController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post(operation_id="AccountLogin", path="/api/access/login", exclude_from_auth=True, security=[])
+    @post(operation_id="AccountLogin", summary="Log in", path="/api/access/login", exclude_from_auth=True, security=[])
     async def login(
         self,
         request: Request[m.User, Token, Any],
@@ -196,7 +196,7 @@ class AccessController(Controller):
 
         return response
 
-    @post(operation_id="AccountLogout", path="/api/access/logout", exclude_from_auth=True, security=[])
+    @post(operation_id="AccountLogout", summary="Log out", path="/api/access/logout", exclude_from_auth=True, security=[])
     async def logout(
         self,
         request: Request[m.User, Token, Any],
@@ -248,7 +248,7 @@ class AccessController(Controller):
 
         return response
 
-    @post(operation_id="TokenRefresh", path="/api/access/refresh", exclude_from_auth=True, security=[])
+    @post(operation_id="TokenRefresh", summary="Refresh access token", path="/api/access/refresh", exclude_from_auth=True, security=[])
     async def refresh_token(
         self,
         request: Request[m.User, Token, Any],
@@ -309,7 +309,7 @@ class AccessController(Controller):
 
         return response
 
-    @get(operation_id="GetActiveSessions", path="/api/access/sessions")
+    @get(operation_id="GetActiveSessions", summary="List active sessions", path="/api/access/sessions")
     async def get_sessions(
         self,
         request: Request[m.User, Token, Any],
@@ -348,7 +348,7 @@ class AccessController(Controller):
         ]
         return refresh_token_service.to_schema(items, total, filters, schema_type=ActiveSession)
 
-    @delete(operation_id="RevokeSession", path="/api/access/sessions/{session_id:uuid}", status_code=200)
+    @delete(operation_id="RevokeSession", summary="Revoke a session", path="/api/access/sessions/{session_id:uuid}", status_code=200)
     async def revoke_session(
         self,
         request: Request[m.User, Token, Any],
@@ -387,7 +387,7 @@ class AccessController(Controller):
 
         return Message(message="Session revoked successfully")
 
-    @delete(operation_id="RevokeAllSessions", path="/api/access/sessions", status_code=200)
+    @delete(operation_id="RevokeAllSessions", summary="Revoke all other sessions", path="/api/access/sessions", status_code=200)
     async def revoke_all_sessions(
         self,
         request: Request[m.User, Token, Any],
@@ -427,7 +427,7 @@ class AccessController(Controller):
 
         return Message(message=f"Revoked {revoked_count} session(s)")
 
-    @post(operation_id="AccountRegister", path="/api/access/signup")
+    @post(operation_id="AccountRegister", summary="Register a new account", path="/api/access/signup")
     async def signup(
         self,
         request: Request[m.User, Token, Any],
@@ -476,7 +476,7 @@ class AccessController(Controller):
 
         return users_service.to_schema(user, schema_type=User)
 
-    @post(operation_id="ForgotPassword", path="/api/access/forgot-password", exclude_from_auth=True, security=[])
+    @post(operation_id="ForgotPassword", summary="Request password reset", path="/api/access/forgot-password", exclude_from_auth=True, security=[])
     async def forgot_password(
         self,
         users_service: UserService,
@@ -511,7 +511,7 @@ class AccessController(Controller):
             message="If the email exists, a password reset link has been sent", expires_in_minutes=60
         )
 
-    @get(operation_id="ValidateResetToken", path="/api/access/reset-password", exclude_from_auth=True, security=[])
+    @get(operation_id="ValidateResetToken", summary="Validate a password reset token", path="/api/access/reset-password", exclude_from_auth=True, security=[])
     async def validate_reset_token(
         self,
         token: Annotated[str, Parameter(query="token", min_length=32, max_length=255)],
@@ -537,7 +537,7 @@ class AccessController(Controller):
 
         return ResetTokenValidation(valid=False)
 
-    @post(operation_id="ResetPassword", path="/api/access/reset-password", exclude_from_auth=True, security=[])
+    @post(operation_id="ResetPassword", summary="Reset password with token", path="/api/access/reset-password", exclude_from_auth=True, security=[])
     async def reset_password_with_token(
         self,
         data: ResetPasswordRequest,

@@ -218,6 +218,7 @@ class FeedbackController(Controller):
 
     @post(
         operation_id="SubmitFeedback",
+        summary="Submit portal feedback",
         path="/api/support/feedback",
     )
     async def submit_feedback(

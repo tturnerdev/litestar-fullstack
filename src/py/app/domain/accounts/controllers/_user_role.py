@@ -39,7 +39,7 @@ class UserRoleController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post(operation_id="AssignUserRole")
+    @post(operation_id="AssignUserRole", summary="Assign a role to a user")
     async def assign_role(
         self,
         request: Request[m.User, Token, Any],
@@ -86,7 +86,7 @@ class UserRoleController(Controller):
             return Message(message=f"Successfully assigned the '{obj.role_slug}' role to {obj.user_email}.")
         return Message(message=f"User {obj.user_email} already has the '{obj.role_slug}' role.")
 
-    @delete(operation_id="RevokeUserRole", status_code=HTTP_202_ACCEPTED)
+    @delete(operation_id="RevokeUserRole", summary="Revoke a role from a user", status_code=HTTP_202_ACCEPTED)
     async def revoke_role(
         self,
         request: Request[m.User, Token, Any],

@@ -25,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { type Location, useBulkDeleteLocations, useDeleteLocation, useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 const getId = (loc: Location) => loc.id
@@ -349,6 +350,9 @@ export function LocationList({
                     {isColumnVisible("address") && <TableHead>Address</TableHead>}
                     {isColumnVisible("subLocations") && <TableHead>Sub-locations</TableHead>}
                     {isColumnVisible("description") && <TableHead>Description</TableHead>}
+                    {isColumnVisible("created") && (
+                      <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                    )}
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -597,6 +601,16 @@ function LocationRow({
             ) : (
               <span className="text-sm text-muted-foreground/50">--</span>
             )}
+          </TableCell>
+        )}
+        {isColumnVisible("created") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(location.createdAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(location.createdAt)}</TooltipContent>
+            </Tooltip>
           </TableCell>
         )}
         <TableCell className={cn("text-right", cellClass)}>

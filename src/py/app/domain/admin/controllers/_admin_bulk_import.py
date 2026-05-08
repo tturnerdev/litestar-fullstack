@@ -175,6 +175,7 @@ class AdminBulkImportController(Controller):
 
     @post(
         operation_id="AdminPreviewDeviceImport",
+        summary="Preview device CSV import",
         path="/preview/devices",
     )
     async def preview_device_import(
@@ -252,6 +253,7 @@ class AdminBulkImportController(Controller):
 
     @post(
         operation_id="AdminImportDevices",
+        summary="Import devices from CSV",
         path="/devices",
     )
     async def import_devices(
@@ -365,6 +367,7 @@ class AdminBulkImportController(Controller):
 
     @post(
         operation_id="AdminPreviewExtensionImport",
+        summary="Preview extension CSV import",
         path="/preview/extensions",
     )
     async def preview_extension_import(
@@ -435,6 +438,7 @@ class AdminBulkImportController(Controller):
 
     @post(
         operation_id="AdminImportExtensions",
+        summary="Import extensions from CSV",
         path="/extensions",
     )
     async def import_extensions(

@@ -57,6 +57,7 @@ class AdminDeviceTemplatesController(Controller):
 
     @get(
         operation_id="AdminListDeviceTemplates",
+        summary="List device templates",
         path="/",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -90,7 +91,7 @@ class AdminDeviceTemplatesController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCreateDeviceTemplate", path="/")
+    @post(operation_id="AdminCreateDeviceTemplate", summary="Create a device template", path="/")
     async def create_template(
         self,
         request: Request[m.User, Token, Any],
@@ -130,7 +131,7 @@ class AdminDeviceTemplatesController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @get(operation_id="AdminGetDeviceTemplate", path="/{template_id:uuid}")
+    @get(operation_id="AdminGetDeviceTemplate", summary="Get device template details", path="/{template_id:uuid}")
     async def get_template(
         self,
         template_service: DeviceTemplateService,
@@ -153,7 +154,7 @@ class AdminDeviceTemplatesController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @patch(operation_id="AdminUpdateDeviceTemplate", path="/{template_id:uuid}")
+    @patch(operation_id="AdminUpdateDeviceTemplate", summary="Update a device template", path="/{template_id:uuid}")
     async def update_template(
         self,
         request: Request[m.User, Token, Any],
@@ -198,7 +199,7 @@ class AdminDeviceTemplatesController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @delete(operation_id="AdminDeleteDeviceTemplate", path="/{template_id:uuid}")
+    @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", path="/{template_id:uuid}")
     async def delete_template(
         self,
         request: Request[m.User, Token, Any],

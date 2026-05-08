@@ -51,6 +51,7 @@ class TicketMessageController(Controller):
 
     @get(
         operation_id="ListTicketMessages",
+        summary="List ticket messages",
         path="/api/support/tickets/{ticket_id:uuid}/messages",
         guards=[requires_feature_permission("support", "view"), requires_ticket_access],
     )
@@ -78,6 +79,7 @@ class TicketMessageController(Controller):
 
     @post(
         operation_id="CreateTicketMessage",
+        summary="Create a ticket message",
         path="/api/support/tickets/{ticket_id:uuid}/messages",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
@@ -114,6 +116,7 @@ class TicketMessageController(Controller):
 
     @patch(
         operation_id="UpdateTicketMessage",
+        summary="Update a ticket message",
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
     )
@@ -151,6 +154,7 @@ class TicketMessageController(Controller):
 
     @delete(
         operation_id="DeleteTicketMessage",
+        summary="Delete a ticket message",
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
     )

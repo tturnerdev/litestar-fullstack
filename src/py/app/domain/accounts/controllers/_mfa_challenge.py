@@ -49,7 +49,7 @@ class MfaChallengeController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post(operation_id="VerifyMfaChallenge", path="/verify", exclude_from_auth=True, security=[])
+    @post(operation_id="VerifyMfaChallenge", summary="Verify MFA challenge", path="/verify", exclude_from_auth=True, security=[])
     async def verify_challenge(
         self,
         request: Request[m.User, Token, Any],

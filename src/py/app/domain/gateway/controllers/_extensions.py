@@ -27,6 +27,7 @@ class ExtensionsGatewayController(Controller):
 
     @get(
         operation_id="GatewayLookupExtension",
+        summary="Look up an extension",
         path="/api/gateway/extensions/{extension_number:str}",
     )
     async def get_extension_data(

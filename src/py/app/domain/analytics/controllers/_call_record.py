@@ -52,7 +52,7 @@ class CallRecordController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListCallRecords", path="/api/analytics/cdrs")
+    @get(operation_id="ListCallRecords", summary="List call records", path="/api/analytics/cdrs")
     async def list_call_records(
         self,
         call_records_service: CallRecordService,
@@ -111,7 +111,7 @@ class CallRecordController(Controller):
             )
         return call_records_service.to_schema(results, total, filters, schema_type=CallRecordList)
 
-    @get(operation_id="GetCallRecord", path="/api/analytics/cdrs/{cdr_id:uuid}")
+    @get(operation_id="GetCallRecord", summary="Get call record details", path="/api/analytics/cdrs/{cdr_id:uuid}")
     async def get_call_record(
         self,
         call_records_service: CallRecordService,
@@ -129,7 +129,7 @@ class CallRecordController(Controller):
         db_obj = await call_records_service.get(cdr_id)
         return call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
 
-    @post(operation_id="CreateCallRecord", path="/api/analytics/cdrs")
+    @post(operation_id="CreateCallRecord", summary="Create a call record", path="/api/analytics/cdrs")
     async def create_call_record(
         self,
         request: Request[m.User, Token, Any],
@@ -168,7 +168,7 @@ class CallRecordController(Controller):
         )
         return call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
 
-    @get(operation_id="ExportCallRecords", path="/api/analytics/cdrs/export")
+    @get(operation_id="ExportCallRecords", summary="Export call records as CSV", path="/api/analytics/cdrs/export")
     async def export_call_records(
         self,
         call_records_service: CallRecordService,

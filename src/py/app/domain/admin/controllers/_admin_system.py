@@ -107,6 +107,7 @@ class AdminSystemController(Controller):
 
     @get(
         operation_id="GetAdminSystemStatus",
+        summary="Get system status",
         path="/status",
         cache=60,
         cache_control=CacheControlHeader(private=True, max_age=60),

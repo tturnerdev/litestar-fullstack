@@ -140,7 +140,7 @@ class ProfileController(Controller):
             for entry in results
         ]
 
-    @patch(operation_id="AccountProfileUpdate", path="/api/me")
+    @patch(operation_id="AccountProfileUpdate", summary="Update profile", path="/api/me")
     async def update_profile(
         self,
         request: Request[m.User, Token, Any],
@@ -181,7 +181,7 @@ class ProfileController(Controller):
 
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @patch(operation_id="AccountPasswordUpdate", path="/api/me/password")
+    @patch(operation_id="AccountPasswordUpdate", summary="Update password", path="/api/me/password")
     async def update_password(
         self,
         request: Request[m.User, Token, Any],
@@ -218,7 +218,7 @@ class ProfileController(Controller):
 
         return Message(message="Your password was successfully modified.")
 
-    @delete(operation_id="AccountDelete", path="/api/me")
+    @delete(operation_id="AccountDelete", summary="Delete account", path="/api/me")
     async def remove_account(
         self,
         request: Request[m.User, Token, Any],

@@ -57,6 +57,7 @@ class AdminMusicOnHoldController(Controller):
 
     @get(
         operation_id="AdminListMusicOnHold",
+        summary="List music on hold classes",
         path="/",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -88,7 +89,7 @@ class AdminMusicOnHoldController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCreateMusicOnHold", path="/")
+    @post(operation_id="AdminCreateMusicOnHold", summary="Create a music on hold class", path="/")
     async def create_music_on_hold(
         self,
         request: Request[m.User, Token, Any],
@@ -126,7 +127,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @get(operation_id="AdminGetMusicOnHold", path="/{moh_id:uuid}")
+    @get(operation_id="AdminGetMusicOnHold", summary="Get music on hold details", path="/{moh_id:uuid}")
     async def get_music_on_hold(
         self,
         moh_service: MusicOnHoldService,
@@ -147,7 +148,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @patch(operation_id="AdminUpdateMusicOnHold", path="/{moh_id:uuid}")
+    @patch(operation_id="AdminUpdateMusicOnHold", summary="Update a music on hold class", path="/{moh_id:uuid}")
     async def update_music_on_hold(
         self,
         request: Request[m.User, Token, Any],
@@ -190,7 +191,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @delete(operation_id="AdminDeleteMusicOnHold", path="/{moh_id:uuid}")
+    @delete(operation_id="AdminDeleteMusicOnHold", summary="Delete a music on hold class", path="/{moh_id:uuid}")
     async def delete_music_on_hold(
         self,
         request: Request[m.User, Token, Any],

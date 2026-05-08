@@ -43,7 +43,7 @@ class AdminFaxController(Controller):
         "fax_message_service": Provide(provide_fax_messages_service),
     }
 
-    @get(operation_id="AdminListFaxNumbers", path="/numbers")
+    @get(operation_id="AdminListFaxNumbers", summary="List fax numbers (admin)", path="/numbers")
     async def list_fax_numbers(
         self,
         fax_number_service: FaxNumberService,
@@ -70,7 +70,7 @@ class AdminFaxController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @get(operation_id="AdminListFaxMessages", path="/messages")
+    @get(operation_id="AdminListFaxMessages", summary="List fax messages (admin)", path="/messages")
     async def list_fax_messages(
         self,
         fax_message_service: FaxMessageService,
@@ -97,6 +97,7 @@ class AdminFaxController(Controller):
 
     @get(
         operation_id="AdminGetFaxStats",
+        summary="Get fax statistics (admin)",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

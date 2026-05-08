@@ -38,6 +38,7 @@ class TicketAttachmentController(Controller):
 
     @post(
         operation_id="UploadAttachment",
+        summary="Upload a ticket attachment",
         path="/api/support/tickets/{ticket_id:uuid}/attachments",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
@@ -60,6 +61,7 @@ class TicketAttachmentController(Controller):
 
     @get(
         operation_id="GetAttachment",
+        summary="Get attachment details",
         path="/api/support/attachments/{attachment_id:uuid}",
         guards=[requires_feature_permission("support", "view")],
     )
@@ -74,6 +76,7 @@ class TicketAttachmentController(Controller):
 
     @delete(
         operation_id="DeleteAttachment",
+        summary="Delete an attachment",
         path="/api/support/attachments/{attachment_id:uuid}",
         guards=[requires_feature_permission("support", "edit")],
     )
@@ -106,6 +109,7 @@ class TicketAttachmentController(Controller):
 
     @post(
         operation_id="PasteImage",
+        summary="Upload a pasted image",
         path="/api/support/tickets/{ticket_id:uuid}/paste-image",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )

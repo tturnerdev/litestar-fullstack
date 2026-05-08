@@ -113,7 +113,7 @@ class NotificationController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListNotifications")
+    @get(operation_id="ListNotifications", summary="List notifications")
     async def list_notifications(
         self,
         notifications_service: NotificationService,
@@ -136,7 +136,7 @@ class NotificationController(Controller):
         )
         return notifications_service.to_schema(results, total, filters, schema_type=Notification)
 
-    @get(operation_id="GetUnreadNotificationCount", path="/unread-count")
+    @get(operation_id="GetUnreadNotificationCount", summary="Get unread notification count", path="/unread-count")
     async def get_unread_count(
         self,
         notifications_service: NotificationService,
@@ -154,7 +154,7 @@ class NotificationController(Controller):
         count = await notifications_service.get_unread_count(current_user.id)
         return UnreadCount(count=count)
 
-    @patch(operation_id="MarkNotificationRead", path="/{notification_id:uuid}/read")
+    @patch(operation_id="MarkNotificationRead", summary="Mark a notification as read", path="/{notification_id:uuid}/read")
     async def mark_read(
         self,
         notifications_service: NotificationService,
@@ -181,7 +181,7 @@ class NotificationController(Controller):
         db_obj = await notifications_service.mark_read(notification_id, current_user.id)
         return notifications_service.to_schema(db_obj, schema_type=Notification)
 
-    @post(operation_id="MarkAllNotificationsRead", path="/mark-all-read")
+    @post(operation_id="MarkAllNotificationsRead", summary="Mark all notifications as read", path="/mark-all-read")
     async def mark_all_read(
         self,
         request: Request[m.User, Any, Any],
@@ -238,7 +238,7 @@ class NotificationController(Controller):
             request=request,
         )
 
-    @delete(operation_id="DeleteNotification", path="/{notification_id:uuid}", return_dto=None)
+    @delete(operation_id="DeleteNotification", summary="Delete a notification", path="/{notification_id:uuid}", return_dto=None)
     async def delete_notification(
         self,
         request: Request[m.User, Any, Any],

@@ -52,6 +52,7 @@ class LocationController(Controller):
 
     @get(
         operation_id="ListLocations",
+        summary="List locations",
         path="/api/teams/{team_id:uuid}/locations",
         guards=[requires_feature_permission("locations", "view")],
     )
@@ -83,6 +84,7 @@ class LocationController(Controller):
 
     @post(
         operation_id="CreateLocation",
+        summary="Create a location",
         path="/api/teams/{team_id:uuid}/locations",
         guards=[requires_feature_permission("locations", "edit")],
     )
@@ -130,6 +132,7 @@ class LocationController(Controller):
 
     @get(
         operation_id="GetLocation",
+        summary="Get location details",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "view"), requires_location_team_membership],
     )
@@ -154,6 +157,7 @@ class LocationController(Controller):
 
     @patch(
         operation_id="UpdateLocation",
+        summary="Update a location",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
     )
@@ -206,6 +210,7 @@ class LocationController(Controller):
 
     @delete(
         operation_id="DeleteLocation",
+        summary="Delete a location",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
     )

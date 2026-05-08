@@ -39,7 +39,7 @@ class AdminSupportController(Controller):
         },
     )
 
-    @get(operation_id="AdminListTickets", path="/tickets")
+    @get(operation_id="AdminListTickets", summary="List tickets (admin)", path="/tickets")
     async def list_tickets(
         self,
         ticket_service: TicketService,
@@ -73,6 +73,7 @@ class AdminSupportController(Controller):
 
     @get(
         operation_id="AdminGetSupportStats",
+        summary="Get support statistics (admin)",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

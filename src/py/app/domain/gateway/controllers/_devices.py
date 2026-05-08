@@ -27,6 +27,7 @@ class DevicesGatewayController(Controller):
 
     @get(
         operation_id="GatewayLookupDevice",
+        summary="Look up a device by MAC address",
         path="/api/gateway/devices/{mac_address:str}",
     )
     async def get_device_data(

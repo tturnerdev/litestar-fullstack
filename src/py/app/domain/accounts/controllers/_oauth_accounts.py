@@ -59,7 +59,7 @@ class OAuthAccountController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ProfileOAuthAccounts", path="/accounts")
+    @get(operation_id="ProfileOAuthAccounts", summary="List linked OAuth accounts", path="/accounts")
     async def list_accounts(
         self,
         current_user: m.User,
@@ -94,7 +94,7 @@ class OAuthAccountController(Controller):
         ]
         return oauth_account_service.to_schema(items, total, filters, schema_type=OAuthAccountInfo)
 
-    @post(operation_id="ProfileOAuthLink", path="/{provider:str}/link")
+    @post(operation_id="ProfileOAuthLink", summary="Link an OAuth account", path="/{provider:str}/link")
     async def start_link(
         self,
         request: Request[Any, Any, Any],
@@ -135,7 +135,7 @@ class OAuthAccountController(Controller):
         )
         return OAuthAuthorization(authorization_url=authorization_url, state=state)
 
-    @delete(operation_id="ProfileOAuthUnlink", path="/{provider:str}", status_code=200)
+    @delete(operation_id="ProfileOAuthUnlink", summary="Unlink an OAuth account", path="/{provider:str}", status_code=200)
     async def unlink(
         self,
         request: Request[Any, Any, Any],
@@ -184,7 +184,7 @@ class OAuthAccountController(Controller):
 
         return Message(message=f"Successfully unlinked {provider} account")
 
-    @post(operation_id="ProfileOAuthUpgradeScopes", path="/{provider:str}/upgrade-scopes")
+    @post(operation_id="ProfileOAuthUpgradeScopes", summary="Upgrade OAuth scopes", path="/{provider:str}/upgrade-scopes")
     async def upgrade_scopes(
         self,
         request: Request[Any, Any, Any],

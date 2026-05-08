@@ -57,7 +57,7 @@ class UserController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListUsers")
+    @get(operation_id="ListUsers", summary="List users")
     async def list_users(
         self, users_service: UserService, filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)]
     ) -> OffsetPagination[User]:
@@ -73,7 +73,7 @@ class UserController(Controller):
         results, total = await users_service.list_and_count(*filters)
         return users_service.to_schema(results, total, filters, schema_type=User)
 
-    @get(operation_id="GetUser", path="/{user_id:uuid}")
+    @get(operation_id="GetUser", summary="Get user details", path="/{user_id:uuid}")
     async def get_user(
         self,
         users_service: UserService,
@@ -91,7 +91,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @post(operation_id="CreateUser")
+    @post(operation_id="CreateUser", summary="Create a user")
     async def create_user(
         self,
         request: Request[m.User, Token, Any],
@@ -127,7 +127,7 @@ class UserController(Controller):
         request.app.emit(event_id="user_created", entity_id=db_obj.id)
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @patch(operation_id="UpdateUser", path="/{user_id:uuid}")
+    @patch(operation_id="UpdateUser", summary="Update a user", path="/{user_id:uuid}")
     async def update_user(
         self,
         request: Request[m.User, Token, Any],
@@ -167,7 +167,7 @@ class UserController(Controller):
         )
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @delete(operation_id="DeleteUser", path="/{user_id:uuid}")
+    @delete(operation_id="DeleteUser", summary="Delete a user", path="/{user_id:uuid}")
     async def delete_user(
         self,
         request: Request[m.User, Token, Any],

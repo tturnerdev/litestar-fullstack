@@ -61,7 +61,7 @@ class MfaController(Controller):
         "oauth_account_service": Provide(provide_user_oauth_service),
     }
 
-    @get(operation_id="GetMfaStatus", path="/status")
+    @get(operation_id="GetMfaStatus", summary="Get MFA status", path="/status")
     async def get_mfa_status(
         self,
         request: Request[m.User, Token, Any],
@@ -88,7 +88,7 @@ class MfaController(Controller):
             backup_codes_remaining=backup_codes_remaining,
         )
 
-    @get(operation_id="InitiateDisableMfaOAuth", path="/disable/oauth/{provider:str}")
+    @get(operation_id="InitiateDisableMfaOAuth", summary="Initiate MFA disable via OAuth", path="/disable/oauth/{provider:str}")
     async def initiate_disable_mfa_oauth(
         self,
         request: Request[m.User, Token, Any],
@@ -150,7 +150,7 @@ class MfaController(Controller):
         )
         return OAuthAuthorization(authorization_url=authorization_url, state=state)
 
-    @post(operation_id="InitiateMfaSetup", path="/enable")
+    @post(operation_id="InitiateMfaSetup", summary="Initiate MFA setup", path="/enable")
     async def initiate_setup(
         self,
         request: Request[m.User, Token, Any],
@@ -185,7 +185,7 @@ class MfaController(Controller):
             provisioning_uri=get_totp_provisioning_uri(secret, user.email, issuer=settings.slug),
         )
 
-    @post(operation_id="ConfirmMfaSetup", path="/confirm")
+    @post(operation_id="ConfirmMfaSetup", summary="Confirm MFA setup", path="/confirm")
     async def confirm_setup(
         self,
         request: Request[m.User, Token, Any],
@@ -252,7 +252,7 @@ class MfaController(Controller):
         )
         return MfaBackupCodes(codes=plaintext_codes)
 
-    @delete(operation_id="DisableMfa", path="/disable", status_code=200)
+    @delete(operation_id="DisableMfa", summary="Disable MFA", path="/disable", status_code=200)
     async def disable_mfa(
         self,
         request: Request[m.User, Token, Any],
@@ -301,7 +301,7 @@ class MfaController(Controller):
         )
         return Message(message="MFA has been disabled")
 
-    @post(operation_id="RegenerateMfaBackupCodes", path="/regenerate-codes")
+    @post(operation_id="RegenerateMfaBackupCodes", summary="Regenerate MFA backup codes", path="/regenerate-codes")
     async def regenerate_backup_codes(
         self,
         request: Request[m.User, Token, Any],

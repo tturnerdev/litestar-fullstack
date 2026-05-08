@@ -62,7 +62,7 @@ class AdminUsersController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="AdminListUsers", path="/")
+    @get(operation_id="AdminListUsers", summary="List users (admin)", path="/")
     async def list_users(
         self,
         request: Request[m.User, Token, Any],
@@ -82,7 +82,7 @@ class AdminUsersController(Controller):
         results, total = await users_service.list_and_count(*filters)
         return users_service.to_schema(results, total, filters, schema_type=AdminUserSummary)
 
-    @get(operation_id="AdminGetUser", path="/{user_id:uuid}")
+    @get(operation_id="AdminGetUser", summary="Get user details (admin)", path="/{user_id:uuid}")
     async def get_user(
         self,
         request: Request[m.User, Token, Any],
@@ -103,7 +103,7 @@ class AdminUsersController(Controller):
 
         return users_service.to_schema(user, schema_type=AdminUserDetail)
 
-    @patch(operation_id="AdminUpdateUser", path="/{user_id:uuid}")
+    @patch(operation_id="AdminUpdateUser", summary="Update a user (admin)", path="/{user_id:uuid}")
     async def update_user(
         self,
         request: Request[m.User, Token, Any],
@@ -150,7 +150,7 @@ class AdminUsersController(Controller):
 
         return users_service.to_schema(user, schema_type=AdminUserDetail)
 
-    @delete(operation_id="AdminDeleteUser", path="/{user_id:uuid}", status_code=200)
+    @delete(operation_id="AdminDeleteUser", summary="Delete a user (admin)", path="/{user_id:uuid}", status_code=200)
     async def delete_user(
         self,
         request: Request[m.User, Token, Any],

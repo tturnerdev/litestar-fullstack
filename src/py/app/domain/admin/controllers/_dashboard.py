@@ -52,6 +52,7 @@ class DashboardController(Controller):
 
     @get(
         operation_id="GetDashboardStats",
+        summary="Get dashboard statistics",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -127,6 +128,7 @@ class DashboardController(Controller):
 
     @get(
         operation_id="GetRecentActivity",
+        summary="Get recent activity",
         path="/activity",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

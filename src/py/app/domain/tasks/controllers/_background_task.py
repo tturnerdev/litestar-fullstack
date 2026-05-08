@@ -52,6 +52,7 @@ class BackgroundTaskController(Controller):
 
     @get(
         operation_id="ListTasks",
+        summary="List background tasks",
         path="/api/tasks",
         guards=[requires_task_access],
     )
@@ -80,6 +81,7 @@ class BackgroundTaskController(Controller):
 
     @get(
         operation_id="ListActiveTasks",
+        summary="List active background tasks",
         path="/api/tasks/active",
         guards=[requires_task_access],
     )
@@ -94,6 +96,7 @@ class BackgroundTaskController(Controller):
 
     @get(
         operation_id="GetTask",
+        summary="Get background task details",
         path="/api/tasks/{task_id:uuid}",
         guards=[requires_task_access],
     )
@@ -108,6 +111,7 @@ class BackgroundTaskController(Controller):
 
     @post(
         operation_id="CancelTask",
+        summary="Cancel a background task",
         path="/api/tasks/{task_id:uuid}/cancel",
         guards=[requires_task_access],
     )
@@ -144,6 +148,7 @@ class BackgroundTaskController(Controller):
 
     @delete(
         operation_id="DeleteTask",
+        summary="Delete a background task",
         path="/api/tasks/{task_id:uuid}",
         guards=[requires_task_access],
         status_code=200,

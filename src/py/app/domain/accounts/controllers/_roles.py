@@ -56,6 +56,7 @@ class RoleController(Controller):
 
     @get(
         operation_id="ListRoles",
+        summary="List roles",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
     )
@@ -76,7 +77,7 @@ class RoleController(Controller):
         results, total = await roles_service.list_and_count(*filters)
         return roles_service.to_schema(results, total, filters, schema_type=Role)
 
-    @get(operation_id="GetRole", path="/{role_id:uuid}")
+    @get(operation_id="GetRole", summary="Get role details", path="/{role_id:uuid}")
     async def get_role(
         self,
         roles_service: RoleService,
@@ -94,7 +95,7 @@ class RoleController(Controller):
         db_obj = await roles_service.get(role_id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @post(operation_id="CreateRole", path="")
+    @post(operation_id="CreateRole", summary="Create a role", path="")
     async def create_role(
         self,
         request: Request[m.User, Token, Any],
@@ -130,7 +131,7 @@ class RoleController(Controller):
         request.app.emit(event_id="role_created", entity_id=db_obj.id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @patch(operation_id="UpdateRole", path="/{role_id:uuid}")
+    @patch(operation_id="UpdateRole", summary="Update a role", path="/{role_id:uuid}")
     async def update_role(
         self,
         request: Request[m.User, Token, Any],
@@ -175,7 +176,7 @@ class RoleController(Controller):
         )
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @delete(operation_id="DeleteRole", path="/{role_id:uuid}")
+    @delete(operation_id="DeleteRole", summary="Delete a role", path="/{role_id:uuid}")
     async def delete_role(
         self,
         request: Request[m.User, Token, Any],
@@ -215,7 +216,7 @@ class RoleController(Controller):
             request=request,
         )
 
-    @post(operation_id="AssignRole", path="/{role_slug:str}/assign")
+    @post(operation_id="AssignRole", summary="Assign a role to a user", path="/{role_slug:str}/assign")
     async def assign_role(
         self,
         request: Request[m.User, Token, Any],
@@ -281,7 +282,7 @@ class RoleController(Controller):
 
         return Message(message=f"Successfully assigned the '{role_slug}' role to {data.user_name}.")
 
-    @post(operation_id="RevokeRole", path="/{role_slug:str}/revoke")
+    @post(operation_id="RevokeRole", summary="Revoke a role from a user", path="/{role_slug:str}/revoke")
     async def revoke_role(
         self,
         request: Request[m.User, Token, Any],

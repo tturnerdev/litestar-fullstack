@@ -59,6 +59,7 @@ class TicketController(Controller):
 
     @get(
         operation_id="ListTickets",
+        summary="List tickets",
         path="/api/support/tickets",
         guards=[requires_feature_permission("support", "view")],
     )
@@ -80,6 +81,7 @@ class TicketController(Controller):
 
     @post(
         operation_id="CreateTicket",
+        summary="Create a ticket",
         path="/api/support/tickets",
         guards=[requires_feature_permission("support", "edit")],
     )
@@ -137,6 +139,7 @@ class TicketController(Controller):
 
     @get(
         operation_id="GetTicket",
+        summary="Get ticket details",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "view"), requires_ticket_access],
     )
@@ -151,6 +154,7 @@ class TicketController(Controller):
 
     @patch(
         operation_id="UpdateTicket",
+        summary="Update a ticket",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
@@ -203,6 +207,7 @@ class TicketController(Controller):
 
     @delete(
         operation_id="DeleteTicket",
+        summary="Delete a ticket",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_support_agent],
     )
@@ -235,6 +240,7 @@ class TicketController(Controller):
 
     @post(
         operation_id="CloseTicket",
+        summary="Close a ticket",
         path="/api/support/tickets/{ticket_id:uuid}/close",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
@@ -286,6 +292,7 @@ class TicketController(Controller):
 
     @post(
         operation_id="ReopenTicket",
+        summary="Reopen a ticket",
         path="/api/support/tickets/{ticket_id:uuid}/reopen",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )

@@ -39,7 +39,7 @@ class AdminDevicesController(Controller):
         },
     )
 
-    @get(operation_id="AdminListDevices", path="/")
+    @get(operation_id="AdminListDevices", summary="List devices (admin)", path="/")
     async def list_devices(
         self,
         device_service: DeviceService,
@@ -74,6 +74,7 @@ class AdminDevicesController(Controller):
 
     @get(
         operation_id="AdminGetDeviceStats",
+        summary="Get device statistics (admin)",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

@@ -60,6 +60,7 @@ class E911RegistrationController(Controller):
 
     @get(
         operation_id="ListE911Registrations",
+        summary="List E911 registrations",
         path="/api/e911",
         guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )
@@ -89,6 +90,7 @@ class E911RegistrationController(Controller):
 
     @post(
         operation_id="CreateE911Registration",
+        summary="Create an E911 registration",
         path="/api/e911",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
@@ -133,6 +135,7 @@ class E911RegistrationController(Controller):
 
     @get(
         operation_id="GetE911Registration",
+        summary="Get E911 registration details",
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )
@@ -155,6 +158,7 @@ class E911RegistrationController(Controller):
 
     @patch(
         operation_id="UpdateE911Registration",
+        summary="Update an E911 registration",
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
@@ -205,6 +209,7 @@ class E911RegistrationController(Controller):
 
     @delete(
         operation_id="DeleteE911Registration",
+        summary="Delete an E911 registration",
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
@@ -246,6 +251,7 @@ class E911RegistrationController(Controller):
 
     @post(
         operation_id="ValidateE911Registration",
+        summary="Validate an E911 registration",
         path="/api/e911/{registration_id:uuid}/validate",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
@@ -292,6 +298,7 @@ class E911RegistrationController(Controller):
 
     @get(
         operation_id="ListUnregisteredPhoneNumbers",
+        summary="List unregistered phone numbers",
         path="/api/e911/unregistered",
         guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )

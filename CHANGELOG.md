@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.288.0 (2026-05-08)
+
+### Added
+- **OpenAPI summaries on ~95 endpoints** — All user-facing controller endpoints now have `summary=` for better API documentation: voice (27), fax (13), webhooks (14), devices (10), connections (6), teams (15), tags (5), call routing (37)
+- **Timestamp columns on 2 frontend tables** — Phone numbers list and teams list now show sortable "Created" column with relative time and full datetime tooltip
+
 ## v0.287.0 (2026-05-08)
 
 ### Added

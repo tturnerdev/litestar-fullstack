@@ -42,6 +42,7 @@ const TOGGLEABLE_COLUMNS = [
   { key: "address", label: "Address" },
   { key: "subLocations", label: "Sub-locations" },
   { key: "description", label: "Description" },
+  { key: "created", label: "Created" },
 ] as const
 
 type ColumnVisibility = Record<string, boolean>

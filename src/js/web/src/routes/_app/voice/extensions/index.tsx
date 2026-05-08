@@ -321,6 +321,10 @@ function ExtensionsPage() {
             aVal = a.isActive ? "1" : "0"
             bVal = b.isActive ? "1" : "0"
             break
+          case "created_at":
+            aVal = a.createdAt ?? ""
+            bVal = b.createdAt ?? ""
+            break
           default:
             return 0
         }
@@ -756,7 +760,16 @@ function ExtensionsPage() {
                       )}
                       {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                       {isColumnVisible("features") && <TableHead className="hidden lg:table-cell">Features</TableHead>}
-                      {isColumnVisible("created") && <TableHead className="hidden md:table-cell">Created</TableHead>}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
                       <TableHead className="w-10">
                         <span className="sr-only">Actions</span>
                       </TableHead>

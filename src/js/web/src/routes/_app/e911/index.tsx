@@ -53,6 +53,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
@@ -65,6 +66,7 @@ import {
 } from "@/lib/api/hooks/e911"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -130,6 +132,7 @@ const TOGGLEABLE_COLUMNS = [
   { key: "cityState", label: "City / State" },
   { key: "validated", label: "Validated" },
   { key: "carrierRegId", label: "Carrier Reg ID" },
+  { key: "created", label: "Created" },
 ] as const
 
 type ColumnVisibility = Record<string, boolean>
@@ -237,6 +240,16 @@ function E911Row({
           ) : (
             <span className="text-xs text-muted-foreground">--</span>
           )}
+        </TableCell>
+      )}
+      {isColumnVisible("created") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(reg.createdAt)}</span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(reg.createdAt)}</TooltipContent>
+          </Tooltip>
         </TableCell>
       )}
       <TableCell className={cn("text-right", cellClass)}>
@@ -763,6 +776,16 @@ function E911Page() {
                         <SortableHeader label="Validated" sortKey="validated" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       )}
                       {isColumnVisible("carrierRegId") && <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
                       <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>

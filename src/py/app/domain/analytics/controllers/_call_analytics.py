@@ -26,7 +26,7 @@ class CallAnalyticsController(Controller):
         "call_records_service": Provide(provide_call_records_service),
     }
 
-    @get(operation_id="GetCallSummary", path="/api/analytics/summary")
+    @get(operation_id="GetCallSummary", summary="Get call analytics summary", path="/api/analytics/summary")
     async def get_summary(
         self,
         call_records_service: CallRecordService,
@@ -50,7 +50,7 @@ class CallAnalyticsController(Controller):
         _verify_team_access(current_user, team_id)
         return await call_records_service.get_summary(team_id, start_date, end_date)
 
-    @get(operation_id="GetCallVolume", path="/api/analytics/volume")
+    @get(operation_id="GetCallVolume", summary="Get call volume over time", path="/api/analytics/volume")
     async def get_volume(
         self,
         call_records_service: CallRecordService,
@@ -76,7 +76,7 @@ class CallAnalyticsController(Controller):
         _verify_team_access(current_user, team_id)
         return await call_records_service.get_volume(team_id, start_date, end_date, interval)
 
-    @get(operation_id="GetCallsByExtension", path="/api/analytics/by-extension")
+    @get(operation_id="GetCallsByExtension", summary="Get calls by extension", path="/api/analytics/by-extension")
     async def get_by_extension(
         self,
         call_records_service: CallRecordService,

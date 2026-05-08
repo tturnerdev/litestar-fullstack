@@ -35,6 +35,7 @@ class OrganizationController(Controller):
 
     @get(
         operation_id="GetOrganization",
+        summary="Get organization details",
         guards=[requires_admin_role],
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -62,6 +63,7 @@ class OrganizationController(Controller):
 
     @put(
         operation_id="UpdateOrganization",
+        summary="Update organization settings",
         guards=[requires_superuser],
     )
     async def update_organization(

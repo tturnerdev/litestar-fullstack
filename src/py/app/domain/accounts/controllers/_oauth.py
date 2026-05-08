@@ -60,7 +60,7 @@ class OAuthController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get("/google", operation_id="GoogleOAuthAuthorize", name="oauth:google:authorize")
+    @get("/google", operation_id="GoogleOAuthAuthorize", summary="Initiate Google OAuth", name="oauth:google:authorize")
     async def google_authorize(
         self,
         request: Request[Any, Any, Any],
@@ -112,7 +112,7 @@ class OAuthController(Controller):
             state=state,
         )
 
-    @get("/google/callback", operation_id="GoogleOAuthCallback", name="oauth:google:callback")
+    @get("/google/callback", operation_id="GoogleOAuthCallback", summary="Handle Google OAuth callback", name="oauth:google:callback")
     async def google_callback(
         self,
         request: Request[Any, Any, Any],
@@ -225,7 +225,7 @@ class OAuthController(Controller):
             user_service, "google", account_id, account_email, token_data, frontend_callback
         )
 
-    @get("/github", operation_id="GitHubOAuthAuthorize", name="oauth:github:authorize")
+    @get("/github", operation_id="GitHubOAuthAuthorize", summary="Initiate GitHub OAuth", name="oauth:github:authorize")
     async def github_authorize(
         self,
         request: Request[Any, Any, Any],
@@ -270,7 +270,7 @@ class OAuthController(Controller):
             state=state,
         )
 
-    @get("/github/callback", operation_id="GitHubOAuthCallback", name="oauth:github:callback")
+    @get("/github/callback", operation_id="GitHubOAuthCallback", summary="Handle GitHub OAuth callback", name="oauth:github:callback")
     async def github_callback(
         self,
         request: Request[Any, Any, Any],

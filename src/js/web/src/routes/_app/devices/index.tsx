@@ -175,6 +175,7 @@ const TOGGLEABLE_COLUMNS = [
   { key: "mac", label: "MAC Address" },
   { key: "ip", label: "IP Address" },
   { key: "lastSeen", label: "Last Seen" },
+  { key: "created", label: "Created" },
 ] as const
 
 type ColumnVisibility = Record<string, boolean>
@@ -839,6 +840,16 @@ function DevicesPage() {
                           className="hidden md:table-cell"
                         />
                       )}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
                       <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1075,6 +1086,16 @@ function DeviceRow({
               <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(device.lastSeenAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(device.lastSeenAt)}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+      )}
+      {isColumnVisible("created") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(device.createdAt)}</span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(device.createdAt)}</TooltipContent>
           </Tooltip>
         </TableCell>
       )}

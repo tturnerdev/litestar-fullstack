@@ -27,6 +27,7 @@ class NumbersGatewayController(Controller):
 
     @get(
         operation_id="GatewayLookupNumber",
+        summary="Look up a phone number",
         path="/api/gateway/numbers/{phone_number:str}",
     )
     async def get_number_data(

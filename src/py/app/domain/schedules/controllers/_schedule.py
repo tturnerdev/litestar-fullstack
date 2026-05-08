@@ -66,6 +66,7 @@ class ScheduleController(Controller):
 
     @get(
         operation_id="ListSchedules",
+        summary="List schedules",
         path="/api/schedules",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -99,6 +100,7 @@ class ScheduleController(Controller):
 
     @post(
         operation_id="CreateSchedule",
+        summary="Create a schedule",
         path="/api/schedules",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -143,6 +145,7 @@ class ScheduleController(Controller):
 
     @get(
         operation_id="GetSchedule",
+        summary="Get schedule details",
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -165,6 +168,7 @@ class ScheduleController(Controller):
 
     @patch(
         operation_id="UpdateSchedule",
+        summary="Update a schedule",
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -215,6 +219,7 @@ class ScheduleController(Controller):
 
     @delete(
         operation_id="DeleteSchedule",
+        summary="Delete a schedule",
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -258,6 +263,7 @@ class ScheduleController(Controller):
 
     @get(
         operation_id="CheckSchedule",
+        summary="Check schedule status",
         path="/api/schedules/{schedule_id:uuid}/check",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -283,6 +289,7 @@ class ScheduleController(Controller):
 
     @get(
         operation_id="ListScheduleEntries",
+        summary="List schedule entries",
         path="/api/schedules/{schedule_id:uuid}/entries",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -305,6 +312,7 @@ class ScheduleController(Controller):
 
     @post(
         operation_id="CreateScheduleEntry",
+        summary="Create a schedule entry",
         path="/api/schedules/{schedule_id:uuid}/entries",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -351,6 +359,7 @@ class ScheduleController(Controller):
 
     @patch(
         operation_id="UpdateScheduleEntry",
+        summary="Update a schedule entry",
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -402,6 +411,7 @@ class ScheduleController(Controller):
 
     @delete(
         operation_id="DeleteScheduleEntry",
+        summary="Delete a schedule entry",
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
     )

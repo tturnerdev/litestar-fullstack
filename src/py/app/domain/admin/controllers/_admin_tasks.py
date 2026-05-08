@@ -54,6 +54,7 @@ class AdminTasksController(Controller):
 
     @get(
         operation_id="GetAdminTaskStats",
+        summary="Get task statistics (admin)",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -71,7 +72,7 @@ class AdminTasksController(Controller):
             total_this_week=raw["total_this_week"],
         )
 
-    @get(operation_id="AdminListTasks", path="/")
+    @get(operation_id="AdminListTasks", summary="List background tasks (admin)", path="/")
     async def list_tasks(
         self,
         task_service: BackgroundTaskService,
@@ -116,7 +117,7 @@ class AdminTasksController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCancelTask", path="/{task_id:uuid}/cancel")
+    @post(operation_id="AdminCancelTask", summary="Cancel a background task (admin)", path="/{task_id:uuid}/cancel")
     async def cancel_task(
         self,
         request: Request[m.User, Token, Any],
@@ -148,7 +149,7 @@ class AdminTasksController(Controller):
         )
         return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
 
-    @delete(operation_id="AdminDeleteTask", path="/{task_id:uuid}")
+    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", path="/{task_id:uuid}")
     async def delete_task(
         self,
         request: Request[m.User, Token, Any],
