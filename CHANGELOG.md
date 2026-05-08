@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.267.0 (2026-05-07)
+
+### Added
+- **Audit log resource linking** — Target entries in the audit log table are now clickable, navigating to the affected resource (devices, users, teams, connections, etc.)
+- **DataFreshness indicators** — Added last-updated timestamp and refresh state to notifications, call-routing, webhooks, and locations list pages
+- **Webhook delivery redeliver button** — Failed deliveries now have a redeliver action button; delivery log supports status filtering (all/success/failed/pending retry)
+- **Connection health card** — Enhanced connection detail page with colored health status card, test result history, response time tracking, and inline header quick info
+
 ## v0.266.0 (2026-05-07)
 
 ### Added
