@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+import structlog
 from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
 from litestar.exceptions import ValidationException
@@ -17,6 +18,8 @@ if TYPE_CHECKING:
 
 from app.db import models as m
 from app.domain.connections.schemas import ConnectionDetail, ConnectionList
+
+logger = structlog.get_logger()
 
 
 class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
@@ -81,7 +84,12 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
         provider_cls = get_provider(db_obj.provider)
         if provider_cls is not None:
             provider = provider_cls()
-            success, error_message = await provider.health_check(db_obj)
+            try:
+                success, error_message = await provider.health_check(db_obj)
+            except Exception:
+                await logger.aerror("Provider health check failed", provider=db_obj.provider, connection_id=str(connection_id), exc_info=True)
+                success = False
+                error_message = "Health check raised an unexpected error"
         else:
             # No gateway provider registered for this connection type;
             # fall back to optimistic success.

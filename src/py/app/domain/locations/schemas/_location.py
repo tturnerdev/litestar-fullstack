@@ -40,7 +40,7 @@ class LocationCreate(CamelizedBaseStruct):
     """Schema for creating a location."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    location_type: str
+    location_type: Annotated[str, Meta(min_length=1, max_length=20)]
     team_id: UUID
     description: Annotated[str, Meta(max_length=500)] | None = None
     parent_id: UUID | None = None
