@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -95,20 +96,45 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
             logger.warning("Failed to load phone_number relationship on extension", exc_info=True)
         return extra
 
-    def to_schema_enriched(self, obj: m.Extension) -> ExtensionSchema:
-        """Convert a single Extension model to schema with E911 enrichment.
+    def to_schema_enriched(
+        self,
+        obj: m.Extension | Sequence[m.Extension],
+        total: int | None = None,
+        filters: Any | None = None,
+    ) -> Any:
+        """Convert model(s) to schema with E911 enrichment.
 
         Args:
-            obj: The Extension model instance.
+            obj: Single model or sequence of models.
+            total: Total count for pagination.
+            filters: Filters for pagination.
 
         Returns:
-            Enriched Extension schema.
+            Schema or paginated schema response.
         """
-        schema = self.to_schema(obj, schema_type=ExtensionSchema)
-        extra = self._enrich_schema(obj)
-        for k, v in extra.items():
-            object.__setattr__(schema, k, v)
-        return schema
+        if isinstance(obj, m.Extension):
+            schema = self.to_schema(obj, schema_type=ExtensionSchema)
+            extra = self._enrich_schema(obj)
+            for k, v in extra.items():
+                object.__setattr__(schema, k, v)
+            return schema
+
+        if total is not None and filters is not None:
+            paginated = self.to_schema(obj, total, filters, schema_type=ExtensionSchema)
+            for model, schema in zip(obj, paginated.items, strict=False):
+                extra = self._enrich_schema(model)
+                for k, v in extra.items():
+                    object.__setattr__(schema, k, v)
+            return paginated
+
+        schemas = []
+        for item in obj:
+            schema = self.to_schema(item, schema_type=ExtensionSchema)
+            extra = self._enrich_schema(item)
+            for k, v in extra.items():
+                object.__setattr__(schema, k, v)
+            schemas.append(schema)
+        return schemas
 
     async def get_assigned_devices(self, extension_id: UUID) -> list[ExtensionDeviceSummary]:
         """Return devices that have this extension assigned to a line.

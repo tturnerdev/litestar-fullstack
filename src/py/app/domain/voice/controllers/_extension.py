@@ -86,7 +86,7 @@ class ExtensionController(Controller):
             *filters,
             m.Extension.user_id == current_user.id,
         )
-        return extensions_service.to_schema(results, total, filters, schema_type=Extension)
+        return extensions_service.to_schema_enriched(results, total, filters)
 
     @post(
         operation_id="CreateExtension",
@@ -164,7 +164,7 @@ class ExtensionController(Controller):
                     payload={"extension_id": str(db_obj.id), "extension_number": db_obj.extension_number},
                 )
 
-        return extensions_service.to_schema(db_obj, schema_type=Extension)
+        return extensions_service.to_schema_enriched(db_obj)
 
     @get(
         operation_id="GetExtension",
@@ -248,7 +248,7 @@ class ExtensionController(Controller):
                 payload={"extension_id": str(db_obj.id), "extension_number": db_obj.extension_number},
             )
 
-        return extensions_service.to_schema(db_obj, schema_type=Extension)
+        return extensions_service.to_schema_enriched(db_obj)
 
     @delete(
         operation_id="DeleteExtension",
