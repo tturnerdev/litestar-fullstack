@@ -589,6 +589,7 @@ function AdminUserDetailPage() {
                           onChange={(e) => handleFieldChange("username", e.target.value, setEditUsername)}
                           onBlur={() => handleFieldBlur("username", editUsername)}
                           placeholder="Username"
+                          maxLength={30}
                           className="mt-1"
                           disabled={updateUser.isPending}
                           aria-invalid={!!fieldErrors.username}
@@ -611,6 +612,7 @@ function AdminUserDetailPage() {
                           onChange={(e) => handleFieldChange("name", e.target.value, setEditName)}
                           onBlur={() => handleFieldBlur("name", editName)}
                           placeholder="Full name"
+                          maxLength={255}
                           className="mt-1"
                           disabled={updateUser.isPending}
                           aria-invalid={!!fieldErrors.name}

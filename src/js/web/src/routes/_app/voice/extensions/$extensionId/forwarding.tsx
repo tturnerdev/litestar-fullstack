@@ -459,6 +459,7 @@ function AddRuleDialog({ extensionId, open, onOpenChange }: { extensionId: strin
                 onChange={(e) => handleFieldChange("destinationValue", e.target.value, setDestValue)}
                 onBlur={() => handleFieldBlur("destinationValue", destValue)}
                 aria-invalid={!!fieldErrors.destinationValue}
+                maxLength={255}
                 placeholder={destType === "voicemail" ? "Voicemail box ID" : destType === "extension" ? "Extension number" : "Phone number (e.g. +15551234567)"}
               />
               <FieldError message={fieldErrors.destinationValue} />
