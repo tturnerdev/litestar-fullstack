@@ -59,6 +59,7 @@ class RingGroupMemberService(service.SQLAlchemyAsyncRepositoryService[m.RingGrou
         model_type = m.RingGroupMember
 
     repository_type = Repo
+    match_fields = ["ring_group_id", "extension_id"]
 
     async def to_model_on_create(self, data: ModelDictT[m.RingGroupMember]) -> ModelDictT[m.RingGroupMember]:
         data = service.schema_dump(data)

@@ -124,6 +124,38 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
     repository_type = Repo
     match_fields = ["schedule_id", "day_of_week", "start_time"]
 
+    async def to_model_on_create(self, data: ModelDictT[m.ScheduleEntry]) -> ModelDictT[m.ScheduleEntry]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if data.get("label"):
+                data["label"] = data["label"].strip()
+            existing = await self.repository.list(
+                m.ScheduleEntry.schedule_id == data["schedule_id"],
+                m.ScheduleEntry.day_of_week == data.get("day_of_week"),
+                m.ScheduleEntry.start_time == data["start_time"],
+            )
+            if existing:
+                raise ValidationException("A schedule entry for this day and start time already exists.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.ScheduleEntry], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.ScheduleEntry]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "label" in data and data["label"]:
+                data["label"] = data["label"].strip()
+            schedule_id = data.get("schedule_id")
+            day_of_week = data.get("day_of_week")
+            start_time = data.get("start_time")
+            if schedule_id and start_time is not None:
+                existing = await self.repository.list(
+                    m.ScheduleEntry.schedule_id == schedule_id,
+                    m.ScheduleEntry.day_of_week == day_of_week,
+                    m.ScheduleEntry.start_time == start_time,
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("A schedule entry for this day and start time already exists.")
+        return data
+
 
 def _entry_to_schema(entry: m.ScheduleEntry) -> ScheduleEntryDetail:
     """Convert a ScheduleEntry model instance to a detail schema."""

@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -79,6 +80,7 @@ export function PhoneNumberEditSheet({ phoneNumber, open, onOpenChange }: PhoneN
               Cancel
             </Button>
             <Button type="submit" disabled={updatePhoneNumber.isPending}>
+              {updatePhoneNumber.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {updatePhoneNumber.isPending ? "Saving..." : "Save changes"}
             </Button>
           </SheetFooter>
