@@ -345,8 +345,9 @@ export function useUpdateAnyExtension() {
         method: "PATCH",
         body: JSON.stringify(payload),
       }),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      queryClient.invalidateQueries({ queryKey: ["voice", "extension", variables.extensionId] })
       toast.success("Extension updated")
     },
     onError: (error) => {
