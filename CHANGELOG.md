@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.259.0 (2026-05-07)
+
+### Added
+- **Shared DestinationPicker component** — Extracted from IVR menu into reusable component with type selector + entity dropdown for extensions, ring groups, call queues, IVR menus, external numbers
+- **Time condition destination picker + schedule dropdown** — Match/no-match destinations use DestinationPicker; schedule field uses dropdown with resolved names
+- **Locations URL-persisted search** — Search, type filter, and pagination now URL-persisted with lifted filter controls
+- **Connection form validation** — Inline validation for name, provider, host URL, port, and dynamic credential fields
+- **Team form validation** — Consistent name/description validation across create form, edit page, and admin edit dialog (4 files)
+
+## v0.258.0 (2026-05-07)
+
+### Added
+- **IVR menu destination picker** — Two-step type/entity dropdown replaces raw text inputs for option destinations, timeout, and invalid destinations
+- **Ring group extension resolution** — Members show extension numbers and names instead of truncated UUIDs; add-member uses dropdown selector
+- **Schedule form validation** — Inline field validation for name and timezone on create and edit pages
+
+## v0.257.0 (2026-05-07)
+
+### Added
+- **URL-persisted search on 4 more pages** — Admin music-on-hold, device templates, fax email routes, and admin teams search now stored in URL params
+- **Call queue extension resolution** — Members show extension numbers and names instead of truncated UUIDs; add-member uses dropdown selector
+- **Support ticket header polish** — Close/reopen promoted to header button; enriched description with relative time, assignee, status/priority badges
+- **Support message distinction** — Current user's messages get subtle background tint for visual scanning
+
 ## v0.256.0 (2026-05-07)
 
 ### Added
