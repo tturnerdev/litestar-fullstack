@@ -63,6 +63,12 @@ class LocationService(service.SQLAlchemyAsyncRepositoryService[m.Location]):
                 raise ValidationException("A location with this name already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.Location]) -> ModelDictT[m.Location]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
+        return data
+
     async def update(self, data: ModelDictT[m.Location], item_id: Any | None = None, **kwargs: Any) -> m.Location:
         """Update a location.
 

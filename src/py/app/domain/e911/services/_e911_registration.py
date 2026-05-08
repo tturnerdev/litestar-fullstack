@@ -64,6 +64,10 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
                 raise ValidationException("An E911 registration already exists for this phone number.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.E911Registration]) -> ModelDictT[m.E911Registration]:
+        data = service.schema_dump(data)
+        return self._strip_address_fields(data)
+
     @staticmethod
     def _enrich_schema(db_obj: m.E911Registration) -> dict[str, Any]:
         """Extract relationship data for schema enrichment.

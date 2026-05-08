@@ -71,5 +71,14 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
                     raise ValidationException("A webhook with this name already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.Webhook]) -> ModelDictT[m.Webhook]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "name" in data:
+                data["name"] = data["name"].strip()
+            if "description" in data and data["description"]:
+                data["description"] = data["description"].strip()
+        return data
+
     async def update(self, data: Any, item_id: Any | None = None, **kwargs: Any) -> m.Webhook:
         return await super().update(data, item_id=item_id, **kwargs)

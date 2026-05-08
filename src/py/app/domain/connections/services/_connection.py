@@ -52,6 +52,12 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
                 raise ValidationException("A connection with this name already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.Connection]) -> ModelDictT[m.Connection]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
+        return data
+
     async def test_connection(self, connection_id: Any) -> tuple[bool, str | None]:
         """Test connectivity to an external data source.
 

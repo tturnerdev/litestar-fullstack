@@ -74,6 +74,15 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                     raise ValidationException("A webhook endpoint with this URL already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: service.ModelDictT[m.WebhookEndpoint]) -> service.ModelDictT[m.WebhookEndpoint]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "url" in data:
+                data["url"] = data["url"].strip()
+            if "description" in data and data["description"]:
+                data["description"] = data["description"].strip()
+        return data
+
     async def create(self, data: dict[str, Any] | m.WebhookEndpoint, **kwargs: Any) -> m.WebhookEndpoint:
         """Create a webhook endpoint with URL validation.
 

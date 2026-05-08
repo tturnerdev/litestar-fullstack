@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { AlertCircle, Building2, Eye, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { AlertCircle, Building2, Eye, Loader2, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -648,8 +648,9 @@ function LocationRow({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete}>
-              Delete
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} disabled={deleteMutation.isPending} onClick={handleDelete}>
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

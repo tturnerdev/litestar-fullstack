@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { Check, Crown, Download, Eye, Home, MoreVertical, Pencil, Plus, Search, Shield, SlidersHorizontal, Trash2, Users, X } from "lucide-react"
+import { Check, Crown, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, Shield, SlidersHorizontal, Trash2, Users, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
@@ -858,7 +858,8 @@ function TeamRow({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => deleteTeamMutation.mutate(team.id)}
             >
-              Delete
+              {deleteTeamMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteTeamMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

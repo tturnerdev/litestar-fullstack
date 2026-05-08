@@ -74,6 +74,19 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
                 raise ValidationException("A device with this MAC address already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.Device]) -> ModelDictT[m.Device]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "name" in data:
+                data["name"] = data["name"].strip()
+            if "manufacturer" in data and data["manufacturer"]:
+                data["manufacturer"] = data["manufacturer"].strip()
+            if "device_model" in data and data["device_model"]:
+                data["device_model"] = data["device_model"].strip()
+            if "mac_address" in data and data["mac_address"]:
+                data["mac_address"] = data["mac_address"].strip().upper()
+        return data
+
     @staticmethod
     def _enrich_line_schema(line: m.DeviceLineAssignment, schema: DeviceLineAssignmentSchema) -> None:
         """Populate denormalized extension fields on a line assignment schema.
