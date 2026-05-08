@@ -37,16 +37,16 @@ class PhoneNumberDetail(CamelizedBaseStruct, kw_only=True):
 class PhoneNumberCreate(CamelizedBaseStruct, kw_only=True):
     number: Annotated[str, Meta(min_length=1, max_length=20)]
     user_id: UUID
-    label: Annotated[str, Meta(max_length=100)] | None = None
+    label: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     number_type: Annotated[str, Meta(min_length=1, max_length=50)] = "local"
-    caller_id_name: Annotated[str, Meta(max_length=50)] | None = None
+    caller_id_name: Annotated[str, Meta(min_length=1, max_length=50)] | None = None
     is_active: bool = True
     team_id: UUID | None = None
 
 
 class PhoneNumberUpdate(CamelizedBaseStruct, gc=False, omit_defaults=True):
-    label: Annotated[str, Meta(max_length=100)] | UnsetType | None = UNSET
+    label: Annotated[str, Meta(min_length=1, max_length=100)] | UnsetType | None = UNSET
     number_type: Annotated[str, Meta(min_length=1, max_length=50)] | UnsetType = UNSET
-    caller_id_name: Annotated[str, Meta(max_length=50)] | UnsetType | None = UNSET
+    caller_id_name: Annotated[str, Meta(min_length=1, max_length=50)] | UnsetType | None = UNSET
     is_active: bool | UnsetType = UNSET
     team_id: UUID | UnsetType | None = UNSET

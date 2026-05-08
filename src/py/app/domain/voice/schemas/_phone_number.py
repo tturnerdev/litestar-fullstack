@@ -32,9 +32,9 @@ class PhoneNumberCreate(CamelizedBaseStruct):
     """Phone number create properties."""
 
     number: Annotated[str, Meta(min_length=1, max_length=20)]
-    label: Annotated[str, Meta(max_length=100)] | None = None
+    label: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     number_type: PhoneNumberType = PhoneNumberType.LOCAL
-    caller_id_name: Annotated[str, Meta(max_length=100)] | None = None
+    caller_id_name: Annotated[str, Meta(min_length=1, max_length=50)] | None = None
     is_active: bool = True
     team_id: UUID | None = None
 
@@ -42,6 +42,6 @@ class PhoneNumberCreate(CamelizedBaseStruct):
 class PhoneNumberUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Phone number update properties."""
 
-    label: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    caller_id_name: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    label: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    caller_id_name: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

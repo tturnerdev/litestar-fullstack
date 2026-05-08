@@ -31,7 +31,7 @@ class FaxMessageCreate(CamelizedBaseStruct):
     fax_number_id: UUID
     direction: FaxDirection
     remote_number: Annotated[str, Meta(min_length=1, max_length=20)]
-    remote_name: Annotated[str, Meta(max_length=255)] | None = None
+    remote_name: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
     page_count: Annotated[int, Meta(ge=0)] = 0
     status: FaxStatus = FaxStatus.SENDING
     file_path: Annotated[str, Meta(max_length=2048)] = ""
