@@ -28,7 +28,7 @@ export function useSyncEntity() {
       return data as SyncResponse
     },
     onSuccess: () => {
-      toast.success("Synced successfully")
+      toast.success("Sync complete")
     },
     onError: (error) => {
       toast.error("Sync failed", {

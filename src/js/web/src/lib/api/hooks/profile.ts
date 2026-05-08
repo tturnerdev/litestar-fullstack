@@ -41,7 +41,7 @@ export function useChangePassword() {
       return response.data
     },
     onSuccess: () => {
-      toast.success("Password changed successfully")
+      toast.success("Password changed")
     },
     onError: (error: Error) => {
       toast.error("Failed to change password", {

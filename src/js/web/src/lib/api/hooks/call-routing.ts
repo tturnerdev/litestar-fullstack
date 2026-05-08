@@ -522,7 +522,7 @@ export function useReorderIvrMenuOptions(menuId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
-      toast.success("Options reordered successfully")
+      toast.success("Options reordered")
     },
     onError: (error) => {
       toast.error("Unable to reorder options", {
@@ -683,7 +683,7 @@ export function useReorderCallQueueMembers(queueId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
-      toast.success("Members reordered successfully")
+      toast.success("Members reordered")
     },
     onError: (error) => {
       toast.error("Unable to reorder members", {
@@ -824,7 +824,7 @@ export function useReorderRingGroupMembers(groupId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", groupId] })
-      toast.success("Members reordered successfully")
+      toast.success("Members reordered")
     },
     onError: (error) => {
       toast.error("Unable to reorder members", {

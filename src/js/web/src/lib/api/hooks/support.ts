@@ -253,7 +253,7 @@ export function useCreateTicketMessage(ticketId: string) {
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId] })
       queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
-      toast.success("Message sent successfully")
+      toast.success("Message sent")
     },
     onError: (error) => {
       toast.error("Unable to send message", {
