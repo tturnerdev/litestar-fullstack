@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.265.0 (2026-05-07)
+
+### Added
+- **Ring group edit form validation** — Name, strategy, and ring timeout with touchedRef pattern and inline error display
+- **Call queue edit form validation** — Name, strategy, max wait time, and ring timeout validation
+- **IVR menu edit form validation** — Name, timeout (1-300), max retries (1-10), and required destinations with DestinationPicker validation
+- **Forwarding rules form validation** — Destination required, ring timeout positive, priority non-negative with inline errors
+
+### Fixed
+- **Mutation error handling** — Added try/catch on bare `mutateAsync` delete calls in ring groups, call queues, IVR menus; fixed admin system test-all loop to continue on individual failures
+
 ## v0.264.0 (2026-05-07)
 
 ### Added
