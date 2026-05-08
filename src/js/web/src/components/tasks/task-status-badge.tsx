@@ -4,6 +4,29 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+export const TASK_STATUSES = {
+  PENDING: "pending",
+  RUNNING: "running",
+  COMPLETED: "completed",
+  FAILED: "failed",
+  CANCELLED: "cancelled",
+  ABORTED: "aborted",
+} as const
+
+export function isTaskActive(status: string): boolean {
+  return status === TASK_STATUSES.PENDING || status === TASK_STATUSES.RUNNING
+}
+
+export function isTaskTerminal(status: string): boolean {
+  return status === TASK_STATUSES.COMPLETED || status === TASK_STATUSES.FAILED || status === TASK_STATUSES.CANCELLED
+}
+
+export function getTaskProgressColor(status: string): string {
+  if (status === TASK_STATUSES.FAILED) return "bg-red-500"
+  if (status === TASK_STATUSES.COMPLETED) return "bg-emerald-500"
+  return "bg-blue-500"
+}
+
 const statusConfig: Record<string, { label: string; description: string; className: string; dotColor: string; icon: LucideIcon }> = {
   pending: {
     label: "Pending",

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, Download, Eye, Home, ListTodo, MoreVertical, SlidersHorizontal, XCircle } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
+import { getTaskProgressColor, isTaskActive, TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { type BulkAction, BulkActionBar, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -168,7 +168,7 @@ function TaskRow({
   isColumnVisible: (col: string) => boolean
 }) {
   const cancelMutation = useCancelTask()
-  const isActive = task.status === "pending" || task.status === "running"
+  const isActive = isTaskActive(task.status)
 
   return (
     <TableRow
@@ -208,12 +208,7 @@ function TaskRow({
           {task.progress != null && task.progress > 0 ? (
             <div className="flex items-center gap-2 min-w-[100px]">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
-                  }`}
-                  style={{ width: `${Math.min(task.progress, 100)}%` }}
-                />
+                <div className={`h-full rounded-full transition-all duration-300 ${getTaskProgressColor(task.status)}`} style={{ width: `${Math.min(task.progress, 100)}%` }} />
               </div>
               <span className="text-xs font-medium text-muted-foreground w-8 text-right">{Math.round(task.progress)}%</span>
             </div>
@@ -393,7 +388,7 @@ function TasksPage() {
   // Update active-tasks flag when data changes
   useEffect(() => {
     const items = data?.items ?? []
-    const active = items.some((t) => t.status === "pending" || t.status === "running")
+    const active = items.some((t) => isTaskActive(t.status))
     setHasActiveTasks(active)
   }, [data?.items])
 
@@ -466,7 +461,7 @@ function TasksPage() {
           description: "Only pending and running tasks will be cancelled. This action cannot be undone.",
         },
         onExecute: async (ids: string[]) => {
-          const activeTasks = items.filter((t) => ids.includes(t.id) && (t.status === "pending" || t.status === "running"))
+          const activeTasks = items.filter((t) => ids.includes(t.id) && isTaskActive(t.status))
           if (activeTasks.length === 0) {
             toast.info("No active tasks to cancel among the selection")
             return

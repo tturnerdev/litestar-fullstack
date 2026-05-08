@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
-import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
+import { getTaskProgressColor, isTaskActive, isTaskTerminal, TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -308,8 +308,8 @@ function AdminTaskRow({
   const cancelMutation = useAdminCancelTask()
   const deleteMutation = useAdminDeleteTask()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const isActive = task.status === "pending" || task.status === "running"
-  const isTerminal = task.status === "completed" || task.status === "failed" || task.status === "cancelled"
+  const isActive = isTaskActive(task.status)
+  const isTerminal = isTaskTerminal(task.status)
 
   return (
     <TableRow
@@ -347,12 +347,7 @@ function AdminTaskRow({
           {task.progress != null && task.progress > 0 ? (
             <div className="flex items-center gap-2 min-w-[100px]">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
-                  }`}
-                  style={{ width: `${Math.min(task.progress, 100)}%` }}
-                />
+                <div className={`h-full rounded-full transition-all duration-300 ${getTaskProgressColor(task.status)}`} style={{ width: `${Math.min(task.progress, 100)}%` }} />
               </div>
               <span className="text-xs font-medium text-muted-foreground w-8 text-right">{Math.round(task.progress)}%</span>
             </div>
@@ -389,7 +384,7 @@ function AdminTaskRow({
         <TableCell>
           {task.startedAt && task.completedAt ? (
             <span className="text-xs text-muted-foreground tabular-nums">{formatDuration((new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime()) / 1000)}</span>
-          ) : task.startedAt && !task.completedAt && (task.status === "running" || task.status === "pending") ? (
+          ) : task.startedAt && !task.completedAt && isTaskActive(task.status) ? (
             <span className="text-xs text-muted-foreground">In progress</span>
           ) : (
             <span className="text-xs text-muted-foreground">--</span>
@@ -676,7 +671,7 @@ function AdminTasksPage() {
           let failed = 0
           for (const id of ids) {
             const task = items.find((t) => t.id === id)
-            if (!task || (task.status !== "pending" && task.status !== "running")) {
+            if (!task || !isTaskActive(task.status)) {
               skipped++
               continue
             }
@@ -713,7 +708,7 @@ function AdminTasksPage() {
           let failed = 0
           for (const id of ids) {
             const task = items.find((t) => t.id === id)
-            if (!task || task.status === "pending" || task.status === "running") {
+            if (!task || isTaskActive(task.status)) {
               skipped++
               continue
             }

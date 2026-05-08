@@ -22,6 +22,7 @@ import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminTicketSummary } from "@/lib/generated/api/types.gen"
+import { getTicketStatusDotColor } from "@/components/support/ticket-status-badge"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/support")({
@@ -409,15 +410,7 @@ function AdminSupportPage() {
                           {isColumnVisible("status") && (
                             <TableCell>
                               <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
-                                <span
-                                  className={cn("h-1.5 w-1.5 rounded-full", {
-                                    "bg-blue-500": ticket.status === "open",
-                                    "bg-amber-500": ticket.status === "in_progress",
-                                    "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
-                                    "bg-emerald-500": ticket.status === "resolved",
-                                    "bg-gray-400": ticket.status === "closed",
-                                  })}
-                                />
+                                <span className={cn("h-1.5 w-1.5 rounded-full", getTicketStatusDotColor(ticket.status))} />
                                 {statusLabel[ticket.status] ?? ticket.status}
                               </Badge>
                             </TableCell>
@@ -552,15 +545,7 @@ function AdminSupportPage() {
                             {isColumnVisible("status") && (
                               <TableCell>
                                 <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
-                                  <span
-                                    className={cn("h-1.5 w-1.5 rounded-full", {
-                                      "bg-blue-500": ticket.status === "open",
-                                      "bg-amber-500": ticket.status === "in_progress",
-                                      "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
-                                      "bg-emerald-500": ticket.status === "resolved",
-                                      "bg-gray-400": ticket.status === "closed",
-                                    })}
-                                  />
+                                  <span className={cn("h-1.5 w-1.5 rounded-full", getTicketStatusDotColor(ticket.status))} />
                                   {statusLabel[ticket.status] ?? ticket.status}
                                 </Badge>
                               </TableCell>

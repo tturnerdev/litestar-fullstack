@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.300.0 (2026-05-08)
+
+### Fixed
+- **Centralized ticket status colors** — Admin support page now uses shared `getTicketStatusDotColor()` from TicketStatusBadge, fixing color inconsistencies between admin and user-facing support views
+- **Centralized task status logic** — Extracted `TASK_STATUSES`, `isTaskActive()`, `isTaskTerminal()`, and `getTaskProgressColor()` from duplicated inline comparisons across 5 files into shared helpers
+
 ## v0.299.0 (2026-05-08)
 
 ### Fixed

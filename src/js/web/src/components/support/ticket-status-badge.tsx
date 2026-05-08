@@ -49,6 +49,12 @@ const statusConfig: Record<string, { label: string; description: string; classNa
   },
 }
 
+export { statusConfig }
+
+export function getTicketStatusDotColor(status: string): string {
+  return statusConfig[status]?.dotColor ?? "bg-zinc-500"
+}
+
 export function TicketStatusBadge({ status }: { status: string }) {
   const config = statusConfig[status] ?? {
     label: status,

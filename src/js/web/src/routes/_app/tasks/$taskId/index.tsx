@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
+import { getTaskProgressColor, isTaskActive, TASK_STATUSES, TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -211,8 +211,8 @@ function TaskDetailPage() {
     return <TaskNotFound message="This task could not be found. It may have been deleted." />
   }
 
-  const isActive = task.status === "pending" || task.status === "running"
-  const isRetryable = task.status === "failed" || task.status === "aborted"
+  const isActive = isTaskActive(task.status)
+  const isRetryable = task.status === TASK_STATUSES.FAILED || task.status === TASK_STATUSES.ABORTED
 
   return (
     <PageContainer className="flex-1 space-y-6">
@@ -313,14 +313,14 @@ function TaskDetailPage() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{task.status === "completed" ? "Complete" : task.status === "failed" ? "Failed" : "In progress..."}</span>
+                        <span className="text-muted-foreground">
+                          {task.status === TASK_STATUSES.COMPLETED ? "Complete" : task.status === TASK_STATUSES.FAILED ? "Failed" : "In progress..."}
+                        </span>
                         <span className="font-medium">{Math.round(task.progress)}%</span>
                       </div>
                       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
-                          }`}
+                          className={`h-full rounded-full transition-all duration-500 ${getTaskProgressColor(task.status)}`}
                           style={{ width: `${Math.min(task.progress, 100)}%` }}
                         />
                       </div>
@@ -332,7 +332,7 @@ function TaskDetailPage() {
           )}
 
           {/* Error section */}
-          {task.status === "failed" && task.errorMessage && (
+          {task.status === TASK_STATUSES.FAILED && task.errorMessage && (
             <PageSection delay={0.1}>
               <SectionErrorBoundary name="Task Error">
                 <Alert variant="destructive">

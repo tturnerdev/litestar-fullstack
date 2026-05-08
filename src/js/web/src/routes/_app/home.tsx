@@ -42,7 +42,7 @@ import { RecentActivityFeed } from "@/components/home/recent-activity-feed"
 import { StatCard } from "@/components/home/stat-card"
 import { TeamsCard } from "@/components/home/teams-card"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
-import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
+import { isTaskActive, TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -244,7 +244,7 @@ function MyAssignmentsCard() {
     if (!tasksData?.items || !user) return []
     return tasksData.items
       .filter((task) => {
-        const isActive = task.status === "pending" || task.status === "running"
+        const isActive = isTaskActive(task.status)
         const isInitiator = task.initiatedByName === user.name || task.initiatedByName === user.email
         return isActive && isInitiator
       })
