@@ -28,8 +28,8 @@ class TimeConditionCreate(CamelizedBaseStruct):
     """Schema for creating a time condition."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    match_destination: str
-    no_match_destination: str
+    match_destination: Annotated[str, Meta(min_length=1, max_length=255)]
+    no_match_destination: Annotated[str, Meta(min_length=1, max_length=255)]
     schedule_id: UUID | None = None
     override_mode: str = "none"
 
@@ -38,8 +38,8 @@ class TimeConditionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a time condition."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    match_destination: str | msgspec.UnsetType = msgspec.UNSET
-    no_match_destination: str | msgspec.UnsetType = msgspec.UNSET
+    match_destination: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    no_match_destination: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     schedule_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     override_mode: str | msgspec.UnsetType = msgspec.UNSET
 

@@ -55,7 +55,7 @@ class DeviceCreate(CamelizedBaseStruct):
     """Schema for creating a device."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    device_type: Annotated[str, Meta(max_length=100)]
+    device_type: Annotated[str, Meta(min_length=1, max_length=100)]
     mac_address: Annotated[str, Meta(max_length=17)] | None = None
     device_model: Annotated[str, Meta(max_length=255)] | None = None
     manufacturer: Annotated[str, Meta(max_length=255)] | None = None

@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.322.0 (2026-05-08)
+
+### Fixed
+- **Webhook event naming bug** — Fixed `DEVICE_TEMPLATE_DELETED` event value from `"device_template.deleted"` to `"device.template.deleted"` to match the created event's dot notation
+- **11 missing webhook event types** — Added webhook event types and listener mappings for organization_created, tag_created/updated, team_permissions_updated, dnd_toggled/updated, schedule_entry_created/updated, ticket_message_updated, voicemail_message_updated, notifications_bulk_deleted
+- **Missing actor_name in audit logs** — All 10 `log_audit()` calls missing `actor_name` now include it (access, email verification, organization controllers)
+- **Duplicate MFA rate limit constants** — Consolidated `MFA_RATE_LIMIT_MAX_ATTEMPTS` and `MFA_RATE_LIMIT_WINDOW_MINUTES` from `_mfa_challenge.py` into `_mfa.py`
+
+### Improved
+- **Duplicate guard removal** — Removed duplicate `requires_superuser` from organizations/guards.py; org controller now imports from accounts.guards like all other 19+ controllers
+
+## v0.320.0 (2026-05-08)
+
+### Improved
+- **Event emission coverage** — Added `tag_created`/`tag_updated` events, `organization_created` event, and `team_permissions_updated` event to controllers
+- **Extension bulk import cache** — `useImportExtensions` now invalidates `["voice","extensions"]` query key alongside `["admin","voice"]` so user-facing extension lists refresh after import
+- **`formatDateTime` timezone support** — Added optional `Intl.DateTimeFormatOptions` parameter for timezone and format overrides (backwards-compatible)
+
 ## v0.319.0 (2026-05-08)
 
 ### Improved

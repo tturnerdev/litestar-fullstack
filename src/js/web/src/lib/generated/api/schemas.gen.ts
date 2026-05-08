@@ -2248,10 +2248,14 @@ export const CallQueueCreateSchema = {
     },
     maxCallers: {
       default: 10,
+      maximum: 100,
+      minimum: 1,
       type: "integer",
     },
     maxWaitTime: {
       default: 300,
+      maximum: 3600,
+      minimum: 0,
       type: "integer",
     },
     musicOnHoldClass: {
@@ -2270,14 +2274,20 @@ export const CallQueueCreateSchema = {
       type: "string",
     },
     number: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     ringTime: {
       default: 15,
+      maximum: 600,
+      minimum: 1,
       type: "integer",
     },
     strategy: {
       default: "ring_all",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     timeoutDestination: {
@@ -2292,6 +2302,8 @@ export const CallQueueCreateSchema = {
     },
     wrapupTime: {
       default: 0,
+      maximum: 300,
+      minimum: 0,
       type: "integer",
     },
   },
@@ -2355,10 +2367,12 @@ export const CallQueueMemberCreateSchema = {
     },
     penalty: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
     priority: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
   },
@@ -2452,6 +2466,8 @@ export const CallQueueUpdateSchema = {
       ],
     },
     maxCallers: {
+      maximum: 100,
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -2459,6 +2475,7 @@ export const CallQueueUpdateSchema = {
       ],
     },
     maxWaitTime: {
+      maximum: 3600,
       oneOf: [
         {
           type: "integer",
@@ -2485,6 +2502,8 @@ export const CallQueueUpdateSchema = {
       ],
     },
     number: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -2492,6 +2511,8 @@ export const CallQueueUpdateSchema = {
       ],
     },
     ringTime: {
+      maximum: 600,
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -2499,6 +2520,8 @@ export const CallQueueUpdateSchema = {
       ],
     },
     strategy: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -2516,6 +2539,7 @@ export const CallQueueUpdateSchema = {
       ],
     },
     wrapupTime: {
+      maximum: 300,
       oneOf: [
         {
           type: "integer",
@@ -3643,6 +3667,7 @@ export const DeviceCreateSchema = {
     },
     deviceType: {
       maxLength: 100,
+      minLength: 1,
       type: "string",
     },
     locationId: {
@@ -4895,6 +4920,8 @@ export const ExtensionSchema = {
     },
     forwardNoAnswerRingCount: {
       default: 4,
+      maximum: 20,
+      minimum: 1,
       type: "integer",
     },
     forwardUnreachableDestination: {
@@ -5189,6 +5216,8 @@ export const ExtensionUpdateSchema = {
       ],
     },
     forwardNoAnswerRingCount: {
+      maximum: 20,
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -5938,6 +5967,8 @@ export const IvrMenuCreateSchema = {
     },
     maxRetries: {
       default: 3,
+      maximum: 10,
+      minimum: 0,
       type: "integer",
     },
     name: {
@@ -5957,6 +5988,8 @@ export const IvrMenuCreateSchema = {
     },
     timeoutSeconds: {
       default: 5,
+      maximum: 120,
+      minimum: 1,
       type: "integer",
     },
   },
@@ -5997,16 +6030,23 @@ export const IvrMenuOptionSchema = {
 export const IvrMenuOptionCreateSchema = {
   properties: {
     destination: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     digit: {
+      maxLength: 10,
+      minLength: 1,
       type: "string",
     },
     label: {
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
     sortOrder: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
   },
@@ -6018,6 +6058,8 @@ export const IvrMenuOptionCreateSchema = {
 export const IvrMenuOptionUpdateSchema = {
   properties: {
     destination: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6025,6 +6067,8 @@ export const IvrMenuOptionUpdateSchema = {
       ],
     },
     digit: {
+      maxLength: 10,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6032,6 +6076,8 @@ export const IvrMenuOptionUpdateSchema = {
       ],
     },
     label: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6091,6 +6137,7 @@ export const IvrMenuUpdateSchema = {
       ],
     },
     maxRetries: {
+      maximum: 10,
       oneOf: [
         {
           type: "integer",
@@ -6117,6 +6164,8 @@ export const IvrMenuUpdateSchema = {
       ],
     },
     timeoutSeconds: {
+      maximum: 120,
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -8013,10 +8062,14 @@ export const RingGroupCreateSchema = {
       ],
     },
     number: {
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     ringTime: {
       default: 20,
+      maximum: 600,
+      minimum: 1,
       type: "integer",
     },
     strategy: {
@@ -8160,6 +8213,8 @@ export const RingGroupUpdateSchema = {
       ],
     },
     number: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8167,6 +8222,8 @@ export const RingGroupUpdateSchema = {
       ],
     },
     ringTime: {
+      maximum: 600,
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -9800,6 +9857,8 @@ export const TimeConditionSchema = {
 export const TimeConditionCreateSchema = {
   properties: {
     matchDestination: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     name: {
@@ -9808,6 +9867,8 @@ export const TimeConditionCreateSchema = {
       type: "string",
     },
     noMatchDestination: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     overrideMode: {
@@ -9845,6 +9906,8 @@ export const TimeConditionOverrideSchema = {
 export const TimeConditionUpdateSchema = {
   properties: {
     matchDestination: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -9861,6 +9924,8 @@ export const TimeConditionUpdateSchema = {
       ],
     },
     noMatchDestination: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",

@@ -25,7 +25,7 @@ class Extension(CamelizedBaseStruct):
     forward_busy_destination: str | None = None
     forward_no_answer_enabled: bool = False
     forward_no_answer_destination: str | None = None
-    forward_no_answer_ring_count: int = 4
+    forward_no_answer_ring_count: Annotated[int, Meta(ge=1, le=20)] = 4
     forward_unreachable_enabled: bool = False
     forward_unreachable_destination: str | None = None
     dnd_enabled: bool = False
@@ -56,7 +56,7 @@ class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     forward_busy_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     forward_no_answer_enabled: bool | msgspec.UnsetType = msgspec.UNSET
     forward_no_answer_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    forward_no_answer_ring_count: int | msgspec.UnsetType = msgspec.UNSET
+    forward_no_answer_ring_count: Annotated[int, Meta(ge=1, le=20)] | msgspec.UnsetType = msgspec.UNSET
     forward_unreachable_enabled: bool | msgspec.UnsetType = msgspec.UNSET
     forward_unreachable_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     dnd_enabled: bool | msgspec.UnsetType = msgspec.UNSET

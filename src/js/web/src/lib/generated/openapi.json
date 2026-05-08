@@ -2326,10 +2326,14 @@
           },
           "maxCallers": {
             "default": 10,
+            "maximum": 100.0,
+            "minimum": 1.0,
             "type": "integer"
           },
           "maxWaitTime": {
             "default": 300,
+            "maximum": 3600.0,
+            "minimum": 0.0,
             "type": "integer"
           },
           "musicOnHoldClass": {
@@ -2348,14 +2352,20 @@
             "type": "string"
           },
           "number": {
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "ringTime": {
             "default": 15,
+            "maximum": 600.0,
+            "minimum": 1.0,
             "type": "integer"
           },
           "strategy": {
             "default": "ring_all",
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "timeoutDestination": {
@@ -2370,6 +2380,8 @@
           },
           "wrapupTime": {
             "default": 0,
+            "maximum": 300.0,
+            "minimum": 0.0,
             "type": "integer"
           }
         },
@@ -2440,10 +2452,12 @@
           },
           "penalty": {
             "default": 0,
+            "minimum": 0.0,
             "type": "integer"
           },
           "priority": {
             "default": 0,
+            "minimum": 0.0,
             "type": "integer"
           }
         },
@@ -2536,6 +2550,8 @@
             ]
           },
           "maxCallers": {
+            "maximum": 100,
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -2543,6 +2559,7 @@
             ]
           },
           "maxWaitTime": {
+            "maximum": 3600,
             "oneOf": [
               {
                 "type": "integer"
@@ -2569,6 +2586,8 @@
             ]
           },
           "number": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -2576,6 +2595,8 @@
             ]
           },
           "ringTime": {
+            "maximum": 600,
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -2583,6 +2604,8 @@
             ]
           },
           "strategy": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -2600,6 +2623,7 @@
             ]
           },
           "wrapupTime": {
+            "maximum": 300,
             "oneOf": [
               {
                 "type": "integer"
@@ -3736,6 +3760,7 @@
           },
           "deviceType": {
             "maxLength": 100,
+            "minLength": 1,
             "type": "string"
           },
           "locationId": {
@@ -5010,6 +5035,8 @@
           },
           "forwardNoAnswerRingCount": {
             "default": 4,
+            "maximum": 20.0,
+            "minimum": 1.0,
             "type": "integer"
           },
           "forwardUnreachableDestination": {
@@ -5308,6 +5335,8 @@
             ]
           },
           "forwardNoAnswerRingCount": {
+            "maximum": 20,
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -6084,6 +6113,8 @@
           },
           "maxRetries": {
             "default": 3,
+            "maximum": 10.0,
+            "minimum": 0.0,
             "type": "integer"
           },
           "name": {
@@ -6103,6 +6134,8 @@
           },
           "timeoutSeconds": {
             "default": 5,
+            "maximum": 120.0,
+            "minimum": 1.0,
             "type": "integer"
           }
         },
@@ -6149,16 +6182,23 @@
       "IvrMenuOptionCreate": {
         "properties": {
           "destination": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "digit": {
+            "maxLength": 10,
+            "minLength": 1,
             "type": "string"
           },
           "label": {
+            "maxLength": 100,
+            "minLength": 1,
             "type": "string"
           },
           "sortOrder": {
             "default": 0,
+            "minimum": 0.0,
             "type": "integer"
           }
         },
@@ -6173,6 +6213,8 @@
       "IvrMenuOptionUpdate": {
         "properties": {
           "destination": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6180,6 +6222,8 @@
             ]
           },
           "digit": {
+            "maxLength": 10,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6187,6 +6231,8 @@
             ]
           },
           "label": {
+            "maxLength": 100,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6245,6 +6291,7 @@
             ]
           },
           "maxRetries": {
+            "maximum": 10,
             "oneOf": [
               {
                 "type": "integer"
@@ -6271,6 +6318,8 @@
             ]
           },
           "timeoutSeconds": {
+            "maximum": 120,
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -8226,10 +8275,14 @@
             ]
           },
           "number": {
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "ringTime": {
             "default": 20,
+            "maximum": 600.0,
+            "minimum": 1.0,
             "type": "integer"
           },
           "strategy": {
@@ -8376,6 +8429,8 @@
             ]
           },
           "number": {
+            "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -8383,6 +8438,8 @@
             ]
           },
           "ringTime": {
+            "maximum": 600,
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -10121,6 +10178,8 @@
       "TimeConditionCreate": {
         "properties": {
           "matchDestination": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "name": {
@@ -10129,6 +10188,8 @@
             "type": "string"
           },
           "noMatchDestination": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "overrideMode": {
@@ -10170,6 +10231,8 @@
       "TimeConditionUpdate": {
         "properties": {
           "matchDestination": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -10186,6 +10249,8 @@
             ]
           },
           "noMatchDestination": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -13198,7 +13263,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13219,7 +13284,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13261,7 +13326,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13587,7 +13652,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13608,7 +13673,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13650,7 +13715,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13974,7 +14039,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13995,7 +14060,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14037,7 +14102,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14355,7 +14420,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14376,7 +14441,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14418,7 +14483,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [

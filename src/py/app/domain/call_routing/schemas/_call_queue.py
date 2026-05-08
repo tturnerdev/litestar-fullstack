@@ -25,8 +25,8 @@ class CallQueueMemberCreate(CamelizedBaseStruct):
     """Schema for creating a call queue member."""
 
     extension_id: UUID | None = None
-    priority: int = 0
-    penalty: int = 0
+    priority: Annotated[int, Meta(ge=0)] = 0
+    penalty: Annotated[int, Meta(ge=0)] = 0
     is_paused: bool = False
 
 
@@ -34,8 +34,8 @@ class CallQueueMemberUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a call queue member."""
 
     extension_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
-    priority: int | msgspec.UnsetType = msgspec.UNSET
-    penalty: int | msgspec.UnsetType = msgspec.UNSET
+    priority: Annotated[int, Meta(ge=0)] | msgspec.UnsetType = msgspec.UNSET
+    penalty: Annotated[int, Meta(ge=0)] | msgspec.UnsetType = msgspec.UNSET
     is_paused: bool | msgspec.UnsetType = msgspec.UNSET
 
 
@@ -72,33 +72,33 @@ class CallQueueCreate(CamelizedBaseStruct):
     """Schema for creating a call queue."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    number: str
-    strategy: str = "ring_all"
-    ring_time: int = 15
-    max_wait_time: int = 300
-    max_callers: int = 10
+    number: Annotated[str, Meta(min_length=1, max_length=50)]
+    strategy: Annotated[str, Meta(min_length=1, max_length=50)] = "ring_all"
+    ring_time: Annotated[int, Meta(ge=1, le=600)] = 15
+    max_wait_time: Annotated[int, Meta(ge=0, le=3600)] = 300
+    max_callers: Annotated[int, Meta(ge=1, le=100)] = 10
     join_empty: bool = False
     leave_when_empty: bool = True
     music_on_hold_class: str | None = None
     announce_frequency: int | None = None
     announce_holdtime: bool = False
     timeout_destination: str | None = None
-    wrapup_time: int = 0
+    wrapup_time: Annotated[int, Meta(ge=0, le=300)] = 0
 
 
 class CallQueueUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a call queue."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    number: str | msgspec.UnsetType = msgspec.UNSET
-    strategy: str | msgspec.UnsetType = msgspec.UNSET
-    ring_time: int | msgspec.UnsetType = msgspec.UNSET
-    max_wait_time: int | msgspec.UnsetType = msgspec.UNSET
-    max_callers: int | msgspec.UnsetType = msgspec.UNSET
+    number: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    strategy: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    ring_time: Annotated[int, Meta(ge=1, le=600)] | msgspec.UnsetType = msgspec.UNSET
+    max_wait_time: Annotated[int, Meta(ge=0, le=3600)] | msgspec.UnsetType = msgspec.UNSET
+    max_callers: Annotated[int, Meta(ge=1, le=100)] | msgspec.UnsetType = msgspec.UNSET
     join_empty: bool | msgspec.UnsetType = msgspec.UNSET
     leave_when_empty: bool | msgspec.UnsetType = msgspec.UNSET
     music_on_hold_class: str | msgspec.UnsetType | None = msgspec.UNSET
     announce_frequency: int | msgspec.UnsetType | None = msgspec.UNSET
     announce_holdtime: bool | msgspec.UnsetType = msgspec.UNSET
     timeout_destination: str | msgspec.UnsetType | None = msgspec.UNSET
-    wrapup_time: int | msgspec.UnsetType = msgspec.UNSET
+    wrapup_time: Annotated[int, Meta(ge=0, le=300)] | msgspec.UnsetType = msgspec.UNSET

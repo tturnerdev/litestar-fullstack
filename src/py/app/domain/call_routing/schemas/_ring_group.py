@@ -55,9 +55,9 @@ class RingGroupCreate(CamelizedBaseStruct):
     """Schema for creating a ring group."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    number: str
+    number: Annotated[str, Meta(min_length=1, max_length=50)]
     strategy: str = "ring_all"
-    ring_time: int = 20
+    ring_time: Annotated[int, Meta(ge=1, le=600)] = 20
     no_answer_destination: str | None = None
 
 
@@ -65,7 +65,7 @@ class RingGroupUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a ring group."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    number: str | msgspec.UnsetType = msgspec.UNSET
+    number: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     strategy: str | msgspec.UnsetType = msgspec.UNSET
-    ring_time: int | msgspec.UnsetType = msgspec.UNSET
+    ring_time: Annotated[int, Meta(ge=1, le=600)] | msgspec.UnsetType = msgspec.UNSET
     no_answer_destination: str | msgspec.UnsetType | None = msgspec.UNSET
