@@ -76,12 +76,8 @@
   --shadow-glow-lg: 0 0 40px hsl(var(--brand-gold) / 0.5);
 
   /* Animations */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-shimmer: shimmer 2s linear infinite;
-  --animate-fade-in-up: fade-in-up 0.5s ease-out;
   --animate-fade-in: fade-in 0.3s ease-out;
-  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
   --animate-float: float 3s ease-in-out infinite;
   --animate-grid: grid 15s linear infinite;
   --animate-star-drift: star-drift 22s linear infinite;
@@ -91,29 +87,13 @@
     0% { background-color: hsl(var(--primary) / 0.15); }
     100% { background-color: transparent; }
   }
-  @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
-  }
-  @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
-  }
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
-  @keyframes fade-in-up {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
   @keyframes fade-in {
     0% { opacity: 0; }
     100% { opacity: 1; }
-  }
-  @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 20px hsl(var(--brand-gold) / 0.3); }
-    50% { box-shadow: 0 0 40px hsl(var(--brand-gold) / 0.5); }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
