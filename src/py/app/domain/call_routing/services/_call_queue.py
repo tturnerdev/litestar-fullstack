@@ -10,9 +10,9 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
-if TYPE_CHECKING:
-    from typing import Any
+from typing import Any
 
+if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
 
@@ -68,4 +68,17 @@ class CallQueueMemberService(service.SQLAlchemyAsyncRepositoryService[m.CallQueu
             )
             if existing:
                 raise ValidationException("This extension is already a member of this call queue.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.CallQueueMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.CallQueueMember]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "extension_id" in data:
+            call_queue_id = data.get("call_queue_id")
+            if call_queue_id:
+                existing = await self.repository.list(
+                    m.CallQueueMember.call_queue_id == call_queue_id,
+                    m.CallQueueMember.extension_id == data["extension_id"],
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("This extension is already a member of this call queue.")
         return data

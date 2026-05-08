@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.293.0 (2026-05-08)
+
+### Added
+- **Response compression** — Wired gzip compression config into the application middleware stack for reduced payload sizes
+- **Duplicate member validation on update** — CallQueueMemberService and RingGroupMemberService now validate extension uniqueness on update (not just create), preventing duplicate members when editing
+
+## v0.292.0 (2026-05-08)
+
+### Added
+- **Auth guards on 5 more controllers** — Added `requires_active_user` to team invitations, team members, profile, MFA, and OAuth accounts controllers — all sensitive write endpoints now have explicit guards
+
+### Fixed
+- **Normalized OpenAPI tags across 19 controllers** — Removed inconsistent hyphenation from voice/gateway tags, added specific tags to support/devices/webhooks/teams sub-controllers, consolidated call routing sub-tags
+
 ## v0.291.0 (2026-05-08)
 
 ### Added

@@ -10,9 +10,9 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
-if TYPE_CHECKING:
-    from typing import Any
+from typing import Any
 
+if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
 
@@ -67,4 +67,17 @@ class RingGroupMemberService(service.SQLAlchemyAsyncRepositoryService[m.RingGrou
             )
             if existing:
                 raise ValidationException("This extension is already a member of this ring group.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.RingGroupMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.RingGroupMember]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "extension_id" in data:
+            ring_group_id = data.get("ring_group_id")
+            if ring_group_id:
+                existing = await self.repository.list(
+                    m.RingGroupMember.ring_group_id == ring_group_id,
+                    m.RingGroupMember.extension_id == data["extension_id"],
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("This extension is already a member of this ring group.")
         return data

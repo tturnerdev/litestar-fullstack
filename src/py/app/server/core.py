@@ -80,6 +80,7 @@ class ApplicationCore(InitPluginProtocol, CLIPluginProtocol):
         )
         app_config = auth.on_app_init(app_config)
         app_config.cors_config = config.cors
+        app_config.compression_config = config.compression
         app_config.middleware = [*app_config.middleware, SecurityHeadersMiddleware]
 
         app_config.plugins.extend(
