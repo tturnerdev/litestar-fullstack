@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.299.0 (2026-05-08)
+
+### Fixed
+- **N+1 queries in 4 admin controllers** — Added selectinload for user/team/phone_number relationships in admin devices, fax, voice, and support list endpoints
+
+### Added
+- **`__repr__` on 10 core models** — User, Team, Device, Connection, Extension, Ticket, Location, PhoneNumber, WebhookEndpoint, and Role now show useful info in logs and debuggers
+
 ## v0.298.0 (2026-05-08)
 
 ### Added

@@ -55,6 +55,9 @@ class Connection(UUIDv7AuditBase):
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     is_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
 
+    def __repr__(self) -> str:
+        return f"<Connection id={self.id} name={self.name}>"
+
     # Relationships
     team: Mapped[Team] = relationship(
         foreign_keys="Connection.team_id",

@@ -120,6 +120,9 @@ class User(UUIDv7AuditBase):
         uselist=False,
     )
 
+    def __repr__(self) -> str:
+        return f"<User id={self.id} email={self.email}>"
+
     @hybrid_property
     def has_password(self) -> bool:
         return self.hashed_password is not None

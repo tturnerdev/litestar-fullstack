@@ -11,6 +11,7 @@ from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency
+from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
@@ -30,6 +31,7 @@ class AdminFaxController(Controller):
     dependencies = create_service_dependencies(
         FaxNumberService,
         key="fax_number_service",
+        load=[selectinload(m.FaxNumber.user), selectinload(m.FaxNumber.team)],
         filters={
             "id_filter": UUID,
             "search": "number,label",

@@ -9,6 +9,7 @@ from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency
+from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
@@ -27,6 +28,7 @@ class AdminDevicesController(Controller):
     dependencies = create_service_dependencies(
         DeviceService,
         key="device_service",
+        load=[selectinload(m.Device.user), selectinload(m.Device.team)],
         filters={
             "id_filter": UUID,
             "search": "name,sip_username,mac_address",

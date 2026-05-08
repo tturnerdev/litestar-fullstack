@@ -26,6 +26,10 @@ class Team(UUIDv7AuditBase, SlugKey):
     name: Mapped[str] = mapped_column(nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Team id={self.id} name={self.name}>"
+
     members: Mapped[list[TeamMember]] = relationship(
         back_populates="team",
         cascade="all, delete",

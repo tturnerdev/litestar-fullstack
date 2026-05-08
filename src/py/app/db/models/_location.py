@@ -50,6 +50,9 @@ class Location(UUIDv7AuditBase):
     postal_code: Mapped[str | None] = mapped_column(String(length=20), nullable=True, default=None)
     country: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
 
+    def __repr__(self) -> str:
+        return f"<Location id={self.id} name={self.name}>"
+
     # Relationships
     team: Mapped[Team] = relationship(
         foreign_keys="Location.team_id",

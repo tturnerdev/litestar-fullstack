@@ -66,6 +66,9 @@ class Ticket(UUIDv7AuditBase):
     closed_at: Mapped[datetime | None] = mapped_column(nullable=True, default=None)
     resolved_at: Mapped[datetime | None] = mapped_column(nullable=True, default=None)
 
+    def __repr__(self) -> str:
+        return f"<Ticket id={self.id} ticket_number={self.ticket_number}>"
+
     # Relationships
     user: Mapped[User] = relationship(
         foreign_keys=[user_id],

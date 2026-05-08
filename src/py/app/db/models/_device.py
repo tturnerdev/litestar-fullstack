@@ -76,6 +76,9 @@ class Device(UUIDv7AuditBase):
     provisioned_at: Mapped[datetime | None] = mapped_column(nullable=True, default=None)
     config_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True, default=None)
 
+    def __repr__(self) -> str:
+        return f"<Device id={self.id} name={self.name}>"
+
     # Relationships
     user: Mapped[User] = relationship(
         foreign_keys="Device.user_id",

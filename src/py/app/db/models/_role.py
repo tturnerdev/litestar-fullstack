@@ -17,6 +17,10 @@ class Role(UUIDv7AuditBase, SlugKey):
 
     name: Mapped[str] = mapped_column(unique=True)
     description: Mapped[str | None]
+
+    def __repr__(self) -> str:
+        return f"<Role id={self.id} name={self.name}>"
+
     users: Mapped[list[UserRole]] = relationship(
         back_populates="role",
         cascade="all, delete",

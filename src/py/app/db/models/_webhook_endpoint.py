@@ -56,3 +56,6 @@ class WebhookEndpoint(UUIDv7AuditBase):
 
     validation_status: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
     """URL validation status: 'valid', 'unreachable', or 'invalid_url'."""
+
+    def __repr__(self) -> str:
+        return f"<WebhookEndpoint id={self.id} url={self.url}>"

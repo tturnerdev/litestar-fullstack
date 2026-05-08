@@ -36,6 +36,9 @@ class PhoneNumber(UUIDv7AuditBase):
         ForeignKey("team.id", ondelete="set null"), nullable=True, default=None
     )
 
+    def __repr__(self) -> str:
+        return f"<PhoneNumber id={self.id} number={self.number}>"
+
     user: Mapped[User] = relationship(
         foreign_keys="PhoneNumber.user_id",
         innerjoin=True,

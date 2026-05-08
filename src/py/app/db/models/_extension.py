@@ -42,6 +42,9 @@ class Extension(UUIDv7AuditBase):
     forward_unreachable_destination: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
     dnd_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
 
+    def __repr__(self) -> str:
+        return f"<Extension id={self.id} extension_number={self.extension_number}>"
+
     user: Mapped[User] = relationship(
         foreign_keys="Extension.user_id",
         innerjoin=True,

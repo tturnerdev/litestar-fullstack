@@ -10,6 +10,7 @@ from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency
+from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
@@ -29,6 +30,7 @@ class AdminVoiceController(Controller):
     dependencies = create_service_dependencies(
         PhoneNumberService,
         key="phone_number_service",
+        load=[selectinload(m.PhoneNumber.user), selectinload(m.PhoneNumber.team)],
         filters={
             "id_filter": UUID,
             "search": "number,label",
@@ -77,7 +79,9 @@ class AdminVoiceController(Controller):
         self,
         extension_service: ExtensionService,
     ) -> list[AdminExtensionSummary]:
-        results = await extension_service.list()
+        results = await extension_service.list(
+            load=[selectinload(m.Extension.user), selectinload(m.Extension.phone_number)],
+        )
         return [
             AdminExtensionSummary(
                 id=ext.id,
