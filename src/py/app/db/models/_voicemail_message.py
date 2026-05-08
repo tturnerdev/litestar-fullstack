@@ -38,3 +38,6 @@ class VoicemailMessage(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<VoicemailMessage id={self.id} voicemail_box_id={self.voicemail_box_id}>"

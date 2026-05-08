@@ -39,6 +39,9 @@ class Tag(UUIDv7AuditBase, SlugKey, UniqueMixin):
     ) -> ColumnElement[bool]:
         return cls.slug == slugify(name)
 
+    def __repr__(self) -> str:
+        return f"<Tag id={self.id} name={self.name}>"
+
 
 def _team_tag() -> Table:
     from app.db.models._team_tag import team_tag

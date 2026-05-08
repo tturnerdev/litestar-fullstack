@@ -33,3 +33,6 @@ class Organization(UUIDv7AuditBase, SlugKey):
     timezone: Mapped[str | None] = mapped_column(String(length=50), nullable=True, default="UTC")
     default_language: Mapped[str | None] = mapped_column(String(length=10), nullable=True, default="en")
     settings: Mapped[dict | None] = mapped_column(JSONB, nullable=True, default=None)
+
+    def __repr__(self) -> str:
+        return f"<Organization id={self.id} name={self.name}>"

@@ -52,3 +52,6 @@ class TimeCondition(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<TimeCondition id={self.id} name={self.name}>"

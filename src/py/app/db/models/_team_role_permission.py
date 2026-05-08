@@ -33,3 +33,6 @@ class TeamRolePermission(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<TeamRolePermission id={self.id} role_id={self.role_id}>"

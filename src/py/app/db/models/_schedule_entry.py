@@ -40,3 +40,6 @@ class ScheduleEntry(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<ScheduleEntry id={self.id} schedule_id={self.schedule_id}>"

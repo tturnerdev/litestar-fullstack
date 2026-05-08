@@ -47,3 +47,6 @@ class TeamMember(UUIDv7AuditBase):
         lazy="joined",
     )
     team_name: AssociationProxy[str] = association_proxy("team", "name")
+
+    def __repr__(self) -> str:
+        return f"<TeamMember id={self.id} team_id={self.team_id}>"

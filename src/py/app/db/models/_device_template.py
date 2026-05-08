@@ -33,3 +33,6 @@ class DeviceTemplate(UUIDv7AuditBase):
     template_variables: Mapped[dict | None] = mapped_column(JSONB, nullable=True, default=None)
     image_url: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<DeviceTemplate id={self.id} name={self.name}>"

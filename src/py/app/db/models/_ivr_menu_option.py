@@ -37,3 +37,6 @@ class IvrMenuOption(UUIDv7AuditBase):
         innerjoin=True,
         uselist=False,
     )
+
+    def __repr__(self) -> str:
+        return f"<IvrMenuOption id={self.id} ivr_menu_id={self.ivr_menu_id}>"

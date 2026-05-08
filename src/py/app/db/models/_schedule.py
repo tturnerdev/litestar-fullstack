@@ -50,3 +50,6 @@ class Schedule(UUIDv7AuditBase):
         passive_deletes=True,
         lazy="selectin",
     )
+
+    def __repr__(self) -> str:
+        return f"<Schedule id={self.id} name={self.name}>"

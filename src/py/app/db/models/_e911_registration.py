@@ -68,3 +68,6 @@ class E911Registration(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<E911Registration id={self.id} location_name={self.location_name}>"

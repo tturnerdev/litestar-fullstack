@@ -42,3 +42,6 @@ class DoNotDisturb(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<DoNotDisturb id={self.id} extension_id={self.extension_id}>"

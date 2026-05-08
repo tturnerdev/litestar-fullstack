@@ -53,3 +53,6 @@ class TicketMessage(UUIDv7AuditBase):
         passive_deletes=True,
         lazy="selectin",
     )
+
+    def __repr__(self) -> str:
+        return f"<TicketMessage id={self.id} ticket_id={self.ticket_id}>"

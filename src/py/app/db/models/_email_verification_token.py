@@ -67,3 +67,6 @@ class EmailVerificationToken(UUIDv7AuditBase):
             datetime: The expiration datetime set to the current time plus the specified hours.
         """
         return datetime.now(UTC) + timedelta(hours=hours)
+
+    def __repr__(self) -> str:
+        return f"<EmailVerificationToken id={self.id} user_id={self.user_id}>"

@@ -58,3 +58,6 @@ class AuditLog(UUIDv7AuditBase):
     """User agent string from the request."""
 
     actor: Mapped[User | None] = relationship(lazy="joined", foreign_keys=[actor_id])
+
+    def __repr__(self) -> str:
+        return f"<AuditLog id={self.id} action={self.action}>"

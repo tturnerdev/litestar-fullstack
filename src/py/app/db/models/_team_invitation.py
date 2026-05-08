@@ -28,3 +28,6 @@ class TeamInvitation(UUIDv7AuditBase):
     invited_by: Mapped[User | None] = relationship(
         foreign_keys="TeamInvitation.invited_by_id", uselist=False, viewonly=True
     )
+
+    def __repr__(self) -> str:
+        return f"<TeamInvitation id={self.id} email={self.email}>"

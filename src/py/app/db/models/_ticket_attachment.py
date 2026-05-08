@@ -57,3 +57,6 @@ class TicketAttachment(UUIDv7AuditBase):
         lazy="joined",
         uselist=False,
     )
+
+    def __repr__(self) -> str:
+        return f"<TicketAttachment id={self.id} ticket_id={self.ticket_id}>"

@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.335.0 (2026-05-08)
+
+### Added
+- **Model `__repr__` methods** — Added `__repr__` to all 39 ORM models that were missing them, providing readable debug output (e.g., `<Webhook id=... name=...>`)
+
+## v0.334.0 (2026-05-08)
+
+### Fixed
+- **Toast message consistency** — Standardized all toast success messages to short past-tense without "successfully" (e.g., "Extension updated" instead of "Extension updated successfully") across 6 hook files
+
+## v0.333.0 (2026-05-08)
+
+### Added
+- **Event emission coverage** — Added 12 new webhook event types: admin user/team CRUD, phone numbers bulk import, device reboot/reprovision/line updates, notification preference changes
+- **Webhook mappings** — All new internal events mapped to `WebhookEventType` entries with descriptions in the events registry
+
 ## v0.332.0 (2026-05-08)
 
 ### Added

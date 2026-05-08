@@ -68,3 +68,6 @@ class PasswordResetToken(UUIDv7AuditBase):
             hours: Number of hours until expiration (default: 1 hour for security)
         """
         return datetime.now(UTC) + timedelta(hours=hours)
+
+    def __repr__(self) -> str:
+        return f"<PasswordResetToken id={self.id} user_id={self.user_id}>"

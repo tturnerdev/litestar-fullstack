@@ -57,3 +57,6 @@ class CallQueue(UUIDv7AuditBase):
         lazy="selectin",
         order_by="CallQueueMember.priority",
     )
+
+    def __repr__(self) -> str:
+        return f"<CallQueue id={self.id} name={self.name}>"

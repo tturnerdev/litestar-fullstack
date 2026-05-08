@@ -64,3 +64,6 @@ class WebhookDelivery(UUIDv7AuditBase):
         lazy="noload",
         uselist=False,
     )
+
+    def __repr__(self) -> str:
+        return f"<WebhookDelivery id={self.id} webhook_id={self.webhook_id}>"

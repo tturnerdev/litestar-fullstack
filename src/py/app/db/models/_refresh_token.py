@@ -90,3 +90,6 @@ class RefreshToken(UUIDv7AuditBase):
             Expiration datetime
         """
         return datetime.now(UTC) + timedelta(days=days)
+
+    def __repr__(self) -> str:
+        return f"<RefreshToken id={self.id} user_id={self.user_id}>"

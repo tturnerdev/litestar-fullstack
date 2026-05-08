@@ -45,3 +45,6 @@ class CallQueueMember(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<CallQueueMember id={self.id} call_queue_id={self.call_queue_id}>"

@@ -54,3 +54,6 @@ class DeviceLineAssignment(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<DeviceLineAssignment id={self.id} device_id={self.device_id}>"

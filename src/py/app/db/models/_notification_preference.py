@@ -47,3 +47,6 @@ class NotificationPreference(UUIDv7AuditBase):
         back_populates="notification_preference",
         lazy="noload",
     )
+
+    def __repr__(self) -> str:
+        return f"<NotificationPreference id={self.id} user_id={self.user_id}>"

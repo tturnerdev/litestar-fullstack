@@ -42,3 +42,6 @@ class ForwardingRule(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<ForwardingRule id={self.id} extension_id={self.extension_id}>"

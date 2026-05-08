@@ -86,3 +86,6 @@ class BackgroundTask(UUIDv7AuditBase):
     # Relationships
     team: Mapped[Team] = relationship(lazy="noload", foreign_keys=[team_id])
     initiated_by: Mapped[User | None] = relationship(lazy="joined", foreign_keys=[initiated_by_id])
+
+    def __repr__(self) -> str:
+        return f"<BackgroundTask id={self.id} name={self.name}>"

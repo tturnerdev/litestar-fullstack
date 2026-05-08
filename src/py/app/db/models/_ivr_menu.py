@@ -52,3 +52,6 @@ class IvrMenu(UUIDv7AuditBase):
         lazy="selectin",
         order_by="IvrMenuOption.sort_order",
     )
+
+    def __repr__(self) -> str:
+        return f"<IvrMenu id={self.id} name={self.name}>"

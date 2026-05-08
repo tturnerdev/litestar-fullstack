@@ -59,3 +59,6 @@ class VoicemailBox(UUIDv7AuditBase):
         uselist=True,
         cascade="all, delete",
     )
+
+    def __repr__(self) -> str:
+        return f"<VoicemailBox id={self.id} extension_id={self.extension_id}>"

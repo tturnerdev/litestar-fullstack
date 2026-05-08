@@ -50,3 +50,6 @@ class FaxNumber(UUIDv7AuditBase):
         passive_deletes=True,
         lazy="noload",
     )
+
+    def __repr__(self) -> str:
+        return f"<FaxNumber id={self.id} number={self.number}>"

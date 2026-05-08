@@ -49,3 +49,6 @@ class RingGroup(UUIDv7AuditBase):
         lazy="selectin",
         order_by="RingGroupMember.sort_order",
     )
+
+    def __repr__(self) -> str:
+        return f"<RingGroup id={self.id} name={self.name}>"

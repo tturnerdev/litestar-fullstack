@@ -29,3 +29,6 @@ class UserRole(UUIDv7AuditBase):
     role: Mapped[Role] = relationship(back_populates="users", innerjoin=True, uselist=False, lazy="joined")
     role_name: AssociationProxy[str] = association_proxy("role", "name")
     role_slug: AssociationProxy[str] = association_proxy("role", "slug")
+
+    def __repr__(self) -> str:
+        return f"<UserRole id={self.id} role_id={self.role_id}>"

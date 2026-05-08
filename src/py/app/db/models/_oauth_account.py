@@ -48,3 +48,6 @@ class UserOAuthAccount(UUIDv7AuditBase):
     user_name: AssociationProxy[str] = association_proxy("user", "name")
     user_email: AssociationProxy[str] = association_proxy("user", "email")
     user: Mapped[User] = relationship(back_populates="oauth_accounts", viewonly=True, innerjoin=True, lazy="joined")
+
+    def __repr__(self) -> str:
+        return f"<UserOAuthAccount id={self.id} oauth_name={self.oauth_name}>"

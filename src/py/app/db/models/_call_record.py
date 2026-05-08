@@ -67,3 +67,6 @@ class CallRecord(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<CallRecord id={self.id} call_id={self.call_id}>"

@@ -54,3 +54,6 @@ class Notification(UUIDv7AuditBase):
     """Additional structured data about the notification."""
 
     user: Mapped[User] = relationship(lazy="noload", foreign_keys=[user_id])
+
+    def __repr__(self) -> str:
+        return f"<Notification id={self.id} title={self.title}>"

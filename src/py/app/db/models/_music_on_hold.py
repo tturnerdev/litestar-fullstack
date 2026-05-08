@@ -21,3 +21,6 @@ class MusicOnHold(UUIDv7AuditBase):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     random_order: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     file_list: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<MusicOnHold id={self.id} name={self.name}>"

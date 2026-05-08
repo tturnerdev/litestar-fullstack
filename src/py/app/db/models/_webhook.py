@@ -53,3 +53,6 @@ class Webhook(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<Webhook id={self.id} name={self.name}>"

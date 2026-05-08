@@ -28,3 +28,6 @@ class FaxEmailRoute(UUIDv7AuditBase):
         uselist=False,
         lazy="joined",
     )
+
+    def __repr__(self) -> str:
+        return f"<FaxEmailRoute id={self.id} fax_number_id={self.fax_number_id}>"
