@@ -453,7 +453,10 @@ function AdminTaskRow({
               <AlertDialogAction
                 onClick={() => {
                   deleteMutation.mutate(task.id, {
-                    onSuccess: () => setShowDeleteDialog(false),
+                    onSuccess: () => {
+                      toast.success("Task deleted")
+                      setShowDeleteDialog(false)
+                    },
                   })
                 }}
                 disabled={deleteMutation.isPending}

@@ -493,6 +493,7 @@ function TaskDetailPage() {
               onClick={() =>
                 deleteMutation.mutate(taskId, {
                   onSuccess: () => {
+                    toast.success("Task deleted")
                     navigate({ to: "/tasks" })
                   },
                 })

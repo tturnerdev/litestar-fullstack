@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Download, Eye, FileText, Home, MoreVertical, Search, Send, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import {
   AlertDialog,
@@ -725,7 +726,11 @@ function FaxMessagesPage() {
                         selected={selectedIds.has(msg.id)}
                         onToggle={() => toggleOne(msg.id)}
                         onRowClick={() => handleRowClick(msg.id)}
-                        onDelete={() => deleteMessage.mutate(msg.id)}
+                        onDelete={() =>
+                          deleteMessage.mutate(msg.id, {
+                            onSuccess: () => toast.success("Fax message deleted"),
+                          })
+                        }
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
                       />

@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react"
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1021,7 +1022,10 @@ function NotificationsPage() {
               onClick={() => {
                 if (!deleteId) return
                 deleteNotification.mutate(deleteId, {
-                  onSuccess: () => setDeleteId(null),
+                  onSuccess: () => {
+                    toast.success("Notification deleted")
+                    setDeleteId(null)
+                  },
                 })
               }}
               disabled={deleteNotification.isPending}
