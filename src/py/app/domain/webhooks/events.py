@@ -89,6 +89,7 @@ class WebhookEventType(StrEnum):
     CALL_QUEUE_CREATED = "call_queue.created"
     CALL_QUEUE_UPDATED = "call_queue.updated"
     CALL_QUEUE_DELETED = "call_queue.deleted"
+    CALL_QUEUE_MEMBER_CREATED = "call_queue.member.created"
     CALL_QUEUE_MEMBER_UPDATED = "call_queue.member.updated"
     CALL_QUEUE_MEMBER_DELETED = "call_queue.member.deleted"
 
@@ -96,6 +97,7 @@ class WebhookEventType(StrEnum):
     IVR_MENU_CREATED = "ivr_menu.created"
     IVR_MENU_UPDATED = "ivr_menu.updated"
     IVR_MENU_DELETED = "ivr_menu.deleted"
+    IVR_MENU_OPTION_CREATED = "ivr_menu.option.created"
     IVR_MENU_OPTION_UPDATED = "ivr_menu.option.updated"
     IVR_MENU_OPTION_DELETED = "ivr_menu.option.deleted"
 
@@ -103,6 +105,7 @@ class WebhookEventType(StrEnum):
     RING_GROUP_CREATED = "ring_group.created"
     RING_GROUP_UPDATED = "ring_group.updated"
     RING_GROUP_DELETED = "ring_group.deleted"
+    RING_GROUP_MEMBER_CREATED = "ring_group.member.created"
     RING_GROUP_MEMBER_UPDATED = "ring_group.member.updated"
     RING_GROUP_MEMBER_DELETED = "ring_group.member.deleted"
 
@@ -125,6 +128,7 @@ class WebhookEventType(StrEnum):
     FORWARDING_CREATED = "forwarding.created"
     FORWARDING_UPDATED = "forwarding.updated"
     FORWARDING_DELETED = "forwarding.deleted"
+    FORWARDING_BULK_REPLACED = "forwarding.bulk_replaced"
 
     # Voice — DND events
     DND_TOGGLED = "dnd.toggled"
@@ -279,18 +283,21 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.CALL_QUEUE_CREATED: "A new call queue was created",
     WebhookEventType.CALL_QUEUE_UPDATED: "A call queue was updated",
     WebhookEventType.CALL_QUEUE_DELETED: "A call queue was deleted",
+    WebhookEventType.CALL_QUEUE_MEMBER_CREATED: "A new member was added to a call queue",
     WebhookEventType.CALL_QUEUE_MEMBER_UPDATED: "A call queue member was updated",
     WebhookEventType.CALL_QUEUE_MEMBER_DELETED: "A call queue member was removed",
     # Call routing — IVR menu events
     WebhookEventType.IVR_MENU_CREATED: "A new IVR menu was created",
     WebhookEventType.IVR_MENU_UPDATED: "An IVR menu was updated",
     WebhookEventType.IVR_MENU_DELETED: "An IVR menu was deleted",
+    WebhookEventType.IVR_MENU_OPTION_CREATED: "A new option was added to an IVR menu",
     WebhookEventType.IVR_MENU_OPTION_UPDATED: "An IVR menu option was updated",
     WebhookEventType.IVR_MENU_OPTION_DELETED: "An IVR menu option was deleted",
     # Call routing — ring group events
     WebhookEventType.RING_GROUP_CREATED: "A new ring group was created",
     WebhookEventType.RING_GROUP_UPDATED: "A ring group was updated",
     WebhookEventType.RING_GROUP_DELETED: "A ring group was deleted",
+    WebhookEventType.RING_GROUP_MEMBER_CREATED: "A new member was added to a ring group",
     WebhookEventType.RING_GROUP_MEMBER_UPDATED: "A ring group member was updated",
     WebhookEventType.RING_GROUP_MEMBER_DELETED: "A ring group member was removed",
     # Call routing — time condition events
@@ -309,6 +316,7 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.FORWARDING_CREATED: "A new call forwarding rule was created",
     WebhookEventType.FORWARDING_UPDATED: "A call forwarding rule was updated",
     WebhookEventType.FORWARDING_DELETED: "A call forwarding rule was deleted",
+    WebhookEventType.FORWARDING_BULK_REPLACED: "Call forwarding rules were bulk-replaced",
     # Voice — DND events
     WebhookEventType.DND_TOGGLED: "Do Not Disturb was toggled",
     WebhookEventType.DND_UPDATED: "Do Not Disturb settings were updated",

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.347.0 (2026-05-08)
+
+### Fixed
+- **Missing event emissions** — Added `request.app.emit()` for call queue member creation, IVR menu option creation, ring group member creation, and forwarding bulk replace — matching the existing pattern on update/delete endpoints
+- **Webhook event coverage** — Added 4 new WebhookEventType entries and EVENT_MAP mappings for the above events
+
 ## v0.346.0 (2026-05-08)
 
 ### Fixed

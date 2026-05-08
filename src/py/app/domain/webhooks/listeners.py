@@ -84,18 +84,21 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "call_queue_created": WebhookEventType.CALL_QUEUE_CREATED,
     "call_queue_updated": WebhookEventType.CALL_QUEUE_UPDATED,
     "call_queue_deleted": WebhookEventType.CALL_QUEUE_DELETED,
+    "call_queue_member_created": WebhookEventType.CALL_QUEUE_MEMBER_CREATED,
     "call_queue_member_updated": WebhookEventType.CALL_QUEUE_MEMBER_UPDATED,
     "call_queue_member_deleted": WebhookEventType.CALL_QUEUE_MEMBER_DELETED,
     # Call routing — IVR menu events
     "ivr_menu_created": WebhookEventType.IVR_MENU_CREATED,
     "ivr_menu_updated": WebhookEventType.IVR_MENU_UPDATED,
     "ivr_menu_deleted": WebhookEventType.IVR_MENU_DELETED,
+    "ivr_menu_option_created": WebhookEventType.IVR_MENU_OPTION_CREATED,
     "ivr_menu_option_updated": WebhookEventType.IVR_MENU_OPTION_UPDATED,
     "ivr_menu_option_deleted": WebhookEventType.IVR_MENU_OPTION_DELETED,
     # Call routing — ring group events
     "ring_group_created": WebhookEventType.RING_GROUP_CREATED,
     "ring_group_updated": WebhookEventType.RING_GROUP_UPDATED,
     "ring_group_deleted": WebhookEventType.RING_GROUP_DELETED,
+    "ring_group_member_created": WebhookEventType.RING_GROUP_MEMBER_CREATED,
     "ring_group_member_updated": WebhookEventType.RING_GROUP_MEMBER_UPDATED,
     "ring_group_member_deleted": WebhookEventType.RING_GROUP_MEMBER_DELETED,
     # Call routing — time condition events
@@ -114,6 +117,7 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "forwarding_created": WebhookEventType.FORWARDING_CREATED,
     "forwarding_updated": WebhookEventType.FORWARDING_UPDATED,
     "forwarding_deleted": WebhookEventType.FORWARDING_DELETED,
+    "forwarding_bulk_replaced": WebhookEventType.FORWARDING_BULK_REPLACED,
     # Voice — DND events
     "dnd_toggled": WebhookEventType.DND_TOGGLED,
     "dnd_updated": WebhookEventType.DND_UPDATED,

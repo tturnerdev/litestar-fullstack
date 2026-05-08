@@ -162,6 +162,7 @@ class ForwardingController(Controller):
             after={"rules": after_rules},
             request=request,
         )
+        request.app.emit(event_id="forwarding_bulk_replaced", entity_id=ext_id)
         return results
 
     @patch(

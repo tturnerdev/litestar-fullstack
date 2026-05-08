@@ -323,6 +323,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ivr_menu_option_created", entity_id=db_obj.id)
         return ivr_menu_options_service.to_schema(db_obj, schema_type=IvrMenuOption)
 
     @patch(

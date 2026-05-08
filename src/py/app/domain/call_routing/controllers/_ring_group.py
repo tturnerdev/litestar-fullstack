@@ -323,6 +323,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ring_group_member_created", entity_id=db_obj.id)
         return ring_group_members_service.to_schema(db_obj, schema_type=RingGroupMember)
 
     @patch(

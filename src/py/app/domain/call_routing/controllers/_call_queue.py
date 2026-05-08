@@ -324,6 +324,7 @@ class CallQueueController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="call_queue_member_created", entity_id=db_obj.id)
         return call_queue_members_service.to_schema(db_obj, schema_type=CallQueueMember)
 
     @patch(
