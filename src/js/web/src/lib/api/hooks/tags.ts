@@ -51,6 +51,7 @@ export function useTags(pageOrOptions: number | UseTagsOptions = 1, pageSizeArg 
       } as never)
       return (response as { data: unknown }).data as { items: Tag[]; total: number }
     },
+    staleTime: 10 * 60 * 1000, // tags are reference data, change infrequently
   })
 }
 

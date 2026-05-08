@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.296.0 (2026-05-08)
+
+### Added
+- **File upload size validation** — Feedback file uploads now enforce 10MB per-file and 25MB total limits; phone number CSV import enforces 5MB limit
+- **staleTime on 7 reference data queries** — Organization, tags, roles, notification preferences, device templates, and profile queries now use 5–10 minute stale times to reduce unnecessary refetches
+
 ## v0.295.0 (2026-05-08)
 
 ### Added

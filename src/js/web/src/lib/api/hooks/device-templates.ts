@@ -145,5 +145,6 @@ export function useDeviceTemplateLookup(manufacturer: string | null | undefined,
     },
     enabled: enabled && !!manufacturer && !!model,
     retry: false,
+    staleTime: 10 * 60 * 1000, // device templates are reference data
   })
 }

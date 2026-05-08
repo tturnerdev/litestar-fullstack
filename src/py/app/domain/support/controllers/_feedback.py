@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 
 FEEDBACK_RECIPIENT = "support@atrelix.com"
 
+_MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB per file
+_MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB total
+
 _SNAPSHOT_EXCLUDE: frozenset[str] = frozenset(
     {"id", "sa_orm_sentinel", "created_at", "updated_at", "hashed_password", "totp_secret", "backup_codes"}
 )
@@ -275,21 +278,29 @@ class FeedbackController(Controller):
 
         # Collect file attachments from multipart form data
         attachments: list[tuple[str, bytes, str]] = []
+        total_size = 0
 
         screenshot = data.get("screenshot")
         if isinstance(screenshot, UploadFile) and screenshot.filename:
             screenshot_bytes = await screenshot.read()
             if screenshot_bytes:
+                if len(screenshot_bytes) > _MAX_FILE_SIZE:
+                    raise HTTPException(status_code=400, detail=f"Screenshot exceeds maximum size of {_MAX_FILE_SIZE // (1024 * 1024)} MB.")
+                total_size += len(screenshot_bytes)
                 attachments.append(("screenshot.png", screenshot_bytes, "image/png"))
 
         files_raw = data.get("files")
         if files_raw is not None:
-            # Normalize to list — single file comes as UploadFile, multiple as list
             file_list = files_raw if isinstance(files_raw, list) else [files_raw]
             for file_item in file_list:
                 if isinstance(file_item, UploadFile) and file_item.filename:
                     file_bytes = await file_item.read()
                     if file_bytes:
+                        if len(file_bytes) > _MAX_FILE_SIZE:
+                            raise HTTPException(status_code=400, detail=f"File '{file_item.filename}' exceeds maximum size of {_MAX_FILE_SIZE // (1024 * 1024)} MB.")
+                        total_size += len(file_bytes)
+                        if total_size > _MAX_TOTAL_SIZE:
+                            raise HTTPException(status_code=400, detail=f"Total attachment size exceeds maximum of {_MAX_TOTAL_SIZE // (1024 * 1024)} MB.")
                         mimetype = (
                             file_item.content_type
                             or mimetypes.guess_type(file_item.filename)[0]

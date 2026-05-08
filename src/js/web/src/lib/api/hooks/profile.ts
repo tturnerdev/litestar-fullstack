@@ -11,6 +11,7 @@ export function useProfile() {
       const response = await accountProfile()
       return response.data
     },
+    staleTime: 5 * 60 * 1000, // profile data changes rarely
   })
 }
 

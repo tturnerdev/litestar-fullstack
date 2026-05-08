@@ -354,6 +354,7 @@ export function useRoles() {
       const response = await listRoles({ query })
       return response.data as { items: Role[]; total: number }
     },
+    staleTime: 10 * 60 * 1000, // roles are reference data, change very rarely
   })
 }
 

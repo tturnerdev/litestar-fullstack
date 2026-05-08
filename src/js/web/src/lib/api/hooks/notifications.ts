@@ -179,6 +179,7 @@ export function useNotificationPreferences() {
       })
       return response.data as NotificationPreference
     },
+    staleTime: 5 * 60 * 1000, // user preferences change rarely
   })
 }
 

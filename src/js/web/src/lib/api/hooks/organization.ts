@@ -9,6 +9,7 @@ export function useOrganization() {
       const response = await getOrganization()
       return response.data as Organization
     },
+    staleTime: 5 * 60 * 1000, // org settings change rarely
   })
 }
 
@@ -19,6 +20,7 @@ export function useOrganizationStats() {
       const response = await getDashboardStats()
       return response.data as DashboardStats
     },
+    staleTime: 5 * 60 * 1000, // aggregate stats change slowly
   })
 }
 
