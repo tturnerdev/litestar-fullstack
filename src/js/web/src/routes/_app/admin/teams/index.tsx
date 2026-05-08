@@ -36,8 +36,12 @@ export const Route = createFileRoute("/_app/admin/teams/")({
     search: Record<string, unknown>,
   ): {
     q?: string
+    sort?: string
+    order?: string
   } => ({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: AdminTeamsPage,
 })
@@ -111,7 +115,7 @@ function formatMemberCount(count: number | undefined): string {
 
 function AdminTeamsPage() {
   useDocumentTitle("Admin — Teams")
-  const { q: searchParam } = Route.useSearch()
+  const { q: searchParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
 
   // Filter & search state
@@ -155,9 +159,9 @@ function AdminTeamsPage() {
     }
   }, [])
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  // Sort state (URL-persisted)
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -213,10 +217,15 @@ function AdminTeamsPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Bulk actions
