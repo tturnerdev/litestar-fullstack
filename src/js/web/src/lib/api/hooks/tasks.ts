@@ -1,33 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
-import { deleteTask } from "@/lib/generated/api/sdk.gen"
-import type { BackgroundTaskDetail, BackgroundTaskList, DeleteTaskData } from "@/lib/generated/api/types.gen"
+import {
+  type BackgroundTaskDetail,
+  type BackgroundTaskList,
+  cancelTask as cancelTaskApi,
+  deleteTask as deleteTaskApi,
+  getTask,
+  listActiveTasks,
+  listTasks,
+} from "@/lib/generated/api"
 import { sseStatus } from "./events"
 
-// ---------------------------------------------------------------------------
-// Helpers (for endpoints not yet in generated SDK)
-// ---------------------------------------------------------------------------
-
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await client.request({
-    method: (options?.method as "GET") ?? "GET",
-    url,
-    body: options?.body ? JSON.parse(options.body as string) : undefined,
-  })
-  return response.data as T
-}
+export type { BackgroundTaskDetail, BackgroundTaskList }
 
 // ---------------------------------------------------------------------------
-// Types
+// Options
 // ---------------------------------------------------------------------------
-
-interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-  limit?: number
-  offset?: number
-}
 
 export interface UseTasksOptions {
   page?: number
@@ -55,12 +43,6 @@ const POLL_INTERVAL_FAST = 5_000
 /** How long SSE must be down before we switch to fast polling (ms). */
 const SSE_DISCONNECT_THRESHOLD = 60_000
 
-/**
- * Returns the appropriate polling interval based on current SSE health.
- * When the event stream is connected, 30 s is sufficient (updates arrive via
- * SSE).  If SSE has been down for more than 60 s, we switch to 5 s polling
- * so the UI stays reasonably fresh.
- */
 function getPollingInterval(): number {
   if (sseStatus.connected) return POLL_INTERVAL_NORMAL
   if (sseStatus.disconnectedSince != null && Date.now() - sseStatus.disconnectedSince > SSE_DISCONNECT_THRESHOLD) {
@@ -92,16 +74,19 @@ export function useTasks(options: UseTasksOptions = {}) {
   return useQuery({
     queryKey: taskKeys.list(options),
     queryFn: async () => {
-      const params = new URLSearchParams()
-      params.set("currentPage", String(page))
-      params.set("pageSize", String(pageSize))
-      if (taskType) params.set("taskType", taskType)
-      if (status) params.set("status", status)
-      if (entityType) params.set("entityType", entityType)
-      if (entityId) params.set("entityId", entityId)
-      if (orderBy) params.set("orderBy", orderBy)
-      if (sortOrder) params.set("sortOrder", sortOrder)
-      return apiFetch<PaginatedResponse<BackgroundTaskList>>(`/api/tasks?${params.toString()}`)
+      const response = await listTasks({
+        query: {
+          currentPage: page,
+          pageSize,
+          taskType,
+          status,
+          entityType,
+          entityId,
+          orderBy,
+          sortOrder,
+        },
+      })
+      return response.data as { items: BackgroundTaskList[]; total: number }
     },
     ...(refetchInterval !== undefined ? { refetchInterval } : {}),
   })
@@ -114,10 +99,13 @@ export function useTasks(options: UseTasksOptions = {}) {
 export function useTask(taskId: string) {
   return useQuery({
     queryKey: taskKeys.detail(taskId),
-    queryFn: () => apiFetch<BackgroundTaskDetail>(`/api/tasks/${taskId}`),
+    queryFn: async () => {
+      const response = await getTask({
+        path: { task_id: taskId },
+      })
+      return response.data as BackgroundTaskDetail
+    },
     enabled: !!taskId,
-    // Poll only while the task is in-flight.  The interval adapts based on
-    // SSE health — 30 s when connected, 5 s after a prolonged disconnect.
     refetchInterval: (query) => {
       const data = query.state.data
       if (data && (data.status === "pending" || data.status === "running")) {
@@ -135,9 +123,10 @@ export function useTask(taskId: string) {
 export function useActiveTasks() {
   return useQuery({
     queryKey: taskKeys.active(),
-    queryFn: () => apiFetch<BackgroundTaskList[]>("/api/tasks/active"),
-    // Polling adapts to SSE health — 30 s when connected, 5 s after a
-    // prolonged SSE disconnect (see getPollingInterval).
+    queryFn: async () => {
+      const response = await listActiveTasks()
+      return response.data as BackgroundTaskList[]
+    },
     refetchInterval: () => getPollingInterval(),
   })
 }
@@ -150,7 +139,6 @@ export function useRetryTask() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (taskId: string) => {
-      // TODO: wire to backend retry endpoint once available
       void taskId
       throw new Error("NOT_IMPLEMENTED")
     },
@@ -178,10 +166,12 @@ export function useRetryTask() {
 export function useCancelTask() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (taskId: string) =>
-      apiFetch<BackgroundTaskDetail>(`/api/tasks/${taskId}/cancel`, {
-        method: "POST",
-      }),
+    mutationFn: async (taskId: string) => {
+      const response = await cancelTaskApi({
+        path: { task_id: taskId },
+      })
+      return response.data as BackgroundTaskDetail
+    },
     onSuccess: (_data, taskId) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
       queryClient.invalidateQueries({ queryKey: taskKeys.detail(taskId) })
@@ -203,9 +193,9 @@ export function useDeleteTask() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (taskId: string) => {
-      const response = await deleteTask({
+      const response = await deleteTaskApi({
         path: { task_id: taskId },
-      } as unknown as DeleteTaskData)
+      })
       return response.data
     },
     onSuccess: () => {
