@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.280.0 (2026-05-07)
+
+### Added
+- **Duplicate validation on 11 services** — `to_model_on_create` now checks for duplicates before insert: roles (name), tags (slug), webhook endpoints (url), webhooks (name), phone numbers (number), fax numbers (number), extensions (extension_number), call queues, IVR menus, ring groups, time conditions (all by name)
+- **Toast notification fix** — `useUpdateAnyConnection` hook now shows success toast after connection update
+
 ## v0.279.0 (2026-05-07)
 
 ### Added
