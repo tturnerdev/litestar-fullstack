@@ -157,6 +157,7 @@ class WebhookEventType(StrEnum):
     FAX_EMAIL_ROUTE_DELETED = "fax.email_route.deleted"
 
     # Fax — message events
+    FAX_MESSAGE_CREATED = "fax.message.created"
     FAX_MESSAGE_DELETED = "fax.message.deleted"
 
     # Support — ticket events
@@ -349,6 +350,7 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.FAX_EMAIL_ROUTE_UPDATED: "A fax email route was updated",
     WebhookEventType.FAX_EMAIL_ROUTE_DELETED: "A fax email route was deleted",
     # Fax — message events
+    WebhookEventType.FAX_MESSAGE_CREATED: "A fax message was created or queued for send",
     WebhookEventType.FAX_MESSAGE_DELETED: "A fax message was deleted",
     # Support — ticket events
     WebhookEventType.TICKET_CREATED: "A new support ticket was created",

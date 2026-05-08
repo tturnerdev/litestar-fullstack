@@ -267,6 +267,8 @@ class FaxMessageController(Controller):
             timeout=600,
         )
 
+        request.app.emit(event_id="fax_message_created", entity_id=db_obj.id)
+
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

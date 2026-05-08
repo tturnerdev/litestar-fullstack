@@ -141,6 +141,7 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "fax_email_route_updated": WebhookEventType.FAX_EMAIL_ROUTE_UPDATED,
     "fax_email_route_deleted": WebhookEventType.FAX_EMAIL_ROUTE_DELETED,
     # Fax — message events
+    "fax_message_created": WebhookEventType.FAX_MESSAGE_CREATED,
     "fax_message_deleted": WebhookEventType.FAX_MESSAGE_DELETED,
     # Support — ticket events
     "ticket_created": WebhookEventType.TICKET_CREATED,
