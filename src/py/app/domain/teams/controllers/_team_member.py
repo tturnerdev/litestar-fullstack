@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 from advanced_alchemy.exceptions import IntegrityError
 from litestar import Controller, Request, delete, patch, post
+from litestar.exceptions import ClientException
 from litestar.di import Provide
 from litestar.params import Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_202_ACCEPTED
@@ -146,6 +147,11 @@ class TeamMemberController(Controller):
         if membership is None:
             msg = "User is not a member of this team."
             raise IntegrityError(msg)
+        if membership.is_owner:
+            raise ClientException(
+                detail="Cannot remove the team owner. Transfer ownership first.",
+                status_code=409,
+            )
         before = capture_snapshot(membership)
         request.app.emit(event_id="team_member_removed", entity_id=membership.id)
         await team_members_service.delete(membership.id)

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.354.0 (2026-05-08)
+
+### Fixed
+- **Team owner removal protection** — Prevent removing a team owner via the member removal endpoint, returning 409 Conflict with a message to transfer ownership first
+
 ## v0.353.0 (2026-05-08)
 
 ### Fixed
