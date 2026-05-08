@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.266.0 (2026-05-07)
+
+### Added
+- **Delete confirmation dialogs** — Devices and E911 list pages now show AlertDialog before single-item deletes instead of firing immediately
+- **Webhook manual redeliver endpoint** — POST `/api/webhooks/{id}/deliveries/{id}/redeliver` for manually retrying failed deliveries; new `WebhookDeliveryDetail` schema with payload visibility
+
+### Fixed
+- **Delete error handling** — Wrapped `mutateAsync` delete calls in try/catch with toast feedback on E911 detail, location detail, and schedule detail pages
+
 ## v0.265.0 (2026-05-07)
 
 ### Added
