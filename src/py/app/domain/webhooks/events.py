@@ -18,6 +18,7 @@ class WebhookEventType(StrEnum):
     USER_CREATED = "user.created"
     USER_UPDATED = "user.updated"
     USER_DELETED = "user.deleted"
+    USER_ROLE_ASSIGNED = "user.role.assigned"
     USER_ROLE_REVOKED = "user.role.revoked"
 
     # Authentication events
@@ -160,6 +161,7 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.USER_CREATED: "A new user account was created",
     WebhookEventType.USER_UPDATED: "A user account was updated",
     WebhookEventType.USER_DELETED: "A user account was deleted",
+    WebhookEventType.USER_ROLE_ASSIGNED: "A role was assigned to a user",
     WebhookEventType.USER_ROLE_REVOKED: "A role was revoked from a user",
     # Authentication events
     WebhookEventType.USER_MFA_CHALLENGE_SUCCESS: "A user passed MFA verification",

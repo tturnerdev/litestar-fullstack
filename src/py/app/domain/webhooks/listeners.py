@@ -27,6 +27,7 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "user_created": WebhookEventType.USER_CREATED,
     "user_updated": WebhookEventType.USER_UPDATED,
     "user_deleted": WebhookEventType.USER_DELETED,
+    "user_role_assigned": WebhookEventType.USER_ROLE_ASSIGNED,
     "user_role_revoked": WebhookEventType.USER_ROLE_REVOKED,
     # Authentication events
     "verification_requested": WebhookEventType.USER_VERIFICATION_REQUESTED,
@@ -156,29 +157,25 @@ async def _dispatch_webhook(internal_event_id: str, **kwargs: Any) -> None:
         return
 
     # Extract the entity identifier from kwargs.  Controllers use different
-    # kwarg names: entity_id, team_id, webhook_id, device_id, etc.
-    # We normalise them all into the payload as "entity_id".
+    # kwarg names (entity_id, team_id, device_id, etc.).  Rather than
+    # maintaining a hardcoded list, we pick the first UUID-valued key
+    # ending in "_id" and normalise it into the payload as "entity_id".
     entity_id: UUID | None = None
-    for key in ("entity_id", "team_id", "webhook_id", "device_id", "connection_id",
-                "schedule_id", "registration_id", "invitation_id", "ticket_id",
-                "call_record_id", "message_id", "user_id"):
-        if key in kwargs:
-            entity_id = kwargs[key]
+    entity_id_key: str | None = None
+    for key, value in kwargs.items():
+        if isinstance(value, UUID) and key.endswith("_id"):
+            entity_id = value
+            entity_id_key = key
             break
 
-    # Build the webhook payload with all non-internal kwargs
     payload: dict[str, Any] = {}
     if entity_id is not None:
         payload["entity_id"] = str(entity_id)
 
-    # Forward additional context (e.g., old_status/new_status for ticket events,
-    # assigned_to_id for ticket assignments)
-    skip_keys = {"mailer", "entity_id", "team_id", "webhook_id", "device_id",
-                 "connection_id", "schedule_id", "registration_id", "invitation_id",
-                 "ticket_id", "call_record_id", "message_id", "user_id"}
     for key, value in kwargs.items():
-        if key not in skip_keys:
-            payload[key] = str(value) if isinstance(value, UUID) else value
+        if key == entity_id_key or key == "mailer":
+            continue
+        payload[key] = str(value) if isinstance(value, UUID) else value
 
     async with provide_services(
         deps.provide_webhook_endpoint_service,

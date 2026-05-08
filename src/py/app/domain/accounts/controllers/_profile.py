@@ -235,6 +235,7 @@ class ProfileController(Controller):
             audit_service: Audit log service.
         """
         before = capture_snapshot(current_user)
+        request.app.emit(event_id="user_deleted", user_id=current_user.id)
         _ = await users_service.delete(current_user.id)
 
         await log_audit(

@@ -263,6 +263,7 @@ class RoleController(Controller):
                 "assigned_at": datetime.now(UTC),
             },
         )
+        request.app.emit(event_id="user_role_assigned", entity_id=db_obj.id)
         await log_audit(
             audit_service,
             action="account.role.assigned",
@@ -321,6 +322,7 @@ class RoleController(Controller):
             raise NotFoundException(detail=f"User '{data.user_name}' does not have role '{role_slug}'")
 
         before = capture_snapshot(existing_role)
+        request.app.emit(event_id="user_role_revoked", entity_id=existing_role.id)
         await user_roles_service.delete(existing_role.id)
         await log_audit(
             audit_service,

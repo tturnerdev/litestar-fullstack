@@ -68,6 +68,7 @@ class UserRoleController(Controller):
         user_obj = await users_service.get_one(email=data.user_name)
         obj, created = await user_roles_service.get_or_upsert(role_id=role.id, user_id=user_obj.id)
         if created:
+            request.app.emit(event_id="user_role_assigned", entity_id=obj.id)
             await log_audit(
                 audit_service,
                 action="account.user_role.assigned",
