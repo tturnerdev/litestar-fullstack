@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from advanced_alchemy.extensions.litestar import repository, service
 from litestar.exceptions import ValidationException
 
@@ -33,11 +35,18 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
         return await self._populate_inviter(data)
 
     async def to_model_on_update(
-        self, data: service.ModelDictT[m.TeamInvitation]
+        self, data: service.ModelDictT[m.TeamInvitation], item_id: Any | None = None, **kwargs: Any
     ) -> service.ModelDictT[m.TeamInvitation]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "email" in data:
             data["email"] = data["email"].strip().lower()
+            if "team_id" in data:
+                existing = await self.repository.list(
+                    m.TeamInvitation.team_id == data["team_id"],
+                    m.TeamInvitation.email == data["email"],
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("An invitation for this email already exists in this team.")
         return await self._populate_inviter(data)
 
     async def to_model_on_upsert(

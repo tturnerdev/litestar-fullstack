@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertTriangle, FileText, Hash, Inbox, type LucideIcon, Mail, Send, TrendingUp } from "lucide-react"
+import { AlertTriangle, FileText, Hash, Home, Inbox, type LucideIcon, Mail, Send, TrendingUp } from "lucide-react"
 import { useMemo } from "react"
 import { Area, AreaChart, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
@@ -103,7 +104,28 @@ function FaxOverviewPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Communications" title="Fax" description="Manage your fax numbers, view message history, and send faxes." />
+      <PageHeader
+        eyebrow="Communications"
+        title="Fax"
+        description="Manage your fax numbers, view message history, and send faxes."
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">
+                    <Home className="h-3.5 w-3.5" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Fax</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      />
 
       <PageSection delay={0.1}>
         {isLoading ? (
