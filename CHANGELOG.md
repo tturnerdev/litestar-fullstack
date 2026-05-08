@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.284.0 (2026-05-07)
+
+### Added
+- **Webhook event dispatcher wiring** — All 84 internal events (create/update/delete across every domain) now bridge to the webhook delivery system via dynamically registered listeners, forwarding payloads to subscribed endpoints with HMAC signing and retry logic
+- **Schema field validation on 17 Create schemas** — `min_length`/`max_length` constraints via `msgspec.Meta` on name, url, address, subject, number, and mac_address fields across teams, locations, webhooks, connections, voice, fax, support, tags, schedules, call routing, E911, and devices
+
 ## v0.283.0 (2026-05-07)
 
 ### Added
