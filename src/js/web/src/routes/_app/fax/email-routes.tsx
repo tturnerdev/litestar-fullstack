@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Mail, MailPlus, MoreVertical, Pencil, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
+import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Loader2, Mail, MailPlus, MoreVertical, Pencil, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -237,6 +237,7 @@ function CreateEmailRouteDialog({ open, onOpenChange }: { open: boolean; onOpenC
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={createMutation.isPending || !faxNumberId || !emailAddress.trim()}>
+            {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {createMutation.isPending ? "Creating..." : "Create Route"}
           </Button>
         </DialogFooter>
@@ -348,6 +349,7 @@ function EditEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteWit
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={updateMutation.isPending}>
+            {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import {
   Accessibility,
   AlertCircle,
+  AlertTriangle,
   Bell,
   Calendar,
   Check,
@@ -27,6 +28,16 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { NotificationPreferences } from "@/components/settings/notification-preferences"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
@@ -607,124 +618,153 @@ function ActiveSessionsSection() {
   const { data, isLoading, isError, refetch } = useActiveSessions()
   const revokeSession = useRevokeSession()
   const revokeAllSessions = useRevokeAllSessions()
+  const [revokeAllOpen, setRevokeAllOpen] = useState(false)
 
   const sessions = data?.items ?? []
   const otherSessionCount = sessions.filter((s) => !s.isCurrent).length
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
-            <Shield className="h-4 w-4 text-emerald-500" />
-          </div>
-          Active Sessions
-        </CardTitle>
-        <CardDescription>Devices and browsers where you are currently signed in.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
-              <div key={`session-skeleton-${i}`} className="flex items-center justify-between rounded-lg border border-border/60 p-4">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-10 w-10 rounded-lg" />
-                  <div className="space-y-1.5">
-                    <Skeleton className="h-4 w-40" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </div>
-                <Skeleton className="h-8 w-16 rounded-md" />
-              </div>
-            ))}
-          </div>
-        ) : isError ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-            <AlertCircle className="h-8 w-8 text-destructive" />
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Unable to load sessions</p>
-              <p className="text-xs text-muted-foreground">Something went wrong. Please try again.</p>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <Shield className="h-4 w-4 text-emerald-500" />
             </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Try again
-            </Button>
-          </div>
-        ) : (
-          <>
+            Active Sessions
+          </CardTitle>
+          <CardDescription>Devices and browsers where you are currently signed in.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isLoading ? (
             <div className="space-y-2">
-              {sessions.map((session) => {
-                const { device, browser, icon: Icon } = parseUserAgent(session.deviceInfo ?? "")
-                const isCurrent = session.isCurrent ?? false
-                return (
-                  <div
-                    key={session.id}
-                    className={cn("flex items-center justify-between rounded-lg border p-4", isCurrent ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/60")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", isCurrent ? "bg-emerald-500/10" : "bg-muted")}>
-                        <Icon className={cn("h-5 w-5", isCurrent ? "text-emerald-500" : "text-muted-foreground")} />
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{browser}</span>
-                          <span className="text-sm text-muted-foreground">on {device}</span>
-                          {isCurrent && (
-                            <Badge variant="default" className="bg-emerald-600 text-[0.625rem] px-1.5 py-0">
-                              Current
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Globe className="h-3 w-3" />
-                            {isCurrent ? "Active now" : formatSessionTime(session.createdAt)}
-                          </span>
-                        </div>
-                      </div>
+              {Array.from({ length: 3 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                <div key={`session-skeleton-${i}`} className="flex items-center justify-between rounded-lg border border-border/60 p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
-                    {!isCurrent && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={revokeSession.isPending}
-                        onClick={() => revokeSession.mutate(session.id)}
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        {revokeSession.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <LogOut className="mr-1.5 h-3.5 w-3.5" />}
-                        Sign out
-                      </Button>
-                    )}
                   </div>
-                )
-              })}
-            </div>
-
-            {otherSessionCount > 0 && (
-              <>
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    {otherSessionCount} other {otherSessionCount === 1 ? "session" : "sessions"} will be signed out.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={revokeAllSessions.isPending}
-                    onClick={() => revokeAllSessions.mutate()}
-                    className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    {revokeAllSessions.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <LogOut className="mr-1.5 h-3.5 w-3.5" />}
-                    Sign out all other sessions
-                  </Button>
+                  <Skeleton className="h-8 w-16 rounded-md" />
                 </div>
-              </>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+              ))}
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Unable to load sessions</p>
+                <p className="text-xs text-muted-foreground">Something went wrong. Please try again.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                {sessions.map((session) => {
+                  const { device, browser, icon: Icon } = parseUserAgent(session.deviceInfo ?? "")
+                  const isCurrent = session.isCurrent ?? false
+                  return (
+                    <div
+                      key={session.id}
+                      className={cn("flex items-center justify-between rounded-lg border p-4", isCurrent ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/60")}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", isCurrent ? "bg-emerald-500/10" : "bg-muted")}>
+                          <Icon className={cn("h-5 w-5", isCurrent ? "text-emerald-500" : "text-muted-foreground")} />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{browser}</span>
+                            <span className="text-sm text-muted-foreground">on {device}</span>
+                            {isCurrent && (
+                              <Badge variant="default" className="bg-emerald-600 text-[0.625rem] px-1.5 py-0">
+                                Current
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Globe className="h-3 w-3" />
+                              {isCurrent ? "Active now" : formatSessionTime(session.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {!isCurrent && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={revokeSession.isPending}
+                          onClick={() => revokeSession.mutate(session.id)}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          {revokeSession.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <LogOut className="mr-1.5 h-3.5 w-3.5" />}
+                          Sign out
+                        </Button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {otherSessionCount > 0 && (
+                <>
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      {otherSessionCount} other {otherSessionCount === 1 ? "session" : "sessions"} will be signed out.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={revokeAllSessions.isPending}
+                      onClick={() => setRevokeAllOpen(true)}
+                      className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      {revokeAllSessions.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <LogOut className="mr-1.5 h-3.5 w-3.5" />}
+                      Sign out all other sessions
+                    </Button>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={revokeAllOpen} onOpenChange={setRevokeAllOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Sign out all other sessions?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will immediately sign out {otherSessionCount} other {otherSessionCount === 1 ? "session" : "sessions"}. Any unsaved work in those sessions will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                revokeAllSessions.mutate()
+                setRevokeAllOpen(false)
+              }}
+            >
+              Sign out all sessions
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 
