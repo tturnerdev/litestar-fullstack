@@ -10,6 +10,7 @@ from litestar import Controller, delete, get, patch
 from litestar.di import Provide
 from litestar.exceptions import NotAuthorizedException
 from litestar.params import Dependency
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import joinedload, load_only, selectinload, undefer_group
 
 from app.db import models as m
@@ -19,7 +20,6 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import AdminUserDetail, AdminUserSummary, AdminUserUpdate
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
-from app.lib.schema import Message
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -150,28 +150,15 @@ class AdminUsersController(Controller):
 
         return users_service.to_schema(user, schema_type=AdminUserDetail)
 
-    @delete(operation_id="AdminDeleteUser", summary="Delete a user (admin)", path="/{user_id:uuid}", status_code=200)
+    @delete(operation_id="AdminDeleteUser", summary="Delete a user (admin)", path="/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_user(
         self,
         request: Request[m.User, Token, Any],
         users_service: UserService,
         audit_service: AuditLogService,
         user_id: UUID,
-    ) -> Message:
-        """Delete a user (admin only).
-
-        Args:
-            request: Request with authenticated superuser
-            users_service: User service
-            audit_service: Audit log service
-            user_id: ID of user to delete
-
-        Returns:
-            Success message
-
-        Raises:
-            NotAuthorizedException: If attempting to delete the current user
-        """
+    ) -> None:
+        """Delete a user (admin only)."""
         user = await users_service.get(user_id)
         if user.id == request.user.id:
             raise NotAuthorizedException(detail="Cannot delete your own account")
@@ -188,4 +175,3 @@ class AdminUsersController(Controller):
             target_label=user_email,
             request=request,
         )
-        return Message(message=f"User {user_email} deleted successfully")

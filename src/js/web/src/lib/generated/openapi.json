@@ -18442,15 +18442,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Message"
-                }
-              }
-            },
-            "description": "Request fulfilled, document follows",
+          "204": {
+            "description": "Request fulfilled, nothing follows",
             "headers": {}
           },
           "400": {
@@ -18955,15 +18948,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Message"
-                }
-              }
-            },
-            "description": "Request fulfilled, document follows",
+          "204": {
+            "description": "Request fulfilled, nothing follows",
             "headers": {}
           },
           "400": {
@@ -29219,15 +29205,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Message"
-                }
-              }
-            },
-            "description": "Request fulfilled, document follows",
+          "204": {
+            "description": "Request fulfilled, nothing follows",
             "headers": {}
           },
           "400": {

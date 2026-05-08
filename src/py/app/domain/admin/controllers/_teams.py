@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch
 from litestar.di import Provide
 from litestar.params import Dependency
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from msgspec import UNSET
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -18,7 +19,6 @@ from app.domain.admin.schemas import AdminTeamDetail, AdminTeamSummary, AdminTea
 from app.domain.teams.services import TeamService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
-from app.lib.schema import Message
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -136,25 +136,15 @@ class AdminTeamsController(Controller):
         )
         return teams_service.to_schema(team, schema_type=AdminTeamDetail)
 
-    @delete(operation_id="AdminDeleteTeam", summary="Delete a team (admin)", path="/{team_id:uuid}", status_code=200)
+    @delete(operation_id="AdminDeleteTeam", summary="Delete a team (admin)", path="/{team_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_team(
         self,
         request: Request[m.User, Token, Any],
         teams_service: TeamService,
         audit_service: AuditLogService,
         team_id: UUID,
-    ) -> Message:
-        """Delete a team (admin only).
-
-        Args:
-            request: Request with authenticated superuser
-            teams_service: Team service
-            audit_service: Audit log service
-            team_id: ID of team to delete
-
-        Returns:
-            Success message
-        """
+    ) -> None:
+        """Delete a team (admin only)."""
         team = await teams_service.get(team_id)
         team_name = team.name
         await teams_service.delete(team.id, auto_commit=True)
@@ -169,4 +159,3 @@ class AdminTeamsController(Controller):
             target_label=team_name,
             request=request,
         )
-        return Message(message=f"Team {team_name} deleted successfully")

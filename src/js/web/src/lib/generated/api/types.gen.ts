@@ -5175,9 +5175,9 @@ export type AdminDeleteTeamError =
 
 export type AdminDeleteTeamResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type AdminDeleteTeamResponse =
@@ -5362,9 +5362,9 @@ export type AdminDeleteUserError =
 
 export type AdminDeleteUserResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type AdminDeleteUserResponse =
@@ -9703,9 +9703,9 @@ export type ManageDeletePhoneNumberError =
 
 export type ManageDeletePhoneNumberResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type ManageDeletePhoneNumberResponse =

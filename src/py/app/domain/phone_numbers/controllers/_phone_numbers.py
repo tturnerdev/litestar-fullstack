@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -10,8 +9,7 @@ import msgspec
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency
-from litestar.status_codes import HTTP_201_CREATED
-from sqlalchemy import inspect as sa_inspect
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.accounts.guards import requires_active_user
@@ -23,8 +21,8 @@ from app.domain.phone_numbers.schemas import (
     PhoneNumberUpdate,
 )
 from app.domain.phone_numbers.services import PhoneNumberService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
-from app.lib.schema import Message
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -33,72 +31,6 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
-
-_SNAPSHOT_EXCLUDE: frozenset[str] = frozenset(
-    {"id", "sa_orm_sentinel", "created_at", "updated_at", "hashed_password", "totp_secret", "backup_codes"}
-)
-
-
-def _capture_snapshot(obj: Any) -> dict[str, Any]:
-    """Serialize a SQLAlchemy model instance to a plain dict for audit details."""
-    mapper = sa_inspect(type(obj))
-    result: dict[str, Any] = {}
-    for col in mapper.columns:
-        key = col.key
-        if key in _SNAPSHOT_EXCLUDE:
-            continue
-        try:
-            value = getattr(obj, key)
-        except Exception:  # noqa: BLE001, S112
-            continue  # intentionally skip unreadable model attributes during snapshot
-        if isinstance(value, UUID):
-            value = str(value)
-        elif isinstance(value, (datetime, date)):
-            value = value.isoformat()
-        result[key] = value
-    return result
-
-
-async def _log_audit(
-    audit_service: AuditLogService,
-    *,
-    action: str,
-    actor: m.User,
-    target_type: str,
-    target_id: UUID,
-    target_label: str,
-    before: dict[str, Any] | None = None,
-    after: dict[str, Any] | None = None,
-    request: Request[Any, Any, Any] | None = None,
-) -> None:
-    """Write an audit log entry with optional before/after diff."""
-    details: dict[str, Any] = {}
-    if before is not None or after is not None:
-        if before is None:
-            details = {"before": None, "after": after}
-        elif after is None:
-            details = {"before": before, "after": None}
-        else:
-            changed_before: dict[str, Any] = {}
-            changed_after: dict[str, Any] = {}
-            for key in set(before) | set(after):
-                if before.get(key) != after.get(key):
-                    changed_before[key] = before.get(key)
-                    changed_after[key] = after.get(key)
-            if changed_before or changed_after:
-                details = {"before": changed_before, "after": changed_after}
-
-    await audit_service.log_action(
-        action=action,
-        actor_id=actor.id,
-        actor_email=actor.email,
-        actor_name=actor.name,
-        target_type=target_type,
-        target_id=str(target_id),
-        target_label=target_label,
-        details=details or None,
-        request=request,
-    )
 
 
 class PhoneNumberController(Controller):
@@ -187,11 +119,13 @@ class PhoneNumberController(Controller):
         """
         result = await phone_number_service.create(data.to_dict(), auto_commit=True)
         request.app.emit(event_id="phone_number_created", entity_id=result.id)
-        after = _capture_snapshot(result)
-        await _log_audit(
+        after = capture_snapshot(result)
+        await log_audit(
             audit_service,
             action="phone_number.created",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="phone_number",
             target_id=result.id,
             target_label=result.number,
@@ -223,7 +157,7 @@ class PhoneNumberController(Controller):
         Returns:
             Updated phone number details.
         """
-        before = _capture_snapshot(await phone_number_service.get(phone_number_id))
+        before = capture_snapshot(await phone_number_service.get(phone_number_id))
         update_data: dict[str, Any] = {}
         for field in data.__struct_fields__:
             value = getattr(data, field)
@@ -232,11 +166,13 @@ class PhoneNumberController(Controller):
 
         fresh_obj = await phone_number_service.update(item_id=phone_number_id, data=update_data, auto_commit=True)
         request.app.emit(event_id="phone_number_updated", entity_id=fresh_obj.id)
-        after = _capture_snapshot(fresh_obj)
-        await _log_audit(
+        after = capture_snapshot(fresh_obj)
+        await log_audit(
             audit_service,
             action="phone_number.updated",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="phone_number",
             target_id=phone_number_id,
             target_label=fresh_obj.number,
@@ -246,7 +182,7 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(fresh_obj, schema_type=PhoneNumberDetail)
 
-    @delete(operation_id="ManageDeletePhoneNumber", summary="Delete a phone number", path="/{phone_number_id:uuid}", status_code=200)
+    @delete(operation_id="ManageDeletePhoneNumber", summary="Delete a phone number", path="/{phone_number_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -254,32 +190,22 @@ class PhoneNumberController(Controller):
         audit_service: AuditLogService,
         current_user: m.User,
         phone_number_id: UUID,
-    ) -> Message:
-        """Delete a phone number.
-
-        Args:
-            request: The current request.
-            phone_number_service: Phone number service.
-            audit_service: Audit Log Service.
-            current_user: Current User.
-            phone_number_id: ID of the phone number.
-
-        Returns:
-            Success message.
-        """
+    ) -> None:
+        """Delete a phone number."""
         phone = await phone_number_service.get(phone_number_id)
-        before = _capture_snapshot(phone)
+        before = capture_snapshot(phone)
         target_label = phone.number
         request.app.emit(event_id="phone_number_deleted", entity_id=phone_number_id)
         await phone_number_service.delete(phone_number_id, auto_commit=True)
-        await _log_audit(
+        await log_audit(
             audit_service,
             action="phone_number.deleted",
-            actor=current_user,
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="phone_number",
             target_id=phone_number_id,
             target_label=target_label,
             before=before,
             request=request,
         )
-        return Message(message=f"Phone number {target_label} deleted successfully")
