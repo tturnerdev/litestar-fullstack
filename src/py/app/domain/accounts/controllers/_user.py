@@ -124,6 +124,7 @@ class UserController(Controller):
             after=capture_snapshot(db_obj),
             request=request,
         )
+        request.app.emit(event_id="user_created", entity_id=db_obj.id)
         return users_service.to_schema(db_obj, schema_type=User)
 
     @patch(operation_id="UpdateUser", path="/{user_id:uuid}")

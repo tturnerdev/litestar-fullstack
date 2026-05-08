@@ -132,6 +132,7 @@ class FaxNumberController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="fax_number_created", entity_id=db_obj.id)
         try:
             await notifications_service.notify(
                 user_id=current_user.id,

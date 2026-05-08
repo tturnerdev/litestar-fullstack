@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-from litestar import Controller, delete, get, patch, post
+from litestar import Controller, Request, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency, Parameter
 
@@ -35,6 +35,7 @@ class WebhookEndpointController(Controller):
         key="webhook_service",
         filters={
             "id_filter": UUID,
+            "search": "url,description",
             "pagination_type": "limit_offset",
             "pagination_size": 25,
             "created_at": True,
@@ -65,10 +66,12 @@ class WebhookEndpointController(Controller):
     @post(operation_id="CreateWebhookEndpoint")
     async def create_endpoint(
         self,
+        request: Request[Any, Any, Any],
         webhook_service: WebhookEndpointService,
         data: WebhookEndpointCreate,
     ) -> WebhookEndpoint:
         db_obj = await webhook_service.create(data.to_dict())
+        request.app.emit(event_id="webhook_endpoint_created", entity_id=db_obj.id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
     @patch(operation_id="UpdateWebhookEndpoint", path="/{endpoint_id:uuid}")

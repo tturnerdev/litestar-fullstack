@@ -125,6 +125,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ring_group_created", entity_id=db_obj.id)
         return ring_groups_service.to_schema(db_obj, schema_type=RingGroup)
 
     @get(

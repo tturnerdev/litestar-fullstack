@@ -38,7 +38,7 @@ class LocationController(Controller):
         load=[selectinload(m.Location.children)],
         filters={
             "id_filter": UUID,
-            "search": "name",
+            "search": "name,city,state",
             "pagination_type": "limit_offset",
             "pagination_size": 20,
             "created_at": True,
@@ -111,6 +111,7 @@ class LocationController(Controller):
         obj = data.to_dict()
         obj["team_id"] = team_id
         db_obj = await locations_service.create(obj)
+        request.app.emit(event_id="location_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

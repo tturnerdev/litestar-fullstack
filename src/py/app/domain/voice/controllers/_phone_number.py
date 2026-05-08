@@ -39,6 +39,7 @@ class PhoneNumberController(Controller):
         load=[joinedload(m.PhoneNumber.e911_registration)],
         filters={
             "id_filter": UUID,
+            "search": "number,label",
             "pagination_type": "limit_offset",
             "pagination_size": 20,
             "created_at": True,
@@ -83,6 +84,7 @@ class PhoneNumberController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await phone_numbers_service.create(obj)
+        request.app.emit(event_id="phone_number_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

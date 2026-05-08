@@ -108,6 +108,7 @@ class AdminDeviceTemplatesController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="device_template_created", entity_id=db_obj.id)
         return DeviceTemplateDetail(
             id=db_obj.id,
             manufacturer=db_obj.manufacturer,

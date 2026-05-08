@@ -122,6 +122,7 @@ class RoleController(Controller):
             after=capture_snapshot(db_obj),
             request=request,
         )
+        request.app.emit(event_id="role_created", entity_id=db_obj.id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
     @patch(operation_id="UpdateRole", path="/{role_id:uuid}")

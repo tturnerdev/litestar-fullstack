@@ -92,6 +92,7 @@ class ForwardingController(Controller):
         obj = data.to_dict()
         obj["extension_id"] = ext_id
         db_obj = await forwarding_rules_service.create(obj)
+        request.app.emit(event_id="forwarding_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

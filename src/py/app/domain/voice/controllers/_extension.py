@@ -130,6 +130,7 @@ class ExtensionController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await extensions_service.create(obj)
+        request.app.emit(event_id="extension_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

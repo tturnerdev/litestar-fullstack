@@ -119,6 +119,7 @@ class TimeConditionController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="time_condition_created", entity_id=db_obj.id)
         return time_conditions_service.to_schema(db_obj, schema_type=TimeCondition)
 
     @get(

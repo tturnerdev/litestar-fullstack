@@ -185,6 +185,7 @@ class PhoneNumberController(Controller):
             Created phone number details.
         """
         result = await phone_number_service.create(data.to_dict(), auto_commit=True)
+        request.app.emit(event_id="phone_number_created", entity_id=result.id)
         after = _capture_snapshot(result)
         await _log_audit(
             audit_service,

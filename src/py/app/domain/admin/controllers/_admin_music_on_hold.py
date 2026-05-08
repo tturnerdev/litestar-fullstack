@@ -42,7 +42,7 @@ class AdminMusicOnHoldController(Controller):
         key="moh_service",
         filters={
             "id_filter": UUID,
-            "search": "name,description",
+            "search": "name",
             "pagination_type": "limit_offset",
             "pagination_size": 25,
             "created_at": True,
@@ -106,6 +106,7 @@ class AdminMusicOnHoldController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="music_on_hold_created", entity_id=db_obj.id)
         return MusicOnHoldDetail(
             id=db_obj.id,
             name=db_obj.name,
