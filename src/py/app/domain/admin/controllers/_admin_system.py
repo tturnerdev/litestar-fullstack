@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import structlog
 from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
-from sqlalchemy import text
+from sqlalchemy import func, select, table as sa_table
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.domain.accounts.guards import requires_superuser
@@ -91,7 +91,7 @@ async def _get_resource_counts(db_session: Any) -> dict[str, int | None]:
             ("total_devices", "device"),
             ("active_connections", "connection"),
         ]:
-            result = await db_session.execute(text(f"SELECT count(*) FROM {table}"))  # noqa: S608
+            result = await db_session.execute(select(func.count()).select_from(sa_table(table)))
             counts[key] = result.scalar()
     except Exception:  # noqa: BLE001
         logger.warning("Failed to retrieve resource counts from database", exc_info=True)

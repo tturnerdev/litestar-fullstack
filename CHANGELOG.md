@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.312.0 (2026-05-08)
+
+### Security
+- **Eliminated f-string SQL** — Admin system stats now uses SQLAlchemy's expression API (`select(func.count()).select_from(sa_table(...))`) instead of `text(f"SELECT count(*) FROM {table}")`, removing a structural SQL injection risk
+
+### Fixed
+- **Double success toasts on create** — Removed duplicate `toast.success` from hook-level `onSuccess` in schedules, E911, fax numbers, and webhooks create mutations (page-level toast is the single source)
+
 ## v0.311.0 (2026-05-08)
 
 ### Security

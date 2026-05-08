@@ -168,7 +168,6 @@ export function useCreateSchedule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] })
-      toast.success("Schedule created")
     },
     onError: (error) => {
       toast.error("Unable to create schedule", {
