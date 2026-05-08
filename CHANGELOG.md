@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.351.0 (2026-05-08)
+
+### Fixed
+- **Name whitespace bypass across services** — Strip leading/trailing whitespace from names before duplicate checks in location, schedule, connection, and organization services, preventing duplicate records via whitespace tricks
+
 ## v0.350.0 (2026-05-08)
 
 ### Fixed
