@@ -266,6 +266,7 @@ class AdminPhoneNumberBulkImportController(Controller):
                 action="admin.phone_number.bulk_import",
                 actor_id=request.user.id,
                 actor_email=request.user.email,
+                actor_name=request.user.name,
                 target_type="phone_number",
                 target_label=f"Bulk import: {len(created)} numbers",
                 details={
@@ -275,6 +276,9 @@ class AdminPhoneNumberBulkImportController(Controller):
                 },
                 request=request,
             )
+
+        if created:
+            request.app.emit(event_id="phone_numbers_bulk_imported", created=len(created))
 
         return BulkImportPhoneNumberResult(
             created_count=len(created),

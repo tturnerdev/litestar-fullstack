@@ -159,6 +159,19 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "extensions_bulk_imported": WebhookEventType.EXTENSIONS_BULK_IMPORTED,
     # Admin gateway events
     "gateway_settings_updated": WebhookEventType.GATEWAY_SETTINGS_UPDATED,
+    # Admin user/team events
+    "admin_user_updated": WebhookEventType.ADMIN_USER_UPDATED,
+    "admin_user_deleted": WebhookEventType.ADMIN_USER_DELETED,
+    "admin_team_updated": WebhookEventType.ADMIN_TEAM_UPDATED,
+    "admin_team_deleted": WebhookEventType.ADMIN_TEAM_DELETED,
+    # Phone number bulk import events
+    "phone_numbers_bulk_imported": WebhookEventType.PHONE_NUMBERS_BULK_IMPORTED,
+    # Device action events
+    "device_rebooted": WebhookEventType.DEVICE_REBOOTED,
+    "device_reprovisioned": WebhookEventType.DEVICE_REPROVISIONED,
+    "device_lines_updated": WebhookEventType.DEVICE_LINES_UPDATED,
+    # Notification preference events
+    "notification_preferences_updated": WebhookEventType.NOTIFICATION_PREFERENCES_UPDATED,
     # Background task events
     "background_task_deleted": WebhookEventType.BACKGROUND_TASK_DELETED,
 }

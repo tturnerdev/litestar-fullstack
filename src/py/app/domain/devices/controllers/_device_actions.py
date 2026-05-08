@@ -91,6 +91,7 @@ class DeviceActionsController(Controller):
             payload={"device_id": str(device.id)},
             timeout=120,
         )
+        request.app.emit(event_id="device_rebooted", device_id=device.id)
         await log_audit(
             audit_service,
             action="device.reboot",
@@ -128,6 +129,7 @@ class DeviceActionsController(Controller):
             payload={"device_id": str(device.id)},
             timeout=120,
         )
+        request.app.emit(event_id="device_reprovisioned", device_id=device.id)
         await log_audit(
             audit_service,
             action="device.reprovision",
@@ -183,6 +185,7 @@ class DeviceActionsController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="device_lines_updated", device_id=device.id)
         return devices_service.to_schema_enriched(device)
 
     @get(

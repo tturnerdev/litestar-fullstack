@@ -183,6 +183,23 @@ class WebhookEventType(StrEnum):
     # Admin — gateway events
     GATEWAY_SETTINGS_UPDATED = "admin.gateway.settings_updated"
 
+    # Admin — user/team events (admin-specific)
+    ADMIN_USER_UPDATED = "admin.user.updated"
+    ADMIN_USER_DELETED = "admin.user.deleted"
+    ADMIN_TEAM_UPDATED = "admin.team.updated"
+    ADMIN_TEAM_DELETED = "admin.team.deleted"
+
+    # Phone number bulk import events
+    PHONE_NUMBERS_BULK_IMPORTED = "admin.phone_numbers.bulk_imported"
+
+    # Device action events
+    DEVICE_REBOOTED = "device.rebooted"
+    DEVICE_REPROVISIONED = "device.reprovisioned"
+    DEVICE_LINES_UPDATED = "device.lines.updated"
+
+    # Notification preference events
+    NOTIFICATION_PREFERENCES_UPDATED = "notification.preferences.updated"
+
     # Background task events
     BACKGROUND_TASK_DELETED = "background_task.deleted"
 
@@ -329,6 +346,15 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.DEVICES_BULK_IMPORTED: "Devices were bulk-imported from CSV",
     WebhookEventType.EXTENSIONS_BULK_IMPORTED: "Extensions were bulk-imported from CSV",
     WebhookEventType.GATEWAY_SETTINGS_UPDATED: "Gateway settings were updated",
+    WebhookEventType.ADMIN_USER_UPDATED: "A user was updated via admin panel",
+    WebhookEventType.ADMIN_USER_DELETED: "A user was deleted via admin panel",
+    WebhookEventType.ADMIN_TEAM_UPDATED: "A team was updated via admin panel",
+    WebhookEventType.ADMIN_TEAM_DELETED: "A team was deleted via admin panel",
+    WebhookEventType.PHONE_NUMBERS_BULK_IMPORTED: "Phone numbers were bulk-imported",
+    WebhookEventType.DEVICE_REBOOTED: "A device reboot was initiated",
+    WebhookEventType.DEVICE_REPROVISIONED: "A device reprovision was initiated",
+    WebhookEventType.DEVICE_LINES_UPDATED: "Device line assignments were updated",
+    WebhookEventType.NOTIFICATION_PREFERENCES_UPDATED: "Notification preferences were updated",
     WebhookEventType.BACKGROUND_TASK_DELETED: "A background task was deleted",
 }
 
