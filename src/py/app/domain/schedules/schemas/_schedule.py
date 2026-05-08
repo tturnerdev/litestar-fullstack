@@ -45,20 +45,20 @@ class ScheduleEntryCreate(CamelizedBaseStruct, kw_only=True):
 
     start_time: dt.time
     end_time: dt.time
-    day_of_week: int | None = None
+    day_of_week: Annotated[int, Meta(ge=0, le=6)] | None = None
     date: dt.date | None = None
-    label: str | None = None
+    label: Annotated[str, Meta(max_length=255)] | None = None
     is_closed: bool = False
 
 
 class ScheduleEntryUpdate(CamelizedBaseStruct, omit_defaults=True, kw_only=True):
     """Schema for updating a schedule entry."""
 
-    day_of_week: int | msgspec.UnsetType | None = msgspec.UNSET
+    day_of_week: Annotated[int, Meta(ge=0, le=6)] | msgspec.UnsetType | None = msgspec.UNSET
     start_time: dt.time | msgspec.UnsetType = msgspec.UNSET
     end_time: dt.time | msgspec.UnsetType = msgspec.UNSET
     date: dt.date | msgspec.UnsetType | None = msgspec.UNSET
-    label: str | msgspec.UnsetType | None = msgspec.UNSET
+    label: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     is_closed: bool | msgspec.UnsetType = msgspec.UNSET
 
 
@@ -94,18 +94,18 @@ class ScheduleCreate(CamelizedBaseStruct, kw_only=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
     team_id: UUID
-    timezone: str = "America/Chicago"
+    timezone: Annotated[str, Meta(min_length=1, max_length=100)] = "America/Chicago"
     is_default: bool = False
-    schedule_type: str = "business_hours"
+    schedule_type: Annotated[str, Meta(min_length=1, max_length=50)] = "business_hours"
 
 
 class ScheduleUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a schedule."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    timezone: str | msgspec.UnsetType = msgspec.UNSET
+    timezone: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
     is_default: bool | msgspec.UnsetType = msgspec.UNSET
-    schedule_type: str | msgspec.UnsetType = msgspec.UNSET
+    schedule_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
 
 
 class ScheduleCheckResponse(CamelizedBaseStruct, kw_only=True):

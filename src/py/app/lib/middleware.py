@@ -26,6 +26,7 @@ class SecurityHeadersMiddleware(AbstractMiddleware):
                     (b"x-frame-options", b"DENY"),
                     (b"referrer-policy", b"strict-origin-when-cross-origin"),
                     (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
+                    (b"strict-transport-security", b"max-age=31536000; includeSubDomains"),
                 ]
                 existing = message.get("headers", [])
                 message["headers"] = [*existing, *security_headers]

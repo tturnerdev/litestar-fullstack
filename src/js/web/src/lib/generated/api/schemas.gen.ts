@@ -3,9 +3,13 @@
 export const AccountLoginSchema = {
   properties: {
     password: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     username: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
   },
@@ -17,6 +21,8 @@ export const AccountLoginSchema = {
 export const AccountRegisterSchema = {
   properties: {
     email: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     initialTeamName: {
@@ -40,6 +46,8 @@ export const AccountRegisterSchema = {
       ],
     },
     password: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     username: {
@@ -6573,6 +6581,8 @@ export const MfaChallengeSchema = {
 export const MfaConfirmSchema = {
   properties: {
     code: {
+      maxLength: 6,
+      minLength: 6,
       type: "string",
     },
   },
@@ -6584,6 +6594,8 @@ export const MfaConfirmSchema = {
 export const MfaDisableSchema = {
   properties: {
     password: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
   },
@@ -7502,9 +7514,13 @@ export const PasswordResetSentSchema = {
 export const PasswordUpdateSchema = {
   properties: {
     currentPassword: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     newPassword: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
   },
@@ -8351,6 +8367,8 @@ export const ScheduleCreateSchema = {
     },
     scheduleType: {
       default: "business_hours",
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     teamId: {
@@ -8359,6 +8377,8 @@ export const ScheduleCreateSchema = {
     },
     timezone: {
       default: "America/Chicago",
+      maxLength: 100,
+      minLength: 1,
       type: "string",
     },
   },
@@ -8767,6 +8787,8 @@ export const ScheduleUpdateSchema = {
       ],
     },
     scheduleType: {
+      maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8774,6 +8796,8 @@ export const ScheduleUpdateSchema = {
       ],
     },
     timezone: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",

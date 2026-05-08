@@ -1,14 +1,17 @@
 """Authentication-related schemas."""
 
+from typing import Annotated
+
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 from app.lib.validation import validate_email, validate_name, validate_password, validate_username
 
 
 class AccountLogin(CamelizedBaseStruct):
-    username: str
-    password: str
+    username: Annotated[str, Meta(min_length=1, max_length=255)]
+    password: Annotated[str, Meta(min_length=1, max_length=255)]
 
     def __post_init__(self) -> None:
         """Validate email format for username."""
@@ -16,10 +19,10 @@ class AccountLogin(CamelizedBaseStruct):
 
 
 class AccountRegister(CamelizedBaseStruct):
-    email: str
-    password: str
-    name: str | None = None
-    username: str | None = None
+    email: Annotated[str, Meta(min_length=1, max_length=255)]
+    password: Annotated[str, Meta(min_length=1, max_length=255)]
+    name: Annotated[str, Meta(max_length=255)] | None = None
+    username: Annotated[str, Meta(max_length=255)] | None = None
     initial_team_name: str | msgspec.UnsetType | None = msgspec.UNSET
 
     def __post_init__(self) -> None:
@@ -33,8 +36,8 @@ class AccountRegister(CamelizedBaseStruct):
 
 
 class PasswordUpdate(CamelizedBaseStruct):
-    current_password: str
-    new_password: str
+    current_password: Annotated[str, Meta(min_length=1, max_length=255)]
+    new_password: Annotated[str, Meta(min_length=1, max_length=255)]
 
     def __post_init__(self) -> None:
         """Validate new password strength."""
@@ -42,4 +45,4 @@ class PasswordUpdate(CamelizedBaseStruct):
 
 
 class PasswordVerify(CamelizedBaseStruct):
-    current_password: str
+    current_password: Annotated[str, Meta(min_length=1, max_length=255)]

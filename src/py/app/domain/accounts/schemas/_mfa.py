@@ -1,8 +1,10 @@
 """Multi-factor authentication schemas."""
 
 from datetime import datetime
+from typing import Annotated
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -21,7 +23,7 @@ class MfaSetup(CamelizedBaseStruct):
 class MfaConfirm(msgspec.Struct, gc=False, omit_defaults=True):
     """TOTP code to confirm MFA setup."""
 
-    code: str
+    code: Annotated[str, Meta(min_length=6, max_length=6)]
     """The 6-digit TOTP code from the authenticator app."""
 
 
@@ -36,16 +38,16 @@ class MfaBackupCodes(CamelizedBaseStruct):
 class MfaDisable(msgspec.Struct, gc=False, omit_defaults=True):
     """Password confirmation to disable MFA."""
 
-    password: str
+    password: Annotated[str, Meta(min_length=1, max_length=255)]
     """Current password for verification."""
 
 
 class MfaChallenge(msgspec.Struct, gc=False, omit_defaults=True):
     """TOTP code or recovery code for MFA verification."""
 
-    code: str | None = None
+    code: Annotated[str, Meta(min_length=6, max_length=6)] | None = None
     """6-digit TOTP code from authenticator app."""
-    recovery_code: str | None = None
+    recovery_code: Annotated[str, Meta(min_length=1, max_length=50)] | None = None
     """Backup recovery code (8 hex characters)."""
 
     def __post_init__(self) -> None:
