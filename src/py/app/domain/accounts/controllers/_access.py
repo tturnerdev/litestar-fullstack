@@ -422,6 +422,7 @@ class AccessController(Controller):
             actor_name=request.user.name,
             target_type="session",
             target_id=session_id,
+            target_label=request.user.email,
             request=request,
         )
 

@@ -258,6 +258,7 @@ class TeamInvitationController(Controller):
             }
         )
         await team_invitations_service.update(item_id=invitation_id, data={"is_accepted": True})
+        request.app.emit(event_id="team_invitation_accepted", entity_id=invitation_id)
 
         await log_audit(
             audit_service,
@@ -294,7 +295,9 @@ class TeamInvitationController(Controller):
         request: Request[m.User, Token, Any],
         current_user: m.User,
         team_invitations_service: TeamInvitationService,
+        teams_service: TeamService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         team_id: UUID,
         invitation_id: UUID,
     ) -> Message:
@@ -311,6 +314,7 @@ class TeamInvitationController(Controller):
             raise ClientException(detail="Invitation does not belong to this team")
         if db_obj.email != current_user.email:
             raise ClientException(detail="You are not authorized to reject this invitation")
+        request.app.emit(event_id="team_invitation_rejected", entity_id=invitation_id)
         await team_invitations_service.delete(item_id=invitation_id)
 
         await log_audit(
@@ -325,5 +329,19 @@ class TeamInvitationController(Controller):
             request=request,
             metadata={"team_id": str(team_id)},
         )
+
+        try:
+            team = await teams_service.get(team_id)
+            owner = next((member for member in team.members if member.is_owner), None)
+            if owner is not None:
+                await notifications_service.notify(
+                    user_id=owner.user_id,
+                    title="Invitation Declined",
+                    message=f"{current_user.email} has declined the invitation to team '{team.name}'.",
+                    category="team",
+                    action_url=f"/teams/{team_id}",
+                )
+        except Exception:
+            logger.warning("Failed to send invitation rejected notification", exc_info=True)
 
         return Message(message="Team invitation rejected")

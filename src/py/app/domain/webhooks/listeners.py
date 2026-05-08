@@ -42,6 +42,8 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "team_updated": WebhookEventType.TEAM_UPDATED,
     "team_deleted": WebhookEventType.TEAM_DELETED,
     "team_invitation_created": WebhookEventType.TEAM_INVITATION_CREATED,
+    "team_invitation_accepted": WebhookEventType.TEAM_INVITATION_ACCEPTED,
+    "team_invitation_rejected": WebhookEventType.TEAM_INVITATION_REJECTED,
     "team_invitation_deleted": WebhookEventType.TEAM_INVITATION_DELETED,
     "team_member_added": WebhookEventType.TEAM_MEMBER_ADDED,
     "team_member_updated": WebhookEventType.TEAM_MEMBER_UPDATED,

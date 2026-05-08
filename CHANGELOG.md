@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.357.0 (2026-05-08)
+
+### Enhanced
+- **Team invitation event emissions** — Add `team_invitation_accepted` and `team_invitation_rejected` event emissions with webhook event types
+- **Invitation rejection notification** — Notify team owner when an invitation is declined, matching the existing acceptance notification pattern
+- **Audit log completeness** — Add missing `target_label` to session revocation audit log
+
 ## v0.356.0 (2026-05-08)
 
 ### Enhanced

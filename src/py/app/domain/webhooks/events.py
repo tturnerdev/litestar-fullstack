@@ -39,6 +39,8 @@ class WebhookEventType(StrEnum):
     TEAM_DELETED = "team.deleted"
     TEAM_MEMBER_INVITED = "team.member.invited"
     TEAM_INVITATION_CREATED = "team.invitation.created"
+    TEAM_INVITATION_ACCEPTED = "team.invitation.accepted"
+    TEAM_INVITATION_REJECTED = "team.invitation.rejected"
     TEAM_INVITATION_DELETED = "team.invitation.deleted"
     TEAM_MEMBER_ADDED = "team.member.added"
     TEAM_MEMBER_UPDATED = "team.member.updated"
@@ -243,6 +245,8 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.TEAM_DELETED: "A team was deleted",
     WebhookEventType.TEAM_MEMBER_INVITED: "A new member was invited to a team",
     WebhookEventType.TEAM_INVITATION_CREATED: "A team invitation was created",
+    WebhookEventType.TEAM_INVITATION_ACCEPTED: "A team invitation was accepted",
+    WebhookEventType.TEAM_INVITATION_REJECTED: "A team invitation was declined",
     WebhookEventType.TEAM_INVITATION_DELETED: "A team invitation was deleted",
     WebhookEventType.TEAM_MEMBER_ADDED: "A member was added to a team",
     WebhookEventType.TEAM_MEMBER_UPDATED: "A team member's role was updated",
