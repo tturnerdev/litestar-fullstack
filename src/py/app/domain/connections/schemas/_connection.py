@@ -67,7 +67,7 @@ class ConnectionCreate(CamelizedBaseStruct):
     team_id: UUID | None = None
     host: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
     port: Annotated[int, Meta(ge=1, le=65535)] | None = None
-    auth_type: str = "none"
+    auth_type: Annotated[str, Meta(min_length=1, max_length=50)] = "none"
     credentials: dict | None = None
     settings: dict | None = None
     description: Annotated[str, Meta(max_length=1000)] | None = None
@@ -82,7 +82,7 @@ class ConnectionUpdate(CamelizedBaseStruct, omit_defaults=True):
     provider: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     host: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     port: Annotated[int, Meta(ge=1, le=65535)] | msgspec.UnsetType | None = msgspec.UNSET
-    auth_type: str | msgspec.UnsetType = msgspec.UNSET
+    auth_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     credentials: dict | msgspec.UnsetType | None = msgspec.UNSET
     settings: dict | msgspec.UnsetType | None = msgspec.UNSET
     description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET

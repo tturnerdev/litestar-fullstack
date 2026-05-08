@@ -43,7 +43,11 @@ async def user_created_event_handler(user_id: UUID, mailer: AppEmailService) -> 
             _, verification_token = await verification_service.create_verification_token(
                 user_id=user.id, email=user.email
             )
-            await mailer.send_verification_email(cast("UserProtocol", user), verification_token)
+            try:
+                await mailer.send_verification_email(cast("UserProtocol", user), verification_token)
+            except Exception:
+                await logger.aerror("Failed to send verification email", user_id=user.id, exc_info=True)
+                return
 
             await logger.ainfo("Sent verification email for user", user_id=user.id)
 
@@ -68,11 +72,15 @@ async def password_reset_requested_event_handler(user_id: UUID, mailer: AppEmail
 
         _, reset_token = await password_reset_service.create_reset_token(user_id=user.id)
 
-        await mailer.send_password_reset_email(
-            user=cast("UserProtocol", user),
-            reset_token=reset_token,
-            expires_in_minutes=60,
-        )
+        try:
+            await mailer.send_password_reset_email(
+                user=cast("UserProtocol", user),
+                reset_token=reset_token,
+                expires_in_minutes=60,
+            )
+        except Exception:
+            await logger.aerror("Failed to send password reset email", user_id=user.id, exc_info=True)
+            return
         await logger.ainfo("Sent password reset email for user", user_id=user.id)
 
 
@@ -91,7 +99,11 @@ async def password_reset_completed_event_handler(user_id: UUID, mailer: AppEmail
             await logger.aerror("Could not locate the specified user", id=user_id)
             return
 
-        await mailer.send_password_reset_confirmation_email(cast("UserProtocol", user))
+        try:
+            await mailer.send_password_reset_confirmation_email(cast("UserProtocol", user))
+        except Exception:
+            await logger.aerror("Failed to send password reset confirmation email", user_id=user.id, exc_info=True)
+            return
         await logger.ainfo("Sent password reset confirmation email for user", user_id=user.id)
 
 
@@ -118,7 +130,11 @@ async def verification_requested_event_handler(user_id: UUID, mailer: AppEmailSe
             return
 
         _, verification_token = await verification_service.create_verification_token(user_id=user.id, email=user.email)
-        await mailer.send_verification_email(cast("UserProtocol", user), verification_token)
+        try:
+            await mailer.send_verification_email(cast("UserProtocol", user), verification_token)
+        except Exception:
+            await logger.aerror("Failed to send verification email", user_id=user.id, exc_info=True)
+            return
         await logger.ainfo("Sent verification email for user", user_id=user.id)
 
 

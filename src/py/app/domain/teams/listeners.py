@@ -67,12 +67,16 @@ async def team_invitation_created_event_handler(invitation_id: UUID, mailer: App
             await logger.aerror("Could not locate the team", id=invitation.team_id)
             return
 
-        await mailer.send_team_invitation_email(
-            invitee_email=invitation.email,
-            inviter_name=inviter.name or inviter.email,
-            team_name=team.name,
-            invitation_url=f"{mailer.base_url}/teams/{team.id}/invitations/{invitation.id}/accept",
-        )
+        try:
+            await mailer.send_team_invitation_email(
+                invitee_email=invitation.email,
+                inviter_name=inviter.name or inviter.email,
+                team_name=team.name,
+                invitation_url=f"{mailer.base_url}/teams/{team.id}/invitations/{invitation.id}/accept",
+            )
+        except Exception:
+            await logger.aerror("Failed to send team invitation email", invitation_id=invitation.id, exc_info=True)
+            return
 
         await logger.ainfo("Sent team invitation email", invitation_id=invitation.id)
 

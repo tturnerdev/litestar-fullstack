@@ -1,9 +1,11 @@
 """Voicemail message schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -29,10 +31,10 @@ class VoicemailMessageCreate(CamelizedBaseStruct):
     """Schema for creating a voicemail message."""
 
     voicemail_box_id: UUID
-    caller_number: str
-    caller_name: str | None = None
+    caller_number: Annotated[str, Meta(min_length=1, max_length=20)]
+    caller_name: Annotated[str, Meta(max_length=100)] | None = None
     duration_seconds: int = 0
-    audio_file_path: str = ""
+    audio_file_path: Annotated[str, Meta(max_length=500)] = ""
     transcription: str | None = None
     is_urgent: bool = False
     received_at: datetime | None = None
