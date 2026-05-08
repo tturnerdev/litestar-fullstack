@@ -1,9 +1,11 @@
 """User-related account schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.db.models._team_roles import TeamRoles
 from app.lib.schema import CamelizedBaseStruct
@@ -75,11 +77,11 @@ class User(CamelizedBaseStruct):
 
 
 class UserCreate(CamelizedBaseStruct):
-    email: str
-    password: str
-    name: str | None = None
-    username: str | None = None
-    phone: str | None = None
+    email: Annotated[str, Meta(min_length=1, max_length=255)]
+    password: Annotated[str, Meta(min_length=1, max_length=255)]
+    name: Annotated[str, Meta(max_length=255)] | None = None
+    username: Annotated[str, Meta(max_length=50)] | None = None
+    phone: Annotated[str, Meta(max_length=20)] | None = None
     is_superuser: bool = False
     is_active: bool = True
     is_verified: bool = False
@@ -104,11 +106,11 @@ class UserCreate(CamelizedBaseStruct):
 
 
 class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
-    email: str | msgspec.UnsetType | None = msgspec.UNSET
-    password: str | msgspec.UnsetType | None = msgspec.UNSET
-    name: str | msgspec.UnsetType | None = msgspec.UNSET
-    username: str | msgspec.UnsetType | None = msgspec.UNSET
-    phone: str | msgspec.UnsetType | None = msgspec.UNSET
+    email: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    password: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    username: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
     is_superuser: bool | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType | None = msgspec.UNSET
     is_verified: bool | msgspec.UnsetType | None = msgspec.UNSET

@@ -9756,6 +9756,7 @@ export const TicketUpdateSchema = {
     },
     priority: {
       maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -9764,6 +9765,7 @@ export const TicketUpdateSchema = {
     },
     status: {
       maxLength: 50,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -9772,6 +9774,7 @@ export const TicketUpdateSchema = {
     },
     subject: {
       maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -10156,6 +10159,8 @@ export const UserSchema = {
 export const UserCreateSchema = {
   properties: {
     email: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     isActive: {
@@ -10181,6 +10186,8 @@ export const UserCreateSchema = {
       ],
     },
     password: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     phone: {
@@ -11508,9 +11515,6 @@ export const WebhookEndpointUpdateSchema = {
           },
           type: "array",
         },
-        {
-          type: "null",
-        },
       ],
     },
     headers: {
@@ -11529,9 +11533,6 @@ export const WebhookEndpointUpdateSchema = {
         {
           type: "boolean",
         },
-        {
-          type: "null",
-        },
       ],
     },
     secret: {
@@ -11545,12 +11546,11 @@ export const WebhookEndpointUpdateSchema = {
       ],
     },
     url: {
+      maxLength: 2048,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },

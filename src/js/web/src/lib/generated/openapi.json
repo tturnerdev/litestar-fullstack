@@ -10077,6 +10077,7 @@
           },
           "priority": {
             "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -10085,6 +10086,7 @@
           },
           "status": {
             "maxLength": 50,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -10093,6 +10095,7 @@
           },
           "subject": {
             "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -10490,6 +10493,8 @@
       "UserCreate": {
         "properties": {
           "email": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "isActive": {
@@ -10515,6 +10520,8 @@
             ]
           },
           "password": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "phone": {
@@ -11873,9 +11880,6 @@
                   "type": "string"
                 },
                 "type": "array"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -11894,9 +11898,6 @@
             "oneOf": [
               {
                 "type": "boolean"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -11911,12 +11912,11 @@
             ]
           },
           "url": {
+            "maxLength": 2048,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
               }
             ]
           }
@@ -13321,6 +13321,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -13343,27 +13364,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13710,6 +13710,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -13732,27 +13753,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14097,6 +14097,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -14119,27 +14140,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14478,6 +14478,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "targetTypeIn",
             "required": false,
             "schema": {
@@ -14500,27 +14521,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [

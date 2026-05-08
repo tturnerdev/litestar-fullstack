@@ -57,9 +57,9 @@ class WebhookEndpointCreate(CamelizedBaseStruct):
 class WebhookEndpointUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Webhook endpoint update schema."""
 
-    url: Annotated[str, Meta(min_length=1, max_length=2048)] | None = msgspec.UNSET  # type: ignore[assignment]
-    description: Annotated[str, Meta(max_length=1000)] | None = msgspec.UNSET  # type: ignore[assignment]
-    events: list[str] | None = msgspec.UNSET  # type: ignore[assignment]
-    is_active: bool | None = msgspec.UNSET  # type: ignore[assignment]
-    secret: Annotated[str, Meta(max_length=255)] | None = msgspec.UNSET  # type: ignore[assignment]
-    headers: dict[str, Any] | None = msgspec.UNSET  # type: ignore[assignment]
+    url: Annotated[str, Meta(min_length=1, max_length=2048)] | msgspec.UnsetType = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
+    events: list[str] | msgspec.UnsetType = msgspec.UNSET
+    is_active: bool | msgspec.UnsetType = msgspec.UNSET
+    secret: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    headers: dict[str, Any] | msgspec.UnsetType | None = msgspec.UNSET

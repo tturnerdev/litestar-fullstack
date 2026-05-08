@@ -47,8 +47,8 @@ class TicketCreate(CamelizedBaseStruct):
 
 
 class TicketUpdate(CamelizedBaseStruct, omit_defaults=True):
-    subject: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    status: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    priority: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    subject: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    status: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    priority: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     category: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     assigned_to_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
