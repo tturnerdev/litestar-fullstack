@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.310.0 (2026-05-08)
+
+### Fixed
+- **NotImplementedError → 501** — Placeholder upload endpoints now raise Litestar's `NotImplementedException` (501) instead of raw Python `NotImplementedError` (500)
+- **Missing OpenAPI summaries** — Added `summary=` to all 7 phone number management endpoints (list, get, create, update, delete, preview import, execute import)
+- **Fax number E.164 validation** — New fax number form now validates E.164 format (`+` followed by 7-15 digits) before submission
+- **Redundant query in phone number update** — Eliminated extra `get_one()` call after `update()` in PhoneNumberController
+
 ## v0.309.0 (2026-05-08)
 
 ### Improved

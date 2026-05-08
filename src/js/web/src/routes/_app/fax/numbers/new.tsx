@@ -53,6 +53,7 @@ function NewFaxNumberPage() {
 
   const validateNumber = (value: string): string | undefined => {
     if (!value.trim()) return "This field is required"
+    if (!/^\+[1-9]\d{6,14}$/.test(value.trim())) return "Enter a valid E.164 phone number (e.g., +15551234567)"
     return undefined
   }
 

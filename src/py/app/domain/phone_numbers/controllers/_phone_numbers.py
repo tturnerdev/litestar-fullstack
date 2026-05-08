@@ -127,7 +127,7 @@ class PhoneNumberController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ManageListPhoneNumbers", path="/")
+    @get(operation_id="ManageListPhoneNumbers", summary="List phone numbers", path="/")
     async def list_phone_numbers(
         self,
         phone_number_service: PhoneNumberService,
@@ -145,7 +145,7 @@ class PhoneNumberController(Controller):
         results, total = await phone_number_service.list_and_count(*filters)
         return phone_number_service.to_schema(results, total, filters, schema_type=PhoneNumberList)
 
-    @get(operation_id="ManageGetPhoneNumber", path="/{phone_number_id:uuid}")
+    @get(operation_id="ManageGetPhoneNumber", summary="Get a phone number", path="/{phone_number_id:uuid}")
     async def get_phone_number(
         self,
         phone_number_service: PhoneNumberService,
@@ -163,7 +163,7 @@ class PhoneNumberController(Controller):
         result = await phone_number_service.get(phone_number_id)
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @post(operation_id="ManageCreatePhoneNumber", path="/")
+    @post(operation_id="ManageCreatePhoneNumber", summary="Create a phone number", path="/")
     async def create_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -199,7 +199,7 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @patch(operation_id="ManageUpdatePhoneNumber", path="/{phone_number_id:uuid}")
+    @patch(operation_id="ManageUpdatePhoneNumber", summary="Update a phone number", path="/{phone_number_id:uuid}")
     async def update_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -229,8 +229,7 @@ class PhoneNumberController(Controller):
             if value is not msgspec.UNSET:
                 update_data[field] = value
 
-        await phone_number_service.update(item_id=phone_number_id, data=update_data, auto_commit=True)
-        fresh_obj = await phone_number_service.get_one(id=phone_number_id)
+        fresh_obj = await phone_number_service.update(item_id=phone_number_id, data=update_data, auto_commit=True)
         request.app.emit(event_id="phone_number_updated", entity_id=fresh_obj.id)
         after = _capture_snapshot(fresh_obj)
         await _log_audit(
@@ -246,7 +245,7 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(fresh_obj, schema_type=PhoneNumberDetail)
 
-    @delete(operation_id="ManageDeletePhoneNumber", path="/{phone_number_id:uuid}", status_code=200)
+    @delete(operation_id="ManageDeletePhoneNumber", summary="Delete a phone number", path="/{phone_number_id:uuid}", status_code=200)
     async def delete_phone_number(
         self,
         request: Request[m.User, Token, Any],

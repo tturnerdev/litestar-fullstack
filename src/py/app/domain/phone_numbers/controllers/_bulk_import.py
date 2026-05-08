@@ -63,6 +63,7 @@ class AdminPhoneNumberBulkImportController(Controller):
 
     @post(
         operation_id="AdminPreviewPhoneNumberBulkImport",
+        summary="Preview phone number bulk import",
         path="/preview",
     )
     async def preview_import(
@@ -177,6 +178,7 @@ class AdminPhoneNumberBulkImportController(Controller):
 
     @post(
         operation_id="AdminExecutePhoneNumberBulkImport",
+        summary="Execute phone number bulk import",
         path="/execute",
     )
     async def execute_import(

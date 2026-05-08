@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, post
+from litestar.exceptions import NotImplementedException
 from litestar.di import Provide
 from litestar.params import Parameter
 from litestar.status_codes import HTTP_204_NO_CONTENT
@@ -58,7 +59,7 @@ class TicketAttachmentController(Controller):
         _ = current_user
         _ = attachments_service
         msg = "File upload not yet implemented. Coming in Phase 3."
-        raise NotImplementedError(msg)
+        raise NotImplementedException(detail=msg)
 
     @get(
         operation_id="GetAttachment",
@@ -132,4 +133,4 @@ class TicketAttachmentController(Controller):
         _ = current_user
         _ = attachments_service
         msg = "Paste image not yet implemented. Coming in Phase 3."
-        raise NotImplementedError(msg)
+        raise NotImplementedException(detail=msg)
