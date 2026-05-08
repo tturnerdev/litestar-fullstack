@@ -48,6 +48,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDeleteE911Registration, useE911Registration, useUpdateE911Registration, useValidateE911Registration } from "@/lib/api/hooks/e911"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/e911/$registrationId")({
   component: E911DetailPage,
@@ -470,11 +471,21 @@ function E911DetailPage() {
                         aria-invalid={!!fieldErrors.addressLine1}
                         maxLength={255}
                       />
-                      <FieldError message={fieldErrors.addressLine1} />
+                      <div className="flex items-center justify-between">
+                        {fieldErrors.addressLine1 ? <FieldError message={fieldErrors.addressLine1} /> : <span />}
+                        <p className={cn("shrink-0 text-xs", editAddr1.length >= 255 ? "text-destructive" : editAddr1.length >= 200 ? "text-amber-500" : "text-muted-foreground")}>
+                          {editAddr1.length}/255
+                        </p>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Address Line 2</Label>
                       <Input value={editAddr2} onChange={(e) => setEditAddr2(e.target.value)} placeholder="Suite, Apt, etc." maxLength={255} />
+                      <div className="flex items-center justify-end">
+                        <p className={cn("shrink-0 text-xs", editAddr2.length >= 255 ? "text-destructive" : editAddr2.length >= 200 ? "text-amber-500" : "text-muted-foreground")}>
+                          {editAddr2.length}/255
+                        </p>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>
@@ -487,7 +498,12 @@ function E911DetailPage() {
                         aria-invalid={!!fieldErrors.city}
                         maxLength={100}
                       />
-                      <FieldError message={fieldErrors.city} />
+                      <div className="flex items-center justify-between">
+                        {fieldErrors.city ? <FieldError message={fieldErrors.city} /> : <span />}
+                        <p className={cn("shrink-0 text-xs", editCity.length >= 100 ? "text-destructive" : editCity.length >= 80 ? "text-amber-500" : "text-muted-foreground")}>
+                          {editCity.length}/100
+                        </p>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>
@@ -524,7 +540,14 @@ function E911DetailPage() {
                         aria-invalid={!!fieldErrors.country}
                         maxLength={100}
                       />
-                      <FieldError message={fieldErrors.country} />
+                      <div className="flex items-center justify-between">
+                        {fieldErrors.country ? <FieldError message={fieldErrors.country} /> : <span />}
+                        <p
+                          className={cn("shrink-0 text-xs", editCountry.length >= 100 ? "text-destructive" : editCountry.length >= 80 ? "text-amber-500" : "text-muted-foreground")}
+                        >
+                          {editCountry.length}/100
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
