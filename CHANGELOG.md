@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.332.0 (2026-05-08)
+
+### Added
+- **Bulk import event emissions** — Device and extension CSV imports now emit `devices_bulk_imported`/`extensions_bulk_imported` events with webhook mappings
+- **Gateway settings event** — Gateway configuration updates now emit `gateway_settings_updated` with webhook mapping
+
+### Refactored
+- **Audit function deduplication** — Removed duplicate `_capture_snapshot` and `_log_audit` from 6 controllers (devices, notifications, notification_preference, teams, feedback, tags), saving ~460 lines. All now use shared `capture_snapshot()`/`log_audit()` from `app.lib.audit`
+
+### Fixed
+- **Delete endpoint standardization** — Admin team/user delete and phone_numbers delete now return `204 No Content` instead of `200 + Message`, matching all other delete endpoints
+- **Phone numbers controller cleanup** — Replaced local audit functions with shared `app.lib.audit`, removed stale `sa_inspect`/`datetime`/`date` imports
+- **Missing FK indexes** — Added database indexes on `phone_number.team_id`, `fax_email_route.fax_number_id`, `fax_message.fax_number_id`, `user_account_role.role_id/user_id`
+- **AdminTeamMember export** — Added missing `AdminTeamMember` to admin schemas `__init__.py` exports
+- **Phone number formatting** — Extensions list page now formats phone numbers via `formatPhoneNumber()` for consistent display
+- **Magic number extraction** — Extracted hardcoded `15000` in tasks page to `ACTIVE_TASK_REFRESH_INTERVAL` constant
+- **Biome lint fixes** — Fixed skeleton layout formatting and import sorting in admin roles/support/settings pages
+
 ## v0.328.0 (2026-05-08)
 
 ### Fixed
