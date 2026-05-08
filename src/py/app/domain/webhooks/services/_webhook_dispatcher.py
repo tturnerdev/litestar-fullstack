@@ -157,23 +157,30 @@ async def _deliver_to_endpoint(
     # Record the delivery attempt
     if delivery_service and webhook_id:
         next_retry_at = _compute_next_retry_at(0) if not success else None
-        await delivery_service.create(
-            {
-                "webhook_id": webhook_id,
-                "endpoint_id": endpoint.id,
-                "event": event_type,
-                "endpoint_url": endpoint.url,
-                "payload": full_payload,
-                "status_code": status_code,
-                "response_time_ms": duration_ms,
-                "success": success,
-                "error": error_msg,
-                "retry_count": 0,
-                "max_retries": 5,
-                "next_retry_at": next_retry_at,
-            },
-            auto_commit=True,
-        )
+        try:
+            await delivery_service.create(
+                {
+                    "webhook_id": webhook_id,
+                    "endpoint_id": endpoint.id,
+                    "event": event_type,
+                    "endpoint_url": endpoint.url,
+                    "payload": full_payload,
+                    "status_code": status_code,
+                    "response_time_ms": duration_ms,
+                    "success": success,
+                    "error": error_msg,
+                    "retry_count": 0,
+                    "max_retries": 5,
+                    "next_retry_at": next_retry_at,
+                },
+                auto_commit=True,
+            )
+        except Exception:  # noqa: BLE001
+            await logger.aerror(
+                "Failed to record webhook delivery",
+                endpoint_id=str(endpoint.id),
+                event_type=event_type,
+            )
 
 
 async def redeliver(
@@ -252,18 +259,24 @@ async def redeliver(
     new_retry_count = delivery.retry_count + 1
     next_retry_at = None if success else _compute_next_retry_at(new_retry_count)
 
-    await delivery_service.update(
-        {
-            "status_code": status_code,
-            "response_time_ms": duration_ms,
-            "success": success,
-            "error": error_msg,
-            "retry_count": new_retry_count,
-            "next_retry_at": next_retry_at,
-        },
-        item_id=delivery.id,
-        auto_commit=True,
-    )
+    try:
+        await delivery_service.update(
+            {
+                "status_code": status_code,
+                "response_time_ms": duration_ms,
+                "success": success,
+                "error": error_msg,
+                "retry_count": new_retry_count,
+                "next_retry_at": next_retry_at,
+            },
+            item_id=delivery.id,
+            auto_commit=True,
+        )
+    except Exception:  # noqa: BLE001
+        await logger.aerror(
+            "Failed to update webhook delivery record",
+            delivery_id=str(delivery.id),
+        )
 
     await logger.ainfo(
         "Webhook redelivery attempt",

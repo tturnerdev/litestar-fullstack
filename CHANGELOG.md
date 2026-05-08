@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.343.0 (2026-05-08)
+
+### Fixed
+- **Webhook delivery resilience** — Delivery record DB writes now catch exceptions and log errors instead of crashing the event handler, preventing event loss
+- **Organization refresh stuck state** — `handleRefreshOrg` uses try-finally so the loading spinner clears even if the refetch fails
+- **Gateway batch lookup stuck state** — `handleRun` uses try-finally so `isRunning` resets on unexpected errors
+
 ## v0.342.0 (2026-05-08)
 
 ### Security

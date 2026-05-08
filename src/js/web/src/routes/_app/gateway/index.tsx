@@ -620,30 +620,32 @@ function BatchTab() {
     setResults(initial)
     setProgress({ completed: 0, total: entries.length })
 
-    for (let i = 0; i < entries.length; i++) {
-      if (abortRef.current) break
+    try {
+      for (let i = 0; i < entries.length; i++) {
+        if (abortRef.current) break
 
-      setResults((prev) => prev.map((r, idx) => (idx === i ? { ...r, status: "loading" } : r)))
+        setResults((prev) => prev.map((r, idx) => (idx === i ? { ...r, status: "loading" } : r)))
 
-      const { sources, error } = await executeSingleLookup(lookupType, entries[i])
+        const { sources, error } = await executeSingleLookup(lookupType, entries[i])
 
-      setResults((prev) =>
-        prev.map((r, idx) =>
-          idx === i
-            ? {
-                ...r,
-                status: error ? "error" : "ok",
-                summary: error ? error : summarizeSources(sources),
-                sources,
-                error,
-              }
-            : r,
-        ),
-      )
-      setProgress((prev) => ({ ...prev, completed: i + 1 }))
+        setResults((prev) =>
+          prev.map((r, idx) =>
+            idx === i
+              ? {
+                  ...r,
+                  status: error ? "error" : "ok",
+                  summary: error ? error : summarizeSources(sources),
+                  sources,
+                  error,
+                }
+              : r,
+          ),
+        )
+        setProgress((prev) => ({ ...prev, completed: i + 1 }))
+      }
+    } finally {
+      setIsRunning(false)
     }
-
-    setIsRunning(false)
   }, [rawInput, lookupType])
 
   const handleStop = useCallback(() => {

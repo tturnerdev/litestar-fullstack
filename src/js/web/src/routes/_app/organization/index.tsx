@@ -295,8 +295,11 @@ function OrganizationSettingsPage() {
 
   const handleRefreshOrg = useCallback(async () => {
     setIsRefreshingOrg(true)
-    await refetchOrg()
-    setIsRefreshingOrg(false)
+    try {
+      await refetchOrg()
+    } finally {
+      setIsRefreshingOrg(false)
+    }
   }, [refetchOrg])
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<OrgFormData>({
