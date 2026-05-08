@@ -191,6 +191,7 @@ export function CreateTeamForm() {
             onBlur={() => handleFieldBlur("name", name)}
             aria-invalid={!!fieldErrors.name}
             maxLength={NAME_MAX}
+            required
             autoFocus
           />
           <div className="flex items-center justify-between">

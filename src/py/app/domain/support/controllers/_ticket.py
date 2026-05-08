@@ -170,6 +170,7 @@ class TicketController(Controller):
         data: TicketUpdate,
         tickets_service: TicketService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to update.")],
     ) -> Ticket:
@@ -209,6 +210,17 @@ class TicketController(Controller):
             after=after,
             request=request,
         )
+        if db_obj.assigned_to_id is not None and db_obj.assigned_to_id != old_assigned_to_id:
+            try:
+                await notifications_service.notify(
+                    user_id=db_obj.assigned_to_id,
+                    title="Ticket Assigned",
+                    message=f"You have been assigned to support ticket '{db_obj.subject}'.",
+                    category="ticket",
+                    action_url=f"/support/{db_obj.id}",
+                )
+            except Exception:
+                logger.warning("Failed to send ticket assignment notification", exc_info=True)
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
     @delete(

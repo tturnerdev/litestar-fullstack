@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.359.0 (2026-05-08)
+
+### Enhanced
+- **Ticket assignment notification** — Notify users when they are assigned to a support ticket, matching the existing close/reopen notification pattern
+- **Team form validation** — Add `required` HTML attribute to team name input for native browser validation
+
 ## v0.358.0 (2026-05-08)
 
 ### Fixed
