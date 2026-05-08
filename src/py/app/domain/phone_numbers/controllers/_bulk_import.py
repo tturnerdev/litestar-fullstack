@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 from litestar import Controller, post
 from litestar.di import Provide
 from litestar.enums import RequestEncodingType
-from litestar.exceptions import HTTPException
+from litestar.exceptions import ClientException
 from litestar.params import Body
 
 from app.db import models as m
@@ -87,7 +87,7 @@ class AdminPhoneNumberBulkImportController(Controller):
         """
         content = await data.read()
         if len(content) > _MAX_CSV_SIZE:
-            raise HTTPException(status_code=400, detail=f"File exceeds maximum size of {_MAX_CSV_SIZE // (1024 * 1024)} MB.")
+            raise ClientException(detail=f"File exceeds maximum size of {_MAX_CSV_SIZE // (1024 * 1024)} MB.")
         text = content.decode("utf-8-sig")  # Handle BOM from Excel
 
         reader = csv.DictReader(io.StringIO(text))

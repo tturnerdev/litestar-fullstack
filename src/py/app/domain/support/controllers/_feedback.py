@@ -12,7 +12,7 @@ from litestar import Controller, Request, post
 from litestar.datastructures import UploadFile
 from litestar.di import Provide
 from litestar.enums import RequestEncodingType
-from litestar.exceptions import HTTPException
+from litestar.exceptions import ClientException
 from litestar.params import Body
 from litestar.security.jwt import Token
 
@@ -190,11 +190,11 @@ class FeedbackController(Controller):
         description = str(data.get("description", "")).strip()
 
         if not title:
-            raise HTTPException(status_code=400, detail="Title is required.")
+            raise ClientException(detail="Title is required.")
         if not category:
-            raise HTTPException(status_code=400, detail="Category is required.")
+            raise ClientException(detail="Category is required.")
         if not description:
-            raise HTTPException(status_code=400, detail="Description is required.")
+            raise ClientException(detail="Description is required.")
 
         user_name = current_user.name or current_user.email
         user_email = current_user.email
@@ -218,7 +218,7 @@ class FeedbackController(Controller):
             screenshot_bytes = await screenshot.read()
             if screenshot_bytes:
                 if len(screenshot_bytes) > _MAX_FILE_SIZE:
-                    raise HTTPException(status_code=400, detail=f"Screenshot exceeds maximum size of {_MAX_FILE_SIZE // (1024 * 1024)} MB.")
+                    raise ClientException(detail=f"Screenshot exceeds maximum size of {_MAX_FILE_SIZE // (1024 * 1024)} MB.")
                 total_size += len(screenshot_bytes)
                 attachments.append(("screenshot.png", screenshot_bytes, "image/png"))
 
@@ -230,10 +230,10 @@ class FeedbackController(Controller):
                     file_bytes = await file_item.read()
                     if file_bytes:
                         if len(file_bytes) > _MAX_FILE_SIZE:
-                            raise HTTPException(status_code=400, detail=f"File '{file_item.filename}' exceeds maximum size of {_MAX_FILE_SIZE // (1024 * 1024)} MB.")
+                            raise ClientException(detail=f"File '{file_item.filename}' exceeds maximum size of {_MAX_FILE_SIZE // (1024 * 1024)} MB.")
                         total_size += len(file_bytes)
                         if total_size > _MAX_TOTAL_SIZE:
-                            raise HTTPException(status_code=400, detail=f"Total attachment size exceeds maximum of {_MAX_TOTAL_SIZE // (1024 * 1024)} MB.")
+                            raise ClientException(detail=f"Total attachment size exceeds maximum of {_MAX_TOTAL_SIZE // (1024 * 1024)} MB.")
                         mimetype = (
                             file_item.content_type
                             or mimetypes.guess_type(file_item.filename)[0]

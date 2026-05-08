@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.344.0 (2026-05-08)
+
+### Fixed
+- **Voicemail bulk unread error handling** — `handleBulkMarkUnread` now catches rejected promises and shows an error toast instead of silently failing
+
+### Refactored
+- **Exception consistency (round 2)** — Replaced raw `HTTPException(status_code=400)` with semantic `ClientException` in feedback, OAuth, admin bulk import, and phone number bulk import controllers
+
 ## v0.343.0 (2026-05-08)
 
 ### Fixed

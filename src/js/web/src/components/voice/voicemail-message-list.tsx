@@ -1,5 +1,6 @@
 import { AlertCircle, AlertTriangle, Filter, Inbox, Loader2, Mail, MailOpen, Search, Trash2, X } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -176,8 +177,9 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
 
   function handleBulkMarkUnread() {
     const ids = Array.from(selectedIds)
-    // Use individual mutations for mark-as-unread since the bulk hook only marks as read
-    Promise.all(ids.map((messageId) => markReadMutation.mutateAsync({ messageId, isRead: false }))).then(() => setSelectedIds(new Set()))
+    Promise.all(ids.map((messageId) => markReadMutation.mutateAsync({ messageId, isRead: false })))
+      .then(() => setSelectedIds(new Set()))
+      .catch(() => toast.error("Failed to mark some messages as unread"))
   }
 
   function restoreFocusToSearch() {

@@ -12,7 +12,7 @@ from litestar import Controller, post
 from litestar.datastructures import UploadFile
 from litestar.di import Provide
 from litestar.enums import RequestEncodingType
-from litestar.exceptions import HTTPException
+from litestar.exceptions import ClientException
 from litestar.params import Body
 
 from app.db import models as m
@@ -134,14 +134,14 @@ async def _read_upload_csv(data: dict[str, Any]) -> str:
     """
     file = data.get("file")
     if not isinstance(file, UploadFile) or not file.filename:
-        raise HTTPException(status_code=400, detail="A CSV file is required. Upload a file with the field name 'file'.")
+        raise ClientException(detail="A CSV file is required. Upload a file with the field name 'file'.")
 
     if file.filename and not file.filename.lower().endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Only .csv files are accepted.")
+        raise ClientException(detail="Only .csv files are accepted.")
 
     raw = await file.read()
     if len(raw) > _MAX_CSV_SIZE:
-        raise HTTPException(status_code=400, detail=f"File exceeds maximum size of {_MAX_CSV_SIZE // (1024 * 1024)} MB.")
+        raise ClientException(detail=f"File exceeds maximum size of {_MAX_CSV_SIZE // (1024 * 1024)} MB.")
 
     try:
         return raw.decode("utf-8-sig")
@@ -149,7 +149,7 @@ async def _read_upload_csv(data: dict[str, Any]) -> str:
         try:
             return raw.decode("latin-1")
         except UnicodeDecodeError as exc:
-            raise HTTPException(status_code=400, detail="Unable to decode the CSV file. Please use UTF-8 encoding.") from exc
+            raise ClientException(detail="Unable to decode the CSV file. Please use UTF-8 encoding.") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -199,10 +199,10 @@ class AdminBulkImportController(Controller):
         rows = _parse_csv(content, _DEVICE_ALL_FIELDS)
 
         if not rows:
-            raise HTTPException(status_code=400, detail="CSV file is empty or has no valid rows.")
+            raise ClientException(detail="CSV file is empty or has no valid rows.")
 
         if len(rows) > _MAX_CSV_ROWS:
-            raise HTTPException(status_code=400, detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
+            raise ClientException(detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
 
         # Build a set of existing MAC addresses for duplicate detection
         existing_devices = await device_service.list()
@@ -280,10 +280,10 @@ class AdminBulkImportController(Controller):
         rows = _parse_csv(content, _DEVICE_ALL_FIELDS)
 
         if not rows:
-            raise HTTPException(status_code=400, detail="CSV file is empty or has no valid rows.")
+            raise ClientException(detail="CSV file is empty or has no valid rows.")
 
         if len(rows) > _MAX_CSV_ROWS:
-            raise HTTPException(status_code=400, detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
+            raise ClientException(detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
 
         # Index existing devices by MAC for upsert logic
         existing_devices = await device_service.list()
@@ -392,10 +392,10 @@ class AdminBulkImportController(Controller):
         rows = _parse_csv(content, _EXTENSION_ALL_FIELDS)
 
         if not rows:
-            raise HTTPException(status_code=400, detail="CSV file is empty or has no valid rows.")
+            raise ClientException(detail="CSV file is empty or has no valid rows.")
 
         if len(rows) > _MAX_CSV_ROWS:
-            raise HTTPException(status_code=400, detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
+            raise ClientException(detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
 
         existing_extensions = await extension_service.list()
         existing_numbers: set[str] = {e.extension_number for e in existing_extensions}
@@ -469,10 +469,10 @@ class AdminBulkImportController(Controller):
         rows = _parse_csv(content, _EXTENSION_ALL_FIELDS)
 
         if not rows:
-            raise HTTPException(status_code=400, detail="CSV file is empty or has no valid rows.")
+            raise ClientException(detail="CSV file is empty or has no valid rows.")
 
         if len(rows) > _MAX_CSV_ROWS:
-            raise HTTPException(status_code=400, detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
+            raise ClientException(detail=f"CSV exceeds maximum of {_MAX_CSV_ROWS} rows.")
 
         # Index existing extensions by number for upsert logic
         existing_extensions = await extension_service.list()

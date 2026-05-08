@@ -13,10 +13,10 @@ from httpx_oauth.exceptions import GetIdEmailError
 from httpx_oauth.oauth2 import BaseOAuth2, GetAccessTokenError, OAuth2Token
 from litestar import Controller, get
 from litestar.di import Provide
-from litestar.exceptions import HTTPException
+from litestar.exceptions import ClientException
 from litestar.params import Parameter
 from litestar.response import Redirect
-from litestar.status_codes import HTTP_302_FOUND, HTTP_400_BAD_REQUEST
+from litestar.status_codes import HTTP_302_FOUND
 from sqlalchemy.orm import undefer_group
 
 from app.domain.accounts.deps import provide_users_service
@@ -81,10 +81,7 @@ class OAuthController(Controller):
             OAuthAuthorization with authorization URL and state
         """
         if not settings.GOOGLE_OAUTH2_CLIENT_ID or not settings.GOOGLE_OAUTH2_CLIENT_SECRET:
-            raise HTTPException(
-                status_code=HTTP_400_BAD_REQUEST,
-                detail="Google OAuth is not configured",
-            )
+            raise ClientException(detail="Google OAuth is not configured")
 
         client = GoogleOAuth2(
             client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
@@ -246,10 +243,7 @@ class OAuthController(Controller):
             OAuthAuthorization with authorization URL and state
         """
         if not settings.GITHUB_OAUTH2_CLIENT_ID or not settings.GITHUB_OAUTH2_CLIENT_SECRET:
-            raise HTTPException(
-                status_code=HTTP_400_BAD_REQUEST,
-                detail="GitHub OAuth is not configured",
-            )
+            raise ClientException(detail="GitHub OAuth is not configured")
         client = GitHubOAuth2(
             client_id=settings.GITHUB_OAUTH2_CLIENT_ID,
             client_secret=settings.GITHUB_OAUTH2_CLIENT_SECRET,
