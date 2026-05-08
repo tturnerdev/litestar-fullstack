@@ -37,6 +37,12 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
     async def to_model_on_create(self, data: ModelDictT[m.Device]) -> ModelDictT[m.Device]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            if "name" in data:
+                data["name"] = data["name"].strip()
+            if data.get("manufacturer"):
+                data["manufacturer"] = data["manufacturer"].strip()
+            if data.get("device_model"):
+                data["device_model"] = data["device_model"].strip()
             if data.get("mac_address"):
                 data["mac_address"] = data["mac_address"].strip().upper()
                 existing = await self.repository.list(
@@ -52,6 +58,13 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
 
     async def to_model_on_update(self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Device]:
         data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "name" in data:
+                data["name"] = data["name"].strip()
+            if "manufacturer" in data and data["manufacturer"]:
+                data["manufacturer"] = data["manufacturer"].strip()
+            if "device_model" in data and data["device_model"]:
+                data["device_model"] = data["device_model"].strip()
         if service.is_dict(data) and "mac_address" in data:
             data["mac_address"] = data["mac_address"].strip().upper()
             existing = await self.repository.list(

@@ -49,6 +49,9 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
     ) -> service.ModelDictT[m.WebhookEndpoint]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["url"] = data["url"].strip()
+            if "description" in data and data["description"]:
+                data["description"] = data["description"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="url", values=[data["url"]]),
             )
@@ -59,12 +62,16 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
     async def to_model_on_update(self, data: ModelDictT[m.WebhookEndpoint], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.WebhookEndpoint]:
         """Validate that no other webhook endpoint with the same URL already exists."""
         data = service.schema_dump(data)
-        if service.is_dict(data) and "url" in data:
-            existing = await self.repository.list(
-                CollectionFilter(field_name="url", values=[data["url"]]),
-            )
-            if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A webhook endpoint with this URL already exists.")
+        if service.is_dict(data):
+            if "description" in data and data["description"]:
+                data["description"] = data["description"].strip()
+            if "url" in data:
+                data["url"] = data["url"].strip()
+                existing = await self.repository.list(
+                    CollectionFilter(field_name="url", values=[data["url"]]),
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("A webhook endpoint with this URL already exists.")
         return data
 
     async def create(self, data: dict[str, Any] | m.WebhookEndpoint, **kwargs: Any) -> m.WebhookEndpoint:
