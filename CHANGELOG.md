@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.277.0 (2026-05-07)
+
+### Added
+- **Event emissions across 16 more create endpoints** — call queues, IVR menus, ring groups, time conditions, fax email routes, fax numbers, extensions, forwarding rules, phone numbers, locations, webhook endpoints, device templates, music on hold, roles, users
+- **Search config expansion** — Added or extended search on webhook endpoints (url, description), voice phone numbers (number, label), locations (name, city, state)
+
+## v0.276.0 (2026-05-07)
+
+### Added
+- **Schema timestamps** — `created_at`/`updated_at` fields added to ScheduleList, ScheduleDetail, Organization, and OrganizationDetail schemas
+
 ## v0.275.0 (2026-05-07)
 
 ### Added
