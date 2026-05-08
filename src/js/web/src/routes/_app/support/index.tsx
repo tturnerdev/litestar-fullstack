@@ -631,8 +631,10 @@ function SupportPage() {
             searchInput.focus()
           }
         }, 0)
-      } catch {
-        toast.error("Unable to delete ticket")
+      } catch (err) {
+        toast.error("Unable to delete ticket", {
+          description: err instanceof Error ? err.message : undefined,
+        })
       }
     },
     [queryClient],

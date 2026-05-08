@@ -230,8 +230,10 @@ function AdminVoicePage() {
       const all = (response.data as { items: AdminExtensionSummary[] })?.items ?? []
       if (!all.length) return
       exportToCsv("admin-extensions", extensionCsvHeaders, all)
-    } catch {
-      toast.error("Failed to export extensions")
+    } catch (err) {
+      toast.error("Failed to export extensions", {
+        description: err instanceof Error ? err.message : undefined,
+      })
     }
   }, [])
 

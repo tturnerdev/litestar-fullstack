@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { Hash, Loader2, Tags } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,6 +88,7 @@ function NewTagPage() {
 
     createTag.mutate(payload, {
       onSuccess: () => {
+        toast.success("Tag created")
         router.navigate({ to: "/tags" })
       },
       onSettled: () => {
