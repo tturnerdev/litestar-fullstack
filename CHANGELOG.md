@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.263.0 (2026-05-07)
+
+### Added
+- **Webhook delivery retry with exponential backoff** — SAQ cron job retries failed deliveries (30s, 2m, 8m, 32m, 2h backoff schedule); new retry_count, max_retries, next_retry_at fields on WebhookDelivery model
+- **Webhook URL validation on create/update** — Validates URL format, blocks private IPs in production, checks reachability via HEAD request; new validation_status and last_validated_at fields
+
+### Fixed
+- **Structured error logging across 32 backend files** — Replaced bare `except Exception: pass` blocks with `logger.warning()` calls including exc_info for debuggability
+- **Consolidated duplicate PhoneNumberService** — Merged voice and phone_numbers services into single canonical class with re-export for backwards compatibility
+- **Fixed migration chain** — Corrected down_revision for webhook validation migration
+
 ## v0.262.0 (2026-05-07)
 
 ### Added
