@@ -218,6 +218,7 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
         onOpenChange(false)
         setFieldErrors({})
         touchedRef.current = {}
+        toast.success("Ring group updated successfully")
       },
     })
   }
@@ -360,6 +361,7 @@ function AddMemberRow({ groupId, extensions }: { groupId: string; extensions: Ex
         setExtensionId("")
         setExternalNumber("")
         setSortOrder(0)
+        toast.success("Member added to ring group")
       },
     })
   }

@@ -255,6 +255,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
         onOpenChange(false)
         setFieldErrors({})
         touchedRef.current = {}
+        toast.success("Call queue updated successfully")
       },
     })
   }
@@ -450,6 +451,7 @@ function AddMemberRow({ queueId, extensions }: { queueId: string; extensions: Ex
           setExtensionId("")
           setPriority(0)
           setPenalty(0)
+          toast.success("Member added to queue")
         },
       },
     )
