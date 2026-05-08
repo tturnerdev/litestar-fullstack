@@ -47,7 +47,7 @@ class ScheduleEntryCreate(CamelizedBaseStruct, kw_only=True):
     end_time: dt.time
     day_of_week: Annotated[int, Meta(ge=0, le=6)] | None = None
     date: dt.date | None = None
-    label: Annotated[str, Meta(max_length=255)] | None = None
+    label: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
     is_closed: bool = False
 
 
@@ -58,7 +58,7 @@ class ScheduleEntryUpdate(CamelizedBaseStruct, omit_defaults=True, kw_only=True)
     start_time: dt.time | msgspec.UnsetType = msgspec.UNSET
     end_time: dt.time | msgspec.UnsetType = msgspec.UNSET
     date: dt.date | msgspec.UnsetType | None = msgspec.UNSET
-    label: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    label: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     is_closed: bool | msgspec.UnsetType = msgspec.UNSET
 
 

@@ -32,7 +32,7 @@ const DESC_MAX = 500
 
 const createLocationSchema = z
   .object({
-    name: z.string().min(1, "Location name is required").min(2, "Name must be at least 2 characters").max(NAME_MAX, "Name must be 100 characters or fewer"),
+    name: z.string().min(1, "Location name is required").min(2, "Name must be at least 2 characters").max(NAME_MAX, `Name must be ${NAME_MAX} characters or fewer`),
     locationType: z.enum(["ADDRESSED", "PHYSICAL"], { message: "Location type is required" }),
     description: z.string().max(DESC_MAX, "Description must be 500 characters or fewer").optional(),
     parentId: z.string().optional(),

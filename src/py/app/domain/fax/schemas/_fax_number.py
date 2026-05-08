@@ -23,11 +23,11 @@ class FaxNumber(CamelizedBaseStruct):
 
 class FaxNumberCreate(CamelizedBaseStruct):
     number: Annotated[str, Meta(min_length=1, max_length=20)]
-    label: Annotated[str, Meta(max_length=100)] | None = None
+    label: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     is_active: bool = True
     team_id: UUID | None = None
 
 
 class FaxNumberUpdate(CamelizedBaseStruct, omit_defaults=True):
-    label: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    label: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
