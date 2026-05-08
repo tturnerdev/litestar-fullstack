@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.282.0 (2026-05-07)
+
+### Added
+- **Update duplicate validation on 11 services** — `to_model_on_update` now prevents renaming to an existing value: tags (slug), webhooks (name), webhook endpoints (url), roles (name), extensions (extension_number), phone numbers (number), fax numbers (number), call queues, IVR menus, ring groups, time conditions (all by name)
+- **HTTP response caching** — Server-side caching on roles list (300s), device templates list (300s), music on hold list (300s), device template lookup (600s)
+
 ## v0.281.0 (2026-05-07)
 
 ### Added
