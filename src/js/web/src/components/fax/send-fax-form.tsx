@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useFaxMessages, useFaxNumbers, useSendFax } from "@/lib/api/hooks/fax"
-import { formatBytes } from "@/lib/format-utils"
+import { formatBytes, formatPhoneNumber } from "@/lib/format-utils"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -361,7 +361,7 @@ export function SendFaxForm() {
                       <SelectContent>
                         {activeNumbers.map((num) => (
                           <SelectItem key={num.id} value={num.id}>
-                            {num.number}
+                            {formatPhoneNumber(num.number)}
                             {num.label ? ` -- ${num.label}` : ""}
                           </SelectItem>
                         ))}
@@ -660,7 +660,7 @@ export function SendFaxForm() {
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
               <span className="font-medium text-muted-foreground">From:</span>
               <span>
-                {selectedNumber?.number}
+                {formatPhoneNumber(selectedNumber?.number)}
                 {selectedNumber?.label ? ` (${selectedNumber.label})` : ""}
               </span>
               <span className="font-medium text-muted-foreground">To:</span>

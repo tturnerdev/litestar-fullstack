@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { type PhoneNumber, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 interface PhoneNumberEditSheetProps {
   phoneNumber: PhoneNumber
@@ -49,7 +50,7 @@ export function PhoneNumberEditSheet({ phoneNumber, open, onOpenChange }: PhoneN
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Edit Phone Number</SheetTitle>
-          <SheetDescription>Update the label, caller ID name, or active status for {phoneNumber.number}.</SheetDescription>
+          <SheetDescription>Update the label, caller ID name, or active status for {formatPhoneNumber(phoneNumber.number)}.</SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-6 overflow-y-auto px-4">
           <div className="space-y-2">

@@ -10,6 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type FaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 const editFaxNumberSchema = z.object({
   label: z.string().max(100, "Label must be 100 characters or fewer").optional(),
@@ -87,7 +88,7 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
         <DialogHeader>
           <DialogTitle>Edit Fax Number</DialogTitle>
           <DialogDescription>
-            Update the label and status for <span className="font-mono font-medium text-foreground">{faxNumber.number}</span>.
+            Update the label and status for <span className="font-mono font-medium text-foreground">{formatPhoneNumber(faxNumber.number)}</span>.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

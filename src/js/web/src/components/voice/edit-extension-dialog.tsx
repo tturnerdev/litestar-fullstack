@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { type Extension, usePhoneNumbers, useUpdateExtension } from "@/lib/api/hooks/voice"
+import { formatPhoneNumber } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
 
 const DISPLAY_NAME_MAX = 100
@@ -188,7 +189,7 @@ export function EditExtensionDialog({ extension, open, onOpenChange }: EditExten
                   <SelectItem value={PHONE_NONE}>None</SelectItem>
                   {phoneNumbers?.items.map((pn) => (
                     <SelectItem key={pn.id} value={pn.id}>
-                      {pn.number}
+                      {formatPhoneNumber(pn.number)}
                       {pn.label ? ` - ${pn.label}` : ""}
                     </SelectItem>
                   ))}
