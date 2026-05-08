@@ -94,6 +94,7 @@ class TeamMemberController(Controller):
         )
         after = capture_snapshot(member)
         team_obj = await teams_service.get(team_id)
+        request.app.emit(event_id="team_member_added", entity_id=member.id)
 
         await log_audit(
             audit_service,
@@ -225,6 +226,8 @@ class TeamMemberController(Controller):
         before = capture_snapshot(membership)
         updated = await team_members_service.update(item_id=membership.id, data={"role": data.role})
         after = capture_snapshot(updated)
+        team_obj = await teams_service.get(team_id)
+        request.app.emit(event_id="team_member_updated", entity_id=membership.id)
 
         await log_audit(
             audit_service,
@@ -234,13 +237,13 @@ class TeamMemberController(Controller):
             actor_name=current_user.name,
             target_type="team_member",
             target_id=membership.id,
+            target_label=team_obj.name,
             before=before,
             after=after,
             request=request,
         )
 
         try:
-            team_obj = await teams_service.get(team_id)
             await notifications_service.notify(
                 user_id=user_id,
                 title="Team Role Updated",

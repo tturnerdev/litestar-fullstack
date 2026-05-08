@@ -40,6 +40,8 @@ class WebhookEventType(StrEnum):
     TEAM_MEMBER_INVITED = "team.member.invited"
     TEAM_INVITATION_CREATED = "team.invitation.created"
     TEAM_INVITATION_DELETED = "team.invitation.deleted"
+    TEAM_MEMBER_ADDED = "team.member.added"
+    TEAM_MEMBER_UPDATED = "team.member.updated"
     TEAM_MEMBER_REMOVED = "team.member.removed"
     TEAM_PERMISSIONS_UPDATED = "team.permissions.updated"
 
@@ -242,6 +244,8 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.TEAM_MEMBER_INVITED: "A new member was invited to a team",
     WebhookEventType.TEAM_INVITATION_CREATED: "A team invitation was created",
     WebhookEventType.TEAM_INVITATION_DELETED: "A team invitation was deleted",
+    WebhookEventType.TEAM_MEMBER_ADDED: "A member was added to a team",
+    WebhookEventType.TEAM_MEMBER_UPDATED: "A team member's role was updated",
     WebhookEventType.TEAM_MEMBER_REMOVED: "A member was removed from a team",
     WebhookEventType.TEAM_PERMISSIONS_UPDATED: "Team permissions were updated",
     # Organization events

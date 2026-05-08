@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.356.0 (2026-05-08)
+
+### Enhanced
+- **Team member event emissions** — Add `team_member_added` and `team_member_updated` event emissions with corresponding webhook event types, matching the existing `team_member_removed` pattern
+- **Audit log completeness** — Add missing `target_label` to `update_team_member` audit log entry
+
 ## v0.355.0 (2026-05-08)
 
 ### Enhanced
