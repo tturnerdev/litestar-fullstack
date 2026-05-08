@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.303.0 (2026-05-08)
+
+### Fixed
+- **Username uniqueness validation** — UserService now validates username uniqueness on create/update, preventing database-level unique constraint violations from surfacing as 500 errors
+
 ## v0.302.0 (2026-05-08)
 
 ### Fixed

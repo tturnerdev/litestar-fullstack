@@ -249,9 +249,22 @@ class UserService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServic
 
     async def _populate_model(self, data: service.ModelDictT[m.User]) -> service.ModelDictT[m.User]:
         data = service.schema_dump(data)
+        await self._validate_username_unique(data)
         data = await self._populate_with_hashed_password(data)
         data = await self._populate_with_backup_codes(data)
         return await self._populate_with_role(data)
+
+    async def _validate_username_unique(self, data: service.ModelDictT[m.User]) -> None:
+        if not service.is_dict(data):
+            return
+        username = data.get("username")
+        if not username:
+            return
+        existing = await self.repository.list(m.User.username == username)
+        if existing:
+            from litestar.exceptions import ValidationException
+
+            raise ValidationException("A user with this username already exists.")
 
     async def _populate_with_hashed_password(self, data: service.ModelDictT[m.User]) -> service.ModelDictT[m.User]:
         if service.is_dict(data) and (password := data.pop("password", None)) is not None:
