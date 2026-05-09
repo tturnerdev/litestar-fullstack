@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 interface SkeletonProps extends React.ComponentProps<"div"> {
@@ -65,4 +66,19 @@ function SkeletonButton({ className }: { className?: string }) {
   return <Skeleton className={cn("h-9 w-24 rounded-md", className)} />
 }
 
-export { Skeleton, SkeletonCard, SkeletonTable, SkeletonAvatar, SkeletonText, SkeletonButton }
+function StatsCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-9 rounded-lg" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-16" />
+        <Skeleton className="mt-2 h-3 w-32" />
+      </CardContent>
+    </Card>
+  )
+}
+
+export { Skeleton, SkeletonCard, SkeletonTable, SkeletonAvatar, SkeletonText, SkeletonButton, StatsCardSkeleton }

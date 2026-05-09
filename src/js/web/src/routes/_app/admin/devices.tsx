@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
+import { SkeletonTable, StatsCardSkeleton } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
@@ -122,21 +122,6 @@ function loadColumnVisibility(): ColumnVisibility {
 }
 
 // -----------------------------------------------------------------------------
-
-function StatsCardSkeleton() {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-9 w-9 rounded-lg" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-8 w-16" />
-        <Skeleton className="mt-2 h-3 w-32" />
-      </CardContent>
-    </Card>
-  )
-}
 
 function AdminDevicesPage() {
   useDocumentTitle("Admin Devices")
