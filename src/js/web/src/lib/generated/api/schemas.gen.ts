@@ -9194,12 +9194,11 @@ export const TagUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },
