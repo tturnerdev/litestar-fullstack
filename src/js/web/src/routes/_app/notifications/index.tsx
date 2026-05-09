@@ -871,7 +871,7 @@ function NotificationsPage() {
                 ) : isEmptyFiltered ? (
                   <EmptyState
                     icon={BellOff}
-                    title="No notifications match your filters"
+                    title={debouncedSearch ? `No notifications match "${debouncedSearch}"` : "No notifications match your filters"}
                     description="Try adjusting your search or filter criteria to find what you're looking for."
                     variant="no-results"
                     action={

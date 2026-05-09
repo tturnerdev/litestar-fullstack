@@ -434,7 +434,7 @@ function AdminUsersPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search && (
+            {search ? (
               <button
                 type="button"
                 onClick={() => setSearch("")}
@@ -443,6 +443,10 @@ function AdminUsersPage() {
                 <X className="h-3.5 w-3.5" />
                 <span className="sr-only">Clear search</span>
               </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
           <FilterDropdown label="Role" options={roleOptions} selected={roleFilter} onChange={setRoleFilter} />
