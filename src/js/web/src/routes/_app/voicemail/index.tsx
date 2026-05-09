@@ -381,7 +381,19 @@ function MessagesTab() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input ref={searchInputRef} placeholder="Search by caller or transcription..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search by caller or transcription..."
+            value={search}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setSearch("")
+                e.currentTarget.blur()
+              }
+            }}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-8"
+          />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
@@ -958,7 +970,19 @@ function BoxesTab() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input ref={searchInputRef} placeholder="Search by extension or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search by extension or email..."
+            value={search}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setSearch("")
+                e.currentTarget.blur()
+              }
+            }}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-8"
+          />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />

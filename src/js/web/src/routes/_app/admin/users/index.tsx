@@ -421,7 +421,19 @@ function AdminUsersPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input ref={searchInputRef} placeholder="Search by name, email, or username..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+            <Input
+              ref={searchInputRef}
+              placeholder="Search by name, email, or username..."
+              value={search}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearch("")
+                  e.currentTarget.blur()
+                }
+              }}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 pr-8"
+            />
             {search && (
               <button
                 type="button"

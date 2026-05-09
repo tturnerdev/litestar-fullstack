@@ -648,6 +648,12 @@ function DevicesPage() {
               ref={searchInputRef}
               placeholder="Search by name, MAC address, or model..."
               value={searchInput}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchInput("")
+                  e.currentTarget.blur()
+                }
+              }}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
