@@ -121,9 +121,8 @@ class ConnectionController(Controller):
         Returns:
             ConnectionDetail
         """
-        if not current_user.is_superuser:
-            if not any(tm.team_id == data.team_id for tm in current_user.teams):
-                raise PermissionDeniedException(detail="You do not have access to this team")
+        if not current_user.is_superuser and not any(tm.team_id == data.team_id for tm in current_user.teams):
+            raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         db_obj = await connections_service.create(obj)
         request.app.emit(event_id="connection_created", connection_id=db_obj.id)

@@ -98,9 +98,8 @@ class TicketController(Controller):
         data: TicketCreate,
     ) -> Ticket:
         """Open a new support ticket."""
-        if data.team_id and not current_user.is_superuser:
-            if not any(tm.team_id == data.team_id for tm in current_user.teams):
-                raise PermissionDeniedException(detail="You do not have access to this team")
+        if data.team_id and not current_user.is_superuser and not any(tm.team_id == data.team_id for tm in current_user.teams):
+            raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         body_markdown = obj.pop("body_markdown")
         obj["user_id"] = current_user.id

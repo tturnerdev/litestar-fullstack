@@ -79,9 +79,7 @@ class NotificationPreferenceService(service.SQLAlchemyAsyncRepositoryService[m.N
         # If categories are being updated, validate and merge with existing
         if "categories" in data and isinstance(data["categories"], dict):
             merged = dict(pref.categories)
-            for key, value in data["categories"].items():
-                if key in VALID_CATEGORIES and isinstance(value, bool):
-                    merged[key] = value
+            merged.update({key: value for key, value in data["categories"].items() if key in VALID_CATEGORIES and isinstance(value, bool)})
             data["categories"] = merged
 
         return await self.update(item_id=pref.id, data=data)

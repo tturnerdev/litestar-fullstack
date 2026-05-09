@@ -89,9 +89,7 @@ def render_markdown(text: str) -> str:
     result = "\n".join(processed)
 
     # Clean up single newlines within paragraphs to <br>
-    result = re.sub(r"(?<!</p>)\n(?!<)", "<br />\n", result)
-
-    return result
+    return re.sub(r"(?<!</p>)\n(?!<)", "<br />\n", result)
 
 
 def generate_ticket_number(sequence: int) -> str:

@@ -77,10 +77,7 @@ class ScheduleService(service.SQLAlchemyAsyncRepositoryService[m.Schedule]):
         schedule = await self.get(schedule_id)
         tz = ZoneInfo(schedule.timezone)
 
-        if check_time is None:
-            check_time = datetime.now(tz=tz)
-        else:
-            check_time = check_time.astimezone(tz)
+        check_time = datetime.now(tz=tz) if check_time is None else check_time.astimezone(tz)
 
         local_date = check_time.date()
         local_time = check_time.time()
@@ -159,9 +156,8 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
 
     async def to_model_on_upsert(self, data: ModelDictT[m.ScheduleEntry]) -> ModelDictT[m.ScheduleEntry]:
         data = service.schema_dump(data)
-        if service.is_dict(data):
-            if data.get("label"):
-                data["label"] = data["label"].strip()
+        if service.is_dict(data) and data.get("label"):
+            data["label"] = data["label"].strip()
         return data
 
 

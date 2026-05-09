@@ -124,7 +124,7 @@ class UnifiProvider(GatewayProvider):
 
     async def _get_sites(self, client: httpx.AsyncClient) -> list[dict[str, Any]] | None:
         resp = await client.get("/sites")
-        if (auth_err := self._handle_status_code(resp)) is not None:
+        if self._handle_status_code(resp) is not None:
             return None
         resp.raise_for_status()
         body = resp.json()

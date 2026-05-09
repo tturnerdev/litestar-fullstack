@@ -207,9 +207,8 @@ async def _search_entity(
                 continue
             if scope_field == "user_id":
                 access_conditions.append(col == user.id)
-            elif scope_field == "team_id":
-                if team_ids:
-                    access_conditions.append(col.in_(team_ids))
+            elif scope_field == "team_id" and team_ids:
+                access_conditions.append(col.in_(team_ids))
         if access_conditions:
             stmt = stmt.where(or_(*access_conditions))
         else:
