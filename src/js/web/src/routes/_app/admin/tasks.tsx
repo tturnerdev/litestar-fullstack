@@ -17,7 +17,7 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -60,6 +60,23 @@ import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/tasks")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    page?: number
+    sort?: string
+    order?: string
+    status?: string
+    type?: string
+    entity?: string
+  } => ({
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
+    status: typeof search.status === "string" && search.status ? search.status : undefined,
+    type: typeof search.type === "string" && search.type ? search.type : undefined,
+    entity: typeof search.entity === "string" && search.entity ? search.entity : undefined,
+  }),
   component: AdminTasksPage,
 })
 
@@ -479,27 +496,36 @@ function AdminTasksPage() {
   useDocumentTitle("Admin Tasks")
 
   const navigate = useNavigate()
+  const searchNavigate = Route.useNavigate()
+  const { page: pageParam, sort: sortParam, order: orderParam, status: statusParam, type: typeParam, entity: entityParam } = Route.useSearch()
   const queryClient = useQueryClient()
   const adminCancelTask = useAdminCancelTask()
   const adminDeleteTask = useAdminDeleteTask()
 
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [taskTypeFilter, setTaskTypeFilter] = useState("all")
-  const [entityTypeFilter, setEntityTypeFilter] = useState("all")
-  const [page, setPage] = useState(1)
+  // URL-derived state
+  const statusFilter = statusParam ?? "all"
+  const taskTypeFilter = typeParam ?? "all"
+  const entityTypeFilter = entityParam ?? "all"
+  const page = pageParam ?? 1
+  const sortKey = sortParam ?? null
+  const sortDir = (orderParam as SortDirection) ?? null
+
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      searchNavigate({ search: (prev) => ({ ...prev, page: undefined }) })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [searchNavigate],
+  )
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
@@ -512,23 +538,14 @@ function AdminTasksPage() {
     })
   }, [])
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
-
+  // Sort handler
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      searchNavigate({ search: (prev) => ({ ...prev, sort: next.sort || undefined, order: next.direction || undefined }) })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, searchNavigate],
   )
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when filters change
-  useEffect(() => {
-    setPage(1)
-  }, [statusFilter, taskTypeFilter, entityTypeFilter])
 
   const queryOptions: AdminTasksParams = useMemo(
     () => ({
@@ -637,11 +654,8 @@ function AdminTasksPage() {
   const hasAnyFilters = statusFilter !== "all" || taskTypeFilter !== "all" || entityTypeFilter !== "all"
 
   const clearAllFilters = useCallback(() => {
-    setStatusFilter("all")
-    setTaskTypeFilter("all")
-    setEntityTypeFilter("all")
-    setPage(1)
-  }, [])
+    searchNavigate({ search: (prev) => ({ ...prev, status: undefined, type: undefined, entity: undefined, page: undefined }) })
+  }, [searchNavigate])
 
   const handleRowClick = useCallback(
     (taskId: string) => {
@@ -793,7 +807,7 @@ function AdminTasksPage() {
       {/* Filters */}
       <PageSection>
         <div className="flex flex-wrap items-center gap-3">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={(v) => searchNavigate({ search: (prev) => ({ ...prev, status: v !== "all" ? v : undefined, page: undefined }) })}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -805,7 +819,7 @@ function AdminTasksPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={taskTypeFilter} onValueChange={setTaskTypeFilter}>
+          <Select value={taskTypeFilter} onValueChange={(v) => searchNavigate({ search: (prev) => ({ ...prev, type: v !== "all" ? v : undefined, page: undefined }) })}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -817,7 +831,7 @@ function AdminTasksPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
+          <Select value={entityTypeFilter} onValueChange={(v) => searchNavigate({ search: (prev) => ({ ...prev, entity: v !== "all" ? v : undefined, page: undefined }) })}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by entity" />
             </SelectTrigger>
@@ -949,7 +963,8 @@ function AdminTasksPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setPage((p) => Math.max(1, p - 1))
+                        const p = Math.max(1, page - 1)
+                        searchNavigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
                         setSelectedIds(new Set())
                       }}
                       disabled={page <= 1}
@@ -960,7 +975,8 @@ function AdminTasksPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setPage((p) => Math.min(totalPages, p + 1))
+                        const p = Math.min(totalPages, page + 1)
+                        searchNavigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
                         setSelectedIds(new Set())
                       }}
                       disabled={page >= totalPages}

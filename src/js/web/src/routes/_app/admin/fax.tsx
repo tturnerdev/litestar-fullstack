@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowRight, Download, FileText, Inbox, Printer, Search, Send, SlidersHorizontal, X, XCircle } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -25,6 +25,19 @@ import type { AdminFaxNumberSummary } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/fax")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
+  }),
   component: AdminFaxPage,
 })
 
@@ -130,9 +143,21 @@ function StatsCardSkeleton() {
 function AdminFaxPage() {
   useDocumentTitle("Admin Fax")
   const navigate = useNavigate()
-  const [numberPage, setNumberPage] = useState(1)
-  const [numberSearch, setNumberSearch] = useState("")
+  const routeNavigate = Route.useNavigate()
+  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
+
+  const numberPage = pageParam ?? 1
+  const [numberSearch, setNumberSearch] = useState(searchParam ?? "")
   const debouncedNumberSearch = useDebouncedValue(numberSearch)
+
+  // Sort state derived from URL
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    routeNavigate({ search: (prev) => ({ ...prev, q: debouncedNumberSearch || undefined, page: undefined }) })
+  }, [debouncedNumberSearch, routeNavigate])
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
@@ -166,17 +191,12 @@ function AdminFaxPage() {
   const numberTotal = numberData?.total ?? 0
   const numberTotalPages = Math.max(1, Math.ceil(numberTotal / PAGE_SIZE))
 
-  // Sort state for recent fax activity table
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
-
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      routeNavigate({ search: (prev) => ({ ...prev, sort: next.sort || undefined, order: next.direction || undefined }) })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, routeNavigate],
   )
 
   const faxMessages = Array.isArray(messages) ? messages : []
@@ -450,22 +470,11 @@ function AdminFaxPage() {
                 <div className="flex items-center gap-3">
                   <div className="relative max-w-sm">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Search numbers..."
-                      value={numberSearch}
-                      onChange={(e) => {
-                        setNumberSearch(e.target.value)
-                        setNumberPage(1)
-                      }}
-                      className="pl-9 pr-8"
-                    />
+                    <Input placeholder="Search numbers..." value={numberSearch} onChange={(e) => setNumberSearch(e.target.value)} className="pl-9 pr-8" />
                     {numberSearch && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setNumberSearch("")
-                          setNumberPage(1)
-                        }}
+                        onClick={() => setNumberSearch("")}
                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -503,7 +512,14 @@ function AdminFaxPage() {
                   title="No fax numbers found"
                   description="No fax numbers match your search. Try a different search term."
                   action={
-                    <Button variant="outline" size="sm" onClick={() => setNumberSearch("")}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setNumberSearch("")
+                        routeNavigate({ search: (prev) => ({ ...prev, q: undefined, page: undefined }) })
+                      }}
+                    >
                       Clear search
                     </Button>
                   }
@@ -553,10 +569,26 @@ function AdminFaxPage() {
                         Page {numberPage} of {numberTotalPages} ({numberTotal} total)
                       </p>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setNumberPage((p) => Math.max(1, p - 1))} disabled={numberPage <= 1}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const p = Math.max(1, numberPage - 1)
+                            routeNavigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
+                          }}
+                          disabled={numberPage <= 1}
+                        >
                           Previous
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setNumberPage((p) => Math.min(numberTotalPages, p + 1))} disabled={numberPage >= numberTotalPages}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const p = Math.min(numberTotalPages, numberPage + 1)
+                            routeNavigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
+                          }}
+                          disabled={numberPage >= numberTotalPages}
+                        >
                           Next
                         </Button>
                       </div>
