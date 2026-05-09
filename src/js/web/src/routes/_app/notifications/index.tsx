@@ -527,20 +527,6 @@ function NotificationsPage() {
     [navigate],
   )
 
-  // Keyboard shortcut: "/" to focus search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault()
-        searchInputRef.current?.focus()
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
-
   const { data: unreadData } = useUnreadCount()
   const { data, isLoading, dataUpdatedAt, isRefetching, refetch } = useNotifications(page, pageSize, {
     refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
@@ -554,6 +540,28 @@ function NotificationsPage() {
   const notifications = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate, page, totalPages])
+
   const readCount = notifications.filter((n) => n.isRead).length
 
   const filteredNotifications = useMemo(() => {

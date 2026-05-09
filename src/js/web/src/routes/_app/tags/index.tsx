@@ -153,24 +153,6 @@ function TagsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  // Keyboard shortcuts: "/" to focus search, "N" opens the create page
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault()
-        searchInputRef.current?.focus()
-      }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        e.preventDefault()
-        navigate({ to: "/tags/new" })
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate])
-
   // Persist page size preference
   const handlePageSizeChange = useCallback(
     (value: string) => {
@@ -212,6 +194,31 @@ function TagsPage() {
   const items = data?.items ?? []
   const totalCount = data?.total ?? items.length
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/tags/new" })
+      }
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate, page, totalPages])
 
   // Sort locally as a fallback (server may not support all sort options)
   const sortedItems = useMemo(() => {

@@ -387,19 +387,6 @@ function E911Page() {
 
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const target = e.target as HTMLElement
-        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-        e.preventDefault()
-        searchInputRef.current?.focus()
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
-
   const { data, isLoading, isRefetching, isError, refetch, dataUpdatedAt } = useE911Registrations({
     page,
     pageSize,
@@ -485,6 +472,32 @@ function E911Page() {
   )
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/e911/new" })
+      }
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate, page, totalPages])
+
   const hasData = filteredItems.length > 0
   const hasAnyItems = items.length > 0
   const unregisteredCount = unregistered?.length ?? 0
