@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from app.lib.guards import has_superuser_access, require_superuser_access
@@ -15,9 +14,6 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.db import models as m
-
-# Messages can be edited within this window
-MESSAGE_EDIT_WINDOW = timedelta(minutes=15)
 
 
 def requires_ticket_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:

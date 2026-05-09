@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AnimatePresence, motion } from "framer-motion"
 import {
+  AlertCircle,
   AlertTriangle,
   Bell,
   BellOff,
@@ -528,7 +529,7 @@ function NotificationsPage() {
   )
 
   const { data: unreadData } = useUnreadCount()
-  const { data, isLoading, dataUpdatedAt, isRefetching, refetch } = useNotifications(page, pageSize, {
+  const { data, isLoading, isError, dataUpdatedAt, isRefetching, refetch } = useNotifications(page, pageSize, {
     refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
   })
   const markAllRead = useMarkAllRead()
@@ -874,6 +875,17 @@ function NotificationsPage() {
                       <Skeleton key={`notif-skel-${i}`} className="h-16 w-full rounded-lg" />
                     ))}
                   </div>
+                ) : isError ? (
+                  <EmptyState
+                    icon={AlertCircle}
+                    title="Unable to load notifications"
+                    description="Something went wrong while fetching your notifications. Please try again."
+                    action={
+                      <Button variant="outline" size="sm" onClick={() => refetch()}>
+                        Try again
+                      </Button>
+                    }
+                  />
                 ) : isEmptyFiltered ? (
                   <EmptyState
                     icon={BellOff}
