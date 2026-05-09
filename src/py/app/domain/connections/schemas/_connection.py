@@ -7,6 +7,7 @@ from uuid import UUID
 import msgspec
 from msgspec import Meta
 
+from app.db.models._connection_enums import ConnectionAuthType, ConnectionType
 from app.lib.schema import CamelizedBaseStruct
 
 
@@ -73,6 +74,16 @@ class ConnectionCreate(CamelizedBaseStruct):
     description: Annotated[str, Meta(min_length=1, max_length=1000)] | None = None
     is_enabled: bool = True
 
+    def __post_init__(self) -> None:
+        valid_types = {t.value for t in ConnectionType}
+        if self.connection_type not in valid_types:
+            msg = f"connection_type must be one of: {', '.join(sorted(valid_types))}"
+            raise ValueError(msg)
+        valid_auth = {t.value for t in ConnectionAuthType}
+        if self.auth_type not in valid_auth:
+            msg = f"auth_type must be one of: {', '.join(sorted(valid_auth))}"
+            raise ValueError(msg)
+
 
 class ConnectionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a connection."""
@@ -87,3 +98,15 @@ class ConnectionUpdate(CamelizedBaseStruct, omit_defaults=True):
     settings: dict | msgspec.UnsetType | None = msgspec.UNSET
     description: Annotated[str, Meta(min_length=1, max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
     is_enabled: bool | msgspec.UnsetType = msgspec.UNSET
+
+    def __post_init__(self) -> None:
+        if isinstance(self.connection_type, str):
+            valid_types = {t.value for t in ConnectionType}
+            if self.connection_type not in valid_types:
+                msg = f"connection_type must be one of: {', '.join(sorted(valid_types))}"
+                raise ValueError(msg)
+        if isinstance(self.auth_type, str):
+            valid_auth = {t.value for t in ConnectionAuthType}
+            if self.auth_type not in valid_auth:
+                msg = f"auth_type must be one of: {', '.join(sorted(valid_auth))}"
+                raise ValueError(msg)
