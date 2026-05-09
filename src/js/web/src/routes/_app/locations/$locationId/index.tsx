@@ -521,7 +521,16 @@ function LocationDetailPage() {
                             <TableCell>
                               <Badge variant={device.status === "online" ? "default" : "secondary"}>{device.status}</Badge>
                             </TableCell>
-                            <TableCell className="font-mono text-xs">{device.macAddress ?? "---"}</TableCell>
+                            <TableCell className="font-mono text-xs">
+                              {device.macAddress ? (
+                                <span className="inline-flex items-center gap-1">
+                                  {device.macAddress}
+                                  <CopyButton value={device.macAddress} label="MAC address" />
+                                </span>
+                              ) : (
+                                "---"
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
