@@ -64,6 +64,7 @@ class CallQueueController(Controller):
     @get(
         operation_id="ListCallQueues",
         summary="List call queues",
+        description="Returns a paginated list of call queues with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         path="/api/call-queues",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -89,6 +90,7 @@ class CallQueueController(Controller):
     @post(
         operation_id="CreateCallQueue",
         summary="Create a call queue",
+        description="Creates a new call queue and assigns it to the current user's team. Logs an audit entry and emits a call_queue_created event.",
         path="/api/call-queues",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -136,6 +138,7 @@ class CallQueueController(Controller):
     @get(
         operation_id="GetCallQueue",
         summary="Get call queue details",
+        description="Retrieves a single call queue by ID, including its current list of members.",
         path="/api/call-queues/{call_queue_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -159,6 +162,7 @@ class CallQueueController(Controller):
     @patch(
         operation_id="UpdateCallQueue",
         summary="Update a call queue",
+        description="Partially updates a call queue's configuration. Captures before/after snapshots for audit logging and emits a call_queue_updated event.",
         path="/api/call-queues/{call_queue_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -206,6 +210,7 @@ class CallQueueController(Controller):
     @delete(
         operation_id="DeleteCallQueue",
         summary="Delete a call queue",
+        description="Permanently deletes a call queue and all its member associations. Emits a call_queue_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/call-queues/{call_queue_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -252,6 +257,7 @@ class CallQueueController(Controller):
     @get(
         operation_id="ListCallQueueMembers",
         summary="List call queue members",
+        description="Returns all members belonging to the specified call queue. Validates that the parent call queue exists before listing.",
         path="/api/call-queues/{call_queue_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -278,6 +284,7 @@ class CallQueueController(Controller):
     @post(
         operation_id="CreateCallQueueMember",
         summary="Add a call queue member",
+        description="Adds a new member to the specified call queue. Logs an audit entry and emits a call_queue_member_created event.",
         path="/api/call-queues/{call_queue_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -330,6 +337,7 @@ class CallQueueController(Controller):
     @patch(
         operation_id="UpdateCallQueueMember",
         summary="Update a call queue member",
+        description="Partially updates a member's settings within a call queue. Captures before/after snapshots for audit logging and emits a call_queue_member_updated event.",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -384,6 +392,7 @@ class CallQueueController(Controller):
     @delete(
         operation_id="DeleteCallQueueMember",
         summary="Remove a call queue member",
+        description="Removes a member from the specified call queue. Emits a call_queue_member_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -432,6 +441,7 @@ class CallQueueController(Controller):
     @put(
         operation_id="PauseCallQueueMember",
         summary="Pause or unpause a call queue member",
+        description="Toggles the pause state for a call queue member. Logs an audit entry with the pause status in metadata and emits a call_queue_member_paused event.",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}/pause",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )

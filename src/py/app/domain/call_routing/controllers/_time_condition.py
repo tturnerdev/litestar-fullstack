@@ -57,6 +57,7 @@ class TimeConditionController(Controller):
     @get(
         operation_id="ListTimeConditions",
         summary="List time conditions",
+        description="Returns a paginated list of time conditions. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         path="/api/time-conditions",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -82,6 +83,7 @@ class TimeConditionController(Controller):
     @post(
         operation_id="CreateTimeCondition",
         summary="Create a time condition",
+        description="Creates a new time condition and assigns it to the current user's team. Logs an audit entry and emits a time_condition_created event.",
         path="/api/time-conditions",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -129,6 +131,7 @@ class TimeConditionController(Controller):
     @get(
         operation_id="GetTimeCondition",
         summary="Get time condition details",
+        description="Retrieves a single time condition by ID, including its current override mode status.",
         path="/api/time-conditions/{time_condition_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -154,6 +157,7 @@ class TimeConditionController(Controller):
     @patch(
         operation_id="UpdateTimeCondition",
         summary="Update a time condition",
+        description="Partially updates a time condition's configuration. Captures before/after snapshots for audit logging and emits a time_condition_updated event.",
         path="/api/time-conditions/{time_condition_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -203,6 +207,7 @@ class TimeConditionController(Controller):
     @delete(
         operation_id="DeleteTimeCondition",
         summary="Delete a time condition",
+        description="Permanently deletes a time condition. Emits a time_condition_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/time-conditions/{time_condition_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -249,6 +254,7 @@ class TimeConditionController(Controller):
     @put(
         operation_id="SetTimeConditionOverride",
         summary="Set time condition override",
+        description="Sets or clears the override mode on a time condition, bypassing normal schedule-based routing. Logs an audit entry and emits both time_condition_updated and time_condition_override_changed events.",
         path="/api/time-conditions/{time_condition_id:uuid}/override",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )

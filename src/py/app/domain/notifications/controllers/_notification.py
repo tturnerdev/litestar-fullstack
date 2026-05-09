@@ -49,7 +49,11 @@ class NotificationController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListNotifications", summary="List notifications")
+    @get(
+        operation_id="ListNotifications",
+        summary="List notifications",
+        description="Retrieve a paginated list of notifications for the current user. Supports search by title, date range filtering, and sorting.",
+    )
     async def list_notifications(
         self,
         notifications_service: NotificationService,
@@ -72,7 +76,12 @@ class NotificationController(Controller):
         )
         return notifications_service.to_schema(results, total, filters, schema_type=Notification)
 
-    @get(operation_id="GetUnreadNotificationCount", summary="Get unread notification count", path="/unread-count")
+    @get(
+        operation_id="GetUnreadNotificationCount",
+        summary="Get unread notification count",
+        description="Return the total number of unread notifications for the current user.",
+        path="/unread-count",
+    )
     async def get_unread_count(
         self,
         notifications_service: NotificationService,
@@ -90,7 +99,12 @@ class NotificationController(Controller):
         count = await notifications_service.get_unread_count(current_user.id)
         return UnreadCount(count=count)
 
-    @patch(operation_id="MarkNotificationRead", summary="Mark a notification as read", path="/{notification_id:uuid}/read")
+    @patch(
+        operation_id="MarkNotificationRead",
+        summary="Mark a notification as read",
+        description="Mark a single notification as read for the current user. Returns 403 if the notification belongs to a different user.",
+        path="/{notification_id:uuid}/read",
+    )
     async def mark_read(
         self,
         notifications_service: NotificationService,
@@ -117,7 +131,12 @@ class NotificationController(Controller):
         db_obj = await notifications_service.mark_read(notification_id, current_user.id)
         return notifications_service.to_schema(db_obj, schema_type=Notification)
 
-    @post(operation_id="MarkAllNotificationsRead", summary="Mark all notifications as read", path="/mark-all-read")
+    @post(
+        operation_id="MarkAllNotificationsRead",
+        summary="Mark all notifications as read",
+        description="Mark every unread notification as read for the current user. Logs an audit entry and returns the new unread count of zero.",
+        path="/mark-all-read",
+    )
     async def mark_all_read(
         self,
         request: Request[m.User, Any, Any],
@@ -179,7 +198,14 @@ class NotificationController(Controller):
             request=request,
         )
 
-    @delete(operation_id="DeleteNotification", summary="Delete a notification", path="/{notification_id:uuid}", return_dto=None, status_code=HTTP_204_NO_CONTENT)
+    @delete(
+        operation_id="DeleteNotification",
+        summary="Delete a notification",
+        description="Permanently delete a single notification. Emits a notification_deleted event and logs an audit entry with the before-state snapshot.",
+        path="/{notification_id:uuid}",
+        return_dto=None,
+        status_code=HTTP_204_NO_CONTENT,
+    )
     async def delete_notification(
         self,
         request: Request[m.User, Any, Any],

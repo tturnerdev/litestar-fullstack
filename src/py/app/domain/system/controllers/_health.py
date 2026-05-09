@@ -33,6 +33,7 @@ class SystemController(Controller):
         name="system:health",
         path="/health",
         summary="Health Check",
+        description="Check system health by verifying database connectivity. Returns a 200 status when healthy or 500 when the database is offline.",
         exclude_from_auth=True,
         security=[],  # Public endpoint - no auth required
         cache_control=CacheControlHeader(no_store=True),
@@ -81,6 +82,7 @@ class SystemController(Controller):
         name="system:oauth-config",
         path="/api/config/oauth",
         summary="Get OAuth Configuration",
+        description="Return which OAuth providers (Google, GitHub) are enabled for the frontend login flow. Response is cached for 5 minutes.",
         exclude_from_auth=True,
         security=[],  # Public endpoint - no auth required
         cache_control=CacheControlHeader(private=True, max_age=300),

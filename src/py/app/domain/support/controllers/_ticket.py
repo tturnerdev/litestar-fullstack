@@ -62,6 +62,7 @@ class TicketController(Controller):
     @get(
         operation_id="ListTickets",
         summary="List tickets",
+        description="Returns a paginated list of support tickets. Superusers see all tickets; regular users only see their own. Supports search by subject, date range filtering, and configurable sort order.",
         path="/api/support/tickets",
         guards=[requires_feature_permission("support", "view")],
     )
@@ -84,6 +85,7 @@ class TicketController(Controller):
     @post(
         operation_id="CreateTicket",
         summary="Create a ticket",
+        description="Opens a new support ticket and creates the initial message from the provided markdown body. Emits a ticket_created event, records an audit log entry, and sends a notification to the submitting user.",
         path="/api/support/tickets",
         guards=[requires_feature_permission("support", "edit")],
         status_code=HTTP_201_CREATED,
@@ -145,6 +147,7 @@ class TicketController(Controller):
     @get(
         operation_id="GetTicket",
         summary="Get ticket details",
+        description="Retrieves a single support ticket by ID, including the associated user and assignee. Access is restricted to the ticket owner or a superuser.",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "view"), requires_ticket_access],
     )
@@ -160,6 +163,7 @@ class TicketController(Controller):
     @patch(
         operation_id="UpdateTicket",
         summary="Update a ticket",
+        description="Updates ticket fields such as status, priority, or assignee. Emits status change and assignment events when applicable, records an audit log entry, and notifies newly assigned agents.",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
@@ -225,6 +229,7 @@ class TicketController(Controller):
     @delete(
         operation_id="DeleteTicket",
         summary="Delete a ticket",
+        description="Permanently deletes a support ticket and all associated messages and attachments. Restricted to support agents. Emits a ticket_deleted event and records an audit log entry.",
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_support_agent],
         status_code=HTTP_204_NO_CONTENT,
@@ -261,6 +266,7 @@ class TicketController(Controller):
     @post(
         operation_id="CloseTicket",
         summary="Close a ticket",
+        description="Transitions a ticket to the closed status. Emits a ticket_status_changed event, records an audit log entry, and sends a closure notification to the ticket owner.",
         path="/api/support/tickets/{ticket_id:uuid}/close",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
@@ -313,6 +319,7 @@ class TicketController(Controller):
     @post(
         operation_id="ReopenTicket",
         summary="Reopen a ticket",
+        description="Reopens a previously closed ticket. Emits a ticket_status_changed event, records an audit log entry, and sends a reopened notification to the ticket owner.",
         path="/api/support/tickets/{ticket_id:uuid}/reopen",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )

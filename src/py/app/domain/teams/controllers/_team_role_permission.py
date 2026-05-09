@@ -37,6 +37,7 @@ class TeamRolePermissionController(Controller):
     @get(
         operation_id="ListTeamPermissions",
         summary="List team permissions",
+        description="Returns all role-based permissions configured for a team. Each entry defines view and edit access for a specific feature area and role combination.",
         path="/api/teams/{team_id:uuid}/permissions",
         guards=[requires_team_membership],
     )
@@ -51,6 +52,7 @@ class TeamRolePermissionController(Controller):
     @put(
         operation_id="UpdateTeamPermissions",
         summary="Update team permissions",
+        description="Replaces the entire permission set for a team. Deletes all existing permissions and creates the new set atomically. Emits a team_permissions_updated event and records an audit log entry with before/after permission snapshots.",
         path="/api/teams/{team_id:uuid}/permissions",
         guards=[requires_team_admin],
     )

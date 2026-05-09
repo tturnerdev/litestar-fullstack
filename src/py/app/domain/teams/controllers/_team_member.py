@@ -48,7 +48,7 @@ class TeamMemberController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @post(operation_id="AddMemberToTeam", summary="Add a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_201_CREATED, guards=[requires_team_admin])
+    @post(operation_id="AddMemberToTeam", summary="Add a team member", description="Adds a user to a team by email address with the default member role. Checks for existing membership to prevent duplicates. Emits a team_member_added event, records an audit log entry, and sends a notification to the added user.", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_201_CREATED, guards=[requires_team_admin])
     async def add_member_to_team(
         self,
         request: Request[m.User, Token, Any],
@@ -125,7 +125,7 @@ class TeamMemberController(Controller):
         return teams_service.to_schema(team_obj, schema_type=Team)
 
     @delete(
-        operation_id="RemoveMemberFromTeam", summary="Remove a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_202_ACCEPTED, guards=[requires_team_admin]
+        operation_id="RemoveMemberFromTeam", summary="Remove a team member", description="Removes a user from a team by email address. The team owner cannot be removed; ownership must be transferred first. Emits a team_member_removed event, records an audit log entry, and sends a removal notification to the user.", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_202_ACCEPTED, guards=[requires_team_admin]
     )
     async def remove_member_from_team(
         self,
@@ -200,7 +200,7 @@ class TeamMemberController(Controller):
 
         return teams_service.to_schema(team_obj, schema_type=Team)
 
-    @patch(operation_id="UpdateTeamMember", summary="Update a team member's role", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}", guards=[requires_team_admin])
+    @patch(operation_id="UpdateTeamMember", summary="Update a team member's role", description="Changes a team member's role. Restricted to team admins. Emits a team_member_updated event, records an audit log entry with before/after snapshots, and sends a role change notification to the member.", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}", guards=[requires_team_admin])
     async def update_team_member(
         self,
         request: Request[m.User, Token, Any],

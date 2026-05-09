@@ -69,6 +69,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="ListSchedules",
         summary="List schedules",
+        description="Returns a paginated list of schedules with their entries. Supports search by name, filtering by team ID and schedule type, date range filtering, and configurable sort order.",
         path="/api/schedules",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -103,6 +104,7 @@ class ScheduleController(Controller):
     @post(
         operation_id="CreateSchedule",
         summary="Create a schedule",
+        description="Creates a new schedule for the specified team. Validates that the user belongs to the team (unless superuser). Emits a schedule_created event and records an audit log entry.",
         path="/api/schedules",
         guards=[requires_feature_permission("schedules", "edit")],
         status_code=HTTP_201_CREATED,
@@ -151,6 +153,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="GetSchedule",
         summary="Get schedule details",
+        description="Retrieves a single schedule by ID, including all of its time entries.",
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -174,6 +177,7 @@ class ScheduleController(Controller):
     @patch(
         operation_id="UpdateSchedule",
         summary="Update a schedule",
+        description="Updates schedule properties such as name, timezone, or type. Emits a schedule_updated event and records an audit log entry with before/after snapshots.",
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -224,6 +228,7 @@ class ScheduleController(Controller):
     @delete(
         operation_id="DeleteSchedule",
         summary="Delete a schedule",
+        description="Permanently deletes a schedule and all of its entries. Emits a schedule_deleted event and records an audit log entry.",
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
         status_code=HTTP_204_NO_CONTENT,
@@ -270,6 +275,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="CheckSchedule",
         summary="Check schedule status",
+        description="Evaluates whether the schedule is currently open or closed at the specified time (defaults to now in the schedule's timezone). Useful for real-time routing decisions.",
         path="/api/schedules/{schedule_id:uuid}/check",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -296,6 +302,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="ListScheduleEntries",
         summary="List schedule entries",
+        description="Returns all time entries belonging to a schedule. Each entry defines a day-of-week and time range that determines when the schedule is active.",
         path="/api/schedules/{schedule_id:uuid}/entries",
         guards=[requires_feature_permission("schedules", "view")],
     )
@@ -319,6 +326,7 @@ class ScheduleController(Controller):
     @post(
         operation_id="CreateScheduleEntry",
         summary="Create a schedule entry",
+        description="Adds a new time entry to a schedule defining a day-of-week and time range. Emits a schedule_entry_created event and records an audit log entry.",
         path="/api/schedules/{schedule_id:uuid}/entries",
         guards=[requires_feature_permission("schedules", "edit")],
         status_code=HTTP_201_CREATED,
@@ -368,6 +376,7 @@ class ScheduleController(Controller):
     @patch(
         operation_id="UpdateScheduleEntry",
         summary="Update a schedule entry",
+        description="Updates an existing schedule entry's day, time range, or label. Emits a schedule_entry_updated event and records an audit log entry with before/after snapshots.",
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
     )
@@ -420,6 +429,7 @@ class ScheduleController(Controller):
     @delete(
         operation_id="DeleteScheduleEntry",
         summary="Delete a schedule entry",
+        description="Permanently deletes a single time entry from a schedule. Emits a schedule_entry_deleted event and records an audit log entry.",
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
         status_code=HTTP_204_NO_CONTENT,

@@ -55,7 +55,11 @@ class WebhookEndpointController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListWebhookEndpoints", summary="List webhook endpoints")
+    @get(
+        operation_id="ListWebhookEndpoints",
+        summary="List webhook endpoints",
+        description="Retrieve a paginated list of system-level webhook endpoints. Supports search by URL and description, date range filtering, and sorting.",
+    )
     async def list_endpoints(
         self,
         webhook_service: WebhookEndpointService,
@@ -64,7 +68,12 @@ class WebhookEndpointController(Controller):
         results, total = await webhook_service.list_and_count(*filters)
         return webhook_service.to_schema(results, total, filters, schema_type=WebhookEndpointList)
 
-    @get(operation_id="GetWebhookEndpoint", summary="Get webhook endpoint details", path="/{endpoint_id:uuid}")
+    @get(
+        operation_id="GetWebhookEndpoint",
+        summary="Get webhook endpoint details",
+        description="Retrieve a single webhook endpoint by ID, including its subscribed event types and configuration.",
+        path="/{endpoint_id:uuid}",
+    )
     async def get_endpoint(
         self,
         webhook_service: WebhookEndpointService,
@@ -73,7 +82,12 @@ class WebhookEndpointController(Controller):
         db_obj = await webhook_service.get(endpoint_id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @post(operation_id="CreateWebhookEndpoint", summary="Create a webhook endpoint", status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="CreateWebhookEndpoint",
+        summary="Create a webhook endpoint",
+        description="Register a new system-level webhook endpoint. Emits a webhook_endpoint_created event and logs an audit entry.",
+        status_code=HTTP_201_CREATED,
+    )
     async def create_endpoint(
         self,
         request: Request[m.User, Token, Any],
@@ -100,7 +114,12 @@ class WebhookEndpointController(Controller):
         )
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @patch(operation_id="UpdateWebhookEndpoint", summary="Update a webhook endpoint", path="/{endpoint_id:uuid}")
+    @patch(
+        operation_id="UpdateWebhookEndpoint",
+        summary="Update a webhook endpoint",
+        description="Partially update a webhook endpoint's URL, event subscriptions, or other settings. Emits a webhook_endpoint_updated event and logs an audit entry with before/after snapshots.",
+        path="/{endpoint_id:uuid}",
+    )
     async def update_endpoint(
         self,
         request: Request[m.User, Token, Any],
@@ -130,7 +149,14 @@ class WebhookEndpointController(Controller):
         )
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @delete(operation_id="DeleteWebhookEndpoint", summary="Delete a webhook endpoint", path="/{endpoint_id:uuid}", return_dto=None, status_code=HTTP_204_NO_CONTENT)
+    @delete(
+        operation_id="DeleteWebhookEndpoint",
+        summary="Delete a webhook endpoint",
+        description="Permanently delete a webhook endpoint. Emits a webhook_endpoint_deleted event and logs an audit entry with the before-state snapshot.",
+        path="/{endpoint_id:uuid}",
+        return_dto=None,
+        status_code=HTTP_204_NO_CONTENT,
+    )
     async def delete_endpoint(
         self,
         request: Request[m.User, Token, Any],
@@ -161,6 +187,7 @@ class WebhookEndpointController(Controller):
     @get(
         operation_id="ListWebhookEventTypes",
         summary="List webhook event types",
+        description="Return all registered webhook event types with their descriptions. Response is cached for 5 minutes.",
         path="/event-types",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

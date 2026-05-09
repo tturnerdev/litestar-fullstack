@@ -139,6 +139,7 @@ class SyncController(Controller):
         name="system:sync-entity",
         path="/api/sync/{domain:path}/{field_name:str}/{value:str}",
         summary="Sync Entity",
+        description="Look up an entity by domain, field name, and value across any registered domain. Supports lookup by ID and domain-specific fields such as name, slug, or extension number.",
     )
     async def sync_entity(
         self,

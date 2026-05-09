@@ -63,6 +63,7 @@ class IvrMenuController(Controller):
     @get(
         operation_id="ListIvrMenus",
         summary="List IVR menus",
+        description="Returns a paginated list of IVR menus with their options. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         path="/api/ivr-menus",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -88,6 +89,7 @@ class IvrMenuController(Controller):
     @post(
         operation_id="CreateIvrMenu",
         summary="Create an IVR menu",
+        description="Creates a new IVR menu and assigns it to the current user's team. Logs an audit entry and emits an ivr_menu_created event.",
         path="/api/ivr-menus",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -135,6 +137,7 @@ class IvrMenuController(Controller):
     @get(
         operation_id="GetIvrMenu",
         summary="Get IVR menu details",
+        description="Retrieves a single IVR menu by ID, including its configured menu options.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -158,6 +161,7 @@ class IvrMenuController(Controller):
     @patch(
         operation_id="UpdateIvrMenu",
         summary="Update an IVR menu",
+        description="Partially updates an IVR menu's configuration. Captures before/after snapshots for audit logging and emits an ivr_menu_updated event.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -205,6 +209,7 @@ class IvrMenuController(Controller):
     @delete(
         operation_id="DeleteIvrMenu",
         summary="Delete an IVR menu",
+        description="Permanently deletes an IVR menu and all its option associations. Emits an ivr_menu_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -251,6 +256,7 @@ class IvrMenuController(Controller):
     @get(
         operation_id="ListIvrMenuOptions",
         summary="List IVR menu options",
+        description="Returns all options configured for the specified IVR menu. Validates that the parent IVR menu exists before listing.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -277,6 +283,7 @@ class IvrMenuController(Controller):
     @post(
         operation_id="CreateIvrMenuOption",
         summary="Add an IVR menu option",
+        description="Adds a new digit-mapped option to the specified IVR menu. Logs an audit entry and emits an ivr_menu_option_created event.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -329,6 +336,7 @@ class IvrMenuController(Controller):
     @patch(
         operation_id="UpdateIvrMenuOption",
         summary="Update an IVR menu option",
+        description="Partially updates an IVR menu option's digit mapping or destination. Captures before/after snapshots for audit logging and emits an ivr_menu_option_updated event.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -381,6 +389,7 @@ class IvrMenuController(Controller):
     @delete(
         operation_id="DeleteIvrMenuOption",
         summary="Delete an IVR menu option",
+        description="Removes an option from the specified IVR menu. Emits an ivr_menu_option_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],

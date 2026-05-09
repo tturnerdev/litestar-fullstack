@@ -37,6 +37,7 @@ class OrganizationController(Controller):
     @get(
         operation_id="GetOrganization",
         summary="Get organization details",
+        description="Retrieve the current organization settings. Creates a default organization record if none exists. Restricted to admin and superuser roles.",
         guards=[requires_admin_role],
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -65,6 +66,7 @@ class OrganizationController(Controller):
     @put(
         operation_id="UpdateOrganization",
         summary="Update organization settings",
+        description="Update the organization name and settings. Creates the organization if it does not yet exist. Emits an event and logs an audit entry. Restricted to superusers.",
         guards=[requires_superuser],
     )
     async def update_organization(

@@ -79,7 +79,12 @@ class WebhookController(Controller):
         "delivery_service": Provide(provide_webhook_delivery_service),
     }
 
-    @get(operation_id="ListWebhooks", summary="List webhooks", path="/api/webhooks")
+    @get(
+        operation_id="ListWebhooks",
+        summary="List webhooks",
+        description="Retrieve a paginated list of webhooks owned by the current user. Supports search by name, date range filtering, and sorting.",
+        path="/api/webhooks",
+    )
     async def list_webhooks(
         self,
         webhooks_service: WebhookService,
@@ -102,7 +107,13 @@ class WebhookController(Controller):
         )
         return webhooks_service.to_schema(results, total, filters, schema_type=WebhookList)
 
-    @post(operation_id="CreateWebhook", summary="Create a webhook", path="/api/webhooks", status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="CreateWebhook",
+        summary="Create a webhook",
+        description="Register a new webhook for the current user. Emits a webhook_created event and logs an audit entry.",
+        path="/api/webhooks",
+        status_code=HTTP_201_CREATED,
+    )
     async def create_webhook(
         self,
         request: Request[m.User, Token, Any],
@@ -146,6 +157,7 @@ class WebhookController(Controller):
     @get(
         operation_id="GetWebhook",
         summary="Get webhook details",
+        description="Retrieve a single webhook by ID with its secret masked. Superusers may access any webhook; regular users may only access their own.",
         path="/api/webhooks/{webhook_id:uuid}",
     )
     async def get_webhook(
@@ -172,6 +184,7 @@ class WebhookController(Controller):
     @patch(
         operation_id="UpdateWebhook",
         summary="Update a webhook",
+        description="Partially update a webhook's configuration. Emits a webhook_updated event and logs an audit entry with before/after snapshots.",
         path="/api/webhooks/{webhook_id:uuid}",
     )
     async def update_webhook(
@@ -224,6 +237,7 @@ class WebhookController(Controller):
     @delete(
         operation_id="DeleteWebhook",
         summary="Delete a webhook",
+        description="Permanently delete a webhook and its configuration. Emits a webhook_deleted event and logs an audit entry with the before-state snapshot.",
         path="/api/webhooks/{webhook_id:uuid}",
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
@@ -269,6 +283,7 @@ class WebhookController(Controller):
     @get(
         operation_id="ListWebhookDeliveries",
         summary="List webhook deliveries",
+        description="Retrieve the 20 most recent delivery attempts for a specific webhook, ordered by most recent first.",
         path="/api/webhooks/{webhook_id:uuid}/deliveries",
     )
     async def list_deliveries(
@@ -305,6 +320,7 @@ class WebhookController(Controller):
     @post(
         operation_id="RedeliverWebhookDelivery",
         summary="Redeliver a webhook",
+        description="Manually retry a previous webhook delivery attempt. Re-sends the original payload to the webhook URL and records the new delivery result.",
         path="/api/webhooks/{webhook_id:uuid}/deliveries/{delivery_id:uuid}/redeliver",
     )
     async def redeliver_delivery(
@@ -342,6 +358,7 @@ class WebhookController(Controller):
     @post(
         operation_id="TestWebhook",
         summary="Send a test webhook",
+        description="Send a test payload to the webhook URL and return the result including status code, response time, and any errors. Records the delivery attempt.",
         path="/api/webhooks/{webhook_id:uuid}/test",
     )
     async def test_webhook(

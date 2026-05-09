@@ -50,7 +50,7 @@ class TeamController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(component="team/list", operation_id="ListTeams", summary="List teams", path="/api/teams")
+    @get(component="team/list", operation_id="ListTeams", summary="List teams", description="Returns a paginated list of teams. Users with elevated privileges see all teams; regular users only see teams they belong to. Supports search by name and configurable sort order.", path="/api/teams")
     async def list_teams(
         self,
         teams_service: TeamService,
@@ -78,7 +78,7 @@ class TeamController(Controller):
             results, total = await teams_service.list_and_count(*filters)
         return teams_service.to_schema(results, total, filters, schema_type=Team)
 
-    @post(operation_id="CreateTeam", summary="Create a team", path="/api/teams", status_code=HTTP_201_CREATED)
+    @post(operation_id="CreateTeam", summary="Create a team", description="Creates a new team with the current user set as the owner. Emits a team_created event and records an audit log entry.", path="/api/teams", status_code=HTTP_201_CREATED)
     async def create_team(
         self,
         request: Request[m.User, Token, Any],
@@ -120,7 +120,7 @@ class TeamController(Controller):
 
         return teams_service.to_schema(db_obj, schema_type=Team)
 
-    @get(operation_id="GetTeam", summary="Get team details", path="/api/teams/{team_id:uuid}", guards=[requires_team_membership])
+    @get(operation_id="GetTeam", summary="Get team details", description="Retrieves a single team by ID, including its tags and member list. Requires membership in the team.", path="/api/teams/{team_id:uuid}", guards=[requires_team_membership])
     async def get_team(
         self,
         teams_service: TeamService,
@@ -138,7 +138,7 @@ class TeamController(Controller):
         db_obj = await teams_service.get(team_id)
         return teams_service.to_schema(db_obj, schema_type=Team)
 
-    @patch(operation_id="UpdateTeam", summary="Update a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_admin])
+    @patch(operation_id="UpdateTeam", summary="Update a team", description="Updates team properties such as name or description. Restricted to team admins. Emits a team_updated event and records an audit log entry with before/after snapshots.", path="/api/teams/{team_id:uuid}", guards=[requires_team_admin])
     async def update_team(
         self,
         request: Request[m.User, Token, Any],
@@ -187,7 +187,7 @@ class TeamController(Controller):
 
         return teams_service.to_schema(fresh_obj, schema_type=Team)
 
-    @delete(operation_id="DeleteTeam", summary="Delete a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership], status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(operation_id="DeleteTeam", summary="Delete a team", description="Permanently deletes a team and all associated memberships. Restricted to the team owner. Emits a team_deleted event and records an audit log entry.", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership], status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_team(
         self,
         request: Request[m.User, Token, Any],

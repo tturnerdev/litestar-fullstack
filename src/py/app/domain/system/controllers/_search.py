@@ -266,6 +266,7 @@ class SearchController(Controller):
         name="system:global-search",
         path="/api/search",
         summary="Global Search",
+        description="Search across all entity types (teams, devices, tickets, extensions, phone numbers, fax numbers, locations, and users). Results are scoped by user permissions and limited to 20 total across all types.",
     )
     async def global_search(
         self,

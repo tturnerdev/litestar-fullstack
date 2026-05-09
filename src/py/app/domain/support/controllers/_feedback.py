@@ -157,6 +157,7 @@ class FeedbackController(Controller):
     @post(
         operation_id="SubmitFeedback",
         summary="Submit portal feedback",
+        description="Accepts multipart form data with a title, category, description, and optional file attachments (max 10 MB per file, 25 MB total). Sends the feedback as a formatted HTML email to support and records an audit log entry.",
         path="/api/support/feedback",
     )
     async def submit_feedback(

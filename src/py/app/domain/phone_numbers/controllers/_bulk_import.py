@@ -64,6 +64,7 @@ class AdminPhoneNumberBulkImportController(Controller):
     @post(
         operation_id="AdminPreviewPhoneNumberBulkImport",
         summary="Preview phone number bulk import",
+        description="Parse and validate a CSV file of phone numbers, returning a preview of valid rows, validation errors, and detected duplicates. Maximum file size is 5 MB and 1000 rows.",
         path="/preview",
     )
     async def preview_import(
@@ -179,6 +180,7 @@ class AdminPhoneNumberBulkImportController(Controller):
     @post(
         operation_id="AdminExecutePhoneNumberBulkImport",
         summary="Execute phone number bulk import",
+        description="Create phone number records from previously validated rows. Skips or rejects duplicates based on the skip_duplicates flag. Logs an audit entry and emits a phone_numbers_bulk_imported event.",
         path="/execute",
     )
     async def execute_import(

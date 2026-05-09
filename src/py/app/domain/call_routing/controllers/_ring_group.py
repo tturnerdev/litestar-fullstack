@@ -63,6 +63,7 @@ class RingGroupController(Controller):
     @get(
         operation_id="ListRingGroups",
         summary="List ring groups",
+        description="Returns a paginated list of ring groups with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         path="/api/ring-groups",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -88,6 +89,7 @@ class RingGroupController(Controller):
     @post(
         operation_id="CreateRingGroup",
         summary="Create a ring group",
+        description="Creates a new ring group and assigns it to the current user's team. Logs an audit entry and emits a ring_group_created event.",
         path="/api/ring-groups",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -135,6 +137,7 @@ class RingGroupController(Controller):
     @get(
         operation_id="GetRingGroup",
         summary="Get ring group details",
+        description="Retrieves a single ring group by ID, including its current list of members.",
         path="/api/ring-groups/{ring_group_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -158,6 +161,7 @@ class RingGroupController(Controller):
     @patch(
         operation_id="UpdateRingGroup",
         summary="Update a ring group",
+        description="Partially updates a ring group's configuration. Captures before/after snapshots for audit logging and emits a ring_group_updated event.",
         path="/api/ring-groups/{ring_group_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -205,6 +209,7 @@ class RingGroupController(Controller):
     @delete(
         operation_id="DeleteRingGroup",
         summary="Delete a ring group",
+        description="Permanently deletes a ring group and all its member associations. Emits a ring_group_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/ring-groups/{ring_group_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -251,6 +256,7 @@ class RingGroupController(Controller):
     @get(
         operation_id="ListRingGroupMembers",
         summary="List ring group members",
+        description="Returns all members belonging to the specified ring group. Validates that the parent ring group exists before listing.",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -277,6 +283,7 @@ class RingGroupController(Controller):
     @post(
         operation_id="CreateRingGroupMember",
         summary="Add a ring group member",
+        description="Adds a new member to the specified ring group. Logs an audit entry and emits a ring_group_member_created event.",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
@@ -329,6 +336,7 @@ class RingGroupController(Controller):
     @patch(
         operation_id="UpdateRingGroupMember",
         summary="Update a ring group member",
+        description="Partially updates a member's settings within a ring group. Captures before/after snapshots for audit logging and emits a ring_group_member_updated event.",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -383,6 +391,7 @@ class RingGroupController(Controller):
     @delete(
         operation_id="DeleteRingGroupMember",
         summary="Remove a ring group member",
+        description="Removes a member from the specified ring group. Emits a ring_group_member_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],

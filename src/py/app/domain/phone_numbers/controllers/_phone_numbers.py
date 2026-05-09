@@ -60,7 +60,12 @@ class PhoneNumberController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ManageListPhoneNumbers", summary="List phone numbers", path="/")
+    @get(
+        operation_id="ManageListPhoneNumbers",
+        summary="List phone numbers",
+        description="Retrieve a paginated list of phone numbers. Supports search by number and friendly name, date range filtering, and sorting.",
+        path="/",
+    )
     async def list_phone_numbers(
         self,
         phone_number_service: PhoneNumberService,
@@ -78,7 +83,12 @@ class PhoneNumberController(Controller):
         results, total = await phone_number_service.list_and_count(*filters)
         return phone_number_service.to_schema(results, total, filters, schema_type=PhoneNumberList)
 
-    @get(operation_id="ManageGetPhoneNumber", summary="Get a phone number", path="/{phone_number_id:uuid}")
+    @get(
+        operation_id="ManageGetPhoneNumber",
+        summary="Get a phone number",
+        description="Retrieve the full details of a single phone number by its ID.",
+        path="/{phone_number_id:uuid}",
+    )
     async def get_phone_number(
         self,
         phone_number_service: PhoneNumberService,
@@ -96,7 +106,14 @@ class PhoneNumberController(Controller):
         result = await phone_number_service.get(phone_number_id)
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @post(operation_id="ManageCreatePhoneNumber", summary="Create a phone number", path="/", status_code=HTTP_201_CREATED, guards=[requires_feature_permission("voice", "edit")])
+    @post(
+        operation_id="ManageCreatePhoneNumber",
+        summary="Create a phone number",
+        description="Create a new phone number record. Emits a phone_number_created event and logs an audit entry.",
+        path="/",
+        status_code=HTTP_201_CREATED,
+        guards=[requires_feature_permission("voice", "edit")],
+    )
     async def create_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -134,7 +151,13 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @patch(operation_id="ManageUpdatePhoneNumber", summary="Update a phone number", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit")])
+    @patch(
+        operation_id="ManageUpdatePhoneNumber",
+        summary="Update a phone number",
+        description="Partially update a phone number's fields. Only provided fields are changed. Emits a phone_number_updated event and logs an audit entry with before/after snapshots.",
+        path="/{phone_number_id:uuid}",
+        guards=[requires_feature_permission("voice", "edit")],
+    )
     async def update_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -182,7 +205,15 @@ class PhoneNumberController(Controller):
         )
         return phone_number_service.to_schema(fresh_obj, schema_type=PhoneNumberDetail)
 
-    @delete(operation_id="ManageDeletePhoneNumber", summary="Delete a phone number", path="/{phone_number_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None, guards=[requires_feature_permission("voice", "edit")])
+    @delete(
+        operation_id="ManageDeletePhoneNumber",
+        summary="Delete a phone number",
+        description="Permanently delete a phone number record. Emits a phone_number_deleted event and logs an audit entry with the before-state snapshot.",
+        path="/{phone_number_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+        guards=[requires_feature_permission("voice", "edit")],
+    )
     async def delete_phone_number(
         self,
         request: Request[m.User, Token, Any],
