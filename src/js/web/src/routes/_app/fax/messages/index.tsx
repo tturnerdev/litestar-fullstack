@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Download, Eye, FileText, Home, MoreVertical, Search, Send, SlidersHorizontal, Trash2, X } from "lucide-react"
+import { AlertCircle, AlertTriangle, Download, Eye, FileText, Home, Loader2, MoreVertical, Search, Send, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
@@ -735,6 +735,7 @@ function FaxMessagesPage() {
                             onSuccess: () => toast.success("Fax message deleted"),
                           })
                         }
+                        isDeleting={deleteMessage.isPending}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
                       />
@@ -815,6 +816,7 @@ function FaxMessageRow({
   onToggle,
   onRowClick,
   onDelete,
+  isDeleting,
   cellClass,
   isColumnVisible,
 }: {
@@ -825,6 +827,7 @@ function FaxMessageRow({
   onToggle: () => void
   onRowClick: () => void
   onDelete: () => void
+  isDeleting: boolean
   cellClass: string
   isColumnVisible: (col: string) => boolean
 }) {
@@ -946,15 +949,16 @@ function FaxMessageRow({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
               onClick={() => {
                 onDelete()
-                setDeleteOpen(false)
               }}
             >
-              Delete Message
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isDeleting ? "Deleting..." : "Delete Message"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

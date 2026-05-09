@@ -12,6 +12,7 @@ import {
   Eye,
   Home,
   LifeBuoy,
+  Loader2,
   MoreVertical,
   Pencil,
   Plus,
@@ -1419,16 +1420,18 @@ function TicketRow({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteTicketMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteTicketMutation.isPending}
               onClick={() => {
                 deleteTicketMutation.mutate(undefined, {
                   onSettled: () => setDeleteOpen(false),
                 })
               }}
             >
-              Delete Ticket
+              {deleteTicketMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteTicketMutation.isPending ? "Deleting..." : "Delete Ticket"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
