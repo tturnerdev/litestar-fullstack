@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -640,7 +641,7 @@ function CallQueueDetailPage() {
   const { callQueueId } = Route.useParams()
   const router = useRouter()
 
-  const { data, isLoading, isError, refetch } = useCallQueue(callQueueId)
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useCallQueue(callQueueId)
   const { data: extensionsData } = useExtensions(1, 200)
   const deleteMutation = useDeleteCallQueue()
 
@@ -800,6 +801,7 @@ function CallQueueDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Badge variant="outline">
               {members.length} member{members.length === 1 ? "" : "s"}
             </Badge>

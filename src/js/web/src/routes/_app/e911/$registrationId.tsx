@@ -34,6 +34,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -182,7 +183,7 @@ function FieldError({ message }: { message?: string }) {
 function E911DetailPage() {
   const { registrationId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError, refetch } = useE911Registration(registrationId)
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useE911Registration(registrationId)
   useDocumentTitle(data ? `E911 - ${data.addressLine1}` : "E911 Details")
 
   const updateMutation = useUpdateE911Registration(registrationId)
@@ -376,6 +377,7 @@ function E911DetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {data.validated ? (
               <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
                 <CheckCircle2 className="mr-1 h-3 w-3" />

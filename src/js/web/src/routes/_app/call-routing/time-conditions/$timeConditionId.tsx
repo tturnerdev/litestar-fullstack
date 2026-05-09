@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -104,7 +105,7 @@ function TimeConditionDetailPage() {
   const { timeConditionId } = Route.useParams()
   const router = useRouter()
 
-  const { data, isLoading, isError, refetch } = useTimeCondition(timeConditionId)
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useTimeCondition(timeConditionId)
   const updateMutation = useUpdateTimeCondition(timeConditionId)
   const deleteMutation = useDeleteTimeCondition()
   const overrideMutation = useSetTimeConditionOverride(timeConditionId)
@@ -264,6 +265,7 @@ function TimeConditionDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Badge variant={data.overrideMode === "none" ? "outline" : "default"}>{overrideModeLabels[data.overrideMode] ?? data.overrideMode}</Badge>
             {!editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>

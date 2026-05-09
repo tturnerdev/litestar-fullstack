@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -288,7 +289,7 @@ function IvrMenuDetailPage() {
   const { ivrMenuId } = Route.useParams()
   const router = useRouter()
 
-  const { data, isLoading, isError, refetch } = useIvrMenu(ivrMenuId)
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useIvrMenu(ivrMenuId)
   const updateMutation = useUpdateIvrMenu(ivrMenuId)
   const deleteMutation = useDeleteIvrMenu()
 
@@ -536,6 +537,7 @@ function IvrMenuDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Badge variant="outline">
               {options.length} option{options.length === 1 ? "" : "s"}
             </Badge>
