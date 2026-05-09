@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, Clock, Download, Eye, GitFork, Home, Loader2, Menu, MoreVertical, Pencil, Phone, Plus, Search, Trash2, Users, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { AlertCircle, Clock, Download, Eye, Home, Loader2, Menu, MoreVertical, Pencil, Phone, Plus, Search, Trash2, Users, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { StatCard } from "@/components/home/stat-card"
 import {
   AlertDialog,
@@ -427,9 +427,10 @@ interface TabSearchProps {
   onSearchChange: (value: string) => void
   debouncedSearch: string
   onFreshnessChange?: (state: TabFreshnessState) => void
+  searchInputRef?: React.RefObject<HTMLInputElement | null>
 }
 
-function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
+function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -523,8 +524,8 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search time conditions..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
-          {search && (
+          <Input ref={searchInputRef} placeholder="Search time conditions..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          {search ? (
             <button
               type="button"
               onClick={() => onSearchChange("")}
@@ -533,6 +534,10 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+              /
+            </kbd>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -753,7 +758,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
   )
 }
 
-function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
+function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -854,8 +859,8 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search IVR menus..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
-          {search && (
+          <Input ref={searchInputRef} placeholder="Search IVR menus..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          {search ? (
             <button
               type="button"
               onClick={() => onSearchChange("")}
@@ -864,6 +869,10 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+              /
+            </kbd>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -1065,7 +1074,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
   )
 }
 
-function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
+function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -1166,8 +1175,8 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search call queues..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
-          {search && (
+          <Input ref={searchInputRef} placeholder="Search call queues..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          {search ? (
             <button
               type="button"
               onClick={() => onSearchChange("")}
@@ -1176,6 +1185,10 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+              /
+            </kbd>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -1384,7 +1397,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
   )
 }
 
-function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange }: TabSearchProps) {
+function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -1485,8 +1498,8 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search ring groups..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
-          {search && (
+          <Input ref={searchInputRef} placeholder="Search ring groups..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          {search ? (
             <button
               type="button"
               onClick={() => onSearchChange("")}
@@ -1495,6 +1508,10 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+              /
+            </kbd>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -1712,6 +1729,21 @@ function CallRoutingPage() {
 
   const { tab = "time-conditions", q: searchParam } = Route.useSearch()
   const navigate = Route.useNavigate()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Keyboard shortcuts: "/" to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   // URL-persisted search: local input state for smooth typing, debounced for URL sync
   const search = searchParam ?? ""
@@ -1797,14 +1829,7 @@ function CallRoutingPage() {
         <SectionErrorBoundary name="Call Routing Summary">
           <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             <StatCard label="Time Conditions" value={tcData?.total} icon={Clock} iconClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400" isLoading={tcLoading} index={0} />
-            <StatCard
-              label="IVR Menus"
-              value={ivrData?.total}
-              icon={GitFork}
-              iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
-              isLoading={ivrLoading}
-              index={1}
-            />
+            <StatCard label="IVR Menus" value={ivrData?.total} icon={Menu} iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400" isLoading={ivrLoading} index={1} />
             <StatCard label="Call Queues" value={cqData?.total} icon={Phone} iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400" isLoading={cqLoading} index={2} />
             <StatCard
               label="Ring Groups"
@@ -1841,22 +1866,46 @@ function CallRoutingPage() {
 
           <TabsContent value="time-conditions" className="mt-6">
             <SectionErrorBoundary name="Time Conditions">
-              <TimeConditionsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["time-conditions"]} />
+              <TimeConditionsTab
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                debouncedSearch={debouncedSearch}
+                onFreshnessChange={freshnessCallbacks["time-conditions"]}
+                searchInputRef={searchInputRef}
+              />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ivr-menus" className="mt-6">
             <SectionErrorBoundary name="IVR Menus">
-              <IvrMenusTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["ivr-menus"]} />
+              <IvrMenusTab
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                debouncedSearch={debouncedSearch}
+                onFreshnessChange={freshnessCallbacks["ivr-menus"]}
+                searchInputRef={searchInputRef}
+              />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="call-queues" className="mt-6">
             <SectionErrorBoundary name="Call Queues">
-              <CallQueuesTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["call-queues"]} />
+              <CallQueuesTab
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                debouncedSearch={debouncedSearch}
+                onFreshnessChange={freshnessCallbacks["call-queues"]}
+                searchInputRef={searchInputRef}
+              />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ring-groups" className="mt-6">
             <SectionErrorBoundary name="Ring Groups">
-              <RingGroupsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} onFreshnessChange={freshnessCallbacks["ring-groups"]} />
+              <RingGroupsTab
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                debouncedSearch={debouncedSearch}
+                onFreshnessChange={freshnessCallbacks["ring-groups"]}
+                searchInputRef={searchInputRef}
+              />
             </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
