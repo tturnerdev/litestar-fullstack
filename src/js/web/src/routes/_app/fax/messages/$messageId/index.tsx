@@ -279,10 +279,10 @@ function FaxMessageTimeline({ message }: { message: FaxMessage }) {
 // -- Main page --------------------------------------------------------------
 
 function FaxMessageDetailPage() {
-  useDocumentTitle("Fax Message")
   const { messageId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxMessage(messageId)
+  useDocumentTitle(data ? `Fax ${data.direction === "inbound" ? "from" : "to"} ${data.remoteNumber}` : "Fax Message")
   const deleteMutation = useDeleteFaxMessage()
   const { data: pdfUrl, isLoading: pdfLoading } = useDownloadFaxDocument(data ? messageId : "")
 
