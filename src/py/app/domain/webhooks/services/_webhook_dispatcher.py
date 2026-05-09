@@ -170,7 +170,7 @@ async def _deliver_to_endpoint(
                     "success": success,
                     "error": error_msg,
                     "retry_count": 0,
-                    "max_retries": 5,
+                    "max_retries": len(RETRY_BACKOFF_SECONDS),
                     "next_retry_at": next_retry_at,
                 },
                 auto_commit=True,

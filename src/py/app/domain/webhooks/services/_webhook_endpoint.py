@@ -16,12 +16,15 @@ from litestar.exceptions import ValidationException
 from app.db import models as m
 from app.lib.settings import get_settings
 
+_DUPLICATE_URL_MSG = "A webhook endpoint with this URL already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
 logger = structlog.get_logger()
 
 VALIDATION_TIMEOUT_SECONDS = 5
+SERVER_ERROR_THRESHOLD = 500
 
 # Private IP networks that should be blocked in non-dev mode
 _PRIVATE_NETWORKS = [
@@ -56,7 +59,7 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                 CollectionFilter(field_name="url", values=[data["url"]]),
             )
             if existing:
-                raise ValidationException("A webhook endpoint with this URL already exists.")
+                raise ValidationException(_DUPLICATE_URL_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.WebhookEndpoint], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.WebhookEndpoint]:
@@ -71,7 +74,7 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                     CollectionFilter(field_name="url", values=[data["url"]]),
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A webhook endpoint with this URL already exists.")
+                    raise ValidationException(_DUPLICATE_URL_MSG)
         return data
 
     async def to_model_on_upsert(self, data: service.ModelDictT[m.WebhookEndpoint]) -> service.ModelDictT[m.WebhookEndpoint]:
@@ -180,11 +183,10 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
         Returns:
             'valid' if reachable, 'unreachable' otherwise.
         """
-        server_error_threshold = 500
         try:
             async with httpx.AsyncClient(timeout=VALIDATION_TIMEOUT_SECONDS) as client:
                 response = await client.head(url, follow_redirects=True)
-                if response.status_code < server_error_threshold:
+                if response.status_code < SERVER_ERROR_THRESHOLD:
                     return "valid"
                 await logger.awarning(
                     "Webhook URL returned server error during validation",
