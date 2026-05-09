@@ -52,7 +52,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { useAdminDashboardStats, useAdminRecentActivity, useAdminSystemStatus } from "@/lib/api/hooks/admin"
 import { useConnections } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { useNotifications, useUnreadCount } from "@/lib/api/hooks/notifications"
@@ -62,7 +62,7 @@ import { useActiveTasks, useTasks } from "@/lib/api/hooks/tasks"
 import { useExtensions, usePhoneNumbers } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
-import { type DashboardStats, getDashboardStats, getRecentActivity, listRoles, listTags, listTeams, type RecentActivity } from "@/lib/generated/api"
+import { listRoles, listTags, listTeams } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/home")({
   component: HomePage,
@@ -592,32 +592,11 @@ function HomePage() {
     },
   })
 
-  const { data: adminStats, isLoading: adminStatsLoading } = useQuery({
-    queryKey: ["admin", "stats"],
-    queryFn: async () => {
-      const response = await getDashboardStats()
-      return response.data as DashboardStats
-    },
-    enabled: isSuperuser,
-  })
+  const { data: adminStats, isLoading: adminStatsLoading } = useAdminDashboardStats({ enabled: isSuperuser })
 
-  const { data: activityData, isLoading: activityLoading } = useQuery({
-    queryKey: ["admin", "activity", { limit: 8 }],
-    queryFn: async () => {
-      const response = await getRecentActivity({ query: { limit: 8 } })
-      return response.data as RecentActivity
-    },
-    enabled: isSuperuser,
-  })
+  const { data: activityData, isLoading: activityLoading } = useAdminRecentActivity({ limit: 8, enabled: isSuperuser })
 
-  const { data: chartActivityData } = useQuery({
-    queryKey: ["admin", "activity-chart", { limit: 200 }],
-    queryFn: async () => {
-      const response = await getRecentActivity({ query: { limit: 200, hours: 168 } })
-      return response.data as RecentActivity
-    },
-    enabled: isSuperuser,
-  })
+  const { data: chartActivityData } = useAdminRecentActivity({ limit: 200, hours: 168, enabled: isSuperuser })
 
   const chartData = useMemo(() => {
     const days: { date: string; label: string; count: number }[] = []

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { AnimatePresence, motion } from "framer-motion"
 import { AlertCircle, CheckCircle, Users, XCircle } from "lucide-react"
@@ -12,7 +12,8 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { acceptTeamInvitation, getTeam, rejectTeamInvitation } from "@/lib/generated/api"
+import { useTeam } from "@/lib/api/hooks/teams"
+import { acceptTeamInvitation, rejectTeamInvitation } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/invitations/$invitationId/accept")({
   component: AcceptInvitationPage,
@@ -27,18 +28,7 @@ function AcceptInvitationPage() {
   const [status, setStatus] = useState<"pending" | "accepting" | "declining" | "accepted" | "declined" | "error">("pending")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const {
-    data: team,
-    isLoading: isTeamLoading,
-    isError: isTeamError,
-  } = useQuery({
-    queryKey: ["team", teamId],
-    queryFn: async () => {
-      const response = await getTeam({ path: { team_id: teamId } })
-      return response.data
-    },
-    retry: false,
-  })
+  const { data: team, isLoading: isTeamLoading, isError: isTeamError } = useTeam(teamId)
 
   const acceptMutation = useMutation({
     mutationFn: async () => {

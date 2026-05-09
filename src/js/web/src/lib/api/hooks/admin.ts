@@ -66,23 +66,26 @@ import {
 } from "@/lib/generated/api"
 import { client } from "@/lib/generated/api/client.gen"
 
-export function useAdminDashboardStats() {
+export function useAdminDashboardStats(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
       const response = await getDashboardStats()
       return response.data as DashboardStats
     },
+    enabled: options?.enabled,
   })
 }
 
-export function useAdminRecentActivity() {
+export function useAdminRecentActivity(options?: { limit?: number; hours?: number; enabled?: boolean }) {
+  const { limit, hours, enabled } = options ?? {}
   return useQuery({
-    queryKey: ["admin", "activity"],
+    queryKey: ["admin", "activity", { limit, hours }],
     queryFn: async () => {
-      const response = await getRecentActivity()
+      const response = await getRecentActivity({ query: { limit, hours } })
       return response.data as RecentActivity
     },
+    enabled,
   })
 }
 
