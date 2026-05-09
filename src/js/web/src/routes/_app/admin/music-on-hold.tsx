@@ -37,7 +37,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminMusicOnHold, useAdminMusicOnHoldDetail, useCreateMusicOnHold, useDeleteMusicOnHold, useUpdateMusicOnHold } from "@/lib/api/hooks/music-on-hold"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import type { MusicOnHoldList } from "@/lib/generated/api"
+import type { MusicOnHoldCreate, MusicOnHoldList, MusicOnHoldUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/music-on-hold")({
@@ -174,7 +174,7 @@ function MohFormDialog({ mode, mohId, open, onOpenChange }: { mode: "create" | "
     }
 
     if (mode === "create") {
-      createMutation.mutate(payload as never, {
+      createMutation.mutate(payload as MusicOnHoldCreate, {
         onSuccess: () => {
           toast.success("Music on hold created")
           handleOpenChange(false)
@@ -186,7 +186,7 @@ function MohFormDialog({ mode, mohId, open, onOpenChange }: { mode: "create" | "
         },
       })
     } else {
-      updateMutation.mutate(payload as never, {
+      updateMutation.mutate(payload as MusicOnHoldUpdate, {
         onSuccess: () => {
           toast.success("Music on hold updated")
           handleOpenChange(false)

@@ -226,7 +226,7 @@ function AdminVoicePage() {
 
   const handleExportExtensions = useCallback(async () => {
     try {
-      const response = await adminListExtensions({ query: { currentPage: 1, pageSize: 10000 } as never })
+      const response = await adminListExtensions({ query: { currentPage: 1, pageSize: 10000 } })
       const all = (response.data as { items: AdminExtensionSummary[] })?.items ?? []
       if (!all.length) return
       exportToCsv("admin-extensions", extensionCsvHeaders, all)

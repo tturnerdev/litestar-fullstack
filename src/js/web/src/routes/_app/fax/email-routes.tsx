@@ -46,7 +46,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type FaxEmailRouteWithNumber, useAllFaxEmailRoutes, useCreateFaxEmailRoute, useDeleteFaxEmailRoute, useFaxNumbers, useUpdateFaxEmailRoute } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import { client } from "@/lib/generated/api/client.gen"
+import { deleteFaxEmailRoute as deleteFaxEmailRouteApi } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/email-routes")({
@@ -562,10 +562,7 @@ function FaxEmailRoutesPage() {
         async (id) => {
           const route = routes?.find((r) => r.id === id)
           if (!route) return
-          await client.request({
-            method: "DELETE",
-            url: `/api/fax/numbers/${route.faxNumberId}/email-routes/${id}`,
-          })
+          await deleteFaxEmailRouteApi({ path: { fax_number_id: route.faxNumberId, route_id: id } })
         },
         () => {
           setSelectedIds(new Set())

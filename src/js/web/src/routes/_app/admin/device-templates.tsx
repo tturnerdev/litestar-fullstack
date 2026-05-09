@@ -37,7 +37,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminDeviceTemplate, useAdminDeviceTemplates, useCreateDeviceTemplate, useDeleteDeviceTemplate, useUpdateDeviceTemplate } from "@/lib/api/hooks/device-templates"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import type { DeviceTemplateList } from "@/lib/generated/api"
+import type { DeviceTemplateCreate, DeviceTemplateList, DeviceTemplateUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/device-templates")({
@@ -215,7 +215,7 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
     }
 
     if (mode === "create") {
-      createMutation.mutate(payload as never, {
+      createMutation.mutate(payload as DeviceTemplateCreate, {
         onSuccess: () => {
           toast.success("Device template created")
           handleOpenChange(false)
@@ -227,7 +227,7 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
         },
       })
     } else {
-      updateMutation.mutate(payload as never, {
+      updateMutation.mutate(payload as DeviceTemplateUpdate, {
         onSuccess: () => {
           toast.success("Device template updated")
           handleOpenChange(false)
