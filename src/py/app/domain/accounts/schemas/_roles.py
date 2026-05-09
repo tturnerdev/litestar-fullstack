@@ -44,4 +44,4 @@ class RoleCreate(CamelizedBaseStruct):
 class RoleUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a role."""
 
-    name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET

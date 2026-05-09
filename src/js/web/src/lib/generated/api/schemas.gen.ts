@@ -1045,12 +1045,11 @@ export const AdminTeamUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },
@@ -8393,12 +8392,11 @@ export const RoleCreateSchema = {
 export const RoleUpdateSchema = {
   properties: {
     name: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },
@@ -9524,12 +9522,11 @@ export const TeamUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },
@@ -10416,12 +10413,11 @@ export const UserTeamSchema = {
 export const UserUpdateSchema = {
   properties: {
     email: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },
@@ -10430,9 +10426,6 @@ export const UserUpdateSchema = {
         {
           type: "boolean",
         },
-        {
-          type: "null",
-        },
       ],
     },
     isSuperuser: {
@@ -10440,18 +10433,12 @@ export const UserUpdateSchema = {
         {
           type: "boolean",
         },
-        {
-          type: "null",
-        },
       ],
     },
     isVerified: {
       oneOf: [
         {
           type: "boolean",
-        },
-        {
-          type: "null",
         },
       ],
     },

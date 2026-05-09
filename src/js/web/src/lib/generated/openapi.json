@@ -1094,12 +1094,11 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
               }
             ]
           }
@@ -8614,12 +8613,11 @@
       "RoleUpdate": {
         "properties": {
           "name": {
+            "maxLength": 100,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
               }
             ]
           }
@@ -9831,12 +9829,11 @@
             ]
           },
           "name": {
+            "maxLength": 100,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -10760,12 +10757,11 @@
       "UserUpdate": {
         "properties": {
           "email": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -10773,9 +10769,6 @@
             "oneOf": [
               {
                 "type": "boolean"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -10783,9 +10776,6 @@
             "oneOf": [
               {
                 "type": "boolean"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -10793,9 +10783,6 @@
             "oneOf": [
               {
                 "type": "boolean"
-              },
-              {
-                "type": "null"
               }
             ]
           },
@@ -13406,28 +13393,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13469,7 +13435,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13795,28 +13782,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13858,7 +13824,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14182,28 +14169,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14245,7 +14211,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14563,28 +14550,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14626,7 +14592,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [

@@ -174,7 +174,7 @@ function EditTeamPage() {
     }
     if (nameErr || descErr) return
 
-    const payload: { name?: string | null; description?: string | null; tags?: string[] | null } = {}
+    const payload: { name?: string; description?: string | null; tags?: string[] | null } = {}
 
     // Only include fields that changed
     if (name !== data.name) payload.name = name

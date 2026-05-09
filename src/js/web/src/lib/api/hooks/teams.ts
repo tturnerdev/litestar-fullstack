@@ -20,7 +20,7 @@ export function useTeam(teamId: string) {
 export function useUpdateTeam(teamId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { name?: string | null; description?: string | null; tags?: string[] | null }) => {
+    mutationFn: async (payload: { name?: string; description?: string | null; tags?: string[] | null }) => {
       const response = await updateTeam({ path: { team_id: teamId }, body: payload })
       return response.data
     },

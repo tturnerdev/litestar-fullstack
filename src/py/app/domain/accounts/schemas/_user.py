@@ -110,14 +110,14 @@ class UserCreate(CamelizedBaseStruct):
 class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a user."""
 
-    email: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    email: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     password: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     username: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
     phone: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
-    is_superuser: bool | msgspec.UnsetType | None = msgspec.UNSET
-    is_active: bool | msgspec.UnsetType | None = msgspec.UNSET
-    is_verified: bool | msgspec.UnsetType | None = msgspec.UNSET
+    is_superuser: bool | msgspec.UnsetType = msgspec.UNSET
+    is_active: bool | msgspec.UnsetType = msgspec.UNSET
+    is_verified: bool | msgspec.UnsetType = msgspec.UNSET
 
     def __post_init__(self) -> None:
         """Ensure at least one field is provided for update and validate fields."""

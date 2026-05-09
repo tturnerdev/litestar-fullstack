@@ -163,7 +163,7 @@ function TeamDetail() {
     const trimmedName = editName.trim()
     if (!trimmedName) return
 
-    const payload: { name?: string | null; description?: string | null; tags?: string[] | null } = {}
+    const payload: { name?: string; description?: string | null; tags?: string[] | null } = {}
 
     if (trimmedName !== team.name) payload.name = trimmedName
     if (editDescription !== (team.description ?? "")) {

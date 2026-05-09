@@ -284,7 +284,7 @@ export type AdminTeamSummary = {
 export type AdminTeamUpdate = {
   description?: string | null;
   is_active?: boolean;
-  name?: string | null;
+  name?: string;
 };
 
 /**
@@ -2100,7 +2100,7 @@ export type RoleCreate = {
  * RoleUpdate
  */
 export type RoleUpdate = {
-  name?: string | null;
+  name?: string;
 };
 
 /**
@@ -2452,7 +2452,7 @@ export type TeamTag = {
  */
 export type TeamUpdate = {
   description?: string | null;
-  name?: string | null;
+  name?: string;
   tags?: Array<string> | null;
 };
 
@@ -2691,10 +2691,10 @@ export type UserTeam = {
  * UserUpdate
  */
 export type UserUpdate = {
-  email?: string | null;
-  isActive?: boolean | null;
-  isSuperuser?: boolean | null;
-  isVerified?: boolean | null;
+  email?: string;
+  isActive?: boolean;
+  isSuperuser?: boolean;
+  isVerified?: boolean;
   name?: string | null;
   password?: string | null;
   phone?: string | null;
@@ -3428,10 +3428,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3507,10 +3507,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3575,10 +3575,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3655,10 +3655,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
