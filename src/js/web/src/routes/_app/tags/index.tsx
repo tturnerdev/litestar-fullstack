@@ -220,6 +220,12 @@ function TagsPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [navigate, page, totalPages])
 
+  useEffect(() => {
+    if (!isLoading && page > totalPages) {
+      navigate({ search: (prev) => ({ ...prev, page: totalPages > 1 ? totalPages : undefined }), replace: true })
+    }
+  }, [page, totalPages, isLoading, navigate])
+
   // Sort locally as a fallback (server may not support all sort options)
   const sortedItems = useMemo(() => {
     if (!sortKey || !sortDir) return items

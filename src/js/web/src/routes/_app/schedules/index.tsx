@@ -294,6 +294,12 @@ function SchedulesPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [navigate, page, totalPages])
 
+  useEffect(() => {
+    if (!isLoading && page > totalPages) {
+      navigate({ search: (prev) => ({ ...prev, page: totalPages > 1 ? totalPages : undefined }), replace: true })
+    }
+  }, [page, totalPages, isLoading, navigate])
+
   // filteredItems (no client-side filters currently, but keeps export consistent)
   const filteredItems = useMemo(() => schedules, [schedules])
 
