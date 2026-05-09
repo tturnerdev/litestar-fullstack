@@ -8,6 +8,7 @@ import msgspec
 from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
+from app.lib.validation import validate_url
 
 
 class WebhookList(CamelizedBaseStruct):
@@ -59,6 +60,9 @@ class WebhookCreate(CamelizedBaseStruct):
     headers: dict[str, str] = {}
     description: Annotated[str, Meta(max_length=500)] = ""
 
+    def __post_init__(self) -> None:
+        self.url = validate_url(self.url)
+
 
 class WebhookUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a webhook."""
@@ -70,6 +74,10 @@ class WebhookUpdate(CamelizedBaseStruct, omit_defaults=True):
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     headers: dict[str, str] | msgspec.UnsetType = msgspec.UNSET
     description: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType = msgspec.UNSET
+
+    def __post_init__(self) -> None:
+        if isinstance(self.url, str):
+            self.url = validate_url(self.url)
 
 
 class WebhookTestResult(CamelizedBaseStruct):

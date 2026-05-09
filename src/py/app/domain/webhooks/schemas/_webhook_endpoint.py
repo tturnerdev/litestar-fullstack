@@ -1,7 +1,5 @@
 """Webhook endpoint schemas."""
 
-from __future__ import annotations
-
 from datetime import datetime
 from typing import Annotated, Any
 from uuid import UUID
@@ -10,6 +8,7 @@ import msgspec
 from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
+from app.lib.validation import validate_url
 
 
 class WebhookEndpoint(CamelizedBaseStruct):
@@ -53,6 +52,9 @@ class WebhookEndpointCreate(CamelizedBaseStruct):
     headers: dict[str, Any] | None = None
     team_id: UUID | None = None
 
+    def __post_init__(self) -> None:
+        self.url = validate_url(self.url)
+
 
 class WebhookEndpointUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Webhook endpoint update schema."""
@@ -63,3 +65,7 @@ class WebhookEndpointUpdate(CamelizedBaseStruct, omit_defaults=True):
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     secret: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     headers: dict[str, Any] | msgspec.UnsetType | None = msgspec.UNSET
+
+    def __post_init__(self) -> None:
+        if isinstance(self.url, str):
+            self.url = validate_url(self.url)
