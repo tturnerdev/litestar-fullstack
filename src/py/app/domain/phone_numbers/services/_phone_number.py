@@ -18,6 +18,11 @@ _DIGITS_ONLY = re.compile(r"\D")
 
 VALID_NUMBER_TYPES = {"local", "toll_free", "international"}
 
+NANP_LOCAL_DIGITS = 10
+NANP_FULL_DIGITS = 11
+MAX_LABEL_LENGTH = 100
+MAX_CALLER_ID_NAME_LENGTH = 50
+
 
 def normalize_phone_number(raw: str) -> str:
     """Normalize a raw phone string to E.164 format.
@@ -43,9 +48,9 @@ def normalize_phone_number(raw: str) -> str:
         msg = f"No digits found in phone number: {raw}"
         raise ValueError(msg)
 
-    if len(digits) == 10 and not has_plus:
+    if len(digits) == NANP_LOCAL_DIGITS and not has_plus:
         result = f"+1{digits}"
-    elif has_plus or (len(digits) == 11 and digits.startswith("1")):
+    elif has_plus or (len(digits) == NANP_FULL_DIGITS and digits.startswith("1")):
         result = f"+{digits}"
     else:
         result = f"+{digits}"
@@ -87,8 +92,8 @@ def validate_phone_row(row: dict[str, str], row_index: int) -> tuple[dict[str, A
 
     label = row.get("label", "").strip()
     if label:
-        if len(label) > 100:
-            errors.append(f"Row {row_index}: 'label' must be 100 characters or fewer")
+        if len(label) > MAX_LABEL_LENGTH:
+            errors.append(f"Row {row_index}: 'label' must be {MAX_LABEL_LENGTH} characters or fewer")
         else:
             data["label"] = label
 
@@ -103,8 +108,8 @@ def validate_phone_row(row: dict[str, str], row_index: int) -> tuple[dict[str, A
 
     caller_id_name = row.get("caller_id_name", "").strip()
     if caller_id_name:
-        if len(caller_id_name) > 50:
-            errors.append(f"Row {row_index}: 'caller_id_name' must be 50 characters or fewer")
+        if len(caller_id_name) > MAX_CALLER_ID_NAME_LENGTH:
+            errors.append(f"Row {row_index}: 'caller_id_name' must be {MAX_CALLER_ID_NAME_LENGTH} characters or fewer")
         else:
             data["caller_id_name"] = caller_id_name
 

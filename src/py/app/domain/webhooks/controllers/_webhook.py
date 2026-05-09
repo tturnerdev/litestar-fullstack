@@ -37,14 +37,16 @@ if TYPE_CHECKING:
 
     from app.domain.admin.services import AuditLogService
 
+_SECRET_VISIBLE_CHARS = 4
+
 
 def _mask_secret(secret: str | None) -> str | None:
-    """Mask webhook secret, showing only the last 4 characters."""
+    """Mask webhook secret, showing only the last few characters."""
     if not secret:
         return None
-    if len(secret) <= 4:
+    if len(secret) <= _SECRET_VISIBLE_CHARS:
         return "*" * len(secret)
-    return "*" * (len(secret) - 4) + secret[-4:]
+    return "*" * (len(secret) - _SECRET_VISIBLE_CHARS) + secret[-_SECRET_VISIBLE_CHARS:]
 
 
 def _to_detail(service: WebhookService, obj: m.Webhook) -> WebhookDetail:
