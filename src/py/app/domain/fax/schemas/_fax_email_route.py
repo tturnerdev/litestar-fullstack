@@ -8,6 +8,7 @@ import msgspec
 from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
+from app.lib.validation import validate_email_format
 
 
 class FaxEmailRoute(CamelizedBaseStruct):
@@ -29,6 +30,9 @@ class FaxEmailRouteCreate(CamelizedBaseStruct):
     is_active: bool = True
     notify_on_failure: bool = True
 
+    def __post_init__(self) -> None:
+        self.email_address = validate_email_format(self.email_address)
+
 
 class FaxEmailRouteUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a fax email route."""
@@ -36,3 +40,7 @@ class FaxEmailRouteUpdate(CamelizedBaseStruct, omit_defaults=True):
     email_address: Annotated[str, Meta(min_length=1, max_length=320)] | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     notify_on_failure: bool | msgspec.UnsetType = msgspec.UNSET
+
+    def __post_init__(self) -> None:
+        if isinstance(self.email_address, str):
+            self.email_address = validate_email_format(self.email_address)

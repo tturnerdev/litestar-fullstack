@@ -9,6 +9,7 @@ from msgspec import Meta
 
 from app.db.models._voice_enums import GreetingType
 from app.lib.schema import CamelizedBaseStruct
+from app.lib.validation import validate_email_format
 
 
 class VoicemailSettings(CamelizedBaseStruct):
@@ -41,6 +42,10 @@ class VoicemailSettingsUpdate(CamelizedBaseStruct, omit_defaults=True):
     email_attach_audio: bool | msgspec.UnsetType = msgspec.UNSET
     transcription_enabled: bool | msgspec.UnsetType = msgspec.UNSET
     auto_delete_days: Annotated[int, Meta(ge=1)] | msgspec.UnsetType | None = msgspec.UNSET
+
+    def __post_init__(self) -> None:
+        if isinstance(self.email_address, str):
+            self.email_address = validate_email_format(self.email_address)
 
 
 class VoicemailMessage(CamelizedBaseStruct):

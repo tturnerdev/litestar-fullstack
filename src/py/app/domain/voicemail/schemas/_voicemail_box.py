@@ -9,6 +9,7 @@ from msgspec import Meta
 
 from app.db.models._voice_enums import GreetingType
 from app.lib.schema import CamelizedBaseStruct
+from app.lib.validation import validate_email_format
 
 
 class VoicemailBox(CamelizedBaseStruct):
@@ -45,6 +46,10 @@ class VoicemailBoxCreate(CamelizedBaseStruct):
     max_message_length_seconds: Annotated[int, Meta(ge=10, le=600)] = 120
     auto_delete_days: Annotated[int, Meta(ge=1, le=365)] | None = None
 
+    def __post_init__(self) -> None:
+        if self.email_address is not None:
+            self.email_address = validate_email_format(self.email_address)
+
 
 class VoicemailBoxUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a voicemail box."""
@@ -59,3 +64,7 @@ class VoicemailBoxUpdate(CamelizedBaseStruct, omit_defaults=True):
     greeting_file_path: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     max_message_length_seconds: Annotated[int, Meta(ge=10, le=600)] | msgspec.UnsetType = msgspec.UNSET
     auto_delete_days: Annotated[int, Meta(ge=1, le=365)] | msgspec.UnsetType | None = msgspec.UNSET
+
+    def __post_init__(self) -> None:
+        if isinstance(self.email_address, str):
+            self.email_address = validate_email_format(self.email_address)

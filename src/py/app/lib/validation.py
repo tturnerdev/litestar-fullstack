@@ -393,6 +393,36 @@ def validate_email(v: str) -> str:
 Email = Annotated[str, msgspec.Meta(description="Valid email address")]
 
 
+def validate_email_format(v: str) -> str:
+    """Validate email format without blocking patterns.
+
+    Suitable for non-account email fields (fax routes, voicemail notifications)
+    where any valid email should be accepted.
+    """
+    v = _ensure_str(v, "Email")
+    email = v.strip().lower()
+
+    if len(email) > EMAIL_MAX_LENGTH:
+        msg = "Email address too long"
+        raise ValidationError(msg)
+    if len(email) < EMAIL_MIN_LENGTH:
+        msg = "Email address too short"
+        raise ValidationError(msg)
+    if not EMAIL_BASIC_PATTERN.match(email):
+        msg = "Invalid email format"
+        raise ValidationError(msg)
+    if EMAIL_DOUBLE_DOT_PATTERN.search(email):
+        msg = "Invalid email format"
+        raise ValidationError(msg)
+
+    local_part, _, _ = email.rpartition("@")
+    if len(local_part) > EMAIL_LOCAL_PART_MAX_LENGTH:
+        msg = "Email local part too long"
+        raise ValidationError(msg)
+
+    return email
+
+
 def validate_password(v: str) -> str:
     """Production-ready password validation with security checks.
 
