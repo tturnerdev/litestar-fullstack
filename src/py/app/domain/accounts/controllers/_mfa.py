@@ -167,6 +167,7 @@ class MfaController(Controller):
         Args:
             request: Request with authenticated user
             users_service: User service
+            audit_service: Audit log service
             settings: Application settings
 
         Returns:
@@ -280,6 +281,7 @@ class MfaController(Controller):
         Args:
             request: Request with authenticated user
             users_service: User service
+            audit_service: Audit log service
             data: Password for verification
 
         Returns:
@@ -329,6 +331,7 @@ class MfaController(Controller):
         Args:
             request: Request with authenticated user
             users_service: User service
+            audit_service: Audit log service
             data: Password for verification
 
         Returns:

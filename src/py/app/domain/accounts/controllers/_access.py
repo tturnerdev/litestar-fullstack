@@ -118,7 +118,9 @@ class AccessController(Controller):
             data: OAuth2 Login Data
             users_service: User Service
             refresh_token_service: Refresh Token Service
+            audit_service: Audit log service
             settings: Application settings
+            user_agent: User-agent header string
 
         Returns:
             OAuth2 Login Response with refresh token cookie, or MFA challenge
@@ -245,6 +247,7 @@ class AccessController(Controller):
         Args:
             request: Request
             refresh_token_service: Refresh Token Service
+            audit_service: Audit log service
 
         Returns:
             Logout Response
@@ -305,6 +308,7 @@ class AccessController(Controller):
             refresh_token_service: Refresh Token Service
             users_service: User Service
             settings: Application settings
+            user_agent: User-agent header string
 
         Returns:
             New access token with rotated refresh token
@@ -440,6 +444,7 @@ class AccessController(Controller):
         Args:
             request: Request with authenticated user
             refresh_token_service: Refresh Token Service
+            audit_service: Audit log service
 
         Returns:
             Success message
@@ -609,6 +614,7 @@ class AccessController(Controller):
             data: Password reset request data
             users_service: User service
             password_reset_service: Password reset service
+            audit_service: Audit log service
             request: HTTP request object
             app_mailer: Email service for sending notifications
 

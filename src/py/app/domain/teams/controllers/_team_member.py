@@ -147,6 +147,7 @@ class TeamMemberController(Controller):
             team_members_service: Team Member Service
             users_service: User Service
             audit_service: Audit log service
+            notifications_service: Notification service
             current_user: Current User
             data: Team Member Modify
             team_id: Team ID

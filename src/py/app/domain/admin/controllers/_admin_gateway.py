@@ -70,6 +70,7 @@ class AdminGatewayController(Controller):
 
         Args:
             request: Request with authenticated superuser.
+            audit_service: Audit log service.
             data: The settings update payload.
 
         Returns:

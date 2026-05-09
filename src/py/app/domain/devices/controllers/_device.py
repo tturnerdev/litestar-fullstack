@@ -114,6 +114,7 @@ class DeviceController(Controller):
             request: The current request
             devices_service: Device Service
             audit_service: Audit Log Service
+            notifications_service: Notification service
             current_user: Current User
             data: Device Create
 
@@ -246,6 +247,7 @@ class DeviceController(Controller):
             request: The current request
             devices_service: Device Service
             audit_service: Audit Log Service
+            notifications_service: Notification service
             current_user: Current User
             device_id: Device ID
         """

@@ -93,6 +93,8 @@ class TeamInvitationController(Controller):
             team_invitations_service: The team invitation service.
             teams_service: The teams service.
             audit_service: Audit log service.
+            notifications_service: Notification service.
+            users_service: User service.
             app_mailer: Email service for sending notifications.
             request: The request object.
             team_id: The team id.
@@ -224,12 +226,14 @@ class TeamInvitationController(Controller):
 
         Args:
             request: The HTTP request.
-            team_id: The ID of the team to accept the invitation for.
-            invitation_id: The ID of the invitation to accept.
+            current_user: The current user.
             team_invitations_service: The team invitation service.
             team_members_service: The team member service.
             audit_service: Audit log service.
-            current_user: The current user.
+            notifications_service: Notification service.
+            teams_service: Team service.
+            team_id: The ID of the team to accept the invitation for.
+            invitation_id: The ID of the invitation to accept.
 
         Raises:
             HTTPException: If the invitation is invalid or the user cannot accept it

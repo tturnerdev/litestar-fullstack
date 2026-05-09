@@ -74,6 +74,7 @@ class MfaChallengeController(Controller):
             audit_service: Audit log service
             settings: Application settings
             data: TOTP code or backup code
+            user_agent: User-agent header string
 
         Returns:
             Full OAuth2 login response with access token
