@@ -464,6 +464,7 @@ function FaxNumbersPage() {
             <Button size="sm" asChild>
               <Link to="/fax/numbers/new">
                 <Plus className="mr-2 h-4 w-4" /> New Number
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
               </Link>
             </Button>
             <div className="flex gap-1 rounded-lg border border-border/60 p-0.5">

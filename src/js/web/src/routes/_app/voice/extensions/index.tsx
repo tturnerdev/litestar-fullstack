@@ -887,8 +887,11 @@ function ExtensionsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => syncExtensions.mutate()}>Sync Now</AlertDialogAction>
+            <AlertDialogCancel disabled={syncExtensions.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => syncExtensions.mutate()} disabled={syncExtensions.isPending}>
+              {syncExtensions.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {syncExtensions.isPending ? "Syncing..." : "Sync Now"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
