@@ -521,7 +521,7 @@ function ExtensionDetailPage() {
       {/* Delete confirmation dialog */}
       <DeleteExtensionDialog
         extensionId={extensionId}
-        extensionName={data.displayName}
+        extensionName={data.displayName ?? ""}
         extensionNumber={data.extensionNumber}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
@@ -548,16 +548,16 @@ interface ForwardingState {
 
 function stateFromExtension(ext: ExtensionType): ForwardingState {
   return {
-    forwardAlwaysEnabled: ext.forwardAlwaysEnabled,
+    forwardAlwaysEnabled: ext.forwardAlwaysEnabled ?? false,
     forwardAlwaysDestination: ext.forwardAlwaysDestination ?? "",
-    forwardBusyEnabled: ext.forwardBusyEnabled,
+    forwardBusyEnabled: ext.forwardBusyEnabled ?? false,
     forwardBusyDestination: ext.forwardBusyDestination ?? "",
-    forwardNoAnswerEnabled: ext.forwardNoAnswerEnabled,
+    forwardNoAnswerEnabled: ext.forwardNoAnswerEnabled ?? false,
     forwardNoAnswerDestination: ext.forwardNoAnswerDestination ?? "",
-    forwardNoAnswerRingCount: ext.forwardNoAnswerRingCount,
-    forwardUnreachableEnabled: ext.forwardUnreachableEnabled,
+    forwardNoAnswerRingCount: ext.forwardNoAnswerRingCount ?? 0,
+    forwardUnreachableEnabled: ext.forwardUnreachableEnabled ?? false,
     forwardUnreachableDestination: ext.forwardUnreachableDestination ?? "",
-    dndEnabled: ext.dndEnabled,
+    dndEnabled: ext.dndEnabled ?? false,
   }
 }
 
@@ -702,7 +702,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
           <ForwardingRuleRow
             label="Always Forward"
             description="Forward all incoming calls"
-            enabled={isEditing ? state.forwardAlwaysEnabled : extension.forwardAlwaysEnabled}
+            enabled={isEditing ? state.forwardAlwaysEnabled : (extension.forwardAlwaysEnabled ?? false)}
             destination={isEditing ? state.forwardAlwaysDestination : (extension.forwardAlwaysDestination ?? "")}
             onEnabledChange={(v) => update("forwardAlwaysEnabled", v)}
             onDestinationChange={(v) => update("forwardAlwaysDestination", v)}
@@ -714,7 +714,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
           <ForwardingRuleRow
             label="Forward on Busy"
             description="Forward when the line is busy"
-            enabled={isEditing ? state.forwardBusyEnabled : extension.forwardBusyEnabled}
+            enabled={isEditing ? state.forwardBusyEnabled : (extension.forwardBusyEnabled ?? false)}
             destination={isEditing ? state.forwardBusyDestination : (extension.forwardBusyDestination ?? "")}
             onEnabledChange={(v) => update("forwardBusyEnabled", v)}
             onDestinationChange={(v) => update("forwardBusyDestination", v)}
@@ -726,7 +726,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
           <ForwardingRuleRow
             label="Forward on No Answer"
             description="Forward after the ring timeout"
-            enabled={isEditing ? state.forwardNoAnswerEnabled : extension.forwardNoAnswerEnabled}
+            enabled={isEditing ? state.forwardNoAnswerEnabled : (extension.forwardNoAnswerEnabled ?? false)}
             destination={isEditing ? state.forwardNoAnswerDestination : (extension.forwardNoAnswerDestination ?? "")}
             ringCount={isEditing ? state.forwardNoAnswerRingCount : extension.forwardNoAnswerRingCount}
             onEnabledChange={(v) => update("forwardNoAnswerEnabled", v)}
@@ -741,7 +741,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
           <ForwardingRuleRow
             label="Forward on Unreachable"
             description="Forward when the extension is offline"
-            enabled={isEditing ? state.forwardUnreachableEnabled : extension.forwardUnreachableEnabled}
+            enabled={isEditing ? state.forwardUnreachableEnabled : (extension.forwardUnreachableEnabled ?? false)}
             destination={isEditing ? state.forwardUnreachableDestination : (extension.forwardUnreachableDestination ?? "")}
             onEnabledChange={(v) => update("forwardUnreachableEnabled", v)}
             onDestinationChange={(v) => update("forwardUnreachableDestination", v)}
@@ -922,7 +922,7 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
   const { data: fwdRules } = useForwardingRules(extensionId)
   const { data: dndSettings } = useDndSettings(extensionId)
 
-  const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
+  const unreadCount = vmMessages?.items?.filter((m) => !m.isRead).length ?? 0
   const totalMessages = vmMessages?.total ?? 0
   const ruleCount = fwdRules?.items?.length ?? 0
   const activeRules = fwdRules?.items?.filter((r) => r.isActive).length ?? 0
@@ -1356,7 +1356,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
 
   const isLoading = settingsLoading || msgsLoading
   const vmEnabled = vmSettings?.isEnabled ?? false
-  const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
+  const unreadCount = vmMessages?.items?.filter((m) => !m.isRead).length ?? 0
   const totalCount = vmMessages?.total ?? 0
   const recentMessages = vmMessages?.items ?? []
 
@@ -1436,7 +1436,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
           <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-muted-foreground">Greeting</p>
-              <p className="capitalize">{vmSettings.greetingType.replace("_", " ")}</p>
+              <p className="capitalize">{(vmSettings.greetingType ?? "").replace("_", " ")}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Transcription</p>
@@ -1501,7 +1501,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm ${!msg.isRead ? "font-semibold" : ""}`}>{msg.callerName ?? msg.callerNumber}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {formatDuration(msg.durationSeconds)} &middot; {formatDateTime(msg.receivedAt)}
+                      {formatDuration(msg.durationSeconds ?? 0)} &middot; {formatDateTime(msg.receivedAt)}
                       {msg.transcription ? ` — ${msg.transcription.slice(0, 50)}${msg.transcription.length > 50 ? "..." : ""}` : ""}
                     </p>
                   </div>

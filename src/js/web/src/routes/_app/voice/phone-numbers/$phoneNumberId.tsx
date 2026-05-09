@@ -350,7 +350,7 @@ function PhoneNumberDetailPage() {
                       </div>
                       <div>
                         <p className="text-muted-foreground text-sm">Type</p>
-                        <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>{numberTypeLabel[data.numberType] ?? data.numberType}</Badge>
+                        <Badge variant={numberTypeBadgeVariant[data.numberType ?? "local"] ?? "outline"}>{numberTypeLabel[data.numberType ?? "local"] ?? data.numberType}</Badge>
                       </div>
                       <div className="space-y-2">
                         <Label>Caller ID Name</Label>
@@ -408,7 +408,7 @@ function PhoneNumberDetailPage() {
                       </div>
                       <div>
                         <p className="text-muted-foreground">Type</p>
-                        <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>{numberTypeLabel[data.numberType] ?? data.numberType}</Badge>
+                        <Badge variant={numberTypeBadgeVariant[data.numberType ?? "local"] ?? "outline"}>{numberTypeLabel[data.numberType ?? "local"] ?? data.numberType}</Badge>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Caller ID Name</p>

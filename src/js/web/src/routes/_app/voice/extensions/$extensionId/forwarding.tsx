@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type ForwardingRule, useCreateForwardingRule, useDeleteForwardingRule, useExtension, useForwardingRules, useUpdateForwardingRule } from "@/lib/api/hooks/voice"
+import type { ForwardingDestinationType, ForwardingRuleType } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/forwarding")({
   component: ForwardingPage,
@@ -155,7 +156,7 @@ function ForwardingPage() {
     )
   }
 
-  const rules: ForwardingRule[] = (rulesData?.items ?? []).sort((a, b) => a.priority - b.priority)
+  const rules: ForwardingRule[] = (rulesData?.items ?? []).sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
   const ruleCount = rules.length
   const activeCount = rules.filter((r) => r.isActive).length
   const extensionName = extension?.displayName ?? "Extension"
@@ -389,8 +390,8 @@ function AddRuleDialog({ extensionId, open, onOpenChange }: { extensionId: strin
 
     createMutation.mutate(
       {
-        ruleType,
-        destinationType: destType,
+        ruleType: ruleType as ForwardingRuleType,
+        destinationType: destType as ForwardingDestinationType,
         destinationValue: destValue,
         ringTimeoutSeconds: timeout ? Number(timeout) : null,
         priority: Number(priority) || 0,

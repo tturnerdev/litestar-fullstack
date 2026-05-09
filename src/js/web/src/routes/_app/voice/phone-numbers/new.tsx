@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreatePhoneNumber } from "@/lib/api/hooks/voice"
+import type { PhoneNumberType } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/voice/phone-numbers/new")({
@@ -116,17 +117,19 @@ function NewPhoneNumberPage() {
       {
         number: number.trim(),
         label: label.trim() || null,
-        numberType,
+        numberType: numberType as PhoneNumberType,
         callerIdName: callerIdName.trim() || null,
         isActive,
       },
       {
         onSuccess: (data) => {
           toast.success("Phone number created successfully")
-          router.navigate({
-            to: "/voice/phone-numbers/$phoneNumberId",
-            params: { phoneNumberId: data.id },
-          })
+          if (data) {
+            router.navigate({
+              to: "/voice/phone-numbers/$phoneNumberId",
+              params: { phoneNumberId: data.id },
+            })
+          }
         },
         onSettled: () => {
           justSubmittedRef.current = false

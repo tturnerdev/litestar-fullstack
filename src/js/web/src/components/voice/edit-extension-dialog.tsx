@@ -187,7 +187,7 @@ export function EditExtensionDialog({ extension, open, onOpenChange }: EditExten
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={PHONE_NONE}>None</SelectItem>
-                  {phoneNumbers?.items.map((pn) => (
+                  {phoneNumbers?.items?.map((pn) => (
                     <SelectItem key={pn.id} value={pn.id}>
                       {formatPhoneNumber(pn.number)}
                       {pn.label ? ` - ${pn.label}` : ""}

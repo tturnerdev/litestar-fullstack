@@ -53,7 +53,7 @@ export function ExtensionRowActions({ extension }: ExtensionRowActionsProps) {
 
       <DeleteExtensionDialog
         extensionId={extension.id}
-        extensionName={extension.displayName}
+        extensionName={extension.displayName ?? ""}
         extensionNumber={extension.extensionNumber}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

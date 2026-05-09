@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreateExtension, usePhoneNumbers } from "@/lib/api/hooks/voice"
+import type { ExtensionCreate } from "@/lib/generated/api"
 import { extensionNumberRegex } from "@/lib/validation"
 
 const PHONE_NONE = "__none__"
@@ -83,7 +84,7 @@ function NewExtensionPage() {
     payload.isActive = data.isActive
 
     try {
-      await createExtension.mutateAsync(payload)
+      await createExtension.mutateAsync(payload as ExtensionCreate)
       // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
       toast.success("Extension created successfully")
@@ -204,7 +205,7 @@ function NewExtensionPage() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value={PHONE_NONE}>None</SelectItem>
-                            {phoneNumbers?.items.map((pn) => (
+                            {phoneNumbers?.items?.map((pn) => (
                               <SelectItem key={pn.id} value={pn.id}>
                                 {pn.number}
                                 {pn.label ? ` - ${pn.label}` : ""}

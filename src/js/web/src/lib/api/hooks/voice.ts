@@ -1,127 +1,56 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import {
+  createExtension,
+  createForwardingRule,
+  createPhoneNumber,
+  deleteExtension,
+  deleteForwardingRule,
+  deletePhoneNumber,
+  deleteVoicemailMessage,
+  getDndSettings,
+  getExtension,
+  getPhoneNumber,
+  getVoicemailSettings,
+  listExtensions,
+  listForwardingRules,
+  listPhoneNumbers,
+  listUnregisteredE911PhoneNumbers,
+  listVoicemailMessages,
+  syncExtensions,
+  toggleDnd,
+  updateDndSettings,
+  updateExtension,
+  updateForwardingRule,
+  updatePhoneNumber,
+  updateVoicemailMessage,
+  updateVoicemailSettings,
+} from "@/lib/generated/api"
 import { client } from "@/lib/generated/api/client.gen"
 
 // ---------------------------------------------------------------------------
-// Types
+// Re-exported generated types
 // ---------------------------------------------------------------------------
 
-export interface PhoneNumber {
-  id: string
-  userId: string
-  number: string
-  label: string | null
-  numberType: "local" | "toll_free" | "international"
-  callerIdName: string | null
-  isActive: boolean
-  teamId: string | null
-  e911Registered: boolean
-  e911RegistrationId: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface Extension {
-  id: string
-  userId: string
-  extensionNumber: string
-  phoneNumberId: string | null
-  displayName: string
-  isActive: boolean
-  forwardAlwaysEnabled: boolean
-  forwardAlwaysDestination: string | null
-  forwardBusyEnabled: boolean
-  forwardBusyDestination: string | null
-  forwardNoAnswerEnabled: boolean
-  forwardNoAnswerDestination: string | null
-  forwardNoAnswerRingCount: number
-  forwardUnreachableEnabled: boolean
-  forwardUnreachableDestination: string | null
-  dndEnabled: boolean
-  e911Status: string
-  e911RegistrationId: string | null
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface VoicemailSettings {
-  id: string
-  extensionId: string
-  isEnabled: boolean
-  greetingType: "default" | "custom" | "name_only"
-  greetingFilePath: string | null
-  maxMessageLengthSeconds: number
-  emailAddress: string | null
-  emailNotification: boolean
-  emailAttachAudio: boolean
-  transcriptionEnabled: boolean
-  autoDeleteDays: number | null
-}
-
-export interface VoicemailMessage {
-  id: string
-  voicemailBoxId: string
-  callerNumber: string
-  callerName: string | null
-  durationSeconds: number
-  audioFilePath: string
-  transcription: string | null
-  isRead: boolean
-  isUrgent: boolean
-  receivedAt: string
-}
-
-export interface ForwardingRule {
-  id: string
-  extensionId: string
-  ruleType: "always" | "busy" | "no_answer" | "unreachable"
-  destinationType: "extension" | "external" | "voicemail"
-  destinationValue: string
-  ringTimeoutSeconds: number | null
-  isActive: boolean
-  priority: number
-}
-
-export interface DndSettings {
-  id: string
-  extensionId: string
-  isEnabled: boolean
-  mode: "always" | "scheduled" | "off"
-  scheduleStart: string | null
-  scheduleEnd: string | null
-  scheduleDays: number[] | null
-  allowList: string[] | null
-}
-
-interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const config = client.getConfig()
-  const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-  const response = await fetch(`${baseUrl}${url}`, {
-    credentials: "include",
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
-  })
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail ?? `Request failed (${response.status})`)
-  }
-  if (response.status === 204) return undefined as unknown as T
-  return response.json()
-}
+// VoicemailMessage for voice extension endpoints uses VoiceSchemasVoicemailVoicemailMessage
+export type {
+  DndSettings,
+  DndSettingsUpdate,
+  DndToggleResponse,
+  Extension,
+  ExtensionCreate,
+  ExtensionSyncResult,
+  ExtensionUpdate,
+  ForwardingRule,
+  ForwardingRuleCreate,
+  ForwardingRuleUpdate,
+  PhoneNumber,
+  PhoneNumberCreate,
+  PhoneNumberUpdate,
+  VoicemailSettings,
+  VoicemailSettingsUpdate,
+  VoiceSchemasVoicemailVoicemailMessage as VoicemailMessage,
+} from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
 // Phone Numbers
@@ -130,14 +59,14 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 export function usePhoneNumbers(page = 1, pageSize = 25) {
   return useQuery({
     queryKey: ["voice", "phone-numbers", page, pageSize],
-    queryFn: () => apiFetch<PaginatedResponse<PhoneNumber>>(`/api/voice/phone-numbers?currentPage=${page}&pageSize=${pageSize}`),
+    queryFn: () => listPhoneNumbers({ query: { currentPage: page, pageSize } }).then((r) => r.data),
   })
 }
 
 export function usePhoneNumber(id: string) {
   return useQuery({
     queryKey: ["voice", "phone-number", id],
-    queryFn: () => apiFetch<PhoneNumber>(`/api/voice/phone-numbers/${id}`),
+    queryFn: () => getPhoneNumber({ path: { phone_number_id: id } }).then((r) => r.data),
     enabled: !!id,
   })
 }
@@ -145,11 +74,7 @@ export function usePhoneNumber(id: string) {
 export function useUpdatePhoneNumber(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<PhoneNumber>(`/api/voice/phone-numbers/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").PhoneNumberUpdate) => updatePhoneNumber({ path: { phone_number_id: id }, body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-number", id] })
@@ -166,11 +91,7 @@ export function useUpdatePhoneNumber(id: string) {
 export function useCreatePhoneNumber() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<PhoneNumber>("/api/voice/phone-numbers", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").PhoneNumberCreate) => createPhoneNumber({ body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
       toast.success("Phone number created")
@@ -186,7 +107,7 @@ export function useCreatePhoneNumber() {
 export function useDeletePhoneNumber() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (phoneNumberId: string) => apiFetch<void>(`/api/voice/phone-numbers/${phoneNumberId}`, { method: "DELETE" }),
+    mutationFn: (phoneNumberId: string) => deletePhoneNumber({ path: { phone_number_id: phoneNumberId } }).then((r) => r.data),
     onSuccess: (_data, phoneNumberId) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-number", phoneNumberId] })
@@ -203,7 +124,7 @@ export function useDeletePhoneNumber() {
 export function useUnregisteredE911Numbers(teamId: string) {
   return useQuery({
     queryKey: ["voice", "phone-numbers", "unregistered-e911", teamId],
-    queryFn: () => apiFetch<PhoneNumber[]>(`/api/voice/phone-numbers/unregistered-e911?teamId=${teamId}`),
+    queryFn: () => listUnregisteredE911PhoneNumbers({ query: { teamId } }).then((r) => r.data),
     enabled: !!teamId,
   })
 }
@@ -215,7 +136,7 @@ export function useUnregisteredE911Numbers(teamId: string) {
 export function useExtensions(page = 1, pageSize = 25, refetchInterval?: number | false) {
   return useQuery({
     queryKey: ["voice", "extensions", page, pageSize],
-    queryFn: () => apiFetch<PaginatedResponse<Extension>>(`/api/voice/extensions?currentPage=${page}&pageSize=${pageSize}`),
+    queryFn: () => listExtensions({ query: { currentPage: page, pageSize } }).then((r) => r.data),
     refetchInterval,
   })
 }
@@ -224,8 +145,8 @@ export function useExtensionsByPhoneNumber(phoneNumberId: string) {
   return useQuery({
     queryKey: ["voice", "extensions", "by-phone-number", phoneNumberId],
     queryFn: async () => {
-      const response = await apiFetch<PaginatedResponse<Extension>>("/api/voice/extensions?pageSize=100")
-      return response.items.filter((ext) => ext.phoneNumberId === phoneNumberId)
+      const response = await listExtensions({ query: { pageSize: 100 } }).then((r) => r.data)
+      return (response?.items ?? []).filter((ext) => ext.phoneNumberId === phoneNumberId)
     },
     enabled: !!phoneNumberId,
   })
@@ -235,9 +156,9 @@ export function useExtensionsByTeam(memberUserIds: string[]) {
   return useQuery({
     queryKey: ["voice", "extensions", "by-team", memberUserIds],
     queryFn: async () => {
-      const response = await apiFetch<PaginatedResponse<Extension>>("/api/voice/extensions?pageSize=200")
+      const response = await listExtensions({ query: { pageSize: 200 } }).then((r) => r.data)
       const userIdSet = new Set(memberUserIds)
-      return response.items.filter((ext) => userIdSet.has(ext.userId))
+      return (response?.items ?? []).filter((ext) => userIdSet.has(ext.userId))
     },
     enabled: memberUserIds.length > 0,
   })
@@ -246,7 +167,7 @@ export function useExtensionsByTeam(memberUserIds: string[]) {
 export function useExtension(id: string) {
   return useQuery({
     queryKey: ["voice", "extension", id],
-    queryFn: () => apiFetch<Extension>(`/api/voice/extensions/${id}`),
+    queryFn: () => getExtension({ path: { ext_id: id } }).then((r) => r.data),
     enabled: !!id,
   })
 }
@@ -254,11 +175,7 @@ export function useExtension(id: string) {
 export function useCreateExtension() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<Extension>("/api/voice/extensions", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").ExtensionCreate) => createExtension({ body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       toast.success("Extension created")
@@ -274,16 +191,22 @@ export function useCreateExtension() {
 export function useSyncExtensions() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => apiFetch<{ created: number; updated: number; errors: string[]; connectionName: string | null }>("/api/voice/extensions/sync", { method: "POST" }),
+    mutationFn: () => syncExtensions().then((r) => r.data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      const created = data?.created ?? 0
+      const updated = data?.updated ?? 0
+      const errors = data?.errors ?? []
+      const connectionName = data?.connectionName ?? null
       const parts = []
-      if (data.created > 0) parts.push(`${data.created} created`)
-      if (data.updated > 0) parts.push(`${data.updated} updated`)
-      toast.success(`PBX sync complete${data.connectionName ? ` (${data.connectionName})` : ""}`, { description: parts.join(", ") || "No changes needed" })
-      if (data.errors.length > 0) {
-        toast.warning(`${data.errors.length} error(s) during sync`, {
-          description: data.errors.slice(0, 3).join("; "),
+      if (created > 0) parts.push(`${created} created`)
+      if (updated > 0) parts.push(`${updated} updated`)
+      toast.success(`PBX sync complete${connectionName ? ` (${connectionName})` : ""}`, {
+        description: parts.join(", ") || "No changes needed",
+      })
+      if (errors.length > 0) {
+        toast.warning(`${errors.length} error(s) during sync`, {
+          description: errors.slice(0, 3).join("; "),
         })
       }
     },
@@ -298,11 +221,7 @@ export function useSyncExtensions() {
 export function useUpdateExtension(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<Extension>(`/api/voice/extensions/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").ExtensionUpdate) => updateExtension({ path: { ext_id: id }, body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       queryClient.invalidateQueries({ queryKey: ["voice", "extension", id] })
@@ -319,7 +238,7 @@ export function useUpdateExtension(id: string) {
 export function useDeleteExtension() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (extensionId: string) => apiFetch<void>(`/api/voice/extensions/${extensionId}`, { method: "DELETE" }),
+    mutationFn: (extensionId: string) => deleteExtension({ path: { ext_id: extensionId } }).then((r) => r.data),
     onSuccess: (_data, extensionId) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       queryClient.invalidateQueries({ queryKey: ["voice", "extension", extensionId] })
@@ -340,11 +259,8 @@ export function useDeleteExtension() {
 export function useUpdateAnyExtension() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ extensionId, payload }: { extensionId: string; payload: Record<string, unknown> }) =>
-      apiFetch<Extension>(`/api/voice/extensions/${extensionId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: ({ extensionId, payload }: { extensionId: string; payload: import("@/lib/generated/api").ExtensionUpdate }) =>
+      updateExtension({ path: { ext_id: extensionId }, body: payload }).then((r) => r.data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       queryClient.invalidateQueries({ queryKey: ["voice", "extension", variables.extensionId] })
@@ -365,7 +281,7 @@ export function useUpdateAnyExtension() {
 export function useVoicemailSettings(extensionId: string) {
   return useQuery({
     queryKey: ["voice", "voicemail-settings", extensionId],
-    queryFn: () => apiFetch<VoicemailSettings>(`/api/voice/extensions/${extensionId}/voicemail`),
+    queryFn: () => getVoicemailSettings({ path: { ext_id: extensionId } }).then((r) => r.data),
     enabled: !!extensionId,
   })
 }
@@ -373,11 +289,7 @@ export function useVoicemailSettings(extensionId: string) {
 export function useUpdateVoicemailSettings(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<VoicemailSettings>(`/api/voice/extensions/${extensionId}/voicemail`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").VoicemailSettingsUpdate) => updateVoicemailSettings({ path: { ext_id: extensionId }, body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-settings", extensionId] })
       toast.success("Voicemail settings updated")
@@ -397,7 +309,11 @@ export function useUpdateVoicemailSettings(extensionId: string) {
 export function useVoicemailMessages(extensionId: string, page = 1, pageSize = 25) {
   return useQuery({
     queryKey: ["voice", "voicemail-messages", extensionId, page, pageSize],
-    queryFn: () => apiFetch<PaginatedResponse<VoicemailMessage>>(`/api/voice/extensions/${extensionId}/voicemail/messages?currentPage=${page}&pageSize=${pageSize}`),
+    queryFn: () =>
+      listVoicemailMessages({
+        path: { ext_id: extensionId },
+        query: { currentPage: page, pageSize },
+      }).then((r) => r.data),
     enabled: !!extensionId,
   })
 }
@@ -405,7 +321,7 @@ export function useVoicemailMessages(extensionId: string, page = 1, pageSize = 2
 export function useDeleteVoicemailMessage(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (messageId: string) => apiFetch<void>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, { method: "DELETE" }),
+    mutationFn: (messageId: string) => deleteVoicemailMessage({ path: { ext_id: extensionId, msg_id: messageId } }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })
       toast.success("Message deleted")
@@ -454,11 +370,11 @@ export function useUploadVoicemailGreeting(extensionId: string) {
 export function useMarkVoicemailRead(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ messageId, isRead }: { messageId: string; isRead: boolean }) =>
-      apiFetch<VoicemailMessage>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ isRead }),
-      }),
+    mutationFn: ({ messageId, isRead }: { messageId: string; isRead: boolean }) =>
+      updateVoicemailMessage({
+        path: { ext_id: extensionId, msg_id: messageId },
+        body: { isRead },
+      }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })
     },
@@ -477,7 +393,7 @@ export function useMarkVoicemailRead(extensionId: string) {
 export function useForwardingRules(extensionId: string) {
   return useQuery({
     queryKey: ["voice", "forwarding-rules", extensionId],
-    queryFn: () => apiFetch<PaginatedResponse<ForwardingRule>>(`/api/voice/extensions/${extensionId}/forwarding`),
+    queryFn: () => listForwardingRules({ path: { ext_id: extensionId } }).then((r) => r.data),
     enabled: !!extensionId,
   })
 }
@@ -485,11 +401,7 @@ export function useForwardingRules(extensionId: string) {
 export function useCreateForwardingRule(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<ForwardingRule>(`/api/voice/extensions/${extensionId}/forwarding`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").ForwardingRuleCreate) => createForwardingRule({ path: { ext_id: extensionId }, body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "forwarding-rules", extensionId] })
       toast.success("Forwarding rule created")
@@ -505,11 +417,11 @@ export function useCreateForwardingRule(extensionId: string) {
 export function useUpdateForwardingRule(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ ruleId, payload }: { ruleId: string; payload: Record<string, unknown> }) =>
-      apiFetch<ForwardingRule>(`/api/voice/extensions/${extensionId}/forwarding/${ruleId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: ({ ruleId, payload }: { ruleId: string; payload: import("@/lib/generated/api").ForwardingRuleUpdate }) =>
+      updateForwardingRule({
+        path: { ext_id: extensionId, rule_id: ruleId },
+        body: payload,
+      }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "forwarding-rules", extensionId] })
       toast.success("Forwarding rule updated")
@@ -525,10 +437,7 @@ export function useUpdateForwardingRule(extensionId: string) {
 export function useDeleteForwardingRule(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (ruleId: string) =>
-      apiFetch<void>(`/api/voice/extensions/${extensionId}/forwarding/${ruleId}`, {
-        method: "DELETE",
-      }),
+    mutationFn: (ruleId: string) => deleteForwardingRule({ path: { ext_id: extensionId, rule_id: ruleId } }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "forwarding-rules", extensionId] })
       toast.success("Forwarding rule deleted")
@@ -548,7 +457,7 @@ export function useDeleteForwardingRule(extensionId: string) {
 export function useDndSettings(extensionId: string) {
   return useQuery({
     queryKey: ["voice", "dnd", extensionId],
-    queryFn: () => apiFetch<DndSettings>(`/api/voice/extensions/${extensionId}/dnd`),
+    queryFn: () => getDndSettings({ path: { ext_id: extensionId } }).then((r) => r.data),
     enabled: !!extensionId,
   })
 }
@@ -556,11 +465,7 @@ export function useDndSettings(extensionId: string) {
 export function useUpdateDndSettings(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<DndSettings>(`/api/voice/extensions/${extensionId}/dnd`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: import("@/lib/generated/api").DndSettingsUpdate) => updateDndSettings({ path: { ext_id: extensionId }, body: payload }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "dnd", extensionId] })
       toast.success("DND settings updated")
@@ -576,10 +481,10 @@ export function useUpdateDndSettings(extensionId: string) {
 export function useToggleDnd(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => apiFetch<{ isEnabled: boolean }>(`/api/voice/extensions/${extensionId}/dnd/toggle`, { method: "POST" }),
+    mutationFn: () => toggleDnd({ path: { ext_id: extensionId } }).then((r) => r.data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "dnd", extensionId] })
-      toast.success(data.isEnabled ? "DND enabled" : "DND disabled")
+      toast.success(data?.isEnabled ? "DND enabled" : "DND disabled")
     },
     onError: (error) => {
       toast.error("Unable to toggle DND", {
@@ -599,7 +504,10 @@ export function useBulkMarkVoicemailRead(extensionId: string) {
     mutationFn: async (messageIds: string[]) => {
       await Promise.all(
         messageIds.map((messageId) =>
-          apiFetch<VoicemailMessage>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, { method: "PATCH", body: JSON.stringify({ isRead: true }) }),
+          updateVoicemailMessage({
+            path: { ext_id: extensionId, msg_id: messageId },
+            body: { isRead: true },
+          }),
         ),
       )
     },
@@ -619,7 +527,7 @@ export function useBulkDeleteVoicemailMessages(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (messageIds: string[]) => {
-      await Promise.all(messageIds.map((messageId) => apiFetch<void>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, { method: "DELETE" })))
+      await Promise.all(messageIds.map((messageId) => deleteVoicemailMessage({ path: { ext_id: extensionId, msg_id: messageId } })))
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })

@@ -24,7 +24,7 @@ function VoicemailPage() {
   const { data: vmSettings, isLoading: settingsLoading } = useVoicemailSettings(extensionId)
 
   const isLoading = extLoading || msgsLoading || settingsLoading
-  const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
+  const unreadCount = vmMessages?.items?.filter((m) => !m.isRead).length ?? 0
   const totalCount = vmMessages?.total ?? 0
   const isEnabled = vmSettings?.isEnabled ?? false
   const extensionName = extension?.displayName ?? "Extension"

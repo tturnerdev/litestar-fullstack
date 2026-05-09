@@ -97,10 +97,10 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
           break
         }
         case "duration":
-          cmp = a.durationSeconds - b.durationSeconds
+          cmp = (a.durationSeconds ?? 0) - (b.durationSeconds ?? 0)
           break
         case "received":
-          cmp = new Date(a.receivedAt).getTime() - new Date(b.receivedAt).getTime()
+          cmp = new Date(a.receivedAt ?? "").getTime() - new Date(b.receivedAt ?? "").getTime()
           break
       }
       return sortDir === "desc" ? -cmp : cmp
@@ -160,11 +160,11 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     )
   }
 
-  const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
-  const totalCount = data.items.length
-  const unreadCount = data.items.filter((m) => !m.isRead).length
+  const totalPages = Math.max(1, Math.ceil((data.total ?? 0) / PAGE_SIZE))
+  const totalCount = (data.items ?? []).length
+  const unreadCount = (data.items ?? []).filter((m) => !m.isRead).length
   const displayCount = sortedItems.length
-  const hasAnyMessages = data.items.length > 0
+  const hasAnyMessages = (data.items ?? []).length > 0
   const isFiltered = !!debouncedSearch || unreadOnly
   const selectedCount = selectedIds.size
 
@@ -511,7 +511,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
             {message.callerName && <p className="font-mono text-xs text-muted-foreground">{message.callerNumber}</p>}
           </div>
         </TableCell>
-        <TableCell className="tabular-nums">{formatDuration(message.durationSeconds)}</TableCell>
+        <TableCell className="tabular-nums">{formatDuration(message.durationSeconds ?? 0)}</TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
             <TooltipProvider>
@@ -520,7 +520,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
                   <span className="text-sm">{formatDateTime(message.receivedAt)}</span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{formatFullDateTime(message.receivedAt)}</p>
+                  <p>{formatFullDateTime(message.receivedAt ?? "")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -578,7 +578,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
         <TableRow>
           <TableCell colSpan={7} className="bg-muted/30 px-6 py-4">
             <div className="space-y-4">
-              <VoicemailPlayer audioUrl={message.audioFilePath} durationSeconds={message.durationSeconds} />
+              <VoicemailPlayer audioUrl={message.audioFilePath ?? ""} durationSeconds={message.durationSeconds ?? 0} />
               {message.transcription && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Transcription</p>

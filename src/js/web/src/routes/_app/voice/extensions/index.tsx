@@ -443,7 +443,7 @@ function ExtensionsPage() {
   const activeFilterCount = statusFilter.length
 
   const hasData = filteredItems.length > 0
-  const hasAnyExtensions = (data?.items.length ?? 0) > 0
+  const hasAnyExtensions = (data?.items?.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
   // Keyboard shortcuts: "/" to focus search, ArrowLeft/ArrowRight for pagination

@@ -108,7 +108,7 @@ function getStoredPageSize(): number {
 const csvHeaders: CsvHeader<PhoneNumber>[] = [
   { label: "Number", accessor: (p) => p.number },
   { label: "Label", accessor: (p) => p.label ?? "" },
-  { label: "Type", accessor: (p) => typeLabels[p.numberType] ?? p.numberType },
+  { label: "Type", accessor: (p) => typeLabels[p.numberType ?? "local"] ?? p.numberType },
   { label: "Status", accessor: (p) => (p.isActive ? "Active" : "Inactive") },
 ]
 
@@ -270,7 +270,7 @@ function PhoneNumberRow({
       </TableCell>
       {isColumnVisible("type") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Badge variant={typeBadgeVariant[pn.numberType] ?? "outline"}>{typeLabels[pn.numberType] ?? pn.numberType}</Badge>
+          <Badge variant={typeBadgeVariant[pn.numberType ?? "local"] ?? "outline"}>{typeLabels[pn.numberType ?? "local"] ?? pn.numberType}</Badge>
         </TableCell>
       )}
       {isColumnVisible("callerId") && (
@@ -280,7 +280,7 @@ function PhoneNumberRow({
       )}
       {isColumnVisible("status") && (
         <TableCell className={cellClass}>
-          <StatusIndicator isActive={pn.isActive} />
+          <StatusIndicator isActive={pn.isActive ?? false} />
         </TableCell>
       )}
       {isColumnVisible("e911") && (
@@ -430,7 +430,7 @@ function PhoneNumbersPage() {
     if (!data?.items) return []
     let items = data.items.filter((pn) => {
       // Type filter
-      if (typeFilter.length > 0 && !typeFilter.includes(pn.numberType)) return false
+      if (typeFilter.length > 0 && !typeFilter.includes(pn.numberType ?? "")) return false
       // Status filter
       if (statusFilter.length > 0) {
         const status = pn.isActive ? "active" : "inactive"
@@ -462,12 +462,12 @@ function PhoneNumbersPage() {
             bVal = b.label ?? ""
             break
           case "number_type":
-            aVal = a.numberType
-            bVal = b.numberType
+            aVal = a.numberType ?? ""
+            bVal = b.numberType ?? ""
             break
           case "is_active":
-            aVal = a.isActive
-            bVal = b.isActive
+            aVal = a.isActive ?? false
+            bVal = b.isActive ?? false
             break
           case "caller_id_name":
             aVal = a.callerIdName ?? ""
@@ -568,7 +568,7 @@ function PhoneNumbersPage() {
   }, [data?.items])
 
   const hasData = filteredItems.length > 0
-  const hasAnyNumbers = (data?.items.length ?? 0) > 0
+  const hasAnyNumbers = (data?.items?.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
   // Keyboard shortcuts: "/" to focus search, ArrowLeft/ArrowRight for pagination

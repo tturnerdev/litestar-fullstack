@@ -282,7 +282,7 @@ function DndPage() {
                     <p className="text-lg font-semibold">
                       {formatScheduleTime(dnd.scheduleStart)} - {formatScheduleTime(dnd.scheduleEnd)}
                     </p>
-                    <p className="text-xs text-muted-foreground">{formatScheduleDays(dnd.scheduleDays)}</p>
+                    <p className="text-xs text-muted-foreground">{formatScheduleDays(dnd.scheduleDays ?? null)}</p>
                   </>
                 ) : (
                   <>

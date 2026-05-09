@@ -106,8 +106,8 @@ function SummaryCards() {
 
   const phoneCount = phoneData?.total ?? 0
   const extCount = extData?.total ?? 0
-  const activePhones = phoneData?.items.filter((p) => p.isActive).length ?? 0
-  const activeExts = extData?.items.filter((e) => e.isActive).length ?? 0
+  const activePhones = phoneData?.items?.filter((p) => p.isActive).length ?? 0
+  const activeExts = extData?.items?.filter((e) => e.isActive).length ?? 0
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -141,8 +141,8 @@ function SummaryCards() {
         </CardContent>
       </Card>
 
-      {extData && extData.items.length > 0 ? (
-        <VoicemailSummaryCard extensionId={extData.items[0].id} />
+      {extData && (extData.items?.length ?? 0) > 0 ? (
+        <VoicemailSummaryCard extensionId={extData.items![0].id} />
       ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -158,8 +158,8 @@ function SummaryCards() {
         </Card>
       )}
 
-      {extData && extData.items.length > 0 ? (
-        <DndSummaryCard extensionId={extData.items[0].id} />
+      {extData && (extData.items?.length ?? 0) > 0 ? (
+        <DndSummaryCard extensionId={extData.items![0].id} />
       ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -182,7 +182,7 @@ function VoicemailSummaryCard({ extensionId }: { extensionId: string }) {
   const { data: vmSettings } = useVoicemailSettings(extensionId)
   const { data: vmMessages } = useVoicemailMessages(extensionId, 1, 100)
 
-  const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
+  const unreadCount = vmMessages?.items?.filter((m) => !m.isRead).length ?? 0
   const totalCount = vmMessages?.total ?? 0
   const isEnabled = vmSettings?.isEnabled ?? false
 
@@ -260,13 +260,13 @@ function VoiceResourceCharts() {
     return [
       {
         name: "Phone Numbers",
-        active: phoneData?.items.filter((p) => p.isActive).length ?? 0,
-        inactive: (phoneData?.total ?? 0) - (phoneData?.items.filter((p) => p.isActive).length ?? 0),
+        active: phoneData?.items?.filter((p) => p.isActive).length ?? 0,
+        inactive: (phoneData?.total ?? 0) - (phoneData?.items?.filter((p) => p.isActive).length ?? 0),
       },
       {
         name: "Extensions",
-        active: extData?.items.filter((e) => e.isActive).length ?? 0,
-        inactive: (extData?.total ?? 0) - (extData?.items.filter((e) => e.isActive).length ?? 0),
+        active: extData?.items?.filter((e) => e.isActive).length ?? 0,
+        inactive: (extData?.total ?? 0) - (extData?.items?.filter((e) => e.isActive).length ?? 0),
       },
       {
         name: "Call Queues",
@@ -402,9 +402,9 @@ function StatusOverview() {
     return null
   }
 
-  const activePhones = phoneData?.items.filter((p) => p.isActive).length ?? 0
+  const activePhones = phoneData?.items?.filter((p) => p.isActive).length ?? 0
   const inactivePhones = (phoneData?.total ?? 0) - activePhones
-  const activeExts = extData?.items.filter((e) => e.isActive).length ?? 0
+  const activeExts = extData?.items?.filter((e) => e.isActive).length ?? 0
   const inactiveExts = (extData?.total ?? 0) - activeExts
   const totalPhones = phoneData?.total ?? 0
   const totalExts = extData?.total ?? 0
@@ -549,7 +549,7 @@ function RecentExtensions() {
     )
   }
 
-  if (!data || data.items.length === 0) return null
+  if (!data || (data.items?.length ?? 0) === 0) return null
 
   return (
     <div className="space-y-4">
@@ -565,8 +565,8 @@ function RecentExtensions() {
         </Button>
       </div>
       <div className="grid gap-3">
-        {data.items.map((ext) => (
-          <ExtensionRow key={ext.id} extensionId={ext.id} displayName={ext.displayName} extensionNumber={ext.extensionNumber} isActive={ext.isActive} />
+        {data.items?.map((ext) => (
+          <ExtensionRow key={ext.id} extensionId={ext.id} displayName={ext.displayName ?? ""} extensionNumber={ext.extensionNumber} isActive={ext.isActive ?? false} />
         ))}
       </div>
     </div>
@@ -577,7 +577,7 @@ function ExtensionRow({ extensionId, displayName, extensionNumber, isActive }: {
   const { data: dndData } = useDndSettings(extensionId)
   const { data: vmData } = useVoicemailMessages(extensionId, 1, 5)
 
-  const unreadCount = vmData?.items.filter((m) => !m.isRead).length ?? 0
+  const unreadCount = vmData?.items?.filter((m) => !m.isRead).length ?? 0
   const dndEnabled = dndData?.isEnabled ?? false
 
   return (
