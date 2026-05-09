@@ -51,6 +51,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useConnections } from "@/lib/api/hooks/connections"
@@ -157,31 +158,6 @@ function formatDuration(startedAt: string | null | undefined, completedAt: strin
   const hours = Math.floor(minutes / 60)
   const remainingMinutes = minutes % 60
   return `${hours}h ${remainingMinutes}m`
-}
-
-// ── Timestamp with tooltip ──────────────────────────────────────────────
-
-function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) {
-    return (
-      <div>
-        <p className="text-muted-foreground text-sm">{label}</p>
-        <p className="text-sm">---</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <p className="text-muted-foreground text-sm">{label}</p>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <p className="cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
-        </TooltipTrigger>
-        <TooltipContent>{formatDateTime(value)}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
 }
 
 // ── Main page ───────────────────────────────────────────────────────────

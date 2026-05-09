@@ -879,7 +879,7 @@ function BoxesTab() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useVoicemailBoxes({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useVoicemailBoxes({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -957,6 +957,9 @@ function BoxesTab() {
               <span className="sr-only">Clear search</span>
             </button>
           )}
+        </div>
+        <div className="ml-auto">
+          <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
         </div>
       </div>
 

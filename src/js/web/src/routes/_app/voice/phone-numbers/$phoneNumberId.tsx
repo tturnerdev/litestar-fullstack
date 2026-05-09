@@ -37,7 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { TimestampField } from "@/components/ui/timestamp-field"
 import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
@@ -46,7 +46,6 @@ import { useE911Registration } from "@/lib/api/hooks/e911"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByPhoneNumber, usePhoneNumber, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
 import type { PhoneNumberUpdate } from "@/lib/generated/api"
 
@@ -73,29 +72,6 @@ const numberTypeBadgeVariant: Record<string, "default" | "secondary" | "outline"
   local: "secondary",
   toll_free: "default",
   international: "outline",
-}
-
-function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) {
-    return (
-      <div>
-        <p className="text-muted-foreground">{label}</p>
-        <p className="text-sm">---</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <p className="text-muted-foreground">{label}</p>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <p className="cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
-        </TooltipTrigger>
-        <TooltipContent>{formatDateTime(value)}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
 }
 
 function PhoneNumberDetailPage() {

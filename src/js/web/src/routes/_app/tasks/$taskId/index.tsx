@@ -41,10 +41,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { TimestampField } from "@/components/ui/timestamp-field"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCancelTask, useDeleteTask, useRetryTask, useTask } from "@/lib/api/hooks/tasks"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/tasks/$taskId/")({
   component: TaskDetailPage,
@@ -59,31 +59,6 @@ function formatTaskType(taskType: string): string {
 function formatEntityType(entityType: string | null | undefined): string {
   if (!entityType) return "--"
   return entityType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-// -- Timestamp field ----------------------------------------------------------
-
-function TimestampField({ label, icon: Icon, value }: { label: string; icon: React.ComponentType<{ className?: string }>; value: string | null | undefined }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-        {value ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <p className="mt-0.5 cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(value)}</TooltipContent>
-          </Tooltip>
-        ) : (
-          <p className="mt-0.5 text-sm text-muted-foreground/70">--</p>
-        )}
-      </div>
-    </div>
-  )
 }
 
 // -- JSON Viewer section ------------------------------------------------------

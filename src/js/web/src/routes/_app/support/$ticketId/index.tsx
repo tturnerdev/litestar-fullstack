@@ -62,6 +62,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
@@ -98,31 +99,6 @@ const statuses = [
   { value: "resolved", label: "Resolved" },
   { value: "closed", label: "Closed" },
 ] as const
-
-// ── Timestamp field ─────────────────────────────────────────────────────
-
-function TimestampField({ label, icon: Icon, value }: { label: string; icon: React.ComponentType<{ className?: string }>; value: string | null | undefined }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-        {value ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <p className="mt-0.5 cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(value)}</TooltipContent>
-          </Tooltip>
-        ) : (
-          <p className="mt-0.5 text-sm text-muted-foreground/70">--</p>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ── Tag Manager ────────────────────────────────────────────────────────
 

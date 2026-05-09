@@ -46,7 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { TimestampField } from "@/components/ui/timestamp-field"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
@@ -67,7 +67,7 @@ import {
   useVoicemailMessages,
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
 
 const searchSchema = z.object({
@@ -79,31 +79,6 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
   component: ExtensionDetailPage,
   validateSearch: searchSchema,
 })
-
-// -- Timestamp with tooltip ---------------------------------------------------
-
-function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) {
-    return (
-      <div>
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-sm">---</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <p className="cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
-        </TooltipTrigger>
-        <TooltipContent>{formatDateTime(value)}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
-}
 
 // -- Main page ----------------------------------------------------------------
 

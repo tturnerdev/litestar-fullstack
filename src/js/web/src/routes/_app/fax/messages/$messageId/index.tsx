@@ -48,41 +48,17 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
+import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
-import { formatDateTime, formatRelativeTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatBytes } from "@/lib/format-utils"
 import type { FaxMessage, FaxStatus } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/fax/messages/$messageId/")({
   component: FaxMessageDetailPage,
 })
-
-// -- Timestamp with tooltip -------------------------------------------------
-
-function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) {
-    return (
-      <div>
-        <p className="text-muted-foreground text-sm">{label}</p>
-        <p className="text-sm">---</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <p className="text-muted-foreground text-sm">{label}</p>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <p className="cursor-default text-sm">{formatRelativeTime(value)}</p>
-        </TooltipTrigger>
-        <TooltipContent>{formatDateTime(value)}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
-}
 
 // -- Fax Message Timeline ---------------------------------------------------
 
