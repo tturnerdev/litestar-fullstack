@@ -927,7 +927,7 @@ function WebhooksPage() {
             <EmptyState
               icon={Webhook}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No webhooks match "${debouncedSearch}"` : "No results found"}
               description="No webhooks match your current search. Try adjusting your search terms."
               action={
                 <Button

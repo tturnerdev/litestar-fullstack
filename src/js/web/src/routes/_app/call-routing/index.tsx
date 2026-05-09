@@ -567,7 +567,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
       ) : items.length === 0 ? (
         <EmptyState
           icon={Clock}
-          title={search ? "No results found" : "No time conditions yet"}
+          title={search ? `No time conditions match "${search}"` : "No time conditions yet"}
           description={
             search
               ? "No time conditions match your search. Try adjusting your keywords."
@@ -902,7 +902,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
       ) : items.length === 0 ? (
         <EmptyState
           icon={Menu}
-          title={search ? "No results found" : "No IVR menus yet"}
+          title={search ? `No IVR menus match "${search}"` : "No IVR menus yet"}
           description={
             search
               ? "No IVR menus match your search. Try adjusting your keywords."
@@ -1218,7 +1218,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
       ) : items.length === 0 ? (
         <EmptyState
           icon={Phone}
-          title={search ? "No results found" : "No call queues yet"}
+          title={search ? `No call queues match "${search}"` : "No call queues yet"}
           description={
             search
               ? "No call queues match your search. Try adjusting your keywords."
@@ -1541,7 +1541,7 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
       ) : items.length === 0 ? (
         <EmptyState
           icon={Users}
-          title={search ? "No results found" : "No ring groups yet"}
+          title={search ? `No ring groups match "${search}"` : "No ring groups yet"}
           description={
             search
               ? "No ring groups match your search. Try adjusting your keywords."

@@ -462,7 +462,7 @@ function TagsPage() {
             <EmptyState
               icon={Tags}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No tags match "${debouncedSearch}"` : "No results found"}
               description="No tags match your search. Try a different search term."
               action={
                 <Button

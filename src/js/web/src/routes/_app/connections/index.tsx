@@ -690,7 +690,7 @@ function ConnectionsPage() {
             <EmptyState
               icon={Cable}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No connections match "${debouncedSearch}"` : "No results found"}
               description="No connections match your current filters. Try adjusting your search or filters."
               action={
                 <Button

@@ -781,7 +781,7 @@ function DevicesPage() {
             <EmptyState
               icon={Monitor}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No devices match "${debouncedSearch}"` : "No results found"}
               description="No devices match your current filters. Try adjusting your search or filters."
               action={
                 <Button

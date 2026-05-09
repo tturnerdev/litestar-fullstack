@@ -659,7 +659,7 @@ function FaxMessagesPage() {
             <EmptyState
               icon={FileText}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No fax messages match "${debouncedSearch}"` : "No results found"}
               description="No fax messages match your current filters. Try adjusting your search or filters."
               action={
                 <Button variant="outline" size="sm" onClick={clearAllFilters}>

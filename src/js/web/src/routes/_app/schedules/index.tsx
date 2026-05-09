@@ -543,7 +543,7 @@ function SchedulesPage() {
             <EmptyState
               icon={Calendar}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No schedules match "${debouncedSearch}"` : "No results found"}
               description="No schedules match your current search. Try adjusting your search terms."
               action={
                 <Button

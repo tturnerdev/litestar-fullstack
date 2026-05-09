@@ -385,7 +385,7 @@ function AdminTeamsPage() {
             <EmptyState
               icon={Users2}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No teams match "${debouncedSearch}"` : "No results found"}
               description="No teams match your current filters. Try adjusting your search or filters."
               action={
                 <Button

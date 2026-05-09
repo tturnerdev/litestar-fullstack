@@ -1106,7 +1106,7 @@ function SupportPage() {
             <EmptyState
               icon={LifeBuoy}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No tickets match "${debouncedSearch}"` : "No results found"}
               description="No tickets match your current filters. Try adjusting your search or filters."
               action={
                 <Button variant="outline" size="sm" onClick={clearAllFilters}>

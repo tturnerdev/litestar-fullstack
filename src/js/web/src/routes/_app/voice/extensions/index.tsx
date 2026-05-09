@@ -707,7 +707,7 @@ function ExtensionsPage() {
             <EmptyState
               icon={Phone}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No extensions match "${debouncedSearch}"` : "No results found"}
               description="No extensions match your current search or filters. Try adjusting your criteria."
               action={
                 <Button

@@ -756,7 +756,7 @@ function E911Page() {
             <EmptyState
               icon={ShieldAlert}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No registrations match "${debouncedSearch}"` : "No results found"}
               description="No E911 registrations match your current filters. Try adjusting your search or filters."
               action={
                 <Button

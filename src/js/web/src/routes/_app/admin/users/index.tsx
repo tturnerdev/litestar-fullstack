@@ -492,7 +492,7 @@ function AdminUsersPage() {
             <EmptyState
               icon={Users}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No users match "${debouncedSearch}"` : "No results found"}
               description="No users match your current filters. Try adjusting your search or filters."
               action={
                 <Button

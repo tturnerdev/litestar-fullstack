@@ -624,7 +624,7 @@ function FaxNumbersPage() {
             <EmptyState
               icon={Printer}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No fax numbers match "${debouncedSearch}"` : "No results found"}
               description="No fax numbers match your current search or filters. Try adjusting your criteria."
               action={
                 <Button

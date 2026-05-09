@@ -818,7 +818,7 @@ function PhoneNumbersPage() {
             <EmptyState
               icon={Phone}
               variant="no-results"
-              title="No results found"
+              title={debouncedSearch ? `No phone numbers match "${debouncedSearch}"` : "No results found"}
               description="No phone numbers match your current filters. Try adjusting your search or filters."
               action={
                 <Button
