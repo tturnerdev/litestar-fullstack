@@ -1,5 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import type {
+  CallQueueCreate,
+  CallQueueMemberCreate,
+  CallQueueUpdate,
+  IvrMenuCreate,
+  IvrMenuOptionCreate,
+  IvrMenuUpdate,
+  RingGroupCreate,
+  RingGroupMemberCreate,
+  RingGroupUpdate,
+  TimeConditionCreate,
+  TimeConditionUpdate,
+} from "@/lib/generated/api"
 import {
   createCallQueue,
   createCallQueueMember,
@@ -115,7 +128,7 @@ export function useTimeCondition(id: string) {
 export function useCreateTimeCondition() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createTimeCondition>[0]["body"]) => createTimeCondition({ body: payload! }).then(unwrap),
+    mutationFn: (payload: TimeConditionCreate) => createTimeCondition({ body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
       toast.success("Time condition created")
@@ -131,7 +144,7 @@ export function useCreateTimeCondition() {
 export function useUpdateTimeCondition(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof updateTimeCondition>[0]["body"]) => updateTimeCondition({ path: { time_condition_id: id }, body: payload! }).then(unwrap),
+    mutationFn: (payload: TimeConditionUpdate) => updateTimeCondition({ path: { time_condition_id: id }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-condition", id] })
@@ -213,7 +226,7 @@ export function useIvrMenu(id: string) {
 export function useCreateIvrMenu() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createIvrMenu>[0]["body"]) => createIvrMenu({ body: payload! }).then(unwrap),
+    mutationFn: (payload: IvrMenuCreate) => createIvrMenu({ body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menus"] })
       toast.success("IVR menu created")
@@ -229,7 +242,7 @@ export function useCreateIvrMenu() {
 export function useUpdateIvrMenu(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof updateIvrMenu>[0]["body"]) => updateIvrMenu({ path: { ivr_menu_id: id }, body: payload! }).then(unwrap),
+    mutationFn: (payload: IvrMenuUpdate) => updateIvrMenu({ path: { ivr_menu_id: id }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menus"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", id] })
@@ -264,7 +277,7 @@ export function useDeleteIvrMenu() {
 export function useCreateIvrMenuOption(menuId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createIvrMenuOption>[0]["body"]) => createIvrMenuOption({ path: { ivr_menu_id: menuId }, body: payload! }).then(unwrap),
+    mutationFn: (payload: IvrMenuOptionCreate) => createIvrMenuOption({ path: { ivr_menu_id: menuId }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
       toast.success("Option added")
@@ -351,7 +364,7 @@ export function useCallQueue(id: string) {
 export function useCreateCallQueue() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createCallQueue>[0]["body"]) => createCallQueue({ body: payload! }).then(unwrap),
+    mutationFn: (payload: CallQueueCreate) => createCallQueue({ body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queues"] })
       toast.success("Call queue created")
@@ -367,7 +380,7 @@ export function useCreateCallQueue() {
 export function useUpdateCallQueue(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof updateCallQueue>[0]["body"]) => updateCallQueue({ path: { call_queue_id: id }, body: payload! }).then(unwrap),
+    mutationFn: (payload: CallQueueUpdate) => updateCallQueue({ path: { call_queue_id: id }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queues"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", id] })
@@ -402,7 +415,7 @@ export function useDeleteCallQueue() {
 export function useCreateCallQueueMember(queueId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createCallQueueMember>[0]["body"]) => createCallQueueMember({ path: { call_queue_id: queueId }, body: payload! }).then(unwrap),
+    mutationFn: (payload: CallQueueMemberCreate) => createCallQueueMember({ path: { call_queue_id: queueId }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
       toast.success("Member added")
@@ -509,7 +522,7 @@ export function useRingGroup(id: string) {
 export function useCreateRingGroup() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createRingGroup>[0]["body"]) => createRingGroup({ body: payload! }).then(unwrap),
+    mutationFn: (payload: RingGroupCreate) => createRingGroup({ body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-groups"] })
       toast.success("Ring group created")
@@ -525,7 +538,7 @@ export function useCreateRingGroup() {
 export function useUpdateRingGroup(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof updateRingGroup>[0]["body"]) => updateRingGroup({ path: { ring_group_id: id }, body: payload! }).then(unwrap),
+    mutationFn: (payload: RingGroupUpdate) => updateRingGroup({ path: { ring_group_id: id }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-groups"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", id] })
@@ -560,7 +573,7 @@ export function useDeleteRingGroup() {
 export function useCreateRingGroupMember(groupId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createRingGroupMember>[0]["body"]) => createRingGroupMember({ path: { ring_group_id: groupId }, body: payload! }).then(unwrap),
+    mutationFn: (payload: RingGroupMemberCreate) => createRingGroupMember({ path: { ring_group_id: groupId }, body: payload }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", groupId] })
       toast.success("Member added")

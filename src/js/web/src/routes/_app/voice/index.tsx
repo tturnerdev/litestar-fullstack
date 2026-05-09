@@ -142,7 +142,7 @@ function SummaryCards() {
       </Card>
 
       {extData && (extData.items?.length ?? 0) > 0 ? (
-        <VoicemailSummaryCard extensionId={extData.items![0].id} />
+        <VoicemailSummaryCard extensionId={extData.items?.[0]?.id ?? ""} />
       ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -159,7 +159,7 @@ function SummaryCards() {
       )}
 
       {extData && (extData.items?.length ?? 0) > 0 ? (
-        <DndSummaryCard extensionId={extData.items![0].id} />
+        <DndSummaryCard extensionId={extData.items?.[0]?.id ?? ""} />
       ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
