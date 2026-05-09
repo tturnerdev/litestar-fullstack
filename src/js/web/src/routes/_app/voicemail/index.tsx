@@ -18,7 +18,7 @@ import {
   Voicemail,
   X,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { z } from "zod"
 import {
   AlertDialog,
@@ -171,6 +171,7 @@ function MessagesTab() {
   const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [readFilter, setReadFilter] = useState<string[]>([])
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -263,11 +264,14 @@ function MessagesTab() {
 
   const activeFilterCount = readFilter.length + (startDate || endDate ? 1 : 0) + (debouncedSearch ? 1 : 0)
 
-  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         setPage((p) => Math.max(1, p - 1))
@@ -377,7 +381,7 @@ function MessagesTab() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search by caller or transcription..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input ref={searchInputRef} placeholder="Search by caller or transcription..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
@@ -849,6 +853,7 @@ function BoxesTab() {
   const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const handlePageSizeChange = useCallback((value: string) => {
     const size = Number(value)
@@ -911,11 +916,14 @@ function BoxesTab() {
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
-  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         setPage((p) => Math.max(1, p - 1))
@@ -950,7 +958,7 @@ function BoxesTab() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search by extension or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input ref={searchInputRef} placeholder="Search by extension or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />

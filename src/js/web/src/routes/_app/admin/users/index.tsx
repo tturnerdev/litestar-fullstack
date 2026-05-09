@@ -20,7 +20,7 @@ import {
   X,
   XCircle,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -177,6 +177,7 @@ function AdminUsersPage() {
   // Filter & search state
   const [search, setSearch] = useState(searchParam ?? "")
   const debouncedSearch = useDebouncedValue(search)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [roleFilter, setRoleFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const page = pageParam ?? 1
@@ -376,11 +377,14 @@ function AdminUsersPage() {
   const hasAnyUsers = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
-  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         const p = Math.max(1, page - 1)
@@ -417,7 +421,7 @@ function AdminUsersPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search by name, email, or username..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+            <Input ref={searchInputRef} placeholder="Search by name, email, or username..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
             {search && (
               <button
                 type="button"

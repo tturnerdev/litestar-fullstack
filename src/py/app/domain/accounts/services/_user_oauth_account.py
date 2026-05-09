@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
+from sqlalchemy.exc import IntegrityError
 
 from app.db import models as m
 
@@ -12,6 +14,8 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from httpx_oauth.oauth2 import OAuth2Token
+
+logger = logging.getLogger(__name__)
 
 
 class UserOAuthAccountService(SQLAlchemyAsyncRepositoryService[m.UserOAuthAccount]):
@@ -110,7 +114,18 @@ class UserOAuthAccountService(SQLAlchemyAsyncRepositoryService[m.UserOAuthAccoun
         existing = await self.get_one_or_none(user_id=user_id, oauth_name=provider)
         if existing:
             return await self.update(item_id=existing.id, data=account_data, auto_commit=True)
-        return await self.create(data=account_data, auto_commit=True)
+        try:
+            return await self.create(data=account_data, auto_commit=True)
+        except IntegrityError:
+            logger.warning(
+                "Race condition creating OAuth account for user %s provider %s, fetching existing",
+                user_id,
+                provider,
+                exc_info=True,
+            )
+            await self.repository.session.rollback()
+            result = await self.get_one(user_id=user_id, oauth_name=provider)
+            return await self.update(item_id=result.id, data=account_data, auto_commit=True)
 
     async def unlink_oauth_account(
         self,

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, CheckCircle2, Download, Eye, MoreVertical, Pencil, Search, Trash2, Users, Users2, X, XCircle } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -120,6 +120,7 @@ function AdminTeamsPage() {
   const search = searchParam ?? ""
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebouncedValue(searchInput)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
@@ -273,11 +274,14 @@ function AdminTeamsPage() {
   const hasAnyTeams = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
-  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         setPage((p) => Math.max(1, p - 1))
@@ -313,6 +317,7 @@ function AdminTeamsPage() {
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search by team name or slug..."
               value={searchInput}
               onKeyDown={(e) => {

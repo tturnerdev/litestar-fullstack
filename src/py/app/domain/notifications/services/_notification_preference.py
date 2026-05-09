@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from advanced_alchemy.extensions.litestar import repository, service
+from sqlalchemy.exc import IntegrityError
 
 from app.db import models as m
 from app.db.models._notification_preference import DEFAULT_CATEGORIES
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+logger = logging.getLogger(__name__)
 
 
 VALID_CATEGORIES = frozenset(DEFAULT_CATEGORIES.keys())
@@ -39,13 +43,22 @@ class NotificationPreferenceService(service.SQLAlchemyAsyncRepositoryService[m.N
         existing = await self.get_one_or_none(user_id=user_id)
         if existing is not None:
             return existing
-        return await self.create(
-            data={
-                "user_id": user_id,
-                "email_enabled": True,
-                "categories": dict(DEFAULT_CATEGORIES),
-            },
-        )
+        try:
+            return await self.create(
+                data={
+                    "user_id": user_id,
+                    "email_enabled": True,
+                    "categories": dict(DEFAULT_CATEGORIES),
+                },
+            )
+        except IntegrityError:
+            logger.warning(
+                "Race condition creating notification preferences for user %s, fetching existing",
+                user_id,
+                exc_info=True,
+            )
+            await self.repository.session.rollback()
+            return await self.get_one(user_id=user_id)
 
     async def update_for_user(
         self,
