@@ -13,9 +13,9 @@ from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 
 from app.db import models as m
+from app.domain.devices.schemas import Device as DeviceSchema
 
 logger = logging.getLogger(__name__)
-from app.domain.devices.schemas import Device as DeviceSchema
 
 _DUPLICATE_MAC_ADDRESS_MSG = "A device with this MAC address already exists."
 

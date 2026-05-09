@@ -14,12 +14,12 @@ from litestar.exceptions import ValidationException
 from sqlalchemy import select
 
 from app.db import models as m
+from app.domain.e911.schemas import E911Registration as E911RegistrationSchema
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
-
-logger = logging.getLogger(__name__)
-from app.domain.e911.schemas import E911Registration as E911RegistrationSchema
 
 _DUPLICATE_E911_REGISTRATION_MSG = "An E911 registration already exists for this phone number."
 

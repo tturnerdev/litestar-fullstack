@@ -11,15 +11,15 @@ from litestar.exceptions import ValidationException
 from sqlalchemy import select
 
 from app.db import models as m
+from app.domain.voice.schemas import Extension as ExtensionSchema
+from app.domain.voice.schemas import ExtensionDeviceSummary
 
 _DUPLICATE_EXTENSION_NUMBER_MSG = "An extension with this extension number already exists."
 
+logger = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
-
-logger = logging.getLogger(__name__)
-from app.domain.voice.schemas import Extension as ExtensionSchema
-from app.domain.voice.schemas import ExtensionDeviceSummary
 
 
 class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
