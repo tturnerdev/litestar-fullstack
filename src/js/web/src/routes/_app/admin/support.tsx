@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, ArrowRight, CheckCircle2, Clock, Download, Loader2, Lock, Search, SlidersHorizontal, TicketCheck, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
@@ -26,6 +26,19 @@ import type { AdminTicketSummary } from "@/lib/generated/api/types.gen"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/support")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
+  }),
   component: AdminSupportPage,
 })
 
@@ -150,15 +163,21 @@ function StatsCardSkeleton() {
 
 function AdminSupportPage() {
   useDocumentTitle("Admin Support")
-  const navigate = useNavigate()
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
+  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when search changes
+  const [search, setSearch] = useState(searchParam ?? "")
+  const debouncedSearch = useDebouncedValue(search)
+  const page = pageParam ?? 1
+
+  // Derive sort state from URL search params
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Sync debounced search to URL (also resets page)
   useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
+    navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined, page: undefined }) })
+  }, [debouncedSearch, navigate])
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminSupportStats()
   const { data, isLoading, isError, refetch: refetchTickets, dataUpdatedAt, isRefetching } = useAdminTickets(page, PAGE_SIZE, debouncedSearch || undefined)
@@ -168,17 +187,12 @@ function AdminSupportPage() {
     refetchTickets()
   }, [refetchStats, refetchTickets])
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
-
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({ search: (prev) => ({ ...prev, sort: next.sort || undefined, order: next.direction || undefined }) })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Column visibility
@@ -571,10 +585,26 @@ function AdminSupportPage() {
                         Page {page} of {totalPages} ({total} total)
                       </p>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const p = Math.max(1, page - 1)
+                            navigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
+                          }}
+                          disabled={page <= 1}
+                        >
                           Previous
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const p = Math.min(totalPages, page + 1)
+                            navigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
+                          }}
+                          disabled={page >= totalPages}
+                        >
                           Next
                         </Button>
                       </div>

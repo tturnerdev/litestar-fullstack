@@ -201,6 +201,7 @@ function ResetPasswordPage() {
                               className="absolute right-0 top-0 h-full px-3 text-muted-foreground/60 hover:text-foreground"
                               onClick={() => setShowPassword(!showPassword)}
                               tabIndex={-1}
+                              aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
@@ -229,6 +230,7 @@ function ResetPasswordPage() {
                               className="absolute right-0 top-0 h-full px-3 text-muted-foreground/60 hover:text-foreground"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                               tabIndex={-1}
+                              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                             >
                               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>

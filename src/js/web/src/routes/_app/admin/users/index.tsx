@@ -61,9 +61,13 @@ export const Route = createFileRoute("/_app/admin/users/")({
   ): {
     sort?: string
     order?: string
+    q?: string
+    page?: number
   } => ({
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
     order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
   }),
   component: AdminUsersPage,
 })
@@ -163,7 +167,7 @@ function matchesStatusFilter(user: AdminUserSummary, filters: string[]): boolean
 
 function AdminUsersPage() {
   useDocumentTitle("Admin — Users")
-  const { sort: sortParam, order: orderParam } = Route.useSearch()
+  const { sort: sortParam, order: orderParam, q: searchParam, page: pageParam } = Route.useSearch()
   const navigate = Route.useNavigate()
 
   // Derive sort state from URL search params
@@ -171,29 +175,32 @@ function AdminUsersPage() {
   const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
   // Filter & search state
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(searchParam ?? "")
   const debouncedSearch = useDebouncedValue(search)
   const [roleFilter, setRoleFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
-  const [page, setPage] = useState(1)
+  const page = pageParam ?? 1
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when search changes
+  // Sync debounced search to URL (also resets page)
   useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
+    navigate({ search: (prev) => ({ ...prev, q: debouncedSearch || undefined, page: undefined }) })
+  }, [debouncedSearch, navigate])
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }) })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -378,16 +385,18 @@ function AdminUsersPage() {
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
+        const p = Math.max(1, page - 1)
+        navigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
       }
       if (e.key === "ArrowRight" && page < totalPages) {
         e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
+        const p = Math.min(totalPages, page + 1)
+        navigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
+  }, [page, totalPages, navigate])
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -552,7 +561,8 @@ function AdminUsersPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setPage((p) => Math.max(1, p - 1))
+                        const p = Math.max(1, page - 1)
+                        navigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
                         setSelectedIds(new Set())
                       }}
                       disabled={page <= 1}
@@ -564,7 +574,8 @@ function AdminUsersPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setPage((p) => Math.min(totalPages, p + 1))
+                        const p = Math.min(totalPages, page + 1)
+                        navigate({ search: (prev) => ({ ...prev, page: p > 1 ? p : undefined }) })
                         setSelectedIds(new Set())
                       }}
                       disabled={page >= totalPages}
