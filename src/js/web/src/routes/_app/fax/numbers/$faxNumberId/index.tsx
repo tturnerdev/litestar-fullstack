@@ -106,7 +106,7 @@ function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const navigate = useNavigate()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxNumber(faxNumberId)
-  useDocumentTitle(data?.number ? `${data.number} - Fax Number` : "Fax Number")
+  useDocumentTitle(data?.number ? `${formatPhoneNumber(data.number)} - Fax Number` : "Fax Number")
   const deleteFaxNumber = useDeleteFaxNumber()
   const teamQuery = useTeam(data?.teamId ?? "")
 
@@ -258,7 +258,7 @@ function FaxNumberDetailPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{data.label ?? data.number}</BreadcrumbPage>
+                <BreadcrumbPage>{data.label ?? formatPhoneNumber(data.number)}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

@@ -51,6 +51,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type PhoneNumber, useDeletePhoneNumber, usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -195,7 +196,7 @@ function EditPhoneNumberDialog({ phoneNumber, open, onOpenChange }: { phoneNumbe
         <DialogHeader>
           <DialogTitle>Edit Phone Number</DialogTitle>
           <DialogDescription>
-            Update the label and caller ID for <span className="font-mono font-medium">{phoneNumber?.number}</span>
+            Update the label and caller ID for <span className="font-mono font-medium">{formatPhoneNumber(phoneNumber?.number)}</span>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
@@ -264,7 +265,7 @@ function PhoneNumberRow({
         />
       </TableCell>
       <TableCell className={cellClass}>
-        <span className="font-mono text-sm">{pn.number}</span>
+        <span className="font-mono text-sm">{formatPhoneNumber(pn.number)}</span>
       </TableCell>
       <TableCell className={cn("hidden md:table-cell", cellClass)}>
         <span className="text-sm">{pn.label ?? <span className="text-muted-foreground">--</span>}</span>

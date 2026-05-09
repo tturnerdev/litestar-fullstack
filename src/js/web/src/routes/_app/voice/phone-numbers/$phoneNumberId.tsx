@@ -227,7 +227,7 @@ function PhoneNumberDetailPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{data.label ?? data.number}</BreadcrumbPage>
+                <BreadcrumbPage>{data.label ?? formatPhoneNumber(data.number)}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
