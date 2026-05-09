@@ -454,6 +454,7 @@ function MemberRow({
   extensionLookup: Map<string, Extension>
 }) {
   const deleteMember = useDeleteRingGroupMember(groupId)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const ext = member.extensionId ? extensionLookup.get(member.extensionId) : undefined
 
   const memberType = member.extensionId ? "Extension" : "External"
@@ -488,14 +489,40 @@ function MemberRow({
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-            onClick={() => deleteMember.mutate(member.id)}
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            onClick={() => setConfirmDelete(true)}
             disabled={deleteMember.isPending}
+            aria-label="Remove member"
           >
             {deleteMember.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
           </Button>
         </div>
+        <AlertDialog open={confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(false)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" /> Remove ring group member?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove {ext?.displayName || ext?.extensionNumber || member.externalNumber || "this member"} from the ring group. You can re-add them later.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMember.isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={() => {
+                  deleteMember.mutate(member.id, { onSuccess: () => setConfirmDelete(false) })
+                }}
+                disabled={deleteMember.isPending}
+              >
+                {deleteMember.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {deleteMember.isPending ? "Removing..." : "Remove"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   )
