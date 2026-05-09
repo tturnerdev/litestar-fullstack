@@ -20,7 +20,7 @@ import {
   X,
   XCircle,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -195,6 +195,7 @@ function SchedulesPage() {
 
   const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
@@ -233,6 +234,24 @@ function SchedulesPage() {
   useEffect(() => {
     setSearchInput(search)
   }, [search])
+
+  // Keyboard shortcuts: "/" to focus search, "n" opens the create page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/schedules/new" })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate])
 
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
@@ -448,6 +467,7 @@ function SchedulesPage() {
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search schedules..."
               value={searchInput}
               onKeyDown={(e) => {
@@ -459,7 +479,7 @@ function SchedulesPage() {
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {searchInput && (
+            {searchInput ? (
               <button
                 type="button"
                 onClick={() => setSearchInput("")}
@@ -468,6 +488,10 @@ function SchedulesPage() {
                 <X className="h-3.5 w-3.5" />
                 <span className="sr-only">Clear search</span>
               </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
         </div>
