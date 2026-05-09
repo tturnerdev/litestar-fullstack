@@ -647,7 +647,7 @@ function TicketDetailSkeleton() {
 
 // ── Error State ─────────────────────────────────────────────────────────
 
-function TicketNotFound({ message }: { message: string }) {
+function TicketNotFound({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <PageContainer className="flex-1">
       <div className="flex flex-col items-center justify-center py-24">
@@ -656,11 +656,18 @@ function TicketNotFound({ message }: { message: string }) {
         </div>
         <h2 className="mt-4 text-lg font-semibold">Unable to load ticket</h2>
         <p className="mt-1 max-w-sm text-center text-sm text-muted-foreground">{message}</p>
-        <Button variant="outline" size="sm" asChild className="mt-6">
-          <Link to="/support">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tickets
-          </Link>
-        </Button>
+        <div className="mt-6 flex items-center gap-2">
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              Try again
+            </Button>
+          )}
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/support">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tickets
+            </Link>
+          </Button>
+        </div>
       </div>
     </PageContainer>
   )
@@ -743,7 +750,7 @@ function TicketDetailPage() {
   }
 
   if (isError) {
-    return <TicketNotFound message="We couldn't load this ticket. It may have been deleted or you may not have permission to view it. Try refreshing." />
+    return <TicketNotFound message="We couldn't load this ticket. It may have been deleted or you may not have permission to view it." onRetry={refetch} />
   }
 
   if (!ticket) {
