@@ -573,9 +573,10 @@ class FreePBXProvider(GatewayProvider):
         """Verify connectivity by attempting a token exchange."""
         try:
             await self._get_token(connection)
-            return True, None
         except Exception as exc:  # noqa: BLE001
             return False, str(exc)
+        else:
+            return True, None
 
     # -- Extension mutation helpers ----------------------------------------
 
@@ -1034,10 +1035,11 @@ class FreePBXProvider(GatewayProvider):
                         "member_extensions": members,
                     })
 
-            return matching
         except Exception:  # noqa: BLE001
             await logger.adebug("freepbx_ring_groups_query_failed", extension=extension)
             return []
+        else:
+            return matching
 
     async def _fetch_voicemail(self, extension: str, connection: m.Connection) -> dict[str, Any] | None:
         """Fetch voicemail configuration for an extension.
@@ -1064,9 +1066,10 @@ class FreePBXProvider(GatewayProvider):
                         "mailbox": box.get("mailbox", ""),
                     }
 
-            return None
         except Exception:  # noqa: BLE001
             await logger.adebug("freepbx_voicemail_query_failed", extension=extension)
+            return None
+        else:
             return None
 
     async def _fetch_cdrs(
@@ -1108,9 +1111,8 @@ class FreePBXProvider(GatewayProvider):
                 dst_digits = re.sub(r"[^\d]", "", dst)
 
                 if (
-                    src == identifier
-                    or dst == identifier
-                    or (normalized and (src_digits == normalized or dst_digits == normalized))
+                    identifier in (src, dst)
+                    or (normalized and normalized in (src_digits, dst_digits))
                 ):
                     results.append({
                         "date": record.get("calldate", ""),
@@ -1125,10 +1127,11 @@ class FreePBXProvider(GatewayProvider):
                     if len(results) >= limit:
                         break
 
-            return results
         except Exception:  # noqa: BLE001
             await logger.adebug("freepbx_cdr_query_failed", identifier=identifier)
             return []
+        else:
+            return results
 
     @staticmethod
     def _base_url(connection: m.Connection) -> str:

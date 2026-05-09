@@ -233,7 +233,7 @@ async def _dispatch_webhook(internal_event_id: str, **kwargs: Any) -> None:
         payload["entity_id"] = str(entity_id)
 
     for key, value in kwargs.items():
-        if key == entity_id_key or key == "mailer":
+        if key in (entity_id_key, "mailer"):
             continue
         payload[key] = str(value) if isinstance(value, UUID) else value
 

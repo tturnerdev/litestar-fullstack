@@ -161,7 +161,7 @@ async def device_status_sync_job(_: Context) -> dict[str, int]:
     updated_count = 0
     async with provide_services(device_deps.provide_devices_service) as (device_service,):
         devices = await device_service.list(m.Device.is_active.is_(True))
-        for device in devices:
+        for _device in devices:
             # In production: check actual device status via API/SIP registration
             # and call broadcast_device_status when changes are detected.
             pass

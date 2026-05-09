@@ -42,7 +42,6 @@ def render_markdown(text: str) -> str:
     # Inline code
     result = re.sub(r"`([^`]+)`", r"<code>\1</code>", result)
 
-    # Headings (h1-h6)
     result = re.sub(r"^######\s+(.+)$", r"<h6>\1</h6>", result, flags=re.MULTILINE)
     result = re.sub(r"^#####\s+(.+)$", r"<h5>\1</h5>", result, flags=re.MULTILINE)
     result = re.sub(r"^####\s+(.+)$", r"<h4>\1</h4>", result, flags=re.MULTILINE)
@@ -58,7 +57,6 @@ def render_markdown(text: str) -> str:
     # Images ![alt](url)
     result = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" />', result)
 
-    # Links [text](url)
     result = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2" rel="noopener noreferrer">\1</a>', result)
 
     # Blockquotes
