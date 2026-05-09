@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from litestar.exceptions import PermissionDeniedException
-
-from app.lib import constants
+from app.lib.guards import require_superuser_access
 
 if TYPE_CHECKING:
     from typing import Any
@@ -18,9 +16,7 @@ if TYPE_CHECKING:
     from app.db import models as m
 
 
-def requires_call_routing_access(
-    connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler
-) -> None:
+def requires_call_routing_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
     """Verify the connection user has access to call routing resources.
 
     Args:
@@ -30,16 +26,7 @@ def requires_call_routing_access(
     Raises:
         PermissionDeniedException: Not authorized
     """
-    if connection.user.is_superuser:
-        return
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
-    if has_system_role:
-        return
-    raise PermissionDeniedException(detail="Admin or superuser access is required to manage call routing.")
+    require_superuser_access(connection, detail="Admin or superuser access is required to manage call routing.")
 
 
 __all__ = ("requires_call_routing_access",)

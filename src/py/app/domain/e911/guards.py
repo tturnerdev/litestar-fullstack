@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 
 from litestar.exceptions import PermissionDeniedException
 
-from app.db import models as m
-from app.lib import constants
+from app.lib.guards import has_superuser_access
 
 if TYPE_CHECKING:
     from typing import Any
@@ -16,10 +15,10 @@ if TYPE_CHECKING:
     from litestar.handlers.base import BaseRouteHandler
     from litestar.security.jwt import Token
 
+    from app.db import models as m
 
-def requires_team_membership(
-    connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler
-) -> None:
+
+def requires_team_membership(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
     """Verify the connection user has at least one team membership.
 
     E911 registrations are team-scoped, so the user must belong to
@@ -32,12 +31,7 @@ def requires_team_membership(
     Raises:
         PermissionDeniedException: Not authorized
     """
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
-    if connection.user.is_superuser or has_system_role:
+    if has_superuser_access(connection):
         return
     if connection.user.teams:
         return

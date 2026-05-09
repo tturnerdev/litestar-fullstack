@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Coroutine
 from typing import TYPE_CHECKING
 
 from litestar.exceptions import PermissionDeniedException
 from sqlalchemy import select
 
 from app.db import models as m
-from app.lib import constants
+from app.lib.guards import has_superuser_access
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
     from typing import Any
 
     from litestar.connection import ASGIConnection
@@ -30,13 +30,8 @@ def requires_team_membership(connection: ASGIConnection[Any, m.User, Token, Any]
         PermissionDeniedException: Not authorized
     """
     team_id = connection.path_params["team_id"]
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
     has_team_role = any(membership.team.id == team_id for membership in connection.user.teams)
-    if connection.user.is_superuser or has_system_role or has_team_role:
+    if has_superuser_access(connection) or has_team_role:
         return
     raise PermissionDeniedException(detail="You must be a member of this team to access it.")
 
@@ -52,15 +47,10 @@ def requires_team_admin(connection: ASGIConnection[Any, m.User, Token, Any], _: 
         PermissionDeniedException: Not authorized
     """
     team_id = connection.path_params["team_id"]
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
     has_team_role = any(
         membership.team.id == team_id and membership.role == m.TeamRoles.ADMIN for membership in connection.user.teams
     )
-    if connection.user.is_superuser or has_system_role or has_team_role:
+    if has_superuser_access(connection) or has_team_role:
         return
     raise PermissionDeniedException(detail="Team admin role is required for this action.")
 
@@ -76,27 +66,11 @@ def requires_team_ownership(connection: ASGIConnection[Any, m.User, Token, Any],
         PermissionDeniedException: Not authorized
     """
     team_id = connection.path_params["team_id"]
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
     has_team_role = any(membership.team.id == team_id and membership.is_owner for membership in connection.user.teams)
-    if connection.user.is_superuser or has_system_role or has_team_role:
+    if has_superuser_access(connection) or has_team_role:
         return
 
     raise PermissionDeniedException(detail="Team owner role is required for this action.")
-
-
-def _is_superuser(user: m.User) -> bool:
-    """Check if a user has superuser access via flag or assigned role."""
-    if user.is_superuser:
-        return True
-    return any(
-        assigned_role.role_name
-        for assigned_role in user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
 
 
 def requires_feature_permission(
@@ -136,12 +110,14 @@ def requires_feature_permission(
         user: m.User = connection.user
 
         # Superusers bypass all permission checks.
-        if _is_superuser(user):
+        if has_superuser_access(connection):
             return
 
         # No team memberships -> deny.
         if not user.teams:
-            raise PermissionDeniedException(detail=f"No team membership found. Access to {feature_area} requires a team role.")
+            raise PermissionDeniedException(
+                detail=f"No team membership found. Access to {feature_area} requires a team role."
+            )
 
         # Obtain a database session from the connection to query permission rows.
         from app.config import alchemy
@@ -149,9 +125,7 @@ def requires_feature_permission(
         session = alchemy.provide_session(connection.app.state, connection.scope)
 
         # Gather team_id -> role from the user's memberships.
-        membership_map: dict[Any, m.TeamRoles] = {
-            membership.team_id: membership.role for membership in user.teams
-        }
+        membership_map: dict[Any, m.TeamRoles] = {membership.team_id: membership.role for membership in user.teams}
 
         # Query permission entries for the user's teams and the requested feature area.
         stmt = select(m.TeamRolePermission).where(

@@ -46,9 +46,7 @@ def requires_voicemail_access(connection: ASGIConnection[Any, m.User, Token, Any
     # to scope results to voicemail boxes belonging to the user's extensions.
 
 
-def requires_voicemail_message_access(
-    connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler
-) -> None:
+def requires_voicemail_message_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
     """Verify the connection user has access to voicemail messages.
 
     Superusers and system admins pass immediately. For regular users,

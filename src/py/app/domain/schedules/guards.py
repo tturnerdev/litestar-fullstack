@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 
 from litestar.exceptions import PermissionDeniedException
 
-from app.db import models as m
-from app.lib import constants
+from app.lib.guards import has_superuser_access
 
 if TYPE_CHECKING:
     from typing import Any
@@ -16,10 +15,10 @@ if TYPE_CHECKING:
     from litestar.handlers.base import BaseRouteHandler
     from litestar.security.jwt import Token
 
+    from app.db import models as m
 
-def requires_schedule_team_membership(
-    connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler
-) -> None:
+
+def requires_schedule_team_membership(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
     """Verify the connection user is a member of the team that owns the schedule.
 
     Args:
@@ -32,13 +31,8 @@ def requires_schedule_team_membership(
     team_id = connection.path_params.get("team_id")
     if team_id is None:
         return
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
     has_team_role = any(membership.team.id == team_id for membership in connection.user.teams)
-    if connection.user.is_superuser or has_system_role or has_team_role:
+    if has_superuser_access(connection) or has_team_role:
         return
     raise PermissionDeniedException(detail="You must be a member of this team to access its schedules.")
 

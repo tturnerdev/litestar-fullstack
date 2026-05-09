@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from litestar.exceptions import PermissionDeniedException
-
-from app.lib import constants
+from app.lib.guards import require_superuser_access
 
 if TYPE_CHECKING:
     from typing import Any
@@ -31,16 +29,9 @@ def requires_connections_admin(connection: ASGIConnection[Any, m.User, Token, An
     Raises:
         PermissionDeniedException: Not authorized
     """
-    if connection.user.is_superuser:
-        return
-    has_system_role = any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
+    require_superuser_access(
+        connection, detail="Insufficient permissions. Admin access is required to manage connections."
     )
-    if has_system_role:
-        return
-    raise PermissionDeniedException(detail="Insufficient permissions. Admin access is required to manage connections.")
 
 
 __all__ = ("requires_connections_admin",)

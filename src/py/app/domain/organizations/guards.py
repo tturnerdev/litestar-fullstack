@@ -4,10 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from litestar.exceptions import PermissionDeniedException
-
-from app.db import models as m
-from app.lib import constants
+from app.lib.guards import require_superuser_access
 
 if TYPE_CHECKING:
     from typing import Any
@@ -15,6 +12,8 @@ if TYPE_CHECKING:
     from litestar.connection import ASGIConnection
     from litestar.handlers.base import BaseRouteHandler
     from litestar.security.jwt import Token
+
+    from app.db import models as m
 
 
 def requires_admin_role(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
@@ -29,15 +28,7 @@ def requires_admin_role(connection: ASGIConnection[Any, m.User, Token, Any], _: 
     Raises:
         PermissionDeniedException: User is not an admin or superuser.
     """
-    if connection.user.is_superuser:
-        return
-    if any(
-        assigned_role.role_name
-        for assigned_role in connection.user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    ):
-        return
-    raise PermissionDeniedException(detail="Insufficient privileges. Admin access required.")
+    require_superuser_access(connection, detail="Insufficient privileges. Admin access required.")
 
 
 __all__ = ("requires_admin_role",)

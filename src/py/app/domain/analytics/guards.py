@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from app.db import models as m
-from app.lib import constants
+from app.lib.guards import has_superuser_access
 
 if TYPE_CHECKING:
     from typing import Any
@@ -14,16 +13,7 @@ if TYPE_CHECKING:
     from litestar.handlers.base import BaseRouteHandler
     from litestar.security.jwt import Token
 
-
-def _has_system_access(user: m.User) -> bool:
-    """Check if user has superuser or system-level access."""
-    if user.is_superuser:
-        return True
-    return any(
-        assigned_role.role_name
-        for assigned_role in user.roles
-        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
-    )
+    from app.db import models as m
 
 
 def requires_analytics_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
@@ -40,10 +30,8 @@ def requires_analytics_access(connection: ASGIConnection[Any, m.User, Token, Any
     Raises:
         PermissionDeniedException: Not authorized
     """
-    if _has_system_access(connection.user):
+    if has_superuser_access(connection):
         return
-    # For non-superusers, we allow access here and rely on controller query filters
-    # to scope results to the user's team memberships.
 
 
 __all__ = ("requires_analytics_access",)
