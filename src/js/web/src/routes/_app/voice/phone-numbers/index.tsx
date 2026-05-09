@@ -722,6 +722,12 @@ function PhoneNumbersPage() {
               placeholder="Search by number, label, or caller ID..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchInput("")
+                  e.currentTarget.blur()
+                }
+              }}
               className="pl-9 pr-8"
             />
             {searchInput ? (

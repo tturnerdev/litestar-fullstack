@@ -524,7 +524,19 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input ref={searchInputRef} placeholder="Search time conditions..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search time conditions..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                onSearchChange("")
+                e.currentTarget.blur()
+              }
+            }}
+            className="pl-9 pr-8"
+          />
           {search ? (
             <button
               type="button"
@@ -859,7 +871,19 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input ref={searchInputRef} placeholder="Search IVR menus..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search IVR menus..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                onSearchChange("")
+                e.currentTarget.blur()
+              }
+            }}
+            className="pl-9 pr-8"
+          />
           {search ? (
             <button
               type="button"
@@ -1175,7 +1199,19 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input ref={searchInputRef} placeholder="Search call queues..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search call queues..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                onSearchChange("")
+                e.currentTarget.blur()
+              }
+            }}
+            className="pl-9 pr-8"
+          />
           {search ? (
             <button
               type="button"
@@ -1498,7 +1534,19 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input ref={searchInputRef} placeholder="Search ring groups..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search ring groups..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                onSearchChange("")
+                e.currentTarget.blur()
+              }
+            }}
+            className="pl-9 pr-8"
+          />
           {search ? (
             <button
               type="button"
