@@ -77,6 +77,7 @@ class FaxNumberController(Controller):
         component="fax/number-list",
         operation_id="ListFaxNumbers",
         summary="List fax numbers",
+        description="Retrieve a paginated list of fax numbers the current user owns or has team access to. Supports searching by number and label.",
         path="/api/fax/numbers",
         guards=[requires_feature_permission("fax", "view")],
     )
@@ -106,6 +107,7 @@ class FaxNumberController(Controller):
     @post(
         operation_id="CreateFaxNumber",
         summary="Create a fax number",
+        description="Provision a new fax number assigned to the current user. Optionally associates the number with a team. Records an audit log entry, emits a fax_number_created event, and sends a notification to the user.",
         path="/api/fax/numbers",
         guards=[requires_feature_permission("fax", "edit")],
         status_code=HTTP_201_CREATED,
@@ -154,6 +156,7 @@ class FaxNumberController(Controller):
     @get(
         operation_id="GetFaxNumber",
         summary="Get fax number details",
+        description="Retrieve details for a single fax number, including its email routes. Access is restricted to the number's owner, team members, and superusers.",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
     )
@@ -184,6 +187,7 @@ class FaxNumberController(Controller):
     @patch(
         operation_id="UpdateFaxNumber",
         summary="Update a fax number",
+        description="Update a fax number's label, active status, or team assignment. Records an audit log entry and emits a fax_number_updated event.",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
@@ -237,6 +241,7 @@ class FaxNumberController(Controller):
     @delete(
         operation_id="DeleteFaxNumber",
         summary="Delete a fax number",
+        description="Delete a fax number and its associated email routes. Records an audit log entry and sends a notification to the number's owner.",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
         status_code=HTTP_204_NO_CONTENT,

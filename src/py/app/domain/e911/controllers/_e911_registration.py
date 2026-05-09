@@ -62,6 +62,7 @@ class E911RegistrationController(Controller):
     @get(
         operation_id="ListE911Registrations",
         summary="List E911 registrations",
+        description="Retrieve a paginated list of E911 registrations with eager-loaded phone number and location data. Supports optional team filtering, search by address, date filters, and configurable sort order.",
         path="/api/e911",
         guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )
@@ -92,6 +93,7 @@ class E911RegistrationController(Controller):
     @post(
         operation_id="CreateE911Registration",
         summary="Create an E911 registration",
+        description="Create a new E911 address registration for a phone number. Emits an e911_registration_created event and records an audit log entry with the registration address.",
         path="/api/e911",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
         status_code=HTTP_201_CREATED,
@@ -138,6 +140,7 @@ class E911RegistrationController(Controller):
     @get(
         operation_id="GetE911Registration",
         summary="Get E911 registration details",
+        description="Retrieve full details for a single E911 registration including associated phone number and location. Requires team membership.",
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )
@@ -161,6 +164,7 @@ class E911RegistrationController(Controller):
     @patch(
         operation_id="UpdateE911Registration",
         summary="Update an E911 registration",
+        description="Partially update an E911 registration's address or phone number assignment. Captures before and after snapshots for audit logging and emits an e911_registration_updated event.",
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
@@ -211,6 +215,7 @@ class E911RegistrationController(Controller):
     @delete(
         operation_id="DeleteE911Registration",
         summary="Delete an E911 registration",
+        description="Permanently delete an E911 registration record. Emits an e911_registration_deleted event and records an audit log entry with the pre-deletion address snapshot.",
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
         status_code=HTTP_204_NO_CONTENT,
@@ -255,6 +260,7 @@ class E911RegistrationController(Controller):
     @post(
         operation_id="ValidateE911Registration",
         summary="Validate an E911 registration",
+        description="Run address validation on an E911 registration and mark it as validated. Currently a stub that sets the validated flag; in production this would call a carrier API for real address verification.",
         path="/api/e911/{registration_id:uuid}/validate",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
@@ -302,6 +308,7 @@ class E911RegistrationController(Controller):
     @get(
         operation_id="ListUnregisteredPhoneNumbers",
         summary="List unregistered phone numbers",
+        description="Retrieve all phone numbers for a team that do not yet have an E911 registration. Useful for identifying numbers that still need emergency address assignment.",
         path="/api/e911/unregistered",
         guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )

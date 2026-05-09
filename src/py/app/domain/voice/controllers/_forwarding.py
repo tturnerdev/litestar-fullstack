@@ -56,6 +56,7 @@ class ForwardingController(Controller):
     @get(
         operation_id="ListForwardingRules",
         summary="List forwarding rules",
+        description="Retrieve a paginated list of forwarding rules for an extension, sorted by priority. Supports search by destination value. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -78,6 +79,7 @@ class ForwardingController(Controller):
     @post(
         operation_id="CreateForwardingRule",
         summary="Create a forwarding rule",
+        description="Add a new forwarding rule to an extension. Logs an audit entry and emits forwarding-changed and creation events. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
         status_code=HTTP_201_CREATED,
@@ -118,6 +120,7 @@ class ForwardingController(Controller):
     @put(
         operation_id="SetForwardingRules",
         summary="Replace all forwarding rules",
+        description="Bulk-replace all forwarding rules for an extension. Deletes existing rules and creates new ones from the request body. Logs a before/after audit entry. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -170,6 +173,7 @@ class ForwardingController(Controller):
     @patch(
         operation_id="UpdateForwardingRule",
         summary="Update a forwarding rule",
+        description="Update fields on a single forwarding rule. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -210,6 +214,7 @@ class ForwardingController(Controller):
     @delete(
         operation_id="DeleteForwardingRule",
         summary="Delete a forwarding rule",
+        description="Remove a single forwarding rule from an extension. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],

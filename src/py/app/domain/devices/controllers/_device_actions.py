@@ -68,7 +68,13 @@ class DeviceActionsController(Controller):
         "task_service": Provide(provide_background_tasks_service),
     }
 
-    @post(operation_id="RebootDevice", summary="Reboot a device", path="/api/devices/{device_id:uuid}/reboot", guards=[requires_feature_permission("devices", "edit")])
+    @post(
+        operation_id="RebootDevice",
+        summary="Reboot a device",
+        description="Enqueue a background task to reboot the device. The reboot is executed asynchronously via SAQ and tracked as a background task. Records an audit log entry and emits a device_rebooted event.",
+        path="/api/devices/{device_id:uuid}/reboot",
+        guards=[requires_feature_permission("devices", "edit")],
+    )
     async def reboot_device(
         self,
         request: Request[m.User, Token, Any],
@@ -106,7 +112,13 @@ class DeviceActionsController(Controller):
         )
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
-    @post(operation_id="ReprovisionDevice", summary="Reprovision a device", path="/api/devices/{device_id:uuid}/reprovision", guards=[requires_feature_permission("devices", "edit")])
+    @post(
+        operation_id="ReprovisionDevice",
+        summary="Reprovision a device",
+        description="Enqueue a background task to reprovision the device with its current configuration. Executed asynchronously via SAQ with a 120-second timeout. Records an audit log entry and emits a device_reprovisioned event.",
+        path="/api/devices/{device_id:uuid}/reprovision",
+        guards=[requires_feature_permission("devices", "edit")],
+    )
     async def reprovision_device(
         self,
         request: Request[m.User, Token, Any],
@@ -144,7 +156,13 @@ class DeviceActionsController(Controller):
         )
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
-    @get(operation_id="ListDeviceLines", summary="List device line assignments", path="/api/devices/{device_id:uuid}/lines", guards=[requires_feature_permission("devices", "view")])
+    @get(
+        operation_id="ListDeviceLines",
+        summary="List device line assignments",
+        description="Retrieve all line assignments for a device, including the associated extension details for each line.",
+        path="/api/devices/{device_id:uuid}/lines",
+        guards=[requires_feature_permission("devices", "view")],
+    )
     async def list_device_lines(
         self,
         devices_service: DeviceService,
@@ -158,7 +176,13 @@ class DeviceActionsController(Controller):
             schemas.append(schema)
         return schemas
 
-    @put(operation_id="SetDeviceLines", summary="Set device line assignments", path="/api/devices/{device_id:uuid}/lines", guards=[requires_feature_permission("devices", "edit")])
+    @put(
+        operation_id="SetDeviceLines",
+        summary="Set device line assignments",
+        description="Replace all line assignments for a device with the provided set. Captures before and after snapshots for audit logging and emits a device_lines_updated event.",
+        path="/api/devices/{device_id:uuid}/lines",
+        guards=[requires_feature_permission("devices", "edit")],
+    )
     async def set_device_lines(
         self,
         request: Request[m.User, Token, Any],

@@ -75,6 +75,7 @@ class FaxMessageController(Controller):
         component="fax/message-list",
         operation_id="ListFaxMessages",
         summary="List fax messages",
+        description="Retrieve a paginated list of fax messages scoped to fax numbers the current user owns or has team access to. Supports searching by remote number and name, and sorting by received date.",
         path="/api/fax/messages",
         guards=[requires_feature_permission("fax", "view")],
     )
@@ -117,6 +118,7 @@ class FaxMessageController(Controller):
     @get(
         operation_id="GetFaxMessage",
         summary="Get fax message details",
+        description="Retrieve details for a single fax message. Access is restricted to users who own or have team membership on the associated fax number.",
         path="/api/fax/messages/{message_id:uuid}",
         guards=[requires_feature_permission("fax", "view"), requires_fax_message_access],
     )
@@ -147,6 +149,7 @@ class FaxMessageController(Controller):
     @delete(
         operation_id="DeleteFaxMessage",
         summary="Delete a fax message",
+        description="Delete a fax message record. The user must have access to the associated fax number. An audit log entry is recorded and a fax_message_deleted event is emitted.",
         path="/api/fax/messages/{message_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_message_access],
         status_code=HTTP_204_NO_CONTENT,
@@ -195,6 +198,7 @@ class FaxMessageController(Controller):
     @post(
         operation_id="SendFax",
         summary="Send a fax",
+        description="Queue an outbound fax for delivery as a tracked background task. Creates a fax message record in QUEUED status and enqueues a SAQ job to send via the configured provider. Returns HTTP 202 with the background task details.",
         path="/api/fax/send",
         status_code=HTTP_202_ACCEPTED,
         guards=[requires_feature_permission("fax", "edit")],

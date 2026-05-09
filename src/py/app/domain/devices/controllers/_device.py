@@ -64,6 +64,7 @@ class DeviceController(Controller):
     @get(
         operation_id="ListDevices",
         summary="List devices",
+        description="Retrieve a paginated list of devices with eager-loaded line assignments, location, and connection data. Superusers see all devices; regular users see only their own. Supports search by name, date filters, and configurable sort order.",
         path="/api/devices",
         guards=[requires_feature_permission("devices", "view")],
     )
@@ -95,6 +96,7 @@ class DeviceController(Controller):
     @post(
         operation_id="CreateDevice",
         summary="Register a device",
+        description="Register a new device and assign it to the current user. Emits a device_created event, records an audit log entry, and sends a notification to the user.",
         path="/api/devices",
         guards=[requires_feature_permission("devices", "edit")],
         status_code=HTTP_201_CREATED,
@@ -153,6 +155,7 @@ class DeviceController(Controller):
     @get(
         operation_id="GetDevice",
         summary="Get device details",
+        description="Retrieve full details for a single device including line assignments, location, and connection. Enforces device ownership so users can only access their own devices.",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "view"), requires_device_ownership],
     )
@@ -176,6 +179,7 @@ class DeviceController(Controller):
     @patch(
         operation_id="UpdateDevice",
         summary="Update a device",
+        description="Partially update a device's fields. Captures before and after snapshots for audit logging and emits a device_updated event. Requires device ownership.",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
     )
@@ -227,6 +231,7 @@ class DeviceController(Controller):
     @delete(
         operation_id="DeleteDevice",
         summary="Delete a device",
+        description="Permanently delete a device record. Emits a device_deleted event, records an audit log entry with the pre-deletion snapshot, and sends a removal notification to the device owner.",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
         status_code=HTTP_204_NO_CONTENT,

@@ -83,6 +83,7 @@ class FaxEmailRouteController(Controller):
     @get(
         operation_id="ListFaxEmailRoutes",
         summary="List fax email routes",
+        description="Retrieve a paginated list of email routes configured for a specific fax number. Supports filtering by email address, creation date, and update date.",
         path="",
         guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
     )
@@ -116,6 +117,7 @@ class FaxEmailRouteController(Controller):
     @post(
         operation_id="CreateFaxEmailRoute",
         summary="Create a fax email route",
+        description="Add a new email routing rule to a fax number. The change is audit-logged and emits a fax_email_route_created event.",
         path="",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
         status_code=HTTP_201_CREATED,
@@ -168,6 +170,7 @@ class FaxEmailRouteController(Controller):
     @patch(
         operation_id="UpdateFaxEmailRoute",
         summary="Update a fax email route",
+        description="Update an existing email route on a fax number. Validates that the route belongs to the specified fax number and records an audit log entry.",
         path="/{route_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
@@ -226,6 +229,7 @@ class FaxEmailRouteController(Controller):
     @delete(
         operation_id="DeleteFaxEmailRoute",
         summary="Delete a fax email route",
+        description="Remove an email route from a fax number. Validates that the route belongs to the specified fax number and records an audit log entry.",
         path="/{route_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
         status_code=HTTP_204_NO_CONTENT,

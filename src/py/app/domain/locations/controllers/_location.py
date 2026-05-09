@@ -55,6 +55,7 @@ class LocationController(Controller):
     @get(
         operation_id="ListLocations",
         summary="List locations",
+        description="Retrieve a paginated list of locations for a team. Supports searching by name, city, and state, and optional filtering by location type.",
         path="/api/teams/{team_id:uuid}/locations",
         guards=[requires_feature_permission("locations", "view")],
     )
@@ -87,6 +88,7 @@ class LocationController(Controller):
     @post(
         operation_id="CreateLocation",
         summary="Create a location",
+        description="Create a new location within a team. Requires team membership. Records an audit log entry and emits a location_created event.",
         path="/api/teams/{team_id:uuid}/locations",
         guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
         status_code=HTTP_201_CREATED,
@@ -136,6 +138,7 @@ class LocationController(Controller):
     @get(
         operation_id="GetLocation",
         summary="Get location details",
+        description="Retrieve details for a single location, including its child locations. Scoped to the specified team.",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "view"), requires_location_team_membership],
     )
@@ -161,6 +164,7 @@ class LocationController(Controller):
     @patch(
         operation_id="UpdateLocation",
         summary="Update a location",
+        description="Update an existing location's attributes. Requires team membership. Records an audit log entry and emits a location_updated event.",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
     )
@@ -213,6 +217,7 @@ class LocationController(Controller):
     @delete(
         operation_id="DeleteLocation",
         summary="Delete a location",
+        description="Delete a location from a team. Fails with HTTP 409 if devices are still assigned to the location. Records an audit log entry.",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
         status_code=HTTP_204_NO_CONTENT,

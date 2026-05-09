@@ -32,6 +32,7 @@ class DeviceTemplateLookupController(Controller):
     @get(
         operation_id="LookupDeviceTemplate",
         summary="Look up device template",
+        description="Find a device template by manufacturer and model name. Returns wireframe data, provisioning template, and template variables. Results are cached for 10 minutes.",
         path="/lookup",
         cache=600,
         cache_control=CacheControlHeader(private=True, max_age=600),

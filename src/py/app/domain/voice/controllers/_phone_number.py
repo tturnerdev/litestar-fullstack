@@ -55,6 +55,7 @@ class PhoneNumberController(Controller):
     @get(
         operation_id="ListPhoneNumbers",
         summary="List phone numbers",
+        description="Retrieve a paginated list of the current user's phone numbers with E911 registration status. Supports search by number or label.",
         guards=[requires_feature_permission("voice", "view")],
     )
     async def list_phone_numbers(
@@ -73,6 +74,7 @@ class PhoneNumberController(Controller):
     @post(
         operation_id="CreatePhoneNumber",
         summary="Create a phone number",
+        description="Register a new phone number for the current user. Logs an audit entry and emits a creation event.",
         guards=[requires_feature_permission("voice", "edit")],
         status_code=HTTP_201_CREATED,
     )
@@ -108,6 +110,7 @@ class PhoneNumberController(Controller):
     @get(
         operation_id="ListUnregisteredE911PhoneNumbers",
         summary="List phone numbers without E911",
+        description="List active phone numbers within a team that lack an E911 registration. The caller must be a superuser or a member of the specified team.",
         path="/unregistered-e911",
         guards=[requires_feature_permission("voice", "view")],
     )
@@ -125,7 +128,13 @@ class PhoneNumberController(Controller):
         results = await phone_numbers_service.get_unregistered_e911_numbers(team_id)
         return phone_numbers_service.to_schema_enriched(results)
 
-    @get(operation_id="GetPhoneNumber", summary="Get phone number details", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "view"), requires_phone_number_access])
+    @get(
+        operation_id="GetPhoneNumber",
+        summary="Get phone number details",
+        description="Retrieve a single phone number by ID with E911 registration status. The caller must own the phone number.",
+        path="/{phone_number_id:uuid}",
+        guards=[requires_feature_permission("voice", "view"), requires_phone_number_access],
+    )
     async def get_phone_number(
         self,
         phone_numbers_service: PhoneNumberService,
@@ -136,7 +145,13 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
         return phone_numbers_service.to_schema_enriched(db_obj)
 
-    @patch(operation_id="UpdatePhoneNumber", summary="Update a phone number", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access])
+    @patch(
+        operation_id="UpdatePhoneNumber",
+        summary="Update a phone number",
+        description="Update a phone number's label or caller ID settings. Logs an audit entry and emits an update event. The caller must own the phone number.",
+        path="/{phone_number_id:uuid}",
+        guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
+    )
     async def update_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -170,6 +185,7 @@ class PhoneNumberController(Controller):
     @delete(
         operation_id="DeletePhoneNumber",
         summary="Delete a phone number",
+        description="Delete a phone number record. Logs an audit entry and emits a deletion event. The caller must own the phone number.",
         path="/{phone_number_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
         return_dto=None,

@@ -80,6 +80,7 @@ class VoicemailController(Controller):
     @get(
         operation_id="GetVoicemailSettings",
         summary="Get voicemail settings",
+        description="Retrieve the voicemail box configuration for an extension, creating a default box if one does not exist. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -98,6 +99,7 @@ class VoicemailController(Controller):
     @patch(
         operation_id="UpdateVoicemailSettings",
         summary="Update voicemail settings",
+        description="Update voicemail box settings such as PIN, email address, or attachment preferences. If PBX-related fields change and a FreePBX connection exists, the voicemail configuration is synced to the PBX. Logs an audit entry.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -170,6 +172,7 @@ class VoicemailController(Controller):
     @get(
         operation_id="ListVoicemailMessages",
         summary="List voicemail messages",
+        description="Retrieve a paginated list of voicemail messages for an extension's mailbox. Supports search by caller number, caller name, or transcription text. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -194,6 +197,7 @@ class VoicemailController(Controller):
     @get(
         operation_id="GetVoicemailMessage",
         summary="Get a voicemail message",
+        description="Retrieve a single voicemail message by ID. Verifies the message belongs to the extension's voicemail box. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -215,6 +219,7 @@ class VoicemailController(Controller):
     @patch(
         operation_id="UpdateVoicemailMessage",
         summary="Update a voicemail message",
+        description="Update a voicemail message's metadata such as read/unread status. Logs an audit entry and emits an update event. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -256,6 +261,7 @@ class VoicemailController(Controller):
     @delete(
         operation_id="DeleteVoicemailMessage",
         summary="Delete a voicemail message",
+        description="Permanently delete a voicemail message from the extension's mailbox. Logs an audit entry and emits a deletion event. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],

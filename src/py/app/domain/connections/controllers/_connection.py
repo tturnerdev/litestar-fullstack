@@ -67,6 +67,7 @@ class ConnectionController(Controller):
     @get(
         operation_id="ListConnections",
         summary="List connections",
+        description="Retrieve a paginated list of external service connections. Supports searching by name and optional filtering by team. Requires connections admin access.",
         path="/api/connections",
         guards=[requires_feature_permission("connections", "view"), requires_connections_admin],
     )
@@ -97,6 +98,7 @@ class ConnectionController(Controller):
     @post(
         operation_id="CreateConnection",
         summary="Create a connection",
+        description="Register a new external service connection with its credentials. The user must belong to the target team. Records an audit log entry and emits a connection_created event.",
         path="/api/connections",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
         status_code=HTTP_201_CREATED,
@@ -145,6 +147,7 @@ class ConnectionController(Controller):
     @get(
         operation_id="GetConnection",
         summary="Get connection details",
+        description="Retrieve details for a single connection. Credential values are never returned; only the credential field names are included.",
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "view"), requires_connections_admin],
     )
@@ -172,6 +175,7 @@ class ConnectionController(Controller):
     @patch(
         operation_id="UpdateConnection",
         summary="Update a connection",
+        description="Update a connection's name, base URL, credentials, or enabled status. Records an audit log entry and emits a connection_updated event.",
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
@@ -224,6 +228,7 @@ class ConnectionController(Controller):
     @delete(
         operation_id="DeleteConnection",
         summary="Delete a connection",
+        description="Delete an external service connection. Fails with HTTP 409 if devices are still managed through this connection. Records an audit log entry.",
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
         status_code=HTTP_204_NO_CONTENT,
@@ -274,6 +279,7 @@ class ConnectionController(Controller):
     @post(
         operation_id="TestConnection",
         summary="Test a connection",
+        description="Test connectivity to the external service by attempting to authenticate with the stored credentials. Returns a success or failure message.",
         path="/api/connections/{connection_id:uuid}/test",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )

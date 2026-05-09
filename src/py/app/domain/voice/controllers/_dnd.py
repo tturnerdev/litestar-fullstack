@@ -39,6 +39,7 @@ class DndController(Controller):
     @get(
         operation_id="GetDndSettings",
         summary="Get do-not-disturb settings",
+        description="Retrieve the DND configuration for an extension, creating a default settings record if one does not exist. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/dnd",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -57,6 +58,7 @@ class DndController(Controller):
     @patch(
         operation_id="UpdateDndSettings",
         summary="Update do-not-disturb settings",
+        description="Update DND settings for an extension (e.g. enabled state, schedule). Logs an audit entry and emits a DND-updated event. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/dnd",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -95,6 +97,7 @@ class DndController(Controller):
     @post(
         operation_id="ToggleDnd",
         summary="Toggle do-not-disturb",
+        description="Flip the DND enabled state for an extension. Returns the new DND state after toggling. Logs an audit entry and emits a DND-toggled event. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/dnd/toggle",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
