@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Clock, Copy, Cpu, ExternalLink, Loader2, MapPin, MoreHorizontal, Pencil, RefreshCw, Shield, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -72,7 +72,7 @@ function LocationDetailPage() {
   const { locationId } = Route.useParams()
   const { edit: editParam } = Route.useSearch()
   const router = useRouter()
-  const navigate = useNavigate()
+  const navigate = Route.useNavigate()
   const { currentTeam } = useAuthStore()
   const teamId = currentTeam?.id ?? ""
 

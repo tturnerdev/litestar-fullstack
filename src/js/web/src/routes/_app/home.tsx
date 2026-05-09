@@ -46,6 +46,7 @@ import { isTaskActive, TaskStatusBadge } from "@/components/tasks/task-status-ba
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
@@ -558,6 +559,9 @@ function HomePage() {
     data: teamsRaw,
     isLoading: teamsLoading,
     isError: teamsError,
+    dataUpdatedAt: teamsUpdatedAt,
+    isRefetching: teamsRefetching,
+    refetch: refetchTeams,
   } = useQuery({
     queryKey: ["home", "teams"],
     queryFn: async () => {
@@ -666,11 +670,14 @@ function HomePage() {
         title={greeting}
         description="Manage your teams, devices, and services from one place."
         actions={
-          <Button size="sm" asChild>
-            <Link to="/teams/new">
-              <Plus className="mr-2 h-4 w-4" /> Create team
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={teamsUpdatedAt} onRefresh={() => refetchTeams()} isRefreshing={teamsRefetching} />
+            <Button size="sm" asChild>
+              <Link to="/teams/new">
+                <Plus className="mr-2 h-4 w-4" /> Create team
+              </Link>
+            </Button>
+          </div>
         }
       />
 

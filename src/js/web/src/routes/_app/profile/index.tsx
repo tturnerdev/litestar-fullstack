@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router"
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router"
 import {
   AlertCircle,
   ArrowRight,
@@ -42,6 +42,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -725,10 +726,10 @@ function DataExportCard({ user }: { user: User }) {
 function ProfilePage() {
   useDocumentTitle("Profile")
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  const navigate = Route.useNavigate()
   const searchParams = useSearch({ from: "/_app/profile/" })
   const authUser = useAuthStore((s) => s.user)
-  const { data: profile, isLoading, isError } = useProfile()
+  const { data: profile, isLoading, isError, dataUpdatedAt, isRefetching, refetch } = useProfile()
 
   const user = profile ?? authUser
 
@@ -805,6 +806,7 @@ function ProfilePage() {
             </BreadcrumbList>
           </Breadcrumb>
         }
+        actions={<DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />}
       />
 
       {/* Profile completeness indicator */}

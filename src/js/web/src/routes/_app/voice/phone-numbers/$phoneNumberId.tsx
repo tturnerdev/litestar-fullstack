@@ -78,6 +78,7 @@ function PhoneNumberDetailPage() {
   const { phoneNumberId } = Route.useParams()
   const { tab = "details", edit } = Route.useSearch()
   const navigate = useNavigate()
+  const routeNavigate = Route.useNavigate()
 
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
@@ -133,7 +134,7 @@ function PhoneNumberDetailPage() {
   useEffect(() => {
     if (edit && data && !editOpen && !editing) {
       startEditing()
-      navigate({
+      routeNavigate({
         to: "/voice/phone-numbers/$phoneNumberId",
         params: { phoneNumberId },
         search: {},
@@ -286,7 +287,7 @@ function PhoneNumberDetailPage() {
       />
 
       <PageSection>
-        <Tabs value={tab} onValueChange={(value) => navigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId }, search: { tab: value }, replace: true })}>
+        <Tabs value={tab} onValueChange={(value) => routeNavigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId }, search: { tab: value }, replace: true })}>
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>

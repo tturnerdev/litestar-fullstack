@@ -22,6 +22,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -110,7 +111,7 @@ function FieldError({ message }: { message?: string }) {
 function AdminTeamDetailPage() {
   const { teamId } = Route.useParams()
   const navigate = useNavigate()
-  const { data, isLoading, isError, refetch } = useAdminTeam(teamId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminTeam(teamId)
   useDocumentTitle(data?.name ? `Admin - ${data.name}` : "Admin - Team Details")
   const updateTeam = useAdminUpdateTeam(teamId)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -313,6 +314,7 @@ function AdminTeamDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {editing ? (
               <>
                 <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateTeam.isPending}>
