@@ -35,6 +35,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -111,7 +112,7 @@ function ExtensionDetailPage() {
   const { tab = "details", edit } = Route.useSearch()
   const router = useRouter()
   const navigate = Route.useNavigate()
-  const { data, isLoading, isError, refetch } = useExtension(extensionId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useExtension(extensionId)
   useDocumentTitle(data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension")
   const updateExtension = useUpdateExtension(extensionId)
   const gatewayQuery = useGatewayLookupExtension(data?.extensionNumber ?? "", tab === "external")
@@ -271,6 +272,7 @@ function ExtensionDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <DndQuickToggle extensionId={extensionId} showLabel />
             {!data.isActive && (
               <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">

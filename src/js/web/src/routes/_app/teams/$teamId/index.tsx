@@ -41,6 +41,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -112,6 +113,9 @@ function TeamDetail() {
     data: team,
     isLoading: isTeamLoading,
     isError: isTeamError,
+    dataUpdatedAt,
+    isRefetching,
+    refetch,
   } = useQuery({
     queryKey: ["team", teamId],
     queryFn: async () => {
@@ -321,6 +325,7 @@ function TeamDetail() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {team.isActive === false ? (
               <Badge variant="destructive" className="text-[10px]">
                 Inactive

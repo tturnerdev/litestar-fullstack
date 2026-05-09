@@ -42,6 +42,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -310,7 +311,7 @@ function isRetryPending(delivery: WebhookDelivery): boolean {
 function WebhookDetailPage() {
   const { webhookId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError, refetch } = useWebhook(webhookId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useWebhook(webhookId)
   const deliveriesQuery = useWebhookDeliveries(webhookId)
   const updateWebhook = useUpdateWebhook(webhookId)
   const deleteWebhook = useDeleteWebhook()
@@ -583,6 +584,7 @@ function WebhookDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {(editing ? editActive : data.isActive) ? (
               <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
                 <Check className="h-3 w-3" />

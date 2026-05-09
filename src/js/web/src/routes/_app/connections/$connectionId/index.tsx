@@ -49,6 +49,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -231,7 +232,7 @@ function ConnectionDetailPage() {
   const { tab = "overview" } = Route.useSearch()
   const navigate = Route.useNavigate()
   const router = useRouter()
-  const { data, isLoading, isError, refetch } = useConnection(connectionId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useConnection(connectionId)
   useDocumentTitle(data?.name ? `${data.name} - Connection` : "Connection")
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestConnection(connectionId)
@@ -579,6 +580,7 @@ function ConnectionDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Button size="sm" variant="outline" onClick={handleTestConnection} disabled={testConnection.isPending || editing}>
               {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
               {testConnection.isPending ? "Testing..." : "Test"}

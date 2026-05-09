@@ -41,6 +41,7 @@ import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -98,7 +99,7 @@ function formatRetention(days: number): string {
 function VoicemailBoxDetailPage() {
   const { boxId } = Route.useParams()
   const navigate = useNavigate()
-  const { data: box, isLoading, isError, refetch } = useVoicemailBox(boxId)
+  const { data: box, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useVoicemailBox(boxId)
   const deleteBoxMutation = useDeleteVoicemailBox()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
@@ -180,6 +181,7 @@ function VoicemailBoxDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {!box.isEnabled && (
               <Badge variant="outline" className="gap-1.5 text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />

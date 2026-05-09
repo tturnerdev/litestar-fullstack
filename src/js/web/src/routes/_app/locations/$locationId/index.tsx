@@ -18,6 +18,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -75,7 +76,7 @@ function LocationDetailPage() {
   const { currentTeam } = useAuthStore()
   const teamId = currentTeam?.id ?? ""
 
-  const { data, isLoading, isError, refetch } = useLocation(teamId, locationId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useLocation(teamId, locationId)
   useDocumentTitle(data?.name ?? "Location")
   const updateLocation = useUpdateLocation(teamId, locationId)
   const deleteLocation = useDeleteLocation(teamId)
@@ -295,6 +296,7 @@ function LocationDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Badge variant="outline" className="uppercase">
               {isAddressed ? "Addressed" : "Physical"}
             </Badge>

@@ -39,6 +39,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -192,7 +193,7 @@ function DeviceDetailPage() {
   const router = useRouter()
   const { currentTeam } = useAuthStore()
   const teamId = currentTeam?.id ?? ""
-  const { data, isLoading, isError, refetch } = useDevice(deviceId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useDevice(deviceId)
   useDocumentTitle(data?.name ?? "Device Details")
   const updateDevice = useUpdateDevice(deviceId)
   const deleteDevice = useDeleteDevice()
@@ -398,6 +399,7 @@ function DeviceDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {!data.isActive && (
               <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
                 Disabled

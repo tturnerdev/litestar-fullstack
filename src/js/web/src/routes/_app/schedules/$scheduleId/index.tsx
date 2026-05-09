@@ -36,6 +36,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -571,7 +572,7 @@ function ScheduleDetailPage() {
   const navigate = Route.useNavigate()
   const router = useRouter()
 
-  const { data, isLoading, isError, refetch } = useSchedule(scheduleId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useSchedule(scheduleId)
   const updateSchedule = useUpdateSchedule(scheduleId)
   const deleteSchedule = useDeleteSchedule()
 
@@ -810,6 +811,7 @@ function ScheduleDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <CurrentStatusBadge scheduleId={scheduleId} />
             {data.isDefault && <Badge className="gap-1 bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400">Default</Badge>}
             {!editing && (

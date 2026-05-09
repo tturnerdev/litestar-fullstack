@@ -26,6 +26,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -102,7 +103,7 @@ function PhoneNumberDetailPage() {
   const { tab = "details", edit } = Route.useSearch()
   const navigate = useNavigate()
 
-  const { data, isLoading, isError, refetch } = usePhoneNumber(phoneNumberId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
   const updatePhoneNumber = useUpdatePhoneNumber(phoneNumberId)
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
@@ -256,6 +257,7 @@ function PhoneNumberDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Badge variant={data.isActive ? "default" : "secondary"}>{data.isActive ? "Active" : "Inactive"}</Badge>
             {!editing && (
               <Button variant="outline" size="sm" onClick={startEditing}>
