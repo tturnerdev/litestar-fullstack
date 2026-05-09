@@ -424,11 +424,11 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
 
   function handleSave() {
     if (!data) return
-    const payload: Record<string, unknown> = {}
+    const payload: VoicemailBoxUpdate = {}
     if (formData.isEnabled !== data.isEnabled) payload.isEnabled = formData.isEnabled
     if (formData.pin) payload.pin = formData.pin
     if (formData.email !== (data.emailAddress ?? "")) payload.emailAddress = formData.email || null
-    if (formData.greetingType !== data.greetingType) payload.greetingType = formData.greetingType
+    if (formData.greetingType !== data.greetingType) payload.greetingType = formData.greetingType as VoicemailBoxUpdate["greetingType"]
     if (formData.maxLength !== String(data.maxMessageLengthSeconds)) payload.maxMessageLengthSeconds = Number(formData.maxLength)
     if (formData.emailNotification !== data.emailNotification) payload.emailNotification = formData.emailNotification
     if (formData.emailAttachAudio !== data.emailAttachAudio) payload.emailAttachAudio = formData.emailAttachAudio
@@ -442,7 +442,7 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
       return
     }
 
-    updateMutation.mutate(payload as VoicemailBoxUpdate, {
+    updateMutation.mutate(payload, {
       onSuccess: () => {
         setEditing(false)
         setShowPin(false)

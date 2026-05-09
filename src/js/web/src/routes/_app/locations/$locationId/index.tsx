@@ -34,6 +34,7 @@ import { useE911Registrations } from "@/lib/api/hooks/e911"
 import { type Location, useDeleteLocation, useLocation, useUpdateLocation } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
+import type { LocationUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/locations/$locationId/")({
   component: LocationDetailPage,
@@ -119,7 +120,7 @@ function LocationDetailPage() {
   }
 
   function handleSave() {
-    const payload: Record<string, unknown> = {}
+    const payload: LocationUpdate = {}
     if (editName !== data?.name) payload.name = editName
     if (editDescription !== (data?.description ?? "")) payload.description = editDescription || null
     if (data?.locationType === "ADDRESSED") {

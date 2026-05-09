@@ -46,7 +46,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type FaxEmailRouteWithNumber, useAllFaxEmailRoutes, useCreateFaxEmailRoute, useDeleteFaxEmailRoute, useFaxNumbers, useUpdateFaxEmailRoute } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import { deleteFaxEmailRoute as deleteFaxEmailRouteApi } from "@/lib/generated/api"
+import { deleteFaxEmailRoute as deleteFaxEmailRouteApi, type FaxEmailRouteUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/email-routes")({
@@ -270,7 +270,7 @@ function EditEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteWit
     if (Object.keys(fieldErrors).length > 0) return
     if (!route) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: FaxEmailRouteUpdate = {}
     if (trimmed !== route.emailAddress) payload.emailAddress = trimmed
     if (isActive !== route.isActive) payload.isActive = isActive
     if (notifyOnFailure !== route.notifyOnFailure) payload.notifyOnFailure = notifyOnFailure

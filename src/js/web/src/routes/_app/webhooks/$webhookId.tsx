@@ -58,6 +58,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
 import { useDeleteWebhook, useRedeliverWebhookDelivery, useTestWebhook, useUpdateWebhook, useWebhook, useWebhookDeliveries } from "@/lib/api/hooks/webhooks"
 import { formatDateTime, formatRelativeFuture, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { WebhookUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/webhooks/$webhookId")({
   component: WebhookDetailPage,
@@ -400,7 +401,7 @@ function WebhookDetailPage() {
     if (nameErr || urlErr || descErr) return
 
     justSavedRef.current = true
-    const payload: Record<string, unknown> = {}
+    const payload: WebhookUpdate = {}
     if (editName !== data.name) payload.name = editName
     if (editUrl !== data.url) payload.url = editUrl
     if (editDescription !== (data.description ?? "")) payload.description = editDescription || undefined
@@ -413,7 +414,7 @@ function WebhookDetailPage() {
       justSavedRef.current = false
       return
     }
-    updateWebhook.mutate(payload as Parameters<typeof updateWebhook.mutate>[0], {
+    updateWebhook.mutate(payload, {
       onSuccess: () => {
         setEditing(false)
         toast.success("Webhook updated successfully")

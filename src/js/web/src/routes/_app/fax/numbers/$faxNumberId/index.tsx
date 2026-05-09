@@ -55,6 +55,7 @@ import { useDeleteFaxNumber, useFaxMessages, useFaxNumber, useUpdateFaxNumber } 
 import { useTeam } from "@/lib/api/hooks/teams"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
+import type { FaxNumberUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
@@ -657,7 +658,7 @@ function FaxNumberSettingsCard({
     touchedRef.current.label = true
     if (labelErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: FaxNumberUpdate = {}
     const trimmedLabel = formData.label.trim()
     if (trimmedLabel !== (data.label ?? "")) payload.label = trimmedLabel || null
     if (formData.isActive !== data.isActive) payload.isActive = formData.isActive

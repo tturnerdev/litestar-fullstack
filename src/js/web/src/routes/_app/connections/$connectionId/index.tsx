@@ -66,6 +66,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useConnection, useDeleteConnection, useTestConnection, useUpdateConnection } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { ConnectionUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/connections/$connectionId/")({
@@ -333,7 +334,7 @@ function ConnectionDetailPage() {
 
   const handleSaveEditing = useCallback(() => {
     if (!data) return
-    const payload: Record<string, unknown> = {}
+    const payload: ConnectionUpdate = {}
     if (editValues.name !== data.name) payload.name = editValues.name
     if (editValues.description !== (data.description ?? "")) {
       payload.description = editValues.description || null

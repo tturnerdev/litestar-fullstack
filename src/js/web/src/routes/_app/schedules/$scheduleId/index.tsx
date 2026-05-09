@@ -63,6 +63,7 @@ import {
   useUpdateSchedule,
 } from "@/lib/api/hooks/schedules"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
+import type { ScheduleUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/schedules/$scheduleId/")({
   component: ScheduleDetailPage,
@@ -647,7 +648,7 @@ function ScheduleDetailPage() {
     }
     if (nameErr || timezoneErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: ScheduleUpdate = {}
     if (editName !== data?.name) payload.name = editName
     if (editTimezone !== data?.timezone) payload.timezone = editTimezone
     if (editType !== data?.scheduleType) payload.scheduleType = editType

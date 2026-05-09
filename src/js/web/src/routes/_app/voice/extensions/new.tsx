@@ -76,7 +76,7 @@ function NewExtensionPage() {
   })
 
   const onSubmit = async (data: CreateExtensionFormData) => {
-    const payload: Record<string, unknown> = {
+    const payload: ExtensionCreate = {
       extensionNumber: data.extensionNumber,
     }
     if (data.displayName) payload.displayName = data.displayName
@@ -84,7 +84,7 @@ function NewExtensionPage() {
     payload.isActive = data.isActive
 
     try {
-      await createExtension.mutateAsync(payload as ExtensionCreate)
+      await createExtension.mutateAsync(payload)
       // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
       toast.success("Extension created successfully")

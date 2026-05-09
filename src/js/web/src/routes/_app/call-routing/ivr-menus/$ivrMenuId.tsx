@@ -42,6 +42,7 @@ import {
   useUpdateIvrMenu,
 } from "@/lib/api/hooks/call-routing"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { IvrMenuUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/call-routing/ivr-menus/$ivrMenuId")({
   component: IvrMenuDetailPage,
@@ -370,7 +371,7 @@ function IvrMenuDetailPage() {
     }
     if (nameErr || timeoutErr || retriesErr || timeoutDestErr || invalidDestErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: IvrMenuUpdate = {}
     if (editName !== data.name) payload.name = editName
     if (editGreetingType !== data.greetingType) payload.greetingType = editGreetingType
     if (editGreetingText !== (data.greetingText ?? "")) payload.greetingText = editGreetingText || null

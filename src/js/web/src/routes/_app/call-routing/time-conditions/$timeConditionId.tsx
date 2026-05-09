@@ -33,6 +33,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type TimeCondition, useDeleteTimeCondition, useSetTimeConditionOverride, useTimeCondition, useUpdateTimeCondition } from "@/lib/api/hooks/call-routing"
 import { useSchedules } from "@/lib/api/hooks/schedules"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { TimeConditionUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/call-routing/time-conditions/$timeConditionId")({
   component: TimeConditionDetailPage,
@@ -128,7 +129,7 @@ function TimeConditionDetailPage() {
   }
 
   function handleSave() {
-    const payload: Record<string, unknown> = {}
+    const payload: TimeConditionUpdate = {}
     if (editName !== data?.name) payload.name = editName
     if (editMatchDest !== data?.matchDestination) payload.matchDestination = editMatchDest
     if (editNoMatchDest !== data?.noMatchDestination) payload.noMatchDestination = editNoMatchDest

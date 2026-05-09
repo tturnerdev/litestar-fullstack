@@ -43,6 +43,7 @@ import {
 } from "@/lib/api/hooks/call-routing"
 import { type Extension, useExtensions } from "@/lib/api/hooks/voice"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { RingGroupMemberCreate, RingGroupUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/call-routing/ring-groups/$ringGroupId")({
   component: RingGroupDetailPage,
@@ -200,7 +201,7 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
     }
     if (nameErr || strategyErr || ringTimeErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: RingGroupUpdate = {}
     if (name !== ringGroup.name) payload.name = name
     if (number !== ringGroup.number) payload.number = number
     if (strategy !== ringGroup.strategy) payload.strategy = strategy
@@ -347,7 +348,7 @@ function AddMemberRow({ groupId, extensions }: { groupId: string; extensions: Ex
   const [sortOrder, setSortOrder] = useState(0)
 
   const handleSave = () => {
-    const payload: Record<string, unknown> = { sortOrder }
+    const payload: RingGroupMemberCreate = { sortOrder }
     if (memberType === "extension") {
       if (!extensionId.trim()) return
       payload.extensionId = extensionId.trim()
@@ -355,7 +356,7 @@ function AddMemberRow({ groupId, extensions }: { groupId: string; extensions: Ex
       if (!externalNumber.trim()) return
       payload.externalNumber = externalNumber.trim()
     }
-    createMember.mutate(payload as Parameters<typeof createMember.mutate>[0], {
+    createMember.mutate(payload, {
       onSuccess: () => {
         setAdding(false)
         setExtensionId("")

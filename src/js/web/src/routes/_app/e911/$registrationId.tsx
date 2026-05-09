@@ -48,6 +48,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDeleteE911Registration, useE911Registration, useUpdateE911Registration, useValidateE911Registration } from "@/lib/api/hooks/e911"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { E911RegistrationUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/e911/$registrationId")({
@@ -256,7 +257,7 @@ function E911DetailPage() {
     }
     if (addr1Err || cityErr || stateErr || postalErr || countryErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: E911RegistrationUpdate = {}
     if (editAddr1 !== data.addressLine1) payload.addressLine1 = editAddr1
     if (editAddr2 !== (data.addressLine2 ?? "")) payload.addressLine2 = editAddr2 || null
     if (editCity !== data.city) payload.city = editCity

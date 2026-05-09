@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { useUpdateVoicemailSettings, useUploadVoicemailGreeting, useVoicemailSettings } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatDurationHuman } from "@/lib/format-utils"
+import type { GreetingType, VoicemailBoxUpdate } from "@/lib/generated/api"
 
 const GREETING_TYPE_DESCRIPTIONS: Record<string, string> = {
   default: "Plays the system default greeting.",
@@ -96,10 +97,10 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
   const currentAutoDelete = autoDeleteDays || (data.autoDeleteDays != null ? String(data.autoDeleteDays) : "")
 
   function handleSave() {
-    const payload: Record<string, unknown> = {}
+    const payload: VoicemailBoxUpdate = {}
     if (isEnabled !== null) payload.isEnabled = isEnabled
     if (pin) payload.pin = pin
-    if (greetingType) payload.greetingType = greetingType
+    if (greetingType) payload.greetingType = greetingType as GreetingType
     if (maxLength) payload.maxMessageLengthSeconds = Number(maxLength)
     if (emailAddress !== null) payload.emailAddress = emailAddress.trim() || null
     if (emailNotification !== null) payload.emailNotification = emailNotification

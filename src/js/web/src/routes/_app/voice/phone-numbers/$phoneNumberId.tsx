@@ -47,6 +47,7 @@ import { useTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByPhoneNumber, usePhoneNumber, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
+import type { PhoneNumberUpdate } from "@/lib/generated/api"
 
 type PhoneNumberDetailSearch = {
   tab?: string
@@ -134,7 +135,7 @@ function PhoneNumberDetailPage() {
 
   function handleSave() {
     if (!data) return
-    const payload: Record<string, unknown> = {}
+    const payload: PhoneNumberUpdate = {}
     if (editLabel !== (data.label ?? "")) payload.label = editLabel || null
     if (editCallerIdName !== (data.callerIdName ?? "")) payload.callerIdName = editCallerIdName || null
     if (Object.keys(payload).length === 0) {

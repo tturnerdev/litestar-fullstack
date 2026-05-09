@@ -60,7 +60,7 @@ import { useTasks } from "@/lib/api/hooks/tasks"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import type { Device } from "@/lib/generated/api"
+import type { Device, DeviceUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
   component: DeviceDetailPage,
@@ -240,7 +240,7 @@ function DeviceDetailPage() {
   }
 
   function handleInfoSave() {
-    const payload: Record<string, unknown> = {}
+    const payload: DeviceUpdate = {}
     if (editName !== data?.name) payload.name = editName
     if (editManufacturer !== (data?.manufacturer ?? "")) payload.manufacturer = editManufacturer || null
     if (editModel !== (data?.deviceModel ?? "")) payload.deviceModel = editModel || null
@@ -1087,7 +1087,7 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
   const [dirty, setDirty] = useState(false)
 
   function handleSave() {
-    const payload: Record<string, unknown> = {}
+    const payload: DeviceUpdate = {}
 
     if (name !== data.name) {
       payload.name = name

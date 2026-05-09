@@ -28,6 +28,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { useTicket, useUpdateTicket } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
+import type { TicketUpdate } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
@@ -151,7 +152,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
 
   const onSubmit = async (data: EditTicketFormData) => {
     // Only send fields that actually changed
-    const changes: Record<string, unknown> = {}
+    const changes: TicketUpdate = {}
     if (data.subject !== ticket.subject) changes.subject = data.subject
     if (data.priority !== ticket.priority) changes.priority = data.priority
     if (data.status !== ticket.status) changes.status = data.status

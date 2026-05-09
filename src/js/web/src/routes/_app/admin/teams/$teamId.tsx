@@ -37,7 +37,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { type DeleteTeamInvitationData, deleteTeamInvitation, type ListTeamInvitationsData, listTeamInvitations, type TeamInvitation } from "@/lib/generated/api"
+import {
+  type AdminTeamUpdate,
+  type DeleteTeamInvitationData,
+  deleteTeamInvitation,
+  type ListTeamInvitationsData,
+  listTeamInvitations,
+  type TeamInvitation,
+} from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/teams/$teamId")({
   component: AdminTeamDetailPage,
@@ -235,7 +242,7 @@ function AdminTeamDetailPage() {
     if (nameErr || descErr) return
 
     const trimmedName = editName.trim()
-    const payload: Record<string, unknown> = {}
+    const payload: AdminTeamUpdate = {}
 
     if (trimmedName !== data.name) payload.name = trimmedName
     if (editDescription !== (data.description ?? "")) {

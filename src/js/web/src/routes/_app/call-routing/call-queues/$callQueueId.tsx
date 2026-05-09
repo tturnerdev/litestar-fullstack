@@ -45,6 +45,7 @@ import {
 } from "@/lib/api/hooks/call-routing"
 import { type Extension, useExtensions } from "@/lib/api/hooks/voice"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { CallQueueUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/call-routing/call-queues/$callQueueId")({
   component: CallQueueDetailPage,
@@ -231,7 +232,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
     }
     if (nameErr || strategyErr || maxWaitErr || ringTimeErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: CallQueueUpdate = {}
     if (name !== queue.name) payload.name = name
     if (number !== queue.number) payload.number = number
     if (strategy !== queue.strategy) payload.strategy = strategy
