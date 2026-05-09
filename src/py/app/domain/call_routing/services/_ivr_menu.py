@@ -10,6 +10,9 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_NAME_MSG = "An IVR menu with this name already exists."
+_DUPLICATE_DIGIT_MSG = "This digit is already assigned in this IVR menu."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -33,7 +36,7 @@ class IvrMenuService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenu]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("An IVR menu with this name already exists.")
+                raise ValidationException(_DUPLICATE_NAME_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.IvrMenu]) -> ModelDictT[m.IvrMenu]:
@@ -50,7 +53,7 @@ class IvrMenuService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenu]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("An IVR menu with this name already exists.")
+                raise ValidationException(_DUPLICATE_NAME_MSG)
         return data
 
 
@@ -74,7 +77,7 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
                 m.IvrMenuOption.digit == data["digit"],
             )
             if existing:
-                raise ValidationException("This digit is already assigned in this IVR menu.")
+                raise ValidationException(_DUPLICATE_DIGIT_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.IvrMenuOption]) -> ModelDictT[m.IvrMenuOption]:
@@ -94,5 +97,5 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
                     m.IvrMenuOption.digit == data["digit"],
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("This digit is already assigned in this IVR menu.")
+                    raise ValidationException(_DUPLICATE_DIGIT_MSG)
         return data

@@ -10,6 +10,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_NAME_MSG = "A time condition with this name already exists."
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -35,7 +37,7 @@ class TimeConditionService(service.SQLAlchemyAsyncRepositoryService[m.TimeCondit
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("A time condition with this name already exists.")
+                raise ValidationException(_DUPLICATE_NAME_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.TimeCondition]) -> ModelDictT[m.TimeCondition]:
@@ -52,5 +54,5 @@ class TimeConditionService(service.SQLAlchemyAsyncRepositoryService[m.TimeCondit
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A time condition with this name already exists.")
+                raise ValidationException(_DUPLICATE_NAME_MSG)
         return data
