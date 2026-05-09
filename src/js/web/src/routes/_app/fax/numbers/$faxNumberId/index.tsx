@@ -40,6 +40,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -128,7 +129,7 @@ function FieldError({ message }: { message?: string }) {
 function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const navigate = useNavigate()
-  const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxNumber(faxNumberId)
   useDocumentTitle(data?.number ? `${data.number} - Fax Number` : "Fax Number")
   const deleteFaxNumber = useDeleteFaxNumber()
   const teamQuery = useTeam(data?.teamId ?? "")
@@ -288,6 +289,7 @@ function FaxNumberDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <ActiveStatusBadge isActive={data.isActive} />
             <Button size="sm" asChild>
               <Link to="/fax/send">

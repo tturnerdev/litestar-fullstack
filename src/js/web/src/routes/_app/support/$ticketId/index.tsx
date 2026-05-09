@@ -53,6 +53,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -670,7 +671,7 @@ function TicketNotFound({ message }: { message: string }) {
 function TicketDetailPage() {
   const { ticketId } = Route.useParams()
   const router = useRouter()
-  const { data: ticket, isLoading, isError } = useTicket(ticketId)
+  const { data: ticket, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTicket(ticketId)
   useDocumentTitle(ticket?.subject ?? "Ticket Details")
   const closeTicket = useCloseTicket(ticketId)
   const reopenTicket = useReopenTicket(ticketId)
@@ -812,6 +813,7 @@ function TicketDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {editing ? (
               <>
                 <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateTicket.isPending}>

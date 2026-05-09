@@ -41,6 +41,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -305,7 +306,7 @@ function FaxMessageDetailPage() {
   useDocumentTitle("Fax Message")
   const { messageId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError, refetch } = useFaxMessage(messageId)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxMessage(messageId)
   const deleteMutation = useDeleteFaxMessage()
   const { data: pdfUrl, isLoading: pdfLoading } = useDownloadFaxDocument(data ? messageId : "")
 
@@ -398,6 +399,7 @@ function FaxMessageDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <FaxStatusBadge status={data.status ?? ""} />
             <DirectionBadge direction={data.direction} />
             <Button variant="outline" size="sm" asChild>

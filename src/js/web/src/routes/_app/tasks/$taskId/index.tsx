@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
@@ -190,7 +191,7 @@ function TaskNotFound({ message }: { message: string }) {
 function TaskDetailPage() {
   const { taskId } = Route.useParams()
   const navigate = useNavigate()
-  const { data: task, isLoading, isError } = useTask(taskId)
+  const { data: task, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTask(taskId)
   const cancelMutation = useCancelTask()
   const retryMutation = useRetryTask()
   const deleteMutation = useDeleteTask()
@@ -243,6 +244,7 @@ function TaskDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             {isRetryable && (
               <Button
                 size="sm"

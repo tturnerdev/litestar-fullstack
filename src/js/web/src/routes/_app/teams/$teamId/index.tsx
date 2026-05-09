@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useBlocker, useParams } from "@tanstack/react-router"
 import {
   Activity,
@@ -56,11 +55,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDevicesByTeam } from "@/lib/api/hooks/devices"
-import { useDeleteTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
+import { useDeleteTeam, useTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByTeam } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { getTeam, type TeamMember } from "@/lib/generated/api"
+import type { TeamMember } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/")({
   component: TeamDetail,
@@ -109,20 +108,7 @@ function TeamDetail() {
   const [editDescription, setEditDescription] = useState("")
   const [editTags, setEditTags] = useState("")
 
-  const {
-    data: team,
-    isLoading: isTeamLoading,
-    isError: isTeamError,
-    dataUpdatedAt,
-    isRefetching,
-    refetch,
-  } = useQuery({
-    queryKey: ["team", teamId],
-    queryFn: async () => {
-      const response = await getTeam({ path: { team_id: teamId } })
-      return response.data
-    },
-  })
+  const { data: team, isLoading: isTeamLoading, isError: isTeamError, dataUpdatedAt, isRefetching, refetch } = useTeam(teamId)
 
   const deleteTeamMutation = useDeleteTeam()
   const updateTeamMutation = useUpdateTeam(teamId)

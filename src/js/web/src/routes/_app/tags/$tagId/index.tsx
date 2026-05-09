@@ -18,6 +18,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/_app/tags/$tagId/")({
 function TagDetailPage() {
   const { tagId } = Route.useParams()
   const navigate = useNavigate()
-  const { data: tag, isLoading, isError, refetch } = useTag(tagId)
+  const { data: tag, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTag(tagId)
   const updateTag = useUpdateTag(tagId)
   const deleteTag = useDeleteTag()
 
@@ -189,6 +190,7 @@ function TagDetailPage() {
           }
           actions={
             <div className="flex items-center gap-2">
+              <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
               <Button variant="outline" size="sm" asChild>
                 <Link to="/tags">
                   <ArrowLeft className="mr-2 h-4 w-4" /> Back
