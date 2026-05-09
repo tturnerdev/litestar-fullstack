@@ -879,6 +879,7 @@ function E911Page() {
                       disabled={page <= 1}
                     >
                       Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                     </Button>
                     <Button
                       variant="outline"
@@ -891,6 +892,7 @@ function E911Page() {
                       disabled={page >= totalPages}
                     >
                       Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                     </Button>
                   </div>
                 )}

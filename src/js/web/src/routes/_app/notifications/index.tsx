@@ -957,6 +957,7 @@ function NotificationsPage() {
                     >
                       <ChevronLeft className="mr-1 h-4 w-4" />
                       Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                     </Button>
                     <span className="text-sm text-muted-foreground">
                       Page {page} of {totalPages}
@@ -972,6 +973,7 @@ function NotificationsPage() {
                       }
                     >
                       Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </>
