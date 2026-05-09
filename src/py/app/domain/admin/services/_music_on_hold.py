@@ -10,6 +10,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_MOH_NAME_MSG = "A music on hold entry with this name already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service.typing import ModelDictT
 
@@ -33,7 +35,7 @@ class MusicOnHoldService(service.SQLAlchemyAsyncRepositoryService[m.MusicOnHold]
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("A music on hold entry with this name already exists.")
+                raise ValidationException(_DUPLICATE_MOH_NAME_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.MusicOnHold], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.MusicOnHold]:
@@ -44,7 +46,7 @@ class MusicOnHoldService(service.SQLAlchemyAsyncRepositoryService[m.MusicOnHold]
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A music on hold entry with this name already exists.")
+                raise ValidationException(_DUPLICATE_MOH_NAME_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.MusicOnHold]) -> ModelDictT[m.MusicOnHold]:

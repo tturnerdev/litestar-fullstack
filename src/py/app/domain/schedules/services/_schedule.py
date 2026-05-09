@@ -14,6 +14,9 @@ from litestar.exceptions import ValidationException
 from app.db import models as m
 from app.domain.schedules.schemas._schedule import ScheduleCheckResponse, ScheduleEntryDetail
 
+_DUPLICATE_SCHEDULE_NAME_MSG = "A schedule with this name already exists."
+_DUPLICATE_SCHEDULE_ENTRY_MSG = "A schedule entry for this day and start time already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -37,7 +40,7 @@ class ScheduleService(service.SQLAlchemyAsyncRepositoryService[m.Schedule]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("A schedule with this name already exists.")
+                raise ValidationException(_DUPLICATE_SCHEDULE_NAME_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.Schedule], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Schedule]:
@@ -48,7 +51,7 @@ class ScheduleService(service.SQLAlchemyAsyncRepositoryService[m.Schedule]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A schedule with this name already exists.")
+                raise ValidationException(_DUPLICATE_SCHEDULE_NAME_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Schedule]) -> ModelDictT[m.Schedule]:
@@ -133,7 +136,7 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
                 m.ScheduleEntry.start_time == data["start_time"],
             )
             if existing:
-                raise ValidationException("A schedule entry for this day and start time already exists.")
+                raise ValidationException(_DUPLICATE_SCHEDULE_ENTRY_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.ScheduleEntry], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.ScheduleEntry]:
@@ -151,7 +154,7 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
                     m.ScheduleEntry.start_time == start_time,
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A schedule entry for this day and start time already exists.")
+                    raise ValidationException(_DUPLICATE_SCHEDULE_ENTRY_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.ScheduleEntry]) -> ModelDictT[m.ScheduleEntry]:

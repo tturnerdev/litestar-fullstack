@@ -7,6 +7,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_FORWARDING_RULE_MSG = "A forwarding rule of this type already exists for this extension."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -30,7 +32,7 @@ class ForwardingRuleService(service.SQLAlchemyAsyncRepositoryService[m.Forwardin
                 m.ForwardingRule.rule_type == data["rule_type"],
             )
             if existing:
-                raise ValidationException("A forwarding rule of this type already exists for this extension.")
+                raise ValidationException(_DUPLICATE_FORWARDING_RULE_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.ForwardingRule], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.ForwardingRule]:
@@ -43,5 +45,5 @@ class ForwardingRuleService(service.SQLAlchemyAsyncRepositoryService[m.Forwardin
                     m.ForwardingRule.rule_type == data["rule_type"],
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A forwarding rule of this type already exists for this extension.")
+                    raise ValidationException(_DUPLICATE_FORWARDING_RULE_MSG)
         return data

@@ -14,6 +14,8 @@ from sqlalchemy import func, select
 from app.db import models as m
 from app.domain.locations.schemas import Location as LocationSchema
 
+_DUPLICATE_LOCATION_NAME_MSG = "A location with this name already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -37,7 +39,7 @@ class LocationService(service.SQLAlchemyAsyncRepositoryService[m.Location]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("A location with this name already exists.")
+                raise ValidationException(_DUPLICATE_LOCATION_NAME_MSG)
             location_type = data.get("location_type", m.LocationType.ADDRESSED)
             # Clear address fields for PHYSICAL type locations
             if location_type == m.LocationType.PHYSICAL:
@@ -61,7 +63,7 @@ class LocationService(service.SQLAlchemyAsyncRepositoryService[m.Location]):
                     CollectionFilter(field_name="name", values=[data["name"]]),
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A location with this name already exists.")
+                    raise ValidationException(_DUPLICATE_LOCATION_NAME_MSG)
             if "location_type" in data:
                 location_type = data["location_type"]
                 if location_type == m.LocationType.PHYSICAL:

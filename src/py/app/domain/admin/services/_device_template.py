@@ -9,6 +9,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_DEVICE_TEMPLATE_MSG = "A device template for this manufacturer and model already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service.typing import ModelDictT
 
@@ -39,7 +41,7 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
                 m.DeviceTemplate.model == data["model"],
             )
             if existing:
-                raise ValidationException("A device template for this manufacturer and model already exists.")
+                raise ValidationException(_DUPLICATE_DEVICE_TEMPLATE_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.DeviceTemplate], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.DeviceTemplate]:
@@ -55,7 +57,7 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
                     m.DeviceTemplate.model == data["model"],
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A device template for this manufacturer and model already exists.")
+                    raise ValidationException(_DUPLICATE_DEVICE_TEMPLATE_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.DeviceTemplate]) -> ModelDictT[m.DeviceTemplate]:

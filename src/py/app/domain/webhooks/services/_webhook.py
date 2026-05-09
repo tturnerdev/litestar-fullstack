@@ -12,6 +12,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db import models as m
 
+_DUPLICATE_WEBHOOK_NAME_MSG = "A webhook with this name already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -53,7 +55,7 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("A webhook with this name already exists.")
+                raise ValidationException(_DUPLICATE_WEBHOOK_NAME_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.Webhook], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Webhook]:
@@ -68,7 +70,7 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
                     CollectionFilter(field_name="name", values=[data["name"]]),
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A webhook with this name already exists.")
+                    raise ValidationException(_DUPLICATE_WEBHOOK_NAME_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Webhook]) -> ModelDictT[m.Webhook]:

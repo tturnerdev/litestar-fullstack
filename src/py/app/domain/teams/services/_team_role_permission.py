@@ -7,6 +7,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_ROLE_PERMISSION_MSG = "This permission already exists for this role."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service.typing import ModelDictT
 
@@ -31,7 +33,7 @@ class TeamRolePermissionService(service.SQLAlchemyAsyncRepositoryService[m.TeamR
                 m.TeamRolePermission.feature_area == data["feature_area"],
             )
             if existing:
-                raise ValidationException("This permission already exists for this role.")
+                raise ValidationException(_DUPLICATE_ROLE_PERMISSION_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.TeamRolePermission], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.TeamRolePermission]:
@@ -43,5 +45,5 @@ class TeamRolePermissionService(service.SQLAlchemyAsyncRepositoryService[m.TeamR
                 m.TeamRolePermission.feature_area == data["feature_area"],
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("This permission already exists for this role.")
+                raise ValidationException(_DUPLICATE_ROLE_PERMISSION_MSG)
         return data

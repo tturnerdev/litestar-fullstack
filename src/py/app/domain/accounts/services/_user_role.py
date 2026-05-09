@@ -7,6 +7,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_USER_ROLE_MSG = "This role is already assigned to this user."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -30,7 +32,7 @@ class UserRoleService(service.SQLAlchemyAsyncRepositoryService[m.UserRole]):
                 m.UserRole.role_id == data["role_id"],
             )
             if existing:
-                raise ValidationException("This role is already assigned to this user.")
+                raise ValidationException(_DUPLICATE_USER_ROLE_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.UserRole], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.UserRole]:
@@ -41,7 +43,7 @@ class UserRoleService(service.SQLAlchemyAsyncRepositoryService[m.UserRole]):
                 m.UserRole.role_id == data["role_id"],
             )
             if any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("This role is already assigned to this user.")
+                raise ValidationException(_DUPLICATE_USER_ROLE_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.UserRole]) -> ModelDictT[m.UserRole]:

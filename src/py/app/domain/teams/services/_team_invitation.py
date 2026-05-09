@@ -7,6 +7,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_TEAM_INVITATION_MSG = "An invitation for this email already exists in this team."
+
 
 class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvitation]):
     """Team Invitation Service."""
@@ -31,7 +33,7 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
                 m.TeamInvitation.email == data["email"],
             )
             if existing:
-                raise ValidationException("An invitation for this email already exists in this team.")
+                raise ValidationException(_DUPLICATE_TEAM_INVITATION_MSG)
         return await self._populate_inviter(data)
 
     async def to_model_on_update(
@@ -46,7 +48,7 @@ class TeamInvitationService(service.SQLAlchemyAsyncRepositoryService[m.TeamInvit
                     m.TeamInvitation.email == data["email"],
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("An invitation for this email already exists in this team.")
+                    raise ValidationException(_DUPLICATE_TEAM_INVITATION_MSG)
         return await self._populate_inviter(data)
 
     async def to_model_on_upsert(

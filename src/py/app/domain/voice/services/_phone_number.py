@@ -13,6 +13,8 @@ from sqlalchemy import select
 from app.db import models as m
 from app.domain.voice.schemas import PhoneNumber as PhoneNumberSchema
 
+_DUPLICATE_PHONE_NUMBER_MSG = "A phone number with this number already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -42,7 +44,7 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
                 CollectionFilter(field_name="number", values=[data["number"]]),
             )
             if existing:
-                raise ValidationException("A phone number with this number already exists.")
+                raise ValidationException(_DUPLICATE_PHONE_NUMBER_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.PhoneNumber], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.PhoneNumber]:
@@ -53,7 +55,7 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
                 CollectionFilter(field_name="number", values=[data["number"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A phone number with this number already exists.")
+                raise ValidationException(_DUPLICATE_PHONE_NUMBER_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.PhoneNumber]) -> ModelDictT[m.PhoneNumber]:

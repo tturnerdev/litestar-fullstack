@@ -12,6 +12,8 @@ from sqlalchemy import select
 
 from app.db import models as m
 
+_DUPLICATE_EXTENSION_NUMBER_MSG = "An extension with this extension number already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -41,7 +43,7 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
                 CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
             )
             if existing:
-                raise ValidationException("An extension with this extension number already exists.")
+                raise ValidationException(_DUPLICATE_EXTENSION_NUMBER_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.Extension], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Extension]:
@@ -55,7 +57,7 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
                     CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("An extension with this extension number already exists.")
+                    raise ValidationException(_DUPLICATE_EXTENSION_NUMBER_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Extension]) -> ModelDictT[m.Extension]:

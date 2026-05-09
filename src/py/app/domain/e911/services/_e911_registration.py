@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 from app.domain.e911.schemas import E911Registration as E911RegistrationSchema
 
+_DUPLICATE_E911_REGISTRATION_MSG = "An E911 registration already exists for this phone number."
+
 
 class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Registration]):
     """Handles CRUD operations on E911Registration resources."""
@@ -50,7 +52,7 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
                 CollectionFilter(field_name="phone_number_id", values=[data["phone_number_id"]]),
             )
             if existing:
-                raise ValidationException("An E911 registration already exists for this phone number.")
+                raise ValidationException(_DUPLICATE_E911_REGISTRATION_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.E911Registration], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.E911Registration]:
@@ -61,7 +63,7 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
                 CollectionFilter(field_name="phone_number_id", values=[data["phone_number_id"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("An E911 registration already exists for this phone number.")
+                raise ValidationException(_DUPLICATE_E911_REGISTRATION_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.E911Registration]) -> ModelDictT[m.E911Registration]:

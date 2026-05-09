@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 from app.db import models as m
 from app.domain.connections.schemas import ConnectionDetail, ConnectionList
 
+_DUPLICATE_CONNECTION_NAME_MSG = "A connection with this name already exists."
+
 logger = structlog.get_logger()
 
 
@@ -41,7 +43,7 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
-                raise ValidationException("A connection with this name already exists.")
+                raise ValidationException(_DUPLICATE_CONNECTION_NAME_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.Connection], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Connection]:
@@ -52,7 +54,7 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A connection with this name already exists.")
+                raise ValidationException(_DUPLICATE_CONNECTION_NAME_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Connection]) -> ModelDictT[m.Connection]:

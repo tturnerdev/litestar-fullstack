@@ -8,6 +8,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_FAX_NUMBER_MSG = "A fax number with this number already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -31,7 +33,7 @@ class FaxNumberService(service.SQLAlchemyAsyncRepositoryService[m.FaxNumber]):
                 CollectionFilter(field_name="number", values=[data["number"]]),
             )
             if existing:
-                raise ValidationException("A fax number with this number already exists.")
+                raise ValidationException(_DUPLICATE_FAX_NUMBER_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.FaxNumber], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.FaxNumber]:
@@ -42,7 +44,7 @@ class FaxNumberService(service.SQLAlchemyAsyncRepositoryService[m.FaxNumber]):
                 CollectionFilter(field_name="number", values=[data["number"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A fax number with this number already exists.")
+                raise ValidationException(_DUPLICATE_FAX_NUMBER_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.FaxNumber]) -> ModelDictT[m.FaxNumber]:

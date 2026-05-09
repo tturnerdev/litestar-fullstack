@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 
 from advanced_alchemy.extensions.litestar import repository, service
-from litestar.exceptions import ClientException, PermissionDeniedException
+from litestar.exceptions import ClientException, PermissionDeniedException, ValidationException
 from sqlalchemy.orm import undefer_group
 
 from app.db import models as m
@@ -14,6 +14,7 @@ from app.lib.deps import CompositeServiceMixin
 from app.lib.validation import PasswordValidationError, validate_password_strength
 
 MAX_FAILED_RESET_ATTEMPTS = 5
+_DUPLICATE_USERNAME_MSG = "A user with this username already exists."
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -266,9 +267,7 @@ class UserService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServic
             return
         existing = await self.repository.list(m.User.username == username)
         if existing:
-            from litestar.exceptions import ValidationException
-
-            raise ValidationException("A user with this username already exists.")
+            raise ValidationException(_DUPLICATE_USERNAME_MSG)
 
     async def _populate_with_hashed_password(self, data: service.ModelDictT[m.User]) -> service.ModelDictT[m.User]:
         if service.is_dict(data) and (password := data.pop("password", None)) is not None:

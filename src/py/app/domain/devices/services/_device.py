@@ -17,6 +17,8 @@ from app.db import models as m
 logger = logging.getLogger(__name__)
 from app.domain.devices.schemas import Device as DeviceSchema
 
+_DUPLICATE_MAC_ADDRESS_MSG = "A device with this MAC address already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -49,7 +51,7 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
                     CollectionFilter(field_name="mac_address", values=[data["mac_address"]]),
                 )
                 if existing:
-                    raise ValidationException("A device with this MAC address already exists.")
+                    raise ValidationException(_DUPLICATE_MAC_ADDRESS_MSG)
             if not data.get("sip_username"):
                 data["sip_username"] = f"dev_{secrets.token_hex(8)}"
             if not data.get("sip_server"):
@@ -71,7 +73,7 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
                 CollectionFilter(field_name="mac_address", values=[data["mac_address"]]),
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A device with this MAC address already exists.")
+                raise ValidationException(_DUPLICATE_MAC_ADDRESS_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.Device]) -> ModelDictT[m.Device]:

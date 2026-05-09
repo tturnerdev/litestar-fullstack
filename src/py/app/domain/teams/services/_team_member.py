@@ -7,6 +7,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_TEAM_MEMBER_MSG = "This user is already a member of this team."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -30,7 +32,7 @@ class TeamMemberService(service.SQLAlchemyAsyncRepositoryService[m.TeamMember]):
                 m.TeamMember.team_id == data["team_id"],
             )
             if existing:
-                raise ValidationException("This user is already a member of this team.")
+                raise ValidationException(_DUPLICATE_TEAM_MEMBER_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.TeamMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.TeamMember]:
@@ -41,5 +43,5 @@ class TeamMemberService(service.SQLAlchemyAsyncRepositoryService[m.TeamMember]):
                 m.TeamMember.team_id == data["team_id"],
             )
             if any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("This user is already a member of this team.")
+                raise ValidationException(_DUPLICATE_TEAM_MEMBER_MSG)
         return data

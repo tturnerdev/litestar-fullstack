@@ -7,6 +7,8 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
+_DUPLICATE_FAX_EMAIL_ROUTE_MSG = "This email address is already routed to this fax number."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -31,7 +33,7 @@ class FaxEmailRouteService(service.SQLAlchemyAsyncRepositoryService[m.FaxEmailRo
                 m.FaxEmailRoute.email_address == data["email_address"],
             )
             if existing:
-                raise ValidationException("This email address is already routed to this fax number.")
+                raise ValidationException(_DUPLICATE_FAX_EMAIL_ROUTE_MSG)
         return data
 
     async def to_model_on_update(self, data: ModelDictT[m.FaxEmailRoute], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.FaxEmailRoute]:
@@ -47,7 +49,7 @@ class FaxEmailRouteService(service.SQLAlchemyAsyncRepositoryService[m.FaxEmailRo
                 m.FaxEmailRoute.email_address == data["email_address"],
             )
             if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("This email address is already routed to this fax number.")
+                raise ValidationException(_DUPLICATE_FAX_EMAIL_ROUTE_MSG)
         return data
 
     async def to_model_on_upsert(self, data: ModelDictT[m.FaxEmailRoute]) -> ModelDictT[m.FaxEmailRoute]:

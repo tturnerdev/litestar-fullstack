@@ -10,6 +10,8 @@ from litestar.exceptions import ValidationException
 from app.db import models as m
 from app.lib.service import AutoSlugServiceMixin
 
+_DUPLICATE_TAG_NAME_MSG = "A tag with this name already exists."
+
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT
 
@@ -38,7 +40,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
                 CollectionFilter(field_name="slug", values=[slug]),
             )
             if existing:
-                raise ValidationException("A tag with this name already exists.")
+                raise ValidationException(_DUPLICATE_TAG_NAME_MSG)
         return await super().to_model_on_create(data)
 
     async def to_model_on_update(self, data: ModelDictT[m.Tag], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Tag]:
@@ -51,7 +53,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
                     CollectionFilter(field_name="slug", values=[slug]),
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
-                    raise ValidationException("A tag with this name already exists.")
+                    raise ValidationException(_DUPLICATE_TAG_NAME_MSG)
             if data.get("description"):
                 data["description"] = data["description"].strip()
         return await super().to_model_on_update(data)
