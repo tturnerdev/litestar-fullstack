@@ -348,7 +348,7 @@ function AppearanceSection({ onNavigate }: { onNavigate: () => void }) {
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <Label className="text-sm font-medium">Theme</Label>
-          <RadioGroup value={mode} onValueChange={handleThemeChange} className="grid grid-cols-3 gap-3">
+          <RadioGroup value={mode} onValueChange={handleThemeChange} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <ThemePreviewCard mode="light" isActive={mode === "light"} icon={Sun} label="Light" />
             <ThemePreviewCard mode="dark" isActive={mode === "dark"} icon={Moon} label="Dark" />
             <ThemePreviewCard mode="system" isActive={mode === "system"} icon={Monitor} label="System" />

@@ -183,7 +183,7 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
 
                 <div className="space-y-2">
                   <Label>Role</Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {roleOptions.map((option) => {
                       const isSelected = selectedRole === option.value
                       return (

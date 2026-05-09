@@ -830,7 +830,7 @@ function OrganizationSettingsPage() {
                       <p className="text-sm">{org?.addressLine2 || <span className="text-muted-foreground italic">Not set</span>}</p>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="org-city">City</Label>
                       {isEditing ? (
@@ -862,7 +862,7 @@ function OrganizationSettingsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="org-postal">Postal code</Label>
                       {isEditing ? (
