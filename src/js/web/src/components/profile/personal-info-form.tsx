@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useUpdateProfile } from "@/lib/api/hooks/profile"
-import type { User } from "@/lib/generated/api/types.gen"
+import type { User } from "@/lib/generated/api"
 
 const NAME_MAX = 255
 const USERNAME_MAX = 30

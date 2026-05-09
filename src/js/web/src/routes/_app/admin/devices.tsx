@@ -20,7 +20,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminDeviceStats, useAdminDevices } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import type { AdminDeviceSummary } from "@/lib/generated/api/types.gen"
+import type { AdminDeviceSummary } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/devices")({

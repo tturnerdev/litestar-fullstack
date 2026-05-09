@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { accountProfile, accountProfileUpdate, revokeAllSessions, revokeSession } from "@/lib/generated/api"
+import { accountProfile, accountProfileUpdate, type ProfileUpdate, revokeAllSessions, revokeSession } from "@/lib/generated/api"
 import { accountProfileQueryKey, getActiveSessionsOptions, getActiveSessionsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
-import type { ProfileUpdate } from "@/lib/generated/api/types.gen"
 
 export function useProfile() {
   return useQuery({

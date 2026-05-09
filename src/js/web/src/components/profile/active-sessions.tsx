@@ -18,7 +18,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib/api/hooks/profile"
 import { formatFullDateTime, formatRelativeTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import type { ActiveSession } from "@/lib/generated/api/types.gen"
+import type { ActiveSession } from "@/lib/generated/api"
 
 type DeviceCategory = "Desktop" | "Mobile" | "Tablet"
 

@@ -22,7 +22,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import type { AdminTicketSummary } from "@/lib/generated/api/types.gen"
+import type { AdminTicketSummary } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/support")({

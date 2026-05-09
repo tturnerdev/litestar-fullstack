@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import type { User } from "@/lib/generated/api/types.gen"
+import type { User } from "@/lib/generated/api"
 
 interface ProfileHeroProps {
   user: User

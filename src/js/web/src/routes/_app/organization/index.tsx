@@ -54,7 +54,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useOrganization, useOrganizationStats, useUpdateOrganization } from "@/lib/api/hooks/organization"
 import { useAuthStore } from "@/lib/auth"
-import type { DashboardStats, Organization, OrganizationUpdate } from "@/lib/generated/api/types.gen"
+import type { DashboardStats, Organization, OrganizationUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/organization/")({
   component: OrganizationSettingsPage,

@@ -29,7 +29,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type UseTasksOptions, useCancelTask, useTasks } from "@/lib/api/hooks/tasks"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import type { BackgroundTaskList } from "@/lib/generated/api/types.gen"
+import type { BackgroundTaskList } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/tasks/")({
   validateSearch: (
