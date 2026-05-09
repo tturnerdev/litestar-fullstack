@@ -489,6 +489,23 @@ function TasksPage() {
   const hasData = items.length > 0
   const hasAnyFilters = statusFilter !== "all" || taskTypeFilter !== "all"
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate, page, totalPages])
+
   const clearAllFilters = useCallback(() => {
     navigate({
       search: (prev) => ({

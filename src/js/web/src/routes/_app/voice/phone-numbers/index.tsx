@@ -23,6 +23,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -410,7 +411,7 @@ function PhoneNumbersPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch, isRefetching } = usePhoneNumbers(page, pageSize)
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = usePhoneNumbers(page, pageSize)
 
   // Summary stats
   const phoneNumberStats = useMemo(() => {
@@ -626,6 +627,7 @@ function PhoneNumbersPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
