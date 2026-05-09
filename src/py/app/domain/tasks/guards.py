@@ -17,15 +17,13 @@ if TYPE_CHECKING:
 
 
 def requires_task_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the user can access background tasks.
+    """Baseline authentication gate for background task endpoints.
 
-    User must be a superuser or have the superuser role.
-    Task-level team scoping is enforced at the service/controller level.
+    Superusers pass immediately. Non-superusers are permitted here;
+    team-level scoping is enforced by service query filters.
     """
     if has_superuser_access(connection):
         return
-    # For task access, we rely on service-level filtering by team membership.
-    # The guard allows access; the controller further filters by user/team.
 
 
 __all__ = ("requires_task_access",)

@@ -17,47 +17,23 @@ if TYPE_CHECKING:
 
 
 def requires_fax_number_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the connection user owns the fax number or has team access.
+    """Baseline authentication gate for fax number endpoints.
 
-    Checks:
-    - User is superuser or has system admin role
-    - Otherwise, defers to controller-level filtering (user ownership / team membership
-      is enforced by the service query filters in each controller method).
-
-    Note: Full ownership verification requires a DB lookup. The guard provides a
-    baseline permission check; controllers enforce row-level access via query filters.
-
-    Args:
-        connection: Request/Connection object.
-        _: Route handler.
-
-    Raises:
-        PermissionDeniedException: Not authorized
+    Superusers pass immediately. Non-superusers are permitted here;
+    row-level ownership/team scoping is enforced by service query filters.
     """
     if has_superuser_access(connection):
         return
-    # For non-superusers, we allow access here and rely on controller query filters
-    # to scope results to the user's own fax numbers and team fax numbers.
-    # Individual GET/PATCH endpoints will verify ownership via the service layer.
 
 
 def requires_fax_message_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the connection user has access to the fax number this message belongs to.
+    """Baseline authentication gate for fax message endpoints.
 
-    Note: Full ownership verification requires a DB lookup. The guard provides a
-    baseline permission check; controllers enforce row-level access via query filters.
-
-    Args:
-        connection: Request/Connection object.
-        _: Route handler.
-
-    Raises:
-        PermissionDeniedException: Not authorized
+    Superusers pass immediately. Non-superusers are permitted here;
+    row-level scoping is enforced by service query filters.
     """
     if has_superuser_access(connection):
         return
-    # For non-superusers, we allow access here and rely on controller query filters
-    # to scope results to messages belonging to the user's fax numbers.
 
 
 __all__ = (

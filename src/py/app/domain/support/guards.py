@@ -21,26 +21,23 @@ MESSAGE_EDIT_WINDOW = timedelta(minutes=15)
 
 
 def requires_ticket_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the user can access the ticket.
+    """Baseline authentication gate for ticket endpoints.
 
-    User is the ticket creator, assigned agent, or superuser.
+    Superusers pass immediately. Non-superusers are permitted here;
+    row-level scoping (creator, assigned agent) is enforced by service query filters.
     """
     if has_superuser_access(connection):
         return
-    # For ticket access, we'll rely on service-level filtering.
-    # The guard allows access; the controller further filters by user_id.
 
 
 def requires_ticket_message_edit(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the user can edit/delete the message.
+    """Baseline authentication gate for ticket message edit/delete.
 
-    User must be the message author and within the edit time window.
-    Superusers can always edit.
+    Superusers pass immediately. Non-superusers are permitted here;
+    author and edit-window checks are enforced at the service layer.
     """
     if has_superuser_access(connection):
         return
-    # Detailed author + time-window check is enforced at the service/controller level
-    # since we need to load the message from the database.
 
 
 def requires_support_agent(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:

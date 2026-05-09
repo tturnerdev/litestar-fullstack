@@ -28,41 +28,23 @@ def _has_system_access(user: m.User) -> bool:
 
 
 def requires_voicemail_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the connection user has voicemail access.
+    """Baseline authentication gate for voicemail endpoints.
 
-    Superusers and system admins pass immediately. For regular users,
-    row-level access is enforced in the controller via query filters.
-
-    Args:
-        connection: Request/Connection object.
-        _: Route handler.
-
-    Raises:
-        PermissionDeniedException: Not authorized
+    Superusers and system admins pass immediately. Non-superusers are
+    permitted here; row-level scoping is enforced by controller query filters.
     """
     if _has_system_access(connection.user):
         return
-    # For non-superusers, we allow access here and rely on controller query filters
-    # to scope results to voicemail boxes belonging to the user's extensions.
 
 
 def requires_voicemail_message_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the connection user has access to voicemail messages.
+    """Baseline authentication gate for voicemail message endpoints.
 
-    Superusers and system admins pass immediately. For regular users,
-    row-level access is enforced in the controller.
-
-    Args:
-        connection: Request/Connection object.
-        _: Route handler.
-
-    Raises:
-        PermissionDeniedException: Not authorized
+    Superusers and system admins pass immediately. Non-superusers are
+    permitted here; row-level scoping is enforced by controller query filters.
     """
     if _has_system_access(connection.user):
         return
-    # For non-superusers, we allow access here and rely on controller query filters
-    # to scope results to messages belonging to the user's voicemail boxes.
 
 
 __all__ = (

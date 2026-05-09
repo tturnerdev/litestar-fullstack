@@ -17,18 +17,10 @@ if TYPE_CHECKING:
 
 
 def requires_analytics_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
-    """Verify the connection user has access to analytics data.
+    """Baseline authentication gate for analytics endpoints.
 
-    Superusers and system admins pass immediately. For non-superusers,
-    access is deferred to controller-level query filters which scope
-    results to the user's team memberships.
-
-    Args:
-        connection: Request/Connection object.
-        _: Route handler.
-
-    Raises:
-        PermissionDeniedException: Not authorized
+    Superusers pass immediately. Non-superusers are permitted here;
+    team-level scoping is enforced by controller query filters.
     """
     if has_superuser_access(connection):
         return
