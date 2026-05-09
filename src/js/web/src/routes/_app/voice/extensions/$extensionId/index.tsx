@@ -1084,10 +1084,10 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
   const e911Query = useE911Registration(e911RegId)
 
   // Find ring groups where this extension is a member
-  const memberRingGroups = (ringGroupsQuery.data?.items ?? []).filter((rg) => rg.members.some((m) => m.extensionId === extensionId))
+  const memberRingGroups = (ringGroupsQuery.data?.items ?? []).filter((rg) => (rg.members ?? []).some((m) => m.extensionId === extensionId))
 
   // Find call queues where this extension is a member
-  const memberCallQueues = (callQueuesQuery.data?.items ?? []).filter((cq) => cq.members.some((m) => m.extensionId === extensionId))
+  const memberCallQueues = (callQueuesQuery.data?.items ?? []).filter((cq) => (cq.members ?? []).some((m) => m.extensionId === extensionId))
 
   // Find teams that this extension's user belongs to
   const userTeams = (teamsQuery.data?.items ?? []).filter((team) => (team.members ?? []).some((m) => m.userId === extension.userId))
@@ -1277,7 +1277,7 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
                     <div>
                       <p className="text-sm font-medium group-hover:text-primary">{rg.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {rg.strategy} &middot; {rg.members.length} member{rg.members.length !== 1 ? "s" : ""}
+                        {rg.strategy} &middot; {(rg.members ?? []).length} member{(rg.members ?? []).length !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
@@ -1305,7 +1305,7 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
                     <div>
                       <p className="text-sm font-medium group-hover:text-primary">{cq.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {cq.strategy} &middot; {cq.members.length} member{cq.members.length !== 1 ? "s" : ""}
+                        {cq.strategy} &middot; {(cq.members ?? []).length} member{(cq.members ?? []).length !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>

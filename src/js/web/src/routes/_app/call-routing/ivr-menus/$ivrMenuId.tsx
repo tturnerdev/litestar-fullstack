@@ -401,7 +401,7 @@ function IvrMenuDetailPage() {
   const reorderMutation = useReorderIvrMenuOptions(ivrMenuId)
 
   const options = data?.options ?? []
-  const sortedOptions = [...options].sort((a, b) => a.sortOrder - b.sortOrder)
+  const sortedOptions = [...options].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
 
   const handleReorder = useCallback(
     (index: number, direction: "up" | "down") => {
@@ -413,8 +413,8 @@ function IvrMenuDetailPage() {
 
       reorderMutation.mutate(
         {
-          optionA: { id: optA.id, sortOrder: optA.sortOrder },
-          optionB: { id: optB.id, sortOrder: optB.sortOrder },
+          optionA: { id: optA.id, sortOrder: optA.sortOrder ?? 0 },
+          optionB: { id: optB.id, sortOrder: optB.sortOrder ?? 0 },
         },
         {
           onSuccess: () => {

@@ -1,257 +1,80 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  createCallQueue,
+  createCallQueueMember,
+  createIvrMenu,
+  createIvrMenuOption,
+  createRingGroup,
+  createRingGroupMember,
+  createTimeCondition,
+  deleteCallQueue,
+  deleteCallQueueMember,
+  deleteIvrMenu,
+  deleteIvrMenuOption,
+  deleteRingGroup,
+  deleteRingGroupMember,
+  deleteTimeCondition,
+  getCallQueue,
+  getIvrMenu,
+  getRingGroup,
+  getTimeCondition,
+  listCallQueues,
+  listIvrMenus,
+  listRingGroups,
+  listTimeConditions,
+  pauseCallQueueMember,
+  setTimeConditionOverride,
+  updateCallQueue,
+  updateCallQueueMember,
+  updateIvrMenu,
+  updateIvrMenuOption,
+  updateRingGroup,
+  updateRingGroupMember,
+  updateTimeCondition,
+} from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const config = client.getConfig()
-  const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+function unwrap<T>(result: { data?: T; error?: unknown }): T {
+  if (result.error) {
+    const err = result.error as { detail?: string; message?: string } | null
+    throw new Error(err?.detail ?? err?.message ?? "Request failed")
   }
-  const response = await fetch(`${baseUrl}${url}`, {
-    credentials: "include",
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
-  })
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail ?? `Request failed (${response.status})`)
-  }
-  if (response.status === 204) return undefined as unknown as T
-  return response.json()
+  return result.data as T
 }
 
 // ---------------------------------------------------------------------------
-// Types — Time Conditions
+// Re-exports — generated types
 // ---------------------------------------------------------------------------
 
-export interface TimeCondition {
-  id: string
-  teamId: string
-  name: string
-  matchDestination: string
-  noMatchDestination: string
-  overrideMode: string
-  scheduleId: string | null
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface TimeConditionCreate {
-  name: string
-  matchDestination: string
-  noMatchDestination: string
-  scheduleId?: string | null
-  overrideMode?: string
-}
-
-export interface TimeConditionUpdate {
-  name?: string
-  matchDestination?: string
-  noMatchDestination?: string
-  scheduleId?: string | null
-  overrideMode?: string
-}
-
-// ---------------------------------------------------------------------------
-// Types — IVR Menus
-// ---------------------------------------------------------------------------
-
-export interface IvrMenuOption {
-  id: string
-  ivrMenuId: string
-  digit: string
-  label: string
-  destination: string
-  sortOrder: number
-}
-
-export interface IvrMenuOptionCreate {
-  digit: string
-  label: string
-  destination: string
-  sortOrder?: number
-}
-
-export interface IvrMenuOptionUpdate {
-  digit?: string
-  label?: string
-  destination?: string
-  sortOrder?: number
-}
-
-export interface IvrMenu {
-  id: string
-  teamId: string
-  name: string
-  greetingType: string
-  timeoutSeconds: number
-  maxRetries: number
-  greetingText: string | null
-  greetingFileUrl: string | null
-  timeoutDestination: string | null
-  invalidDestination: string | null
-  options: IvrMenuOption[]
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface IvrMenuCreate {
-  name: string
-  greetingType?: string
-  greetingText?: string | null
-  greetingFileUrl?: string | null
-  timeoutSeconds?: number
-  maxRetries?: number
-  timeoutDestination?: string | null
-  invalidDestination?: string | null
-}
-
-export interface IvrMenuUpdate {
-  name?: string
-  greetingType?: string
-  greetingText?: string | null
-  greetingFileUrl?: string | null
-  timeoutSeconds?: number
-  maxRetries?: number
-  timeoutDestination?: string | null
-  invalidDestination?: string | null
-}
-
-// ---------------------------------------------------------------------------
-// Types — Call Queues
-// ---------------------------------------------------------------------------
-
-export interface CallQueueMember {
-  id: string
-  callQueueId: string
-  priority: number
-  penalty: number
-  isPaused: boolean
-  extensionId: string | null
-}
-
-export interface CallQueueMemberCreate {
-  extensionId?: string | null
-  priority?: number
-  penalty?: number
-  isPaused?: boolean
-}
-
-export interface CallQueue {
-  id: string
-  teamId: string
-  name: string
-  number: string
-  strategy: string
-  ringTime: number
-  maxWaitTime: number
-  maxCallers: number
-  joinEmpty: boolean
-  leaveWhenEmpty: boolean
-  announceHoldtime: boolean
-  wrapupTime: number
-  musicOnHoldClass: string | null
-  announceFrequency: number | null
-  timeoutDestination: string | null
-  members: CallQueueMember[]
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface CallQueueCreate {
-  name: string
-  number: string
-  strategy?: string
-  ringTime?: number
-  maxWaitTime?: number
-  maxCallers?: number
-  joinEmpty?: boolean
-  leaveWhenEmpty?: boolean
-  musicOnHoldClass?: string | null
-  announceFrequency?: number | null
-  announceHoldtime?: boolean
-  timeoutDestination?: string | null
-  wrapupTime?: number
-}
-
-export interface CallQueueUpdate {
-  name?: string
-  number?: string
-  strategy?: string
-  ringTime?: number
-  maxWaitTime?: number
-  maxCallers?: number
-  joinEmpty?: boolean
-  leaveWhenEmpty?: boolean
-  musicOnHoldClass?: string | null
-  announceFrequency?: number | null
-  announceHoldtime?: boolean
-  timeoutDestination?: string | null
-  wrapupTime?: number
-}
-
-// ---------------------------------------------------------------------------
-// Types — Ring Groups
-// ---------------------------------------------------------------------------
-
-export interface RingGroupMember {
-  id: string
-  ringGroupId: string
-  sortOrder: number
-  extensionId: string | null
-  externalNumber: string | null
-}
-
-export interface RingGroupMemberCreate {
-  extensionId?: string | null
-  externalNumber?: string | null
-  sortOrder?: number
-}
-
-export interface RingGroup {
-  id: string
-  teamId: string
-  name: string
-  number: string
-  strategy: string
-  ringTime: number
-  noAnswerDestination: string | null
-  members: RingGroupMember[]
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface RingGroupCreate {
-  name: string
-  number: string
-  strategy?: string
-  ringTime?: number
-  noAnswerDestination?: string | null
-}
-
-export interface RingGroupUpdate {
-  name?: string
-  number?: string
-  strategy?: string
-  ringTime?: number
-  noAnswerDestination?: string | null
-}
+export type {
+  CallQueue,
+  CallQueueCreate,
+  CallQueueMember,
+  CallQueueMemberCreate,
+  CallQueueUpdate,
+  IvrMenu,
+  IvrMenuCreate,
+  IvrMenuOption,
+  IvrMenuOptionCreate,
+  IvrMenuOptionUpdate,
+  IvrMenuUpdate,
+  RingGroup,
+  RingGroupCreate,
+  RingGroupMember,
+  RingGroupMemberCreate,
+  RingGroupUpdate,
+  TimeCondition,
+  TimeConditionCreate,
+  TimeConditionUpdate,
+} from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
 // Common
 // ---------------------------------------------------------------------------
-
-interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-}
 
 export interface UseListOptions {
   page?: number
@@ -261,19 +84,6 @@ export interface UseListOptions {
   sortOrder?: "asc" | "desc"
 }
 
-function buildListParams(opts: UseListOptions): string {
-  const params = new URLSearchParams()
-  params.set("currentPage", String(opts.page ?? 1))
-  params.set("pageSize", String(opts.pageSize ?? 25))
-  if (opts.search) {
-    params.set("searchString", opts.search)
-    params.set("searchIgnoreCase", "true")
-  }
-  if (opts.orderBy) params.set("orderBy", opts.orderBy)
-  if (opts.sortOrder) params.set("sortOrder", opts.sortOrder)
-  return params.toString()
-}
-
 // ===========================================================================
 // Time Conditions
 // ===========================================================================
@@ -281,14 +91,23 @@ function buildListParams(opts: UseListOptions): string {
 export function useTimeConditions(opts: UseListOptions = {}) {
   return useQuery({
     queryKey: ["call-routing", "time-conditions", opts.page, opts.pageSize, opts.search, opts.orderBy, opts.sortOrder],
-    queryFn: () => apiFetch<PaginatedResponse<TimeCondition>>(`/api/time-conditions?${buildListParams(opts)}`),
+    queryFn: () =>
+      listTimeConditions({
+        query: {
+          currentPage: opts.page ?? 1,
+          pageSize: opts.pageSize ?? 25,
+          searchString: opts.search,
+          orderBy: opts.orderBy,
+          sortOrder: opts.sortOrder,
+        },
+      }).then(unwrap),
   })
 }
 
 export function useTimeCondition(id: string) {
   return useQuery({
     queryKey: ["call-routing", "time-condition", id],
-    queryFn: () => apiFetch<TimeCondition>(`/api/time-conditions/${id}`),
+    queryFn: () => getTimeCondition({ path: { time_condition_id: id } }).then(unwrap),
     enabled: !!id,
   })
 }
@@ -296,11 +115,7 @@ export function useTimeCondition(id: string) {
 export function useCreateTimeCondition() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: TimeConditionCreate) =>
-      apiFetch<TimeCondition>("/api/time-conditions", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createTimeCondition>[0]["body"]) => createTimeCondition({ body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
       toast.success("Time condition created")
@@ -316,11 +131,7 @@ export function useCreateTimeCondition() {
 export function useUpdateTimeCondition(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: TimeConditionUpdate) =>
-      apiFetch<TimeCondition>(`/api/time-conditions/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof updateTimeCondition>[0]["body"]) => updateTimeCondition({ path: { time_condition_id: id }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-condition", id] })
@@ -337,7 +148,7 @@ export function useUpdateTimeCondition(id: string) {
 export function useDeleteTimeCondition() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => apiFetch<void>(`/api/time-conditions/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => deleteTimeCondition({ path: { time_condition_id: id } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
       toast.success("Time condition deleted")
@@ -354,10 +165,10 @@ export function useSetTimeConditionOverride(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (overrideMode: string) =>
-      apiFetch<TimeCondition>(`/api/time-conditions/${id}/override`, {
-        method: "PUT",
-        body: JSON.stringify({ overrideMode }),
-      }),
+      setTimeConditionOverride({
+        path: { time_condition_id: id },
+        body: { overrideMode },
+      }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-condition", id] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
@@ -378,14 +189,23 @@ export function useSetTimeConditionOverride(id: string) {
 export function useIvrMenus(opts: UseListOptions = {}) {
   return useQuery({
     queryKey: ["call-routing", "ivr-menus", opts.page, opts.pageSize, opts.search, opts.orderBy, opts.sortOrder],
-    queryFn: () => apiFetch<PaginatedResponse<IvrMenu>>(`/api/ivr-menus?${buildListParams(opts)}`),
+    queryFn: () =>
+      listIvrMenus({
+        query: {
+          currentPage: opts.page ?? 1,
+          pageSize: opts.pageSize ?? 25,
+          searchString: opts.search,
+          orderBy: opts.orderBy,
+          sortOrder: opts.sortOrder,
+        },
+      }).then(unwrap),
   })
 }
 
 export function useIvrMenu(id: string) {
   return useQuery({
     queryKey: ["call-routing", "ivr-menu", id],
-    queryFn: () => apiFetch<IvrMenu>(`/api/ivr-menus/${id}`),
+    queryFn: () => getIvrMenu({ path: { ivr_menu_id: id } }).then(unwrap),
     enabled: !!id,
   })
 }
@@ -393,11 +213,7 @@ export function useIvrMenu(id: string) {
 export function useCreateIvrMenu() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: IvrMenuCreate) =>
-      apiFetch<IvrMenu>("/api/ivr-menus", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createIvrMenu>[0]["body"]) => createIvrMenu({ body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menus"] })
       toast.success("IVR menu created")
@@ -413,11 +229,7 @@ export function useCreateIvrMenu() {
 export function useUpdateIvrMenu(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: IvrMenuUpdate) =>
-      apiFetch<IvrMenu>(`/api/ivr-menus/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof updateIvrMenu>[0]["body"]) => updateIvrMenu({ path: { ivr_menu_id: id }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menus"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", id] })
@@ -434,7 +246,7 @@ export function useUpdateIvrMenu(id: string) {
 export function useDeleteIvrMenu() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => apiFetch<void>(`/api/ivr-menus/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => deleteIvrMenu({ path: { ivr_menu_id: id } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menus"] })
       toast.success("IVR menu deleted")
@@ -452,11 +264,7 @@ export function useDeleteIvrMenu() {
 export function useCreateIvrMenuOption(menuId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: IvrMenuOptionCreate) =>
-      apiFetch<IvrMenuOption>(`/api/ivr-menus/${menuId}/options`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createIvrMenuOption>[0]["body"]) => createIvrMenuOption({ path: { ivr_menu_id: menuId }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
       toast.success("Option added")
@@ -472,7 +280,7 @@ export function useCreateIvrMenuOption(menuId: string) {
 export function useDeleteIvrMenuOption(menuId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (optionId: string) => apiFetch<void>(`/api/ivr-menus/${menuId}/options/${optionId}`, { method: "DELETE" }),
+    mutationFn: (optionId: string) => deleteIvrMenuOption({ path: { ivr_menu_id: menuId, option_id: optionId } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
       toast.success("Option removed")
@@ -490,13 +298,13 @@ export function useReorderIvrMenuOptions(menuId: string) {
   return useMutation({
     mutationFn: async ({ optionA, optionB }: { optionA: { id: string; sortOrder: number }; optionB: { id: string; sortOrder: number } }) => {
       await Promise.all([
-        apiFetch<IvrMenuOption>(`/api/ivr-menus/${menuId}/options/${optionA.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ sortOrder: optionB.sortOrder }),
+        updateIvrMenuOption({
+          path: { ivr_menu_id: menuId, option_id: optionA.id },
+          body: { sortOrder: optionB.sortOrder },
         }),
-        apiFetch<IvrMenuOption>(`/api/ivr-menus/${menuId}/options/${optionB.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ sortOrder: optionA.sortOrder }),
+        updateIvrMenuOption({
+          path: { ivr_menu_id: menuId, option_id: optionB.id },
+          body: { sortOrder: optionA.sortOrder },
         }),
       ])
     },
@@ -519,14 +327,23 @@ export function useReorderIvrMenuOptions(menuId: string) {
 export function useCallQueues(opts: UseListOptions = {}) {
   return useQuery({
     queryKey: ["call-routing", "call-queues", opts.page, opts.pageSize, opts.search, opts.orderBy, opts.sortOrder],
-    queryFn: () => apiFetch<PaginatedResponse<CallQueue>>(`/api/call-queues?${buildListParams(opts)}`),
+    queryFn: () =>
+      listCallQueues({
+        query: {
+          currentPage: opts.page ?? 1,
+          pageSize: opts.pageSize ?? 25,
+          searchString: opts.search,
+          orderBy: opts.orderBy,
+          sortOrder: opts.sortOrder,
+        },
+      }).then(unwrap),
   })
 }
 
 export function useCallQueue(id: string) {
   return useQuery({
     queryKey: ["call-routing", "call-queue", id],
-    queryFn: () => apiFetch<CallQueue>(`/api/call-queues/${id}`),
+    queryFn: () => getCallQueue({ path: { call_queue_id: id } }).then(unwrap),
     enabled: !!id,
   })
 }
@@ -534,11 +351,7 @@ export function useCallQueue(id: string) {
 export function useCreateCallQueue() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: CallQueueCreate) =>
-      apiFetch<CallQueue>("/api/call-queues", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createCallQueue>[0]["body"]) => createCallQueue({ body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queues"] })
       toast.success("Call queue created")
@@ -554,11 +367,7 @@ export function useCreateCallQueue() {
 export function useUpdateCallQueue(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: CallQueueUpdate) =>
-      apiFetch<CallQueue>(`/api/call-queues/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof updateCallQueue>[0]["body"]) => updateCallQueue({ path: { call_queue_id: id }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queues"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", id] })
@@ -575,7 +384,7 @@ export function useUpdateCallQueue(id: string) {
 export function useDeleteCallQueue() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => apiFetch<void>(`/api/call-queues/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => deleteCallQueue({ path: { call_queue_id: id } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queues"] })
       toast.success("Call queue deleted")
@@ -593,11 +402,7 @@ export function useDeleteCallQueue() {
 export function useCreateCallQueueMember(queueId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: CallQueueMemberCreate) =>
-      apiFetch<CallQueueMember>(`/api/call-queues/${queueId}/members`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createCallQueueMember>[0]["body"]) => createCallQueueMember({ path: { call_queue_id: queueId }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
       toast.success("Member added")
@@ -613,7 +418,7 @@ export function useCreateCallQueueMember(queueId: string) {
 export function useDeleteCallQueueMember(queueId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (memberId: string) => apiFetch<void>(`/api/call-queues/${queueId}/members/${memberId}`, { method: "DELETE" }),
+    mutationFn: (memberId: string) => deleteCallQueueMember({ path: { call_queue_id: queueId, member_id: memberId } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
       toast.success("Member removed")
@@ -630,10 +435,10 @@ export function usePauseCallQueueMember(queueId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ memberId, isPaused }: { memberId: string; isPaused: boolean }) =>
-      apiFetch<CallQueueMember>(`/api/call-queues/${queueId}/members/${memberId}/pause`, {
-        method: "PUT",
-        body: JSON.stringify({ isPaused }),
-      }),
+      pauseCallQueueMember({
+        path: { call_queue_id: queueId, member_id: memberId },
+        body: { isPaused },
+      }).then(unwrap),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
       toast.success(variables.isPaused ? "Member paused" : "Member unpaused")
@@ -651,13 +456,13 @@ export function useReorderCallQueueMembers(queueId: string) {
   return useMutation({
     mutationFn: async ({ memberA, memberB }: { memberA: { id: string; priority: number }; memberB: { id: string; priority: number } }) => {
       await Promise.all([
-        apiFetch<CallQueueMember>(`/api/call-queues/${queueId}/members/${memberA.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ priority: memberB.priority }),
+        updateCallQueueMember({
+          path: { call_queue_id: queueId, member_id: memberA.id },
+          body: { priority: memberB.priority },
         }),
-        apiFetch<CallQueueMember>(`/api/call-queues/${queueId}/members/${memberB.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ priority: memberA.priority }),
+        updateCallQueueMember({
+          path: { call_queue_id: queueId, member_id: memberB.id },
+          body: { priority: memberA.priority },
         }),
       ])
     },
@@ -680,14 +485,23 @@ export function useReorderCallQueueMembers(queueId: string) {
 export function useRingGroups(opts: UseListOptions = {}) {
   return useQuery({
     queryKey: ["call-routing", "ring-groups", opts.page, opts.pageSize, opts.search, opts.orderBy, opts.sortOrder],
-    queryFn: () => apiFetch<PaginatedResponse<RingGroup>>(`/api/ring-groups?${buildListParams(opts)}`),
+    queryFn: () =>
+      listRingGroups({
+        query: {
+          currentPage: opts.page ?? 1,
+          pageSize: opts.pageSize ?? 25,
+          searchString: opts.search,
+          orderBy: opts.orderBy,
+          sortOrder: opts.sortOrder,
+        },
+      }).then(unwrap),
   })
 }
 
 export function useRingGroup(id: string) {
   return useQuery({
     queryKey: ["call-routing", "ring-group", id],
-    queryFn: () => apiFetch<RingGroup>(`/api/ring-groups/${id}`),
+    queryFn: () => getRingGroup({ path: { ring_group_id: id } }).then(unwrap),
     enabled: !!id,
   })
 }
@@ -695,11 +509,7 @@ export function useRingGroup(id: string) {
 export function useCreateRingGroup() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: RingGroupCreate) =>
-      apiFetch<RingGroup>("/api/ring-groups", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createRingGroup>[0]["body"]) => createRingGroup({ body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-groups"] })
       toast.success("Ring group created")
@@ -715,11 +525,7 @@ export function useCreateRingGroup() {
 export function useUpdateRingGroup(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: RingGroupUpdate) =>
-      apiFetch<RingGroup>(`/api/ring-groups/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof updateRingGroup>[0]["body"]) => updateRingGroup({ path: { ring_group_id: id }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-groups"] })
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", id] })
@@ -736,7 +542,7 @@ export function useUpdateRingGroup(id: string) {
 export function useDeleteRingGroup() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => apiFetch<void>(`/api/ring-groups/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => deleteRingGroup({ path: { ring_group_id: id } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-groups"] })
       toast.success("Ring group deleted")
@@ -754,11 +560,7 @@ export function useDeleteRingGroup() {
 export function useCreateRingGroupMember(groupId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: RingGroupMemberCreate) =>
-      apiFetch<RingGroupMember>(`/api/ring-groups/${groupId}/members`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: Parameters<typeof createRingGroupMember>[0]["body"]) => createRingGroupMember({ path: { ring_group_id: groupId }, body: payload! }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", groupId] })
       toast.success("Member added")
@@ -774,7 +576,7 @@ export function useCreateRingGroupMember(groupId: string) {
 export function useDeleteRingGroupMember(groupId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (memberId: string) => apiFetch<void>(`/api/ring-groups/${groupId}/members/${memberId}`, { method: "DELETE" }),
+    mutationFn: (memberId: string) => deleteRingGroupMember({ path: { ring_group_id: groupId, member_id: memberId } }).then(unwrap),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", groupId] })
       toast.success("Member removed")
@@ -792,13 +594,13 @@ export function useReorderRingGroupMembers(groupId: string) {
   return useMutation({
     mutationFn: async ({ memberA, memberB }: { memberA: { id: string; sortOrder: number }; memberB: { id: string; sortOrder: number } }) => {
       await Promise.all([
-        apiFetch<RingGroupMember>(`/api/ring-groups/${groupId}/members/${memberA.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ sortOrder: memberB.sortOrder }),
+        updateRingGroupMember({
+          path: { ring_group_id: groupId, member_id: memberA.id },
+          body: { sortOrder: memberB.sortOrder },
         }),
-        apiFetch<RingGroupMember>(`/api/ring-groups/${groupId}/members/${memberB.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ sortOrder: memberA.sortOrder }),
+        updateRingGroupMember({
+          path: { ring_group_id: groupId, member_id: memberB.id },
+          body: { sortOrder: memberA.sortOrder },
         }),
       ])
     },
