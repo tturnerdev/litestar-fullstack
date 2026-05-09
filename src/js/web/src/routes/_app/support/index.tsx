@@ -68,11 +68,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { type Ticket, useTickets } from "@/lib/api/hooks/support"
+import { type Ticket, useDeleteTicket, useTickets } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { closeTicket, deleteTicket, reopenTicket, updateTicket } from "@/lib/generated/api"
+import { closeTicket as closeTicketApi, deleteTicket as deleteTicketApi, reopenTicket as reopenTicketApi, updateTicket as updateTicketApi } from "@/lib/generated/api"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -614,29 +614,6 @@ function SupportPage() {
     [navigate],
   )
 
-  // Single-ticket delete handler
-  const handleDeleteTicket = useCallback(
-    async (ticketId: string) => {
-      try {
-        await deleteTicket({ path: { ticket_id: ticketId } })
-        queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
-        toast.success("Ticket deleted")
-        // The deleted row is gone, so restore focus to the search input
-        setTimeout(() => {
-          const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
-          if (searchInput) {
-            searchInput.focus()
-          }
-        }, 0)
-      } catch (err) {
-        toast.error("Unable to delete ticket", {
-          description: err instanceof Error ? err.message : undefined,
-        })
-      }
-    },
-    [queryClient],
-  )
-
   // Bulk actions
   const bulkActions: BulkAction[] = useMemo(
     () => [
@@ -653,7 +630,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await updateTicket({ path: { ticket_id: id }, body: { status: "resolved" } })
+              await updateTicketApi({ path: { ticket_id: id }, body: { status: "resolved" } })
             } catch {
               errors.push(id)
             }
@@ -680,7 +657,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await closeTicket({ path: { ticket_id: id } })
+              await closeTicketApi({ path: { ticket_id: id } })
             } catch {
               errors.push(id)
             }
@@ -707,7 +684,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await reopenTicket({ path: { ticket_id: id } })
+              await reopenTicketApi({ path: { ticket_id: id } })
             } catch {
               errors.push(id)
             }
@@ -730,7 +707,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await updateTicket({ path: { ticket_id: id }, body: { priority: "high" } })
+              await updateTicketApi({ path: { ticket_id: id }, body: { priority: "high" } })
             } catch {
               errors.push(id)
             }
@@ -753,7 +730,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await updateTicket({ path: { ticket_id: id }, body: { priority: "low" } })
+              await updateTicketApi({ path: { ticket_id: id }, body: { priority: "low" } })
             } catch {
               errors.push(id)
             }
@@ -780,7 +757,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await deleteTicket({ path: { ticket_id: id } })
+              await deleteTicketApi({ path: { ticket_id: id } })
             } catch {
               errors.push(id)
             }
@@ -1194,7 +1171,6 @@ function SupportPage() {
                         selected={selectedIds.has(ticket.id)}
                         onToggle={() => toggleOne(ticket.id)}
                         onRowClick={() => handleRowClick(ticket.id)}
-                        onDelete={() => handleDeleteTicket(ticket.id)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
                       />
@@ -1272,7 +1248,6 @@ function TicketRow({
   selected,
   onToggle,
   onRowClick,
-  onDelete,
   cellClass,
   isColumnVisible,
 }: {
@@ -1281,11 +1256,11 @@ function TicketRow({
   selected: boolean
   onToggle: () => void
   onRowClick: () => void
-  onDelete: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const deleteTicketMutation = useDeleteTicket(ticket.id)
 
   return (
     <>
@@ -1431,8 +1406,9 @@ function TicketRow({
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
-                onDelete()
-                setDeleteOpen(false)
+                deleteTicketMutation.mutate(undefined, {
+                  onSettled: () => setDeleteOpen(false),
+                })
               }}
             >
               Delete Ticket

@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   Activity,
@@ -53,17 +52,18 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminDashboardStats, useAdminRecentActivity, useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { useAdminDashboardStats, useAdminRecentActivity, useAdminSystemStatus, useRoles } from "@/lib/api/hooks/admin"
 import { useConnections } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { useNotifications, useUnreadCount } from "@/lib/api/hooks/notifications"
 import { useSchedules } from "@/lib/api/hooks/schedules"
 import { useTickets } from "@/lib/api/hooks/support"
+import { useTags } from "@/lib/api/hooks/tags"
 import { useActiveTasks, useTasks } from "@/lib/api/hooks/tasks"
+import { useTeams } from "@/lib/api/hooks/teams"
 import { useExtensions, usePhoneNumbers } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
-import { listRoles, listTags, listTeams } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/home")({
   component: HomePage,
@@ -555,46 +555,11 @@ function HomePage() {
   const isSuperuser = user?.isSuperuser ?? false
   const greeting = useGreeting()
 
-  const {
-    data: teamsRaw,
-    isLoading: teamsLoading,
-    isError: teamsError,
-    dataUpdatedAt: teamsUpdatedAt,
-    isRefetching: teamsRefetching,
-    refetch: refetchTeams,
-  } = useQuery({
-    queryKey: ["home", "teams"],
-    queryFn: async () => {
-      const response = await listTeams()
-      const data = response.data
-      if (Array.isArray(data)) return { items: data, total: data.length }
-      return { items: data?.items ?? [], total: data?.total ?? 0 }
-    },
-  })
+  const { data: teamsRaw, isLoading: teamsLoading, isError: teamsError, dataUpdatedAt: teamsUpdatedAt, isRefetching: teamsRefetching, refetch: refetchTeams } = useTeams()
 
-  const {
-    data: tagsData,
-    isLoading: tagsLoading,
-    isError: tagsError,
-  } = useQuery({
-    queryKey: ["home", "tags-count"],
-    queryFn: async () => {
-      const response = await listTags({ query: { currentPage: 1, pageSize: 1 } })
-      return response.data as { total?: number } | undefined
-    },
-  })
+  const { data: tagsData, isLoading: tagsLoading, isError: tagsError } = useTags({ page: 1, pageSize: 1 })
 
-  const {
-    data: rolesData,
-    isLoading: rolesLoading,
-    isError: rolesError,
-  } = useQuery({
-    queryKey: ["home", "roles-count"],
-    queryFn: async () => {
-      const response = await listRoles({ query: { currentPage: 1, pageSize: 1 } })
-      return response.data as { total?: number } | undefined
-    },
-  })
+  const { data: rolesData, isLoading: rolesLoading, isError: rolesError } = useRoles()
 
   const { data: adminStats, isLoading: adminStatsLoading } = useAdminDashboardStats({ enabled: isSuperuser })
 

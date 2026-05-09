@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertCircle,
@@ -287,6 +288,7 @@ function DevicesPage() {
   const [deviceToDelete, setDeviceToDelete] = useState<Device | null>(null)
 
   // Queries & mutations
+  const queryClient = useQueryClient()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useDevices({
     page,
     pageSize,
@@ -398,7 +400,7 @@ function DevicesPage() {
               errors.push(id)
             }
           }
-          const { toast } = await import("sonner")
+          await queryClient.invalidateQueries({ queryKey: ["devices"] })
           if (errors.length > 0) {
             toast.error(`Failed to reboot ${errors.length} of ${ids.length} devices`)
           } else {
@@ -425,7 +427,7 @@ function DevicesPage() {
               errors.push(id)
             }
           }
-          const { toast } = await import("sonner")
+          await queryClient.invalidateQueries({ queryKey: ["devices"] })
           if (errors.length > 0) {
             toast.error(`Failed to reprovision ${errors.length} of ${ids.length} devices`)
           } else {
@@ -438,13 +440,14 @@ function DevicesPage() {
           await deleteDevice({ path: { device_id: id } })
         },
         () => {
+          queryClient.invalidateQueries({ queryKey: ["devices"] })
           setSelectedIds(new Set())
           deleteMutation.reset()
         },
       ),
       createExportAction<Device>("devices-selected", csvHeaders, (ids) => filteredItems.filter((d) => ids.includes(d.id))),
     ],
-    [filteredItems, deleteMutation, selectedIds.size],
+    [filteredItems, deleteMutation, selectedIds.size, queryClient],
   )
 
   // Export all visible
@@ -977,13 +980,7 @@ function DevicesPage() {
                 if (!deviceToDelete) return
                 deleteMutation.mutate(deviceToDelete.id, {
                   onSuccess: () => {
-                    toast.success("Device deleted")
                     setDeviceToDelete(null)
-                  },
-                  onError: (err) => {
-                    toast.error("Failed to delete device", {
-                      description: err instanceof Error ? err.message : undefined,
-                    })
                   },
                 })
               }}

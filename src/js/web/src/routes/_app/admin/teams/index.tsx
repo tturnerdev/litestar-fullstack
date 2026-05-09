@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, CheckCircle2, Download, Eye, MoreVertical, Pencil, Search, Trash2, Users, Users2, X, XCircle } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -25,11 +24,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminTeams } from "@/lib/api/hooks/admin"
+import { useAdminDeleteTeam, useAdminTeams } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminTeamSummary } from "@/lib/generated/api"
-import { adminDeleteTeam } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/teams/")({
   validateSearch: (
@@ -167,7 +165,7 @@ function AdminTeamsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const queryClient = useQueryClient()
+  const deleteTeamMutation = useAdminDeleteTeam()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminTeams({
     page,
     pageSize,
@@ -245,23 +243,20 @@ function AdminTeamsPage() {
           let failed = 0
           for (const id of ids) {
             try {
-              await adminDeleteTeam({ path: { team_id: id } })
+              await deleteTeamMutation.mutateAsync(id)
               succeeded++
             } catch {
               failed++
             }
           }
-          await queryClient.invalidateQueries({ queryKey: ["admin", "teams"] })
           setSelectedIds(new Set())
-          if (failed === 0) {
-            toast.success(`Deleted ${succeeded} team${succeeded !== 1 ? "s" : ""}`)
-          } else {
+          if (failed > 0) {
             toast.warning(`${succeeded} deleted, ${failed} failed`)
           }
         },
       },
     ],
-    [queryClient],
+    [deleteTeamMutation],
   )
 
   // Row click handler

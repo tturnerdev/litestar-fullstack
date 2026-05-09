@@ -49,11 +49,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminUsers } from "@/lib/api/hooks/admin"
+import { useAdminDeleteUser, useAdminUsers } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminUserSummary } from "@/lib/generated/api"
-import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
+import { adminUpdateUser } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/users/")({
   validateSearch: (
@@ -207,6 +207,7 @@ function AdminUsersPage() {
 
   // Queries & mutations
   const queryClient = useQueryClient()
+  const deleteUserMutation = useAdminDeleteUser()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminUsers({
     page,
     pageSize,
@@ -345,23 +346,20 @@ function AdminUsersPage() {
           let failed = 0
           for (const id of ids) {
             try {
-              await adminDeleteUser({ path: { user_id: id } })
+              await deleteUserMutation.mutateAsync(id)
               succeeded++
             } catch {
               failed++
             }
           }
-          await queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
           setSelectedIds(new Set())
-          if (failed === 0) {
-            toast.success(`Deleted ${succeeded} user${succeeded !== 1 ? "s" : ""}`)
-          } else {
+          if (failed > 0) {
             toast.warning(`${succeeded} deleted, ${failed} failed`)
           }
         },
       },
     ],
-    [queryClient],
+    [queryClient, deleteUserMutation],
   )
 
   // Row click handler
