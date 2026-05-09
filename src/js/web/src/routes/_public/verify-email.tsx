@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { CheckCircle2, Mail, XCircle } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import { AuthHeroPanel } from "@/components/auth/auth-hero-panel"
@@ -29,6 +29,7 @@ function VerifyEmailPage() {
   const { refetch: refetchUser } = useAuth()
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying")
   const [errorMessage, setErrorMessage] = useState<string>("")
+  const redirectTimer = useRef<ReturnType<typeof setTimeout>>(null)
 
   const token = searchParams.token
 
@@ -48,7 +49,7 @@ function VerifyEmailPage() {
       setStatus("success")
       toast.success("Email verified successfully!")
       await refetchUser()
-      setTimeout(() => {
+      redirectTimer.current = setTimeout(() => {
         navigate({ to: "/home" })
       }, 3000)
     },
@@ -65,6 +66,9 @@ function VerifyEmailPage() {
     } else {
       setStatus("error")
       setErrorMessage("Verification token is missing")
+    }
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current)
     }
   }, [token, verifyEmail])
 

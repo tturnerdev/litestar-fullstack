@@ -67,7 +67,7 @@ export function StatCard({ label, value, icon: Icon, iconClassName, isLoading, t
         ) : (
           <>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-semibold tracking-tight">{value ?? 0}</p>
+              <p className="text-2xl font-semibold tracking-tight">{(value ?? 0).toLocaleString()}</p>
               {trend && <TrendIndicator trend={trend} />}
             </div>
             <Tooltip>
