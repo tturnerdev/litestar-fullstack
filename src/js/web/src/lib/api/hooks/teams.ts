@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { deleteTeam, getTeam, listTeams, type Team, updateTeam } from "@/lib/generated/api"
+import { deleteTeam, getTeam, type ListTeamsData, listTeams, type Team, updateTeam } from "@/lib/generated/api"
 
 // ── Team Detail ──────────────────────────────────────────────────────
 
@@ -53,14 +53,14 @@ export function useTeams(options: UseTeamsOptions = {}) {
   return useQuery({
     queryKey: ["teams", page, pageSize, search, orderBy, sortOrder],
     queryFn: async () => {
-      const query: Record<string, unknown> = { currentPage: page, pageSize }
+      const query: ListTeamsData["query"] = { currentPage: page, pageSize }
       if (search) {
         query.searchString = search
         query.searchIgnoreCase = true
       }
       if (orderBy) query.orderBy = orderBy
-      if (sortOrder) query.sortOrder = sortOrder
-      const response = await listTeams({ query } as never)
+      if (sortOrder) query.sortOrder = sortOrder as "asc" | "desc"
+      const response = await listTeams({ query })
       const data = response.data
       if (Array.isArray(data)) return { items: data as Team[], total: data.length }
       return {

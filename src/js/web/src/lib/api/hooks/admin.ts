@@ -637,7 +637,7 @@ export function useAdminExtensions(page = 1, pageSize = 25, search?: string) {
   return useQuery({
     queryKey: ["admin", "voice", "extensions", page, pageSize, search],
     queryFn: async () => {
-      const response = await adminListExtensions({ query: { currentPage: page, pageSize, searchString: search } as never })
+      const response = await adminListExtensions({ query: { currentPage: page, pageSize, searchString: search } })
       return response.data as { items: AdminExtensionSummary[]; total: number }
     },
   })

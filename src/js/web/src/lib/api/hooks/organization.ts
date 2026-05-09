@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { type DashboardStats, getDashboardStats, getOrganization, type Organization, updateOrganization } from "@/lib/generated/api"
+import { type DashboardStats, getDashboardStats, getOrganization, type Organization, type OrganizationUpdate, updateOrganization } from "@/lib/generated/api"
 
 export function useOrganization() {
   return useQuery({
@@ -27,7 +27,7 @@ export function useOrganizationStats() {
 export function useUpdateOrganization() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
+    mutationFn: async (payload: OrganizationUpdate) => {
       const response = await updateOrganization({
         body: payload,
       })

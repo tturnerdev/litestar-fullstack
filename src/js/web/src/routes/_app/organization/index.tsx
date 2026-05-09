@@ -54,7 +54,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useOrganization, useOrganizationStats, useUpdateOrganization } from "@/lib/api/hooks/organization"
 import { useAuthStore } from "@/lib/auth"
-import type { DashboardStats, Organization } from "@/lib/generated/api/types.gen"
+import type { DashboardStats, Organization, OrganizationUpdate } from "@/lib/generated/api/types.gen"
 
 export const Route = createFileRoute("/_app/organization/")({
   component: OrganizationSettingsPage,
@@ -426,7 +426,7 @@ function OrganizationSettingsPage() {
     }
     if (nameErr || emailErr || websiteErr || logoUrlErr || phoneErr) return
 
-    const payload: Record<string, unknown> = {}
+    const payload: OrganizationUpdate = {}
     if (formData.name !== (org?.name ?? "")) payload.name = formData.name
     if (formData.description !== (org?.description ?? "")) payload.description = formData.description || null
     if (formData.logoUrl !== (org?.logoUrl ?? "")) payload.logoUrl = formData.logoUrl || null
