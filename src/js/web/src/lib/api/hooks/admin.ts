@@ -307,8 +307,9 @@ export function useAdminDeleteUser() {
       const response = await adminDeleteUser({ path: { user_id: userId } })
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+      queryClient.removeQueries({ queryKey: ["admin", "user", userId] })
       toast.success("User deleted")
     },
     onError: (error) => {
@@ -326,8 +327,9 @@ export function useAdminDeleteTeam() {
       const response = await adminDeleteTeam({ path: { team_id: teamId } })
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (_, teamId) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "teams"] })
+      queryClient.removeQueries({ queryKey: ["admin", "team", teamId] })
       toast.success("Team deleted")
     },
     onError: (error) => {
