@@ -47,7 +47,7 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["name"] = data["name"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
@@ -60,7 +60,7 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
         """Validate that no other webhook with the same name already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data):
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
             if "name" in data:
                 data["name"] = data["name"].strip()
@@ -76,7 +76,7 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
         if service.is_dict(data):
             if "name" in data:
                 data["name"] = data["name"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
         return data
 

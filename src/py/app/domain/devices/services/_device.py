@@ -8,8 +8,8 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
-from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 
 from app.db import models as m
@@ -61,9 +61,9 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
         if service.is_dict(data):
             if "name" in data:
                 data["name"] = data["name"].strip()
-            if "manufacturer" in data and data["manufacturer"]:
+            if data.get("manufacturer"):
                 data["manufacturer"] = data["manufacturer"].strip()
-            if "device_model" in data and data["device_model"]:
+            if data.get("device_model"):
                 data["device_model"] = data["device_model"].strip()
         if service.is_dict(data) and "mac_address" in data:
             data["mac_address"] = data["mac_address"].strip().upper()
@@ -79,11 +79,11 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
         if service.is_dict(data):
             if "name" in data:
                 data["name"] = data["name"].strip()
-            if "manufacturer" in data and data["manufacturer"]:
+            if data.get("manufacturer"):
                 data["manufacturer"] = data["manufacturer"].strip()
-            if "device_model" in data and data["device_model"]:
+            if data.get("device_model"):
                 data["device_model"] = data["device_model"].strip()
-            if "mac_address" in data and data["mac_address"]:
+            if data.get("mac_address"):
                 data["mac_address"] = data["mac_address"].strip().upper()
         return data
 

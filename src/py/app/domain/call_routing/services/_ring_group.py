@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 
 from app.db import models as m
-
-from typing import Any
 
 if TYPE_CHECKING:
     from advanced_alchemy.service import ModelDictT

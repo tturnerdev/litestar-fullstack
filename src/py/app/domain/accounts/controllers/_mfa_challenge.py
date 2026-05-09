@@ -13,10 +13,10 @@ from litestar.params import Parameter
 from litestar.security.jwt import Token as JWTToken
 from sqlalchemy.orm import undefer_group
 
+from app.domain.accounts.controllers._mfa import MFA_RATE_LIMIT_MAX_ATTEMPTS, MFA_RATE_LIMIT_WINDOW_MINUTES
 from app.domain.accounts.deps import provide_refresh_token_service, provide_users_service
 from app.domain.accounts.guards import auth
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.accounts.controllers._mfa import MFA_RATE_LIMIT_MAX_ATTEMPTS, MFA_RATE_LIMIT_WINDOW_MINUTES
 from app.lib.crypt import verify_backup_code, verify_totp_code
 
 if TYPE_CHECKING:

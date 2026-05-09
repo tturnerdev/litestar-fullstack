@@ -8,8 +8,8 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
-from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 from sqlalchemy import select
 
@@ -38,7 +38,7 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
     def _strip_address_fields(self, data: ModelDictT[m.E911Registration]) -> ModelDictT[m.E911Registration]:
         if service.is_dict(data):
             for field in self._address_fields:
-                if field in data and data[field]:
+                if data.get(field):
                     data[field] = data[field].strip()
         return data
 

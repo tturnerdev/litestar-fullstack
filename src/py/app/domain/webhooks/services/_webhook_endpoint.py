@@ -50,7 +50,7 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["url"] = data["url"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="url", values=[data["url"]]),
@@ -63,7 +63,7 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
         """Validate that no other webhook endpoint with the same URL already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data):
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
             if "url" in data:
                 data["url"] = data["url"].strip()
@@ -79,7 +79,7 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
         if service.is_dict(data):
             if "url" in data:
                 data["url"] = data["url"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
         return data
 

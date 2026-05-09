@@ -12,6 +12,7 @@ from httpx_oauth.clients.google import GoogleOAuth2
 from litestar import Controller, delete, get, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import undefer_group
 
 from app.domain.accounts.deps import provide_user_oauth_service, provide_users_service
@@ -33,7 +34,6 @@ from app.lib.crypt import (
     verify_password,
     verify_totp_code,
 )
-from litestar.status_codes import HTTP_204_NO_CONTENT
 from app.utils.oauth import create_oauth_state
 
 if TYPE_CHECKING:

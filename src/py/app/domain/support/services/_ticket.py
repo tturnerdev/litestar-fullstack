@@ -28,7 +28,7 @@ class TicketService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServ
         if service.is_dict(data):
             if "subject" in data:
                 data["subject"] = data["subject"].strip()
-            if "body_markdown" in data and data["body_markdown"]:
+            if data.get("body_markdown"):
                 data["body_markdown"] = data["body_markdown"].strip()
             if "ticket_number" not in data:
                 data["ticket_number"] = await self._generate_ticket_number()
@@ -39,7 +39,7 @@ class TicketService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServ
         if service.is_dict(data):
             if "subject" in data:
                 data["subject"] = data["subject"].strip()
-            if "body_markdown" in data and data["body_markdown"]:
+            if data.get("body_markdown"):
                 data["body_markdown"] = data["body_markdown"].strip()
         return data
 
@@ -48,7 +48,7 @@ class TicketService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServ
         if service.is_dict(data):
             if "subject" in data:
                 data["subject"] = data["subject"].strip()
-            if "body_markdown" in data and data["body_markdown"]:
+            if data.get("body_markdown"):
                 data["body_markdown"] = data["body_markdown"].strip()
         return data
 

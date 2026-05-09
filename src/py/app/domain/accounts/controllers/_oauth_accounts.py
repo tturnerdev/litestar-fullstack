@@ -10,6 +10,7 @@ from litestar import Controller, delete, get, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException, NotFoundException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import undefer_group
 
 from app.db import models as m
@@ -20,7 +21,6 @@ from app.domain.accounts.services import UserOAuthAccountService
 from app.domain.admin.deps import provide_audit_log_service
 from app.lib.audit import log_audit
 from app.lib.deps import create_service_dependencies
-from litestar.status_codes import HTTP_204_NO_CONTENT
 from app.utils.oauth import create_oauth_state
 
 if TYPE_CHECKING:

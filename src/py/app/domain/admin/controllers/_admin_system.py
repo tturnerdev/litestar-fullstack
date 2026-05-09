@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING, Any, Literal
 import structlog
 from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
-from sqlalchemy import func, select, table as sa_table, text
+from sqlalchemy import func, select, text
+from sqlalchemy import table as sa_table
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.domain.accounts.guards import requires_superuser

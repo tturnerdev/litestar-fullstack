@@ -16,7 +16,6 @@ from litestar.params import Parameter
 from app.db import models as m
 from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.devices.deps import provide_devices_service
 from app.domain.devices.jobs import device_reboot_job, device_reprovision_job
 from app.domain.devices.schemas import (
@@ -27,6 +26,7 @@ from app.domain.devices.schemas import (
 )
 from app.domain.tasks.deps import provide_background_tasks_service
 from app.domain.tasks.schemas import BackgroundTaskDetail
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 
 if TYPE_CHECKING:

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, Request, delete, get, patch, post
-from litestar.exceptions import ClientException, PermissionDeniedException
 from litestar.di import Provide
+from litestar.exceptions import ClientException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 
 from app.db import models as m
@@ -33,7 +33,7 @@ class OrganizationService(
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["name"] = data["name"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="name", values=[data["name"]]),
@@ -52,7 +52,7 @@ class OrganizationService(
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
                     raise ValidationException("An organization with this name already exists.")
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
         return await super().to_model_on_update(data)
 
@@ -61,6 +61,6 @@ class OrganizationService(
         if service.is_dict(data):
             if "name" in data:
                 data["name"] = data["name"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
         return await super().to_model_on_upsert(data)

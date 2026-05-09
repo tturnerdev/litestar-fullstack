@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
-from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 
 from app.db import models as m
@@ -139,7 +139,7 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
     async def to_model_on_update(self, data: ModelDictT[m.ScheduleEntry], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.ScheduleEntry]:
         data = service.schema_dump(data)
         if service.is_dict(data):
-            if "label" in data and data["label"]:
+            if data.get("label"):
                 data["label"] = data["label"].strip()
             schedule_id = data.get("schedule_id")
             day_of_week = data.get("day_of_week")
@@ -157,7 +157,7 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
     async def to_model_on_upsert(self, data: ModelDictT[m.ScheduleEntry]) -> ModelDictT[m.ScheduleEntry]:
         data = service.schema_dump(data)
         if service.is_dict(data):
-            if "label" in data and data["label"]:
+            if data.get("label"):
                 data["label"] = data["label"].strip()
         return data
 

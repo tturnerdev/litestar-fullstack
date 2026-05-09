@@ -13,7 +13,6 @@ from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.phone_numbers.schemas import (
     PhoneNumberCreate,
     PhoneNumberDetail,
@@ -21,6 +20,7 @@ from app.domain.phone_numbers.schemas import (
     PhoneNumberUpdate,
 )
 from app.domain.phone_numbers.services import PhoneNumberService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

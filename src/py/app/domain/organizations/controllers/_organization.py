@@ -9,9 +9,9 @@ from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.organizations.deps import provide_organization_service
-from app.domain.accounts.guards import requires_superuser
 from app.domain.organizations.guards import requires_admin_role
 from app.domain.organizations.schemas import Organization, OrganizationUpdate
 from app.lib.audit import capture_snapshot, log_audit

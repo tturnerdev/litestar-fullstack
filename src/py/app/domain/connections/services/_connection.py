@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 import structlog
-from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
 from litestar.exceptions import ValidationException
 from sqlalchemy import func, select
 

@@ -31,7 +31,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["name"] = data["name"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
             slug = slugify(data["name"])
             existing = await self.repository.list(
@@ -52,7 +52,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
                 )
                 if existing and any(str(e.id) != str(item_id) for e in existing):
                     raise ValidationException("A tag with this name already exists.")
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
         return await super().to_model_on_update(data)
 
@@ -61,6 +61,6 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
         if service.is_dict(data):
             if "name" in data:
                 data["name"] = data["name"].strip()
-            if "description" in data and data["description"]:
+            if data.get("description"):
                 data["description"] = data["description"].strip()
         return await super().to_model_on_upsert(data)
