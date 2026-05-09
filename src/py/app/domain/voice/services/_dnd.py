@@ -5,6 +5,7 @@ from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
 from sqlalchemy import update as sa_update
+from sqlalchemy.exc import IntegrityError
 
 from app.db import models as m
 
@@ -27,7 +28,7 @@ class DoNotDisturbService(service.SQLAlchemyAsyncRepositoryService[m.DoNotDistur
             return db_obj
         try:
             return await self.create({"extension_id": extension_id})
-        except Exception:
+        except IntegrityError:
             logger.warning("Race condition creating DND record for extension %s, fetching existing", extension_id, exc_info=True)
             await self.repository.session.rollback()
             return await self.get_one(extension_id=extension_id)

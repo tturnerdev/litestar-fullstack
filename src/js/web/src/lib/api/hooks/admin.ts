@@ -68,8 +68,11 @@ import {
   systemHealth,
   type TeamInvitation,
   type TeamRolePermission,
+  type TeamRolePermissionEntry,
+  type TeamRolePermissionUpdate,
   type TeamRoles,
   updateTeamMember,
+  updateTeamPermissions,
 } from "@/lib/generated/api"
 import { client } from "@/lib/generated/api/client.gen"
 
@@ -767,6 +770,28 @@ export function useTeamPermissions(teamId: string) {
       return response.data as TeamRolePermission[]
     },
     enabled: !!teamId,
+  })
+}
+
+export function useUpdateTeamPermissions(teamId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (permissions: TeamRolePermissionEntry[]) => {
+      const response = await updateTeamPermissions({
+        path: { team_id: teamId },
+        body: { permissions } as TeamRolePermissionUpdate,
+      })
+      return response.data as TeamRolePermission[]
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team-permissions", teamId] })
+      toast.success("Permissions updated")
+    },
+    onError: (error) => {
+      toast.error("Failed to update permissions", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }
 

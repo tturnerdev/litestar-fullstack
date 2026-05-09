@@ -4,6 +4,7 @@ import logging
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
+from sqlalchemy.exc import IntegrityError
 
 from app.db import models as m
 
@@ -26,7 +27,7 @@ class VoicemailBoxService(service.SQLAlchemyAsyncRepositoryService[m.VoicemailBo
             return db_obj
         try:
             return await self.create({"extension_id": extension_id})
-        except Exception:
+        except IntegrityError:
             logger.warning("Race condition creating voicemail box for extension %s, fetching existing", extension_id, exc_info=True)
             await self.repository.session.rollback()
             return await self.get_one(extension_id=extension_id)

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import type { LucideIcon } from "lucide-react"
 import {
@@ -37,9 +37,9 @@ import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminTeams, useTeamPermissions } from "@/lib/api/hooks/admin"
+import { useAdminTeams, useTeamPermissions, useUpdateTeamPermissions } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
-import { type FeatureArea, type TeamRolePermission, type TeamRolePermissionEntry, type TeamRoles, updateTeamPermissions } from "@/lib/generated/api"
+import type { FeatureArea, TeamRolePermission, TeamRolePermissionEntry, TeamRoles } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/roles")({
   component: AdminRolesPage,
@@ -316,7 +316,6 @@ function AdminRolesPage() {
 // -- Per-team permission card ------------------------------------------------
 
 function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string; teamName: string; memberCount?: number }) {
-  const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
 
   const { data: serverPermissions, isLoading, isRefetching } = useTeamPermissions(teamId)
@@ -366,26 +365,17 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
     })
   }, [])
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const entries = matrixToEntries(editMatrix)
-      const response = await updateTeamPermissions({
-        path: { team_id: teamId },
-        body: { permissions: entries },
-      })
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["team-permissions", teamId] })
-      toast.success(`Permissions updated for ${teamName}`)
-      setIsEditing(false)
-    },
-    onError: (error) => {
-      toast.error("Failed to update permissions", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
-    },
-  })
+  const updatePermissions = useUpdateTeamPermissions(teamId)
+
+  const handleSave = useCallback(() => {
+    const entries = matrixToEntries(editMatrix)
+    updatePermissions.mutate(entries, {
+      onSuccess: () => {
+        toast.success(`Permissions updated for ${teamName}`)
+        setIsEditing(false)
+      },
+    })
+  }, [editMatrix, updatePermissions, teamName])
 
   const handleCancel = useCallback(() => {
     setEditMatrix(serverMatrix)
@@ -414,11 +404,11 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
           <div className="flex items-center gap-2">
             {isEditing ? (
               <>
-                <Button variant="outline" size="sm" onClick={handleCancel} disabled={saveMutation.isPending}>
+                <Button variant="outline" size="sm" onClick={handleCancel} disabled={updatePermissions.isPending}>
                   Cancel
                 </Button>
-                <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-                  {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                <Button size="sm" onClick={() => handleSave()} disabled={updatePermissions.isPending}>
+                  {updatePermissions.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   Save
                 </Button>
               </>
@@ -536,7 +526,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
                                 <Checkbox
                                   checked={perm.canView}
                                   onChange={() => togglePermission(role, area.key, "canView")}
-                                  disabled={saveMutation.isPending}
+                                  disabled={updatePermissions.isPending}
                                   aria-label={`${role} can view ${area.label}`}
                                 />
                               </div>
@@ -550,7 +540,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
                                 <Checkbox
                                   checked={perm.canEdit}
                                   onChange={() => togglePermission(role, area.key, "canEdit")}
-                                  disabled={saveMutation.isPending}
+                                  disabled={updatePermissions.isPending}
                                   aria-label={`${role} can edit ${area.label}`}
                                 />
                               </div>
