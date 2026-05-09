@@ -719,7 +719,7 @@ function BatchTab() {
 
           <div className="flex items-center gap-3">
             {isRunning ? (
-              <Button variant="destructive" onClick={handleStop}>
+              <Button variant="outline" onClick={handleStop}>
                 <XCircle className="mr-2 h-4 w-4" />
                 Stop
               </Button>

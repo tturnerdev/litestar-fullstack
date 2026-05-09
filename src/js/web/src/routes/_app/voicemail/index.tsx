@@ -467,11 +467,11 @@ function MessagesTab() {
         <div className="flex items-center gap-2">
           <Badge variant="outline">{selectedIds.size} selected</Badge>
           <Button variant="outline" size="sm" onClick={handleBulkMarkRead} disabled={bulkMarkReadMutation.isPending}>
-            <MailOpen className="mr-1 h-4 w-4" />
-            Mark read
+            {bulkMarkReadMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <MailOpen className="mr-1 h-4 w-4" />}
+            {bulkMarkReadMutation.isPending ? "Marking..." : "Mark read"}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={bulkDeleteMutation.isPending}>
-            <Trash2 className="mr-1 h-4 w-4" />
+            {bulkDeleteMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
             Delete
           </Button>
         </div>
