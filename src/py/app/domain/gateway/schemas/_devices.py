@@ -1,7 +1,5 @@
 """Device gateway response schemas."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from app.domain.gateway.schemas._common import SourceResult

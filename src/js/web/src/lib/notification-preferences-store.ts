@@ -40,6 +40,14 @@ export const useNotificationPreferencesStore = create<NotificationPreferencesSto
     }),
     {
       name: "notification-preferences",
+      version: 1,
+      onRehydrateStorage: () => {
+        return (_state, error) => {
+          if (error) {
+            console.error("Failed to rehydrate notification preferences store:", error)
+          }
+        }
+      },
       partialize: (state) => ({
         systemAlerts: state.systemAlerts,
         taskUpdates: state.taskUpdates,

@@ -1,7 +1,5 @@
 """System status schemas."""
 
-from __future__ import annotations
-
 from typing import Literal
 
 from app.__metadata__ import __version__

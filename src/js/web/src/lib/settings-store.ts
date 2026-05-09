@@ -90,6 +90,14 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "settings-storage",
+      version: 1,
+      onRehydrateStorage: () => {
+        return (_state, error) => {
+          if (error) {
+            console.error("Failed to rehydrate settings store:", error)
+          }
+        }
+      },
       partialize: (state) => ({
         compactMode: state.compactMode,
         emailNotifications: state.emailNotifications,

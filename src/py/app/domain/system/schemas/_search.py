@@ -1,7 +1,5 @@
 """Global search response schemas."""
 
-from __future__ import annotations
-
 from app.lib.schema import CamelizedBaseStruct
 
 

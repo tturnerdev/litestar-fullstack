@@ -1,7 +1,5 @@
 """Admin gateway settings schemas."""
 
-from __future__ import annotations
-
 from typing import Annotated
 
 import msgspec

@@ -1,7 +1,5 @@
 """Common gateway response schemas."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from app.lib.schema import CamelizedBaseStruct

@@ -1,7 +1,5 @@
 """Bulk import schemas for admin CSV upload."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from app.lib.schema import CamelizedBaseStruct
