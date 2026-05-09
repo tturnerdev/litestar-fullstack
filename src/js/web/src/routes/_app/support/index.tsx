@@ -72,7 +72,7 @@ import { type Ticket, useTickets } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { client } from "@/lib/generated/api/client.gen"
+import { closeTicket, deleteTicket, reopenTicket, updateTicket } from "@/lib/generated/api"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -618,10 +618,7 @@ function SupportPage() {
   const handleDeleteTicket = useCallback(
     async (ticketId: string) => {
       try {
-        await client.delete({
-          url: `/api/support/tickets/${ticketId}`,
-          security: [{ scheme: "bearer", type: "http" }],
-        } as never)
+        await deleteTicket({ path: { ticket_id: ticketId } })
         queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
         toast.success("Ticket deleted")
         // The deleted row is gone, so restore focus to the search input
@@ -656,11 +653,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await client.patch({
-                url: `/api/support/tickets/${id}`,
-                body: { status: "resolved" },
-                security: [{ scheme: "bearer", type: "http" }],
-              } as never)
+              await updateTicket({ path: { ticket_id: id }, body: { status: "resolved" } })
             } catch {
               errors.push(id)
             }
@@ -687,10 +680,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await client.post({
-                url: `/api/support/tickets/${id}/close`,
-                security: [{ scheme: "bearer", type: "http" }],
-              } as never)
+              await closeTicket({ path: { ticket_id: id } })
             } catch {
               errors.push(id)
             }
@@ -717,10 +707,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await client.post({
-                url: `/api/support/tickets/${id}/reopen`,
-                security: [{ scheme: "bearer", type: "http" }],
-              } as never)
+              await reopenTicket({ path: { ticket_id: id } })
             } catch {
               errors.push(id)
             }
@@ -743,11 +730,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await client.patch({
-                url: `/api/support/tickets/${id}`,
-                body: { priority: "high" },
-                security: [{ scheme: "bearer", type: "http" }],
-              } as never)
+              await updateTicket({ path: { ticket_id: id }, body: { priority: "high" } })
             } catch {
               errors.push(id)
             }
@@ -770,11 +753,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await client.patch({
-                url: `/api/support/tickets/${id}`,
-                body: { priority: "low" },
-                security: [{ scheme: "bearer", type: "http" }],
-              } as never)
+              await updateTicket({ path: { ticket_id: id }, body: { priority: "low" } })
             } catch {
               errors.push(id)
             }
@@ -801,10 +780,7 @@ function SupportPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await client.delete({
-                url: `/api/support/tickets/${id}`,
-                security: [{ scheme: "bearer", type: "http" }],
-              } as never)
+              await deleteTicket({ path: { ticket_id: id } })
             } catch {
               errors.push(id)
             }

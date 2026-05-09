@@ -51,7 +51,12 @@ import {
   useTimeConditions,
 } from "@/lib/api/hooks/call-routing"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  deleteCallQueue as deleteCallQueueApi,
+  deleteIvrMenu as deleteIvrMenuApi,
+  deleteRingGroup as deleteRingGroupApi,
+  deleteTimeCondition as deleteTimeConditionApi,
+} from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
 // Route definition
@@ -504,7 +509,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
     () => [
       createBulkDeleteAction(
         async (id) => {
-          await client.request({ method: "DELETE", url: `/api/time-conditions/${id}` })
+          await deleteTimeConditionApi({ path: { time_condition_id: id } })
         },
         () => setSelectedIds(new Set()),
       ),
@@ -835,7 +840,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
     () => [
       createBulkDeleteAction(
         async (id) => {
-          await client.request({ method: "DELETE", url: `/api/ivr-menus/${id}` })
+          await deleteIvrMenuApi({ path: { ivr_menu_id: id } })
         },
         () => setSelectedIds(new Set()),
       ),
@@ -1147,7 +1152,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
     () => [
       createBulkDeleteAction(
         async (id) => {
-          await client.request({ method: "DELETE", url: `/api/call-queues/${id}` })
+          await deleteCallQueueApi({ path: { call_queue_id: id } })
         },
         () => setSelectedIds(new Set()),
       ),
@@ -1466,7 +1471,7 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
     () => [
       createBulkDeleteAction(
         async (id) => {
-          await client.request({ method: "DELETE", url: `/api/ring-groups/${id}` })
+          await deleteRingGroupApi({ path: { ring_group_id: id } })
         },
         () => setSelectedIds(new Set()),
       ),
