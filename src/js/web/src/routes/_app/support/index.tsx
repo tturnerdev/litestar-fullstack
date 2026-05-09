@@ -799,6 +799,10 @@ function SupportPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/support/new" })
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         updateSearch({ page: Math.max(1, page - 1) })
@@ -810,7 +814,7 @@ function SupportPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages, updateSearch])
+  }, [page, totalPages, updateSearch, navigate])
 
   useEffect(() => {
     if (!isLoading && page > totalPages) {

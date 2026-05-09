@@ -389,6 +389,10 @@ function FaxNumbersPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/fax/numbers/new" })
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
