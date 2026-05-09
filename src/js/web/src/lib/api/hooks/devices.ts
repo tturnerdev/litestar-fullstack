@@ -30,7 +30,7 @@ function getAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const config = client.getConfig()
   const baseUrl = config.baseUrl ?? ""
   const headers: Record<string, string> = {

@@ -60,10 +60,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { apiFetch, useDeleteDevice, useDevices, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
+import { useDeleteDevice, useDevices, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { type Device, deleteDevice } from "@/lib/generated/api"
+import { type Device, deleteDevice, rebootDevice, reprovisionDevice } from "@/lib/generated/api"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -393,7 +393,7 @@ function DevicesPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await apiFetch<{ message: string }>(`/api/devices/${id}/reboot`, { method: "POST" })
+              await rebootDevice({ path: { device_id: id } })
             } catch {
               errors.push(id)
             }
@@ -420,7 +420,7 @@ function DevicesPage() {
           const errors: string[] = []
           for (const id of ids) {
             try {
-              await apiFetch<{ message: string }>(`/api/devices/${id}/reprovision`, { method: "POST" })
+              await reprovisionDevice({ path: { device_id: id } })
             } catch {
               errors.push(id)
             }
