@@ -9,6 +9,7 @@ from msgspec import Meta
 
 from app.db.models._voice_enums import PhoneNumberType
 from app.lib.schema import CamelizedBaseStruct
+from app.lib.validation import validate_phone
 
 
 class PhoneNumber(CamelizedBaseStruct):
@@ -37,6 +38,9 @@ class PhoneNumberCreate(CamelizedBaseStruct):
     caller_id_name: Annotated[str, Meta(min_length=1, max_length=50)] | None = None
     is_active: bool = True
     team_id: UUID | None = None
+
+    def __post_init__(self) -> None:
+        self.number = validate_phone(self.number)
 
 
 class PhoneNumberUpdate(CamelizedBaseStruct, omit_defaults=True):

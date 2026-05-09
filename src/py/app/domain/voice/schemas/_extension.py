@@ -43,6 +43,11 @@ class ExtensionCreate(CamelizedBaseStruct):
     phone_number_id: UUID | None = None
     is_active: bool = True
 
+    def __post_init__(self) -> None:
+        if not self.extension_number.isdigit():
+            msg = "Extension number must contain only digits"
+            raise ValueError(msg)
+
 
 class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Extension update properties."""
@@ -51,14 +56,22 @@ class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     phone_number_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     forward_always_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_always_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_always_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = (
+        msgspec.UNSET
+    )
     forward_busy_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_busy_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_busy_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = (
+        msgspec.UNSET
+    )
     forward_no_answer_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_no_answer_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_no_answer_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = (
+        msgspec.UNSET
+    )
     forward_no_answer_ring_count: Annotated[int, Meta(ge=1, le=20)] | msgspec.UnsetType = msgspec.UNSET
     forward_unreachable_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_unreachable_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_unreachable_destination: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = (
+        msgspec.UNSET
+    )
     dnd_enabled: bool | msgspec.UnsetType = msgspec.UNSET
 
 

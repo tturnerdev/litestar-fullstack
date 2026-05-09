@@ -50,6 +50,11 @@ class ScheduleEntryCreate(CamelizedBaseStruct, kw_only=True):
     label: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
     is_closed: bool = False
 
+    def __post_init__(self) -> None:
+        if self.start_time >= self.end_time:
+            msg = "start_time must be before end_time"
+            raise ValueError(msg)
+
 
 class ScheduleEntryUpdate(CamelizedBaseStruct, omit_defaults=True, kw_only=True):
     """Schema for updating a schedule entry."""
