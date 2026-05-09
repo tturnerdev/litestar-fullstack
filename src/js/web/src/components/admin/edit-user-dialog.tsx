@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser } from "@/lib/api/hooks/admin"
-import type { AdminUserDetail, AdminUserSummary } from "@/lib/generated/api"
+import type { AdminUserDetail, AdminUserSummary, AdminUserUpdate } from "@/lib/generated/api"
 
 type UserLike = AdminUserSummary | AdminUserDetail
 
@@ -45,7 +45,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const payload: Record<string, unknown> = {}
+    const payload: AdminUserUpdate = {}
 
     const currentName = user.name ?? ""
     if (name !== currentName) {
@@ -60,11 +60,11 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
     }
 
     if (isActive !== (user.isActive ?? true)) {
-      payload.is_active = isActive
+      payload.isActive = isActive
     }
 
     if (isSuperuser !== (user.isSuperuser ?? false)) {
-      payload.is_superuser = isSuperuser
+      payload.isSuperuser = isSuperuser
     }
 
     if (Object.keys(payload).length === 0) {

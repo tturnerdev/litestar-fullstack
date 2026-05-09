@@ -21,10 +21,12 @@ import {
   type AdminSystemStatus,
   type AdminTeamDetail,
   type AdminTeamSummary,
+  type AdminTeamUpdate,
   type AdminTicketSummary,
   type AdminTrends,
   type AdminUserDetail,
   type AdminUserSummary,
+  type AdminUserUpdate,
   type AdminVoiceStats,
   type AuditLogEntry,
   adminDeleteTeam,
@@ -245,7 +247,7 @@ export function useAdminTeam(teamId: string) {
 export function useAdminUpdateUser(userId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
+    mutationFn: async (payload: AdminUserUpdate) => {
       const response = await adminUpdateUser({
         path: { user_id: userId },
         body: payload,
@@ -268,7 +270,7 @@ export function useAdminUpdateUser(userId: string) {
 export function useAdminUpdateTeam(teamId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
+    mutationFn: async (payload: AdminTeamUpdate) => {
       const response = await adminUpdateTeam({
         path: { team_id: teamId },
         body: payload,

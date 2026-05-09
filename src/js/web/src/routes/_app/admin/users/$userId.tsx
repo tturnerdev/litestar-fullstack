@@ -62,6 +62,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { AdminUserUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
   component: AdminUserDetailPage,
@@ -244,7 +245,7 @@ function AdminUserDetailPage() {
     if (nameErr || usernameErr) return
 
     justSavedRef.current = true
-    const payload: Record<string, unknown> = {}
+    const payload: AdminUserUpdate = {}
     if (editName !== (data.name ?? "")) payload.name = editName || null
     if (editUsername !== (data.username ?? "")) payload.username = editUsername || null
     if (Object.keys(payload).length === 0) {
@@ -635,7 +636,7 @@ function AdminUserDetailPage() {
                         variant="ghost"
                         size="sm"
                         className="h-6 px-2 text-xs"
-                        onClick={() => updateUser.mutate({ is_verified: !data.isVerified })}
+                        onClick={() => updateUser.mutate({ isVerified: !data.isVerified })}
                         disabled={updateUser.isPending}
                       >
                         {data.isVerified ? "Revoke" : "Verify"}
@@ -713,7 +714,7 @@ function AdminUserDetailPage() {
                   >
                     {data.isActive ? "Active" : "Inactive"}
                   </Badge>
-                  <Switch checked={data.isActive ?? false} onCheckedChange={() => updateUser.mutate({ is_active: !data.isActive })} disabled={updateUser.isPending} />
+                  <Switch checked={data.isActive ?? false} onCheckedChange={() => updateUser.mutate({ isActive: !data.isActive })} disabled={updateUser.isPending} />
                 </div>
               </div>
 
@@ -725,7 +726,7 @@ function AdminUserDetailPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   {data.isSuperuser && <Badge variant="destructive">Superuser</Badge>}
-                  <Switch checked={data.isSuperuser ?? false} onCheckedChange={() => updateUser.mutate({ is_superuser: !data.isSuperuser })} disabled={updateUser.isPending} />
+                  <Switch checked={data.isSuperuser ?? false} onCheckedChange={() => updateUser.mutate({ isSuperuser: !data.isSuperuser })} disabled={updateUser.isPending} />
                 </div>
               </div>
 
@@ -737,7 +738,7 @@ function AdminUserDetailPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant={data.isVerified ? "default" : "outline"}>{data.isVerified ? "Verified" : "Unverified"}</Badge>
-                  <Switch checked={data.isVerified ?? false} onCheckedChange={() => updateUser.mutate({ is_verified: !data.isVerified })} disabled={updateUser.isPending} />
+                  <Switch checked={data.isVerified ?? false} onCheckedChange={() => updateUser.mutate({ isVerified: !data.isVerified })} disabled={updateUser.isPending} />
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useAdminUpdateTeam } from "@/lib/api/hooks/admin"
+import type { AdminTeamUpdate } from "@/lib/generated/api"
 
 const NAME_MAX = 100
 const DESC_MAX = 500
@@ -109,7 +110,7 @@ export function EditTeamDialog({ teamId, currentName, currentDescription, curren
     }
     if (nameErr || descErr) return
 
-    const payload: Record<string, unknown> = {
+    const payload: AdminTeamUpdate = {
       name: name.trim(),
       description: description.trim() || null,
     }

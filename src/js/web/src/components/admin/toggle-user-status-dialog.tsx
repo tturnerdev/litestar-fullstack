@@ -28,7 +28,7 @@ export function ToggleUserStatusDialog({ userId, userEmail, userName, isActive, 
 
   function handleToggle() {
     updateUser.mutate(
-      { is_active: !isActive },
+      { isActive: !isActive },
       {
         onSuccess: () => {
           onOpenChange(false)
