@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import type { LucideIcon } from "lucide-react"
 import {
@@ -37,9 +37,9 @@ import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminTeams } from "@/lib/api/hooks/admin"
+import { useAdminTeams, useTeamPermissions } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
-import { type FeatureArea, listTeamPermissions, type TeamRolePermission, type TeamRolePermissionEntry, type TeamRoles, updateTeamPermissions } from "@/lib/generated/api"
+import { type FeatureArea, type TeamRolePermission, type TeamRolePermissionEntry, type TeamRoles, updateTeamPermissions } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/roles")({
   component: AdminRolesPage,
@@ -319,19 +319,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
 
-  const {
-    data: serverPermissions,
-    isLoading,
-    isRefetching,
-  } = useQuery({
-    queryKey: ["team-permissions", teamId],
-    queryFn: async () => {
-      const response = await listTeamPermissions({
-        path: { team_id: teamId },
-      })
-      return response.data as TeamRolePermission[]
-    },
-  })
+  const { data: serverPermissions, isLoading, isRefetching } = useTeamPermissions(teamId)
 
   const serverMatrix = useMemo(() => {
     if (!serverPermissions) return buildDefaultPermissions()

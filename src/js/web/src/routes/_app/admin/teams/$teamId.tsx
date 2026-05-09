@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowLeft, Calendar, Clock, Copy, Hash, Loader2, Mail, MoreHorizontal, Pencil, Save, Shield, Trash2, UserCheck, Users, UserX, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -35,16 +35,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
+import { useAdminTeam, useAdminTeamInvitations, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import {
-  type AdminTeamUpdate,
-  type DeleteTeamInvitationData,
-  deleteTeamInvitation,
-  type ListTeamInvitationsData,
-  listTeamInvitations,
-  type TeamInvitation,
-} from "@/lib/generated/api"
+import { type AdminTeamUpdate, type DeleteTeamInvitationData, deleteTeamInvitation } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/teams/$teamId")({
   component: AdminTeamDetailPage,
@@ -831,19 +824,7 @@ function MembersCard({ members }: MembersCardProps) {
 function InvitationsCard({ teamId }: { teamId: string }) {
   const queryClient = useQueryClient()
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch: refetchInvitations,
-  } = useQuery({
-    queryKey: ["admin", "team", teamId, "invitations"],
-    queryFn: async () => {
-      const query = { pageSize: 50 } as unknown as ListTeamInvitationsData["query"]
-      const response = await listTeamInvitations({ path: { team_id: teamId }, query })
-      return response.data as { items: TeamInvitation[]; total: number }
-    },
-  })
+  const { data, isLoading, isError, refetch: refetchInvitations } = useAdminTeamInvitations(teamId)
 
   const revokeInvitation = useMutation({
     mutationFn: async (invitationId: string) => {

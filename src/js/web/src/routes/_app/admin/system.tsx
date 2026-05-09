@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   Activity,
@@ -42,13 +41,12 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { useAdminSystemStatus, useSystemHealthCheck } from "@/lib/api/hooks/admin"
 import { useConnections, useTestAnyConnection } from "@/lib/api/hooks/connections"
 import { sseStatus } from "@/lib/api/hooks/events"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatUptime } from "@/lib/format-utils"
 import type { AdminSystemStatus, DatabasePoolInfo, RedisInfo } from "@/lib/generated/api"
-import { type SystemHealth, systemHealth } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/system")({
   component: AdminSystemPage,
@@ -158,8 +156,6 @@ function UptimeBanner({ startedAt, uptimeSeconds }: { startedAt: string; uptimeS
 // System Health Indicators
 // ---------------------------------------------------------------------------
 
-const HEALTH_CHECK_INTERVAL = 30_000
-
 type HealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown"
 
 interface HealthIndicator {
@@ -167,18 +163,6 @@ interface HealthIndicator {
   icon: typeof Server
   status: HealthStatus
   detail: string
-}
-
-function useSystemHealthCheck(autoRefreshEnabled: boolean) {
-  return useQuery({
-    queryKey: ["system", "health-check"],
-    queryFn: async () => {
-      const response = await systemHealth()
-      return response.data as SystemHealth
-    },
-    refetchInterval: autoRefreshEnabled ? HEALTH_CHECK_INTERVAL : false,
-    retry: 1,
-  })
 }
 
 function healthStatusColor(status: HealthStatus) {
@@ -254,7 +238,7 @@ function HealthIndicatorCard({ indicator }: { indicator: HealthIndicator }) {
 }
 
 function SystemHealthIndicators({ autoRefresh, systemData }: { autoRefresh: boolean; systemData: AdminSystemStatus }) {
-  const { data: healthData, isError: healthError, dataUpdatedAt, refetch, isFetching } = useSystemHealthCheck(autoRefresh)
+  const { data: healthData, isError: healthError, dataUpdatedAt, refetch, isFetching } = useSystemHealthCheck({ autoRefresh })
 
   const [, setTick] = useState(0)
   useEffect(() => {

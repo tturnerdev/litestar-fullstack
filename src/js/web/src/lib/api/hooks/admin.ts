@@ -57,10 +57,17 @@ import {
   getDashboardTrends,
   getRecentActivity,
   type ListRolesData,
+  type ListTeamInvitationsData,
   listRoles,
+  listTeamInvitations,
+  listTeamPermissions,
   type RecentActivity,
   type Role,
   revokeRole,
+  type SystemHealth,
+  systemHealth,
+  type TeamInvitation,
+  type TeamRolePermission,
   type TeamRoles,
   updateTeamMember,
 } from "@/lib/generated/api"
@@ -735,5 +742,40 @@ export function useTargetAuditLogs(targetType: string, targetId: string, options
     },
     enabled: enabled && !!targetType && !!targetId,
     staleTime: 60_000,
+  })
+}
+
+export function useAdminTeamInvitations(teamId: string) {
+  return useQuery({
+    queryKey: ["admin", "team", teamId, "invitations"],
+    queryFn: async () => {
+      const query = { pageSize: 50 } as unknown as ListTeamInvitationsData["query"]
+      const response = await listTeamInvitations({ path: { team_id: teamId }, query })
+      return response.data as { items: TeamInvitation[]; total: number }
+    },
+    enabled: !!teamId,
+  })
+}
+
+export function useTeamPermissions(teamId: string) {
+  return useQuery({
+    queryKey: ["team-permissions", teamId],
+    queryFn: async () => {
+      const response = await listTeamPermissions({ path: { team_id: teamId } })
+      return response.data as TeamRolePermission[]
+    },
+    enabled: !!teamId,
+  })
+}
+
+export function useSystemHealthCheck(options?: { autoRefresh?: boolean }) {
+  return useQuery({
+    queryKey: ["system", "health-check"],
+    queryFn: async () => {
+      const response = await systemHealth()
+      return response.data as SystemHealth
+    },
+    refetchInterval: options?.autoRefresh ? 30_000 : false,
+    retry: 1,
   })
 }

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { AnimatePresence, motion } from "framer-motion"
-import { AlertCircle, CheckCircle, Users, XCircle } from "lucide-react"
+import { AlertCircle, CheckCircle, Loader2, Users, XCircle } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
@@ -234,9 +234,11 @@ function AcceptInvitationPage() {
             {(isPending || status === "error") && (
               <CardFooter className="flex flex-col gap-2">
                 <Button className="w-full" onClick={() => acceptMutation.mutate()} disabled={isProcessing}>
+                  {acceptMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Accept Invitation
                 </Button>
                 <Button variant="outline" className="w-full" onClick={() => declineMutation.mutate()} disabled={isProcessing}>
+                  {declineMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Decline
                 </Button>
               </CardFooter>
