@@ -54,7 +54,12 @@ class CallRecordController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListCallRecords", summary="List call records", path="/api/analytics/cdrs")
+    @get(
+        operation_id="ListCallRecords",
+        summary="List call records",
+        description="Returns a paginated list of call detail records with filtering by date range, direction, disposition, source, destination, and duration. Non-superusers see only records for their teams.",
+        path="/api/analytics/cdrs",
+    )
     async def list_call_records(
         self,
         call_records_service: CallRecordService,
@@ -113,7 +118,12 @@ class CallRecordController(Controller):
             )
         return call_records_service.to_schema(results, total, filters, schema_type=CallRecordList)
 
-    @get(operation_id="GetCallRecord", summary="Get call record details", path="/api/analytics/cdrs/{cdr_id:uuid}")
+    @get(
+        operation_id="GetCallRecord",
+        summary="Get call record details",
+        description="Retrieves the full details of a single call detail record by its ID.",
+        path="/api/analytics/cdrs/{cdr_id:uuid}",
+    )
     async def get_call_record(
         self,
         call_records_service: CallRecordService,
@@ -131,7 +141,13 @@ class CallRecordController(Controller):
         db_obj = await call_records_service.get(cdr_id)
         return call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
 
-    @post(operation_id="CreateCallRecord", summary="Create a call record", path="/api/analytics/cdrs", status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="CreateCallRecord",
+        summary="Create a call record",
+        description="Creates a new call detail record via manual entry or import. Emits a call_record_created event and logs the action to the audit trail.",
+        path="/api/analytics/cdrs",
+        status_code=HTTP_201_CREATED,
+    )
     async def create_call_record(
         self,
         request: Request[m.User, Token, Any],
@@ -170,7 +186,12 @@ class CallRecordController(Controller):
         )
         return call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
 
-    @get(operation_id="ExportCallRecords", summary="Export call records as CSV", path="/api/analytics/cdrs/export")
+    @get(
+        operation_id="ExportCallRecords",
+        summary="Export call records as CSV",
+        description="Exports call detail records as a downloadable CSV file. Supports filtering by date range, direction, and disposition. Non-superusers receive only records for their teams.",
+        path="/api/analytics/cdrs/export",
+    )
     async def export_call_records(
         self,
         call_records_service: CallRecordService,

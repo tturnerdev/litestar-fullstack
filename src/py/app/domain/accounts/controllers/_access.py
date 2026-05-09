@@ -97,7 +97,14 @@ class AccessController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post(operation_id="AccountLogin", summary="Log in", path="/api/access/login", exclude_from_auth=True, security=[])
+    @post(
+        operation_id="AccountLogin",
+        summary="Log in",
+        description="Authenticate with email and password. If MFA is enabled on the account, returns a challenge requiring a second factor; otherwise returns OAuth2 access and refresh tokens. Rate-limited to prevent brute-force attempts, with failed login attempts recorded in the audit log.",
+        path="/api/access/login",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def login(
         self,
         request: Request[m.User, Token, Any],
@@ -233,7 +240,14 @@ class AccessController(Controller):
 
         return response
 
-    @post(operation_id="AccountLogout", summary="Log out", path="/api/access/logout", exclude_from_auth=True, security=[])
+    @post(
+        operation_id="AccountLogout",
+        summary="Log out",
+        description="Revoke the current refresh token family, clear the session and authentication cookies, and record the logout in the audit log.",
+        path="/api/access/logout",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def logout(
         self,
         request: Request[m.User, Token, Any],
@@ -289,7 +303,14 @@ class AccessController(Controller):
 
         return response
 
-    @post(operation_id="TokenRefresh", summary="Refresh access token", path="/api/access/refresh", exclude_from_auth=True, security=[])
+    @post(
+        operation_id="TokenRefresh",
+        summary="Refresh access token",
+        description="Exchange a valid refresh token cookie for a new access token. Implements token rotation: the old refresh token is revoked and a new one is issued in the response cookie.",
+        path="/api/access/refresh",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def refresh_token(
         self,
         request: Request[m.User, Token, Any],
@@ -352,7 +373,12 @@ class AccessController(Controller):
 
         return response
 
-    @get(operation_id="GetActiveSessions", summary="List active sessions", path="/api/access/sessions")
+    @get(
+        operation_id="GetActiveSessions",
+        summary="List active sessions",
+        description="Return a paginated list of the current user's active (non-revoked, non-expired) sessions with device info and creation timestamps. The session matching the current refresh token is flagged as is_current.",
+        path="/api/access/sessions",
+    )
     async def get_sessions(
         self,
         request: Request[m.User, Token, Any],
@@ -391,7 +417,14 @@ class AccessController(Controller):
         ]
         return refresh_token_service.to_schema(items, total, filters, schema_type=ActiveSession)
 
-    @delete(operation_id="RevokeSession", summary="Revoke a session", path="/api/access/sessions/{session_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="RevokeSession",
+        summary="Revoke a session",
+        description="Revoke a specific session by invalidating its entire refresh token family. Only sessions belonging to the authenticated user may be revoked. Emits a session_revoked event and records the action in the audit log.",
+        path="/api/access/sessions/{session_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def revoke_session(
         self,
         request: Request[m.User, Token, Any],
@@ -432,7 +465,14 @@ class AccessController(Controller):
 
         request.app.emit(event_id="session_revoked", user_id=request.user.id)
 
-    @delete(operation_id="RevokeAllSessions", summary="Revoke all other sessions", path="/api/access/sessions", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="RevokeAllSessions",
+        summary="Revoke all other sessions",
+        description="Revoke every active session for the current user except the one tied to the current refresh token. Records the total number of revoked sessions in the audit log and emits a sessions_revoked_all event.",
+        path="/api/access/sessions",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def revoke_all_sessions(
         self,
         request: Request[m.User, Token, Any],
@@ -474,7 +514,12 @@ class AccessController(Controller):
 
         request.app.emit(event_id="sessions_revoked_all", user_id=request.user.id, revoked_count=revoked_count)
 
-    @post(operation_id="AccountRegister", summary="Register a new account", path="/api/access/signup")
+    @post(
+        operation_id="AccountRegister",
+        summary="Register a new account",
+        description="Create a new user account with the default role, trigger a verification email, and record the registration in the audit log. Rate-limited by client IP to prevent abuse.",
+        path="/api/access/signup",
+    )
     async def signup(
         self,
         request: Request[m.User, Token, Any],
@@ -537,7 +582,14 @@ class AccessController(Controller):
 
         return users_service.to_schema(user, schema_type=User)
 
-    @post(operation_id="ForgotPassword", summary="Request password reset", path="/api/access/forgot-password", exclude_from_auth=True, security=[])
+    @post(
+        operation_id="ForgotPassword",
+        summary="Request password reset",
+        description="Initiate the password reset flow by emitting a password_reset_requested event that sends a reset link via email. Returns a generic success message regardless of whether the email exists, to prevent user enumeration. Rate-limited per user.",
+        path="/api/access/forgot-password",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def forgot_password(
         self,
         users_service: UserService,
@@ -572,7 +624,14 @@ class AccessController(Controller):
             message="If the email exists, a password reset link has been sent", expires_in_minutes=60
         )
 
-    @get(operation_id="ValidateResetToken", summary="Validate a password reset token", path="/api/access/reset-password", exclude_from_auth=True, security=[])
+    @get(
+        operation_id="ValidateResetToken",
+        summary="Validate a password reset token",
+        description="Check whether a password reset token is still valid and not expired. Returns the associated user ID and expiration time if valid, or valid=false if the token is invalid or expired.",
+        path="/api/access/reset-password",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def validate_reset_token(
         self,
         token: Annotated[str, Parameter(query="token", min_length=32, max_length=255)],
@@ -598,7 +657,14 @@ class AccessController(Controller):
 
         return ResetTokenValidation(valid=False)
 
-    @post(operation_id="ResetPassword", summary="Reset password with token", path="/api/access/reset-password", exclude_from_auth=True, security=[])
+    @post(
+        operation_id="ResetPassword",
+        summary="Reset password with token",
+        description="Complete the password reset flow by validating the reset token, enforcing password strength requirements, updating the user's password, and emitting a password_reset_completed event. Records the reset in the audit log.",
+        path="/api/access/reset-password",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def reset_password_with_token(
         self,
         data: ResetPasswordRequest,

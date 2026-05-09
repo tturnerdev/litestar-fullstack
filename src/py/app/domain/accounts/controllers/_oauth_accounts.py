@@ -60,7 +60,12 @@ class OAuthAccountController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ProfileOAuthAccounts", summary="List linked OAuth accounts", path="/accounts")
+    @get(
+        operation_id="ProfileOAuthAccounts",
+        summary="List linked OAuth accounts",
+        description="Return a paginated list of OAuth provider accounts linked to the authenticated user, including provider name, email, link date, and last login time. Supports search filtering by provider name and account email.",
+        path="/accounts",
+    )
     async def list_accounts(
         self,
         current_user: m.User,
@@ -95,7 +100,12 @@ class OAuthAccountController(Controller):
         ]
         return oauth_account_service.to_schema(items, total, filters, schema_type=OAuthAccountInfo)
 
-    @post(operation_id="ProfileOAuthLink", summary="Link an OAuth account", path="/{provider:str}/link")
+    @post(
+        operation_id="ProfileOAuthLink",
+        summary="Link an OAuth account",
+        description="Initiate an OAuth flow to link a new provider account to the authenticated user. Returns an authorization URL with a signed state token encoding the link action and the user's ID. Uses the same callback endpoint as login so only one redirect URI needs to be registered with the provider.",
+        path="/{provider:str}/link",
+    )
     async def start_link(
         self,
         request: Request[Any, Any, Any],
@@ -136,7 +146,14 @@ class OAuthAccountController(Controller):
         )
         return OAuthAuthorization(authorization_url=authorization_url, state=state)
 
-    @delete(operation_id="ProfileOAuthUnlink", summary="Unlink an OAuth account", path="/{provider:str}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="ProfileOAuthUnlink",
+        summary="Unlink an OAuth account",
+        description="Remove the link between the authenticated user and an OAuth provider. Checks that unlinking will not leave the user without any authentication method. Records the unlink in the audit log and emits an oauth_account_unlinked event.",
+        path="/{provider:str}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def unlink(
         self,
         request: Request[Any, Any, Any],
@@ -185,7 +202,12 @@ class OAuthAccountController(Controller):
 
         request.app.emit(event_id="oauth_account_unlinked", user_id=current_user.id, provider=provider)
 
-    @post(operation_id="ProfileOAuthUpgradeScopes", summary="Upgrade OAuth scopes", path="/{provider:str}/upgrade-scopes")
+    @post(
+        operation_id="ProfileOAuthUpgradeScopes",
+        summary="Upgrade OAuth scopes",
+        description="Initiate an OAuth re-authorization flow to request expanded permission scopes from the provider. Returns an authorization URL with a signed state token encoding the upgrade action and the user's ID.",
+        path="/{provider:str}/upgrade-scopes",
+    )
     async def upgrade_scopes(
         self,
         request: Request[Any, Any, Any],

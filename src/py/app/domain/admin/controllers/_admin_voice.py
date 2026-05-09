@@ -48,7 +48,7 @@ class AdminVoiceController(Controller):
         "dnd_service": Provide(provide_dnd_service),
     }
 
-    @get(operation_id="AdminListPhoneNumbers", summary="List phone numbers (admin)", path="/phone-numbers")
+    @get(operation_id="AdminListPhoneNumbers", summary="List phone numbers (admin)", description="Returns a paginated list of all phone numbers with owner and team details. Supports search by number and label. Requires superuser access.", path="/phone-numbers")
     async def list_phone_numbers(
         self,
         phone_number_service: PhoneNumberService,
@@ -77,7 +77,7 @@ class AdminVoiceController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @get(operation_id="AdminListExtensions", summary="List extensions (admin)", path="/extensions")
+    @get(operation_id="AdminListExtensions", summary="List extensions (admin)", description="Returns a paginated list of all extensions with owner and phone number details. Supports search by extension number and display name. Requires superuser access.", path="/extensions")
     async def list_extensions(
         self,
         extension_service: ExtensionService,
@@ -116,6 +116,7 @@ class AdminVoiceController(Controller):
     @get(
         operation_id="AdminGetVoiceStats",
         summary="Get voice statistics (admin)",
+        description="Returns aggregate voice statistics including phone number and extension counts, active Do Not Disturb entries, and a breakdown of numbers by type. Cached for 5 minutes. Requires superuser access.",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

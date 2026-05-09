@@ -109,6 +109,7 @@ class AdminSystemController(Controller):
     @get(
         operation_id="GetAdminSystemStatus",
         summary="Get system status",
+        description="Returns comprehensive system health information including database and Redis status, connection pool stats, worker queue depths, resource counts, and process uptime. Cached for 1 minute. Requires superuser access.",
         path="/status",
         cache=60,
         cache_control=CacheControlHeader(private=True, max_age=60),

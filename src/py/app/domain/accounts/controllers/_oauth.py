@@ -60,7 +60,13 @@ class OAuthController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get("/google", operation_id="GoogleOAuthAuthorize", summary="Initiate Google OAuth", name="oauth:google:authorize")
+    @get(
+        "/google",
+        operation_id="GoogleOAuthAuthorize",
+        summary="Initiate Google OAuth",
+        description="Generate a Google OAuth2 authorization URL with a signed state parameter for the SPA to redirect to. The state encodes the provider, frontend callback URL, and a login action.",
+        name="oauth:google:authorize",
+    )
     async def google_authorize(
         self,
         request: Request[Any, Any, Any],
@@ -109,7 +115,13 @@ class OAuthController(Controller):
             state=state,
         )
 
-    @get("/google/callback", operation_id="GoogleOAuthCallback", summary="Handle Google OAuth callback", name="oauth:google:callback")
+    @get(
+        "/google/callback",
+        operation_id="GoogleOAuthCallback",
+        summary="Handle Google OAuth callback",
+        description="Process the Google OAuth2 redirect. Verifies the state token, exchanges the authorization code for tokens, retrieves the user's Google profile, and dispatches to login, account linking, or MFA disable flows based on the state action. Redirects the browser to the frontend callback URL with result parameters.",
+        name="oauth:google:callback",
+    )
     async def google_callback(
         self,
         request: Request[Any, Any, Any],
@@ -222,7 +234,13 @@ class OAuthController(Controller):
             user_service, "google", account_id, account_email, token_data, frontend_callback
         )
 
-    @get("/github", operation_id="GitHubOAuthAuthorize", summary="Initiate GitHub OAuth", name="oauth:github:authorize")
+    @get(
+        "/github",
+        operation_id="GitHubOAuthAuthorize",
+        summary="Initiate GitHub OAuth",
+        description="Generate a GitHub OAuth2 authorization URL with a signed state parameter for the SPA to redirect to. The state encodes the provider, frontend callback URL, and a login action.",
+        name="oauth:github:authorize",
+    )
     async def github_authorize(
         self,
         request: Request[Any, Any, Any],
@@ -264,7 +282,13 @@ class OAuthController(Controller):
             state=state,
         )
 
-    @get("/github/callback", operation_id="GitHubOAuthCallback", summary="Handle GitHub OAuth callback", name="oauth:github:callback")
+    @get(
+        "/github/callback",
+        operation_id="GitHubOAuthCallback",
+        summary="Handle GitHub OAuth callback",
+        description="Process the GitHub OAuth2 redirect. Verifies the state token, exchanges the authorization code for tokens, retrieves the user's GitHub profile, and dispatches to login, account linking, or MFA disable flows based on the state action. Redirects the browser to the frontend callback URL with result parameters.",
+        name="oauth:github:callback",
+    )
     async def github_callback(
         self,
         request: Request[Any, Any, Any],

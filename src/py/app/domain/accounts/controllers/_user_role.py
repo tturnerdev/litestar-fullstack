@@ -39,7 +39,11 @@ class UserRoleController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post(operation_id="AssignUserRole", summary="Assign a role to a user")
+    @post(
+        operation_id="AssignUserRole",
+        summary="Assign a role to a user",
+        description="Grant a role to a user identified by email, using upsert semantics. If the assignment already exists, returns a message indicating so without error. Records new assignments in the audit log and emits a user_role_assigned event.",
+    )
     async def assign_role(
         self,
         request: Request[m.User, Token, Any],
@@ -86,7 +90,12 @@ class UserRoleController(Controller):
             return Message(message=f"Successfully assigned the '{obj.role_slug}' role to {obj.user_email}.")
         return Message(message=f"User {obj.user_email} already has the '{obj.role_slug}' role.")
 
-    @delete(operation_id="RevokeUserRole", summary="Revoke a role from a user", status_code=HTTP_202_ACCEPTED)
+    @delete(
+        operation_id="RevokeUserRole",
+        summary="Revoke a role from a user",
+        description="Remove a role from a user identified by email. Iterates the user's role assignments to find and delete the matching record. Raises an IntegrityError if the user does not have the role. Records the removal in the audit log and emits a user_role_revoked event.",
+        status_code=HTTP_202_ACCEPTED,
+    )
     async def revoke_role(
         self,
         request: Request[m.User, Token, Any],

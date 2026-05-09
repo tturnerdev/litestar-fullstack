@@ -54,7 +54,13 @@ class VoicemailMessageController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListAllVoicemailMessages", summary="List all voicemail messages", path="/api/voicemail/messages", guards=[requires_voicemail_message_access])
+    @get(
+        operation_id="ListAllVoicemailMessages",
+        summary="List all voicemail messages",
+        description="Returns a paginated list of voicemail messages across all boxes with optional filtering by read status and urgency. Superusers see all messages; regular users see only messages for their extensions' voicemail boxes.",
+        path="/api/voicemail/messages",
+        guards=[requires_voicemail_message_access],
+    )
     async def list_voicemail_messages(
         self,
         voicemail_messages_service: VoicemailMessageService,
@@ -105,6 +111,7 @@ class VoicemailMessageController(Controller):
     @get(
         operation_id="ListVoicemailBoxMessages",
         summary="List voicemail box messages",
+        description="Returns a paginated list of voicemail messages for a specific voicemail box with optional filtering by read status and urgency. Validates that the box exists before querying messages.",
         path="/api/voicemail/boxes/{box_id:uuid}/messages",
         guards=[requires_voicemail_message_access],
     )
@@ -145,6 +152,7 @@ class VoicemailMessageController(Controller):
     @get(
         operation_id="GetVoicemailMessageById",
         summary="Get voicemail message details",
+        description="Retrieves the full details of a single voicemail message by its ID, including caller information and the associated voicemail box.",
         path="/api/voicemail/messages/{message_id:uuid}",
         guards=[requires_voicemail_message_access],
     )
@@ -168,6 +176,7 @@ class VoicemailMessageController(Controller):
     @put(
         operation_id="ToggleVoicemailMessageRead",
         summary="Toggle voicemail message read status",
+        description="Marks a voicemail message as read or unread based on the request payload and emits a voicemail_message_updated event.",
         path="/api/voicemail/messages/{message_id:uuid}/read",
         guards=[requires_voicemail_message_access],
     )
@@ -199,6 +208,7 @@ class VoicemailMessageController(Controller):
     @delete(
         operation_id="DeleteVoicemailMessageById",
         summary="Delete a voicemail message",
+        description="Permanently deletes a voicemail message, emits a voicemail_message_deleted event, and logs the deletion with a before snapshot to the audit trail.",
         path="/api/voicemail/messages/{message_id:uuid}",
         guards=[requires_voicemail_message_access],
         status_code=HTTP_204_NO_CONTENT,

@@ -41,7 +41,13 @@ class EmailVerificationController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post("/request", operation_id="RequestEmailVerification", summary="Request email verification", status_code=HTTP_201_CREATED)
+    @post(
+        "/request",
+        operation_id="RequestEmailVerification",
+        summary="Request email verification",
+        description="Send a verification email to the specified address. Returns a generic success message regardless of whether the email exists, to prevent user enumeration. No-ops if the email is already verified.",
+        status_code=HTTP_201_CREATED,
+    )
     async def request_verification(
         self,
         users_service: UserService,
@@ -62,7 +68,13 @@ class EmailVerificationController(Controller):
         request.app.emit(event_id="verification_requested", user_id=user.id, mailer=app_mailer)
         return EmailVerificationSent(message="Verification email sent")
 
-    @post("/verify", operation_id="VerifyEmail", summary="Verify email address", status_code=HTTP_200_OK)
+    @post(
+        "/verify",
+        operation_id="VerifyEmail",
+        summary="Verify email address",
+        description="Confirm a user's email address by validating the verification token. Marks the user as verified and records the verification in the audit log.",
+        status_code=HTTP_200_OK,
+    )
     async def verify_email(
         self,
         request: Request[m.User, Token, Any],
@@ -93,7 +105,12 @@ class EmailVerificationController(Controller):
 
         return users_service.to_schema(user, schema_type=User)
 
-    @get("/status/{user_id:uuid}", operation_id="GetEmailVerificationStatus", summary="Get email verification status")
+    @get(
+        "/status/{user_id:uuid}",
+        operation_id="GetEmailVerificationStatus",
+        summary="Get email verification status",
+        description="Check whether a specific user's email address has been verified.",
+    )
     async def get_verification_status(
         self,
         user_id: UUID,

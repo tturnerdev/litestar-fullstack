@@ -54,7 +54,7 @@ class AdminTeamsController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="AdminListTeams", summary="List teams (admin)", path="/")
+    @get(operation_id="AdminListTeams", summary="List teams (admin)", description="Returns a paginated list of all teams with member details. Supports search by name and date range filtering. Requires superuser access.", path="/")
     async def list_teams(
         self,
         teams_service: TeamService,
@@ -72,7 +72,7 @@ class AdminTeamsController(Controller):
         results, total = await teams_service.list_and_count(*filters)
         return teams_service.to_schema(results, total, filters, schema_type=AdminTeamSummary)
 
-    @get(operation_id="AdminGetTeam", summary="Get team details (admin)", path="/{team_id:uuid}")
+    @get(operation_id="AdminGetTeam", summary="Get team details (admin)", description="Retrieves detailed information for a single team by its UUID, including the full member list. Requires superuser access.", path="/{team_id:uuid}")
     async def get_team(
         self,
         teams_service: TeamService,
@@ -90,7 +90,7 @@ class AdminTeamsController(Controller):
         team = await teams_service.get(team_id)
         return teams_service.to_schema(team, schema_type=AdminTeamDetail)
 
-    @patch(operation_id="AdminUpdateTeam", summary="Update a team (admin)", path="/{team_id:uuid}")
+    @patch(operation_id="AdminUpdateTeam", summary="Update a team (admin)", description="Partially updates a team's name, description, or active status. Captures before/after snapshots for the audit log and emits an admin_team_updated event. Requires superuser access.", path="/{team_id:uuid}")
     async def update_team(
         self,
         request: Request[m.User, Token, Any],
@@ -137,7 +137,7 @@ class AdminTeamsController(Controller):
         request.app.emit(event_id="admin_team_updated", team_id=team.id)
         return teams_service.to_schema(team, schema_type=AdminTeamDetail)
 
-    @delete(operation_id="AdminDeleteTeam", summary="Delete a team (admin)", path="/{team_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(operation_id="AdminDeleteTeam", summary="Delete a team (admin)", description="Permanently deletes a team and all its memberships. Records the deletion in the audit log with a before snapshot. Requires superuser access.", path="/{team_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_team(
         self,
         request: Request[m.User, Token, Any],

@@ -58,6 +58,7 @@ class RoleController(Controller):
     @get(
         operation_id="ListRoles",
         summary="List roles",
+        description="Return a paginated list of all roles with their assigned users. Supports searching by name or slug. Results are cached for 5 minutes.",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
     )
@@ -78,7 +79,12 @@ class RoleController(Controller):
         results, total = await roles_service.list_and_count(*filters)
         return roles_service.to_schema(results, total, filters, schema_type=Role)
 
-    @get(operation_id="GetRole", summary="Get role details", path="/{role_id:uuid}")
+    @get(
+        operation_id="GetRole",
+        summary="Get role details",
+        description="Retrieve a single role by its UUID, including the list of users assigned to it.",
+        path="/{role_id:uuid}",
+    )
     async def get_role(
         self,
         roles_service: RoleService,
@@ -96,7 +102,13 @@ class RoleController(Controller):
         db_obj = await roles_service.get(role_id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @post(operation_id="CreateRole", summary="Create a role", path="", status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="CreateRole",
+        summary="Create a role",
+        description="Create a new role with the given name and permissions. Records the creation in the audit log and emits a role_created event.",
+        path="",
+        status_code=HTTP_201_CREATED,
+    )
     async def create_role(
         self,
         request: Request[m.User, Token, Any],
@@ -132,7 +144,12 @@ class RoleController(Controller):
         request.app.emit(event_id="role_created", role_id=db_obj.id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @patch(operation_id="UpdateRole", summary="Update a role", path="/{role_id:uuid}")
+    @patch(
+        operation_id="UpdateRole",
+        summary="Update a role",
+        description="Update a role's name or permissions. Built-in default roles cannot be modified. Captures before/after snapshots, records the change in the audit log, and emits a role_updated event.",
+        path="/{role_id:uuid}",
+    )
     async def update_role(
         self,
         request: Request[m.User, Token, Any],
@@ -177,7 +194,14 @@ class RoleController(Controller):
         )
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @delete(operation_id="DeleteRole", summary="Delete a role", path="/{role_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="DeleteRole",
+        summary="Delete a role",
+        description="Permanently remove a role from the system. Built-in default roles cannot be deleted. Captures a before snapshot, records the deletion in the audit log, and emits a role_deleted event.",
+        path="/{role_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def delete_role(
         self,
         request: Request[m.User, Token, Any],
@@ -217,7 +241,12 @@ class RoleController(Controller):
             request=request,
         )
 
-    @post(operation_id="AssignRole", summary="Assign a role to a user", path="/{role_slug:str}/assign")
+    @post(
+        operation_id="AssignRole",
+        summary="Assign a role to a user",
+        description="Grant a role to a user identified by email. Fails with 409 if the user already has the role. Records the assignment in the audit log and emits a user_role_assigned event.",
+        path="/{role_slug:str}/assign",
+    )
     async def assign_role(
         self,
         request: Request[m.User, Token, Any],
@@ -283,7 +312,12 @@ class RoleController(Controller):
 
         return Message(message=f"Successfully assigned the '{role_slug}' role to {data.user_name}.")
 
-    @post(operation_id="RevokeRole", summary="Revoke a role from a user", path="/{role_slug:str}/revoke")
+    @post(
+        operation_id="RevokeRole",
+        summary="Revoke a role from a user",
+        description="Remove a role from a user identified by email. Fails with 404 if the user does not have the role. Captures a before snapshot, records the revocation in the audit log, and emits a user_role_revoked event.",
+        path="/{role_slug:str}/revoke",
+    )
     async def revoke_role(
         self,
         request: Request[m.User, Token, Any],

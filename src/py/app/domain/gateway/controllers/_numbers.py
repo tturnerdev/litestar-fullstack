@@ -28,6 +28,7 @@ class NumbersGatewayController(Controller):
     @get(
         operation_id="GatewayLookupNumber",
         summary="Look up a phone number",
+        description="Queries all enabled external provider connections that support the numbers domain and returns aggregated results for the given phone number. Supports cached responses with an optional refresh parameter to bypass the cache.",
         path="/api/gateway/numbers/{phone_number:str}",
     )
     async def get_number_data(

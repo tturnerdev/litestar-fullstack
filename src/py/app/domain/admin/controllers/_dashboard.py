@@ -53,6 +53,7 @@ class DashboardController(Controller):
     @get(
         operation_id="GetDashboardStats",
         summary="Get dashboard statistics",
+        description="Returns aggregate counts for the admin dashboard including users, teams, devices, extensions, open tickets, unread voicemails, and new user signups. Cached for 5 minutes. Requires superuser access.",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -129,6 +130,7 @@ class DashboardController(Controller):
     @get(
         operation_id="GetRecentActivity",
         summary="Get recent activity",
+        description="Returns recent audit log entries for the admin dashboard activity feed. Configurable lookback period (default 24 hours) and result limit (default 50). Cached for 5 minutes. Requires superuser access.",
         path="/activity",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -176,6 +178,7 @@ class DashboardController(Controller):
         operation_id="GetDashboardTrends",
         path="/trends",
         summary="Get 7-day trend data for dashboard charts",
+        description="Returns daily event and new user counts for the last 7 days, suitable for dashboard chart rendering. Cached for 5 minutes. Requires superuser access.",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
     )

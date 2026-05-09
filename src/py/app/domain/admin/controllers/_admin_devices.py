@@ -42,7 +42,7 @@ class AdminDevicesController(Controller):
         },
     )
 
-    @get(operation_id="AdminListDevices", summary="List devices (admin)", path="/")
+    @get(operation_id="AdminListDevices", summary="List devices (admin)", description="Returns a paginated list of all devices across the system with owner and team details. Supports search by name, SIP username, and MAC address. Requires superuser access.", path="/")
     async def list_devices(
         self,
         device_service: DeviceService,
@@ -78,6 +78,7 @@ class AdminDevicesController(Controller):
     @get(
         operation_id="AdminGetDeviceStats",
         summary="Get device statistics (admin)",
+        description="Returns aggregate device statistics including totals, active/online/offline/error counts, and a breakdown by device type. Cached for 5 minutes. Requires superuser access.",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

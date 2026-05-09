@@ -28,6 +28,7 @@ class ExtensionsGatewayController(Controller):
     @get(
         operation_id="GatewayLookupExtension",
         summary="Look up an extension",
+        description="Queries all enabled external provider connections that support the extensions domain and returns aggregated results for the given extension number. Supports cached responses with an optional refresh parameter to bypass the cache.",
         path="/api/gateway/extensions/{extension_number:str}",
     )
     async def get_extension_data(

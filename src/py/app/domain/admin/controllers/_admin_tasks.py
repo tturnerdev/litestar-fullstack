@@ -56,6 +56,7 @@ class AdminTasksController(Controller):
     @get(
         operation_id="GetAdminTaskStats",
         summary="Get task statistics (admin)",
+        description="Returns aggregate background task statistics including counts by status, average duration, and totals for today and this week. Cached for 5 minutes. Requires superuser access.",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -73,7 +74,7 @@ class AdminTasksController(Controller):
             total_this_week=raw["total_this_week"],
         )
 
-    @get(operation_id="AdminListTasks", summary="List background tasks (admin)", path="/")
+    @get(operation_id="AdminListTasks", summary="List background tasks (admin)", description="Returns a paginated list of all background tasks across every team. Supports filtering by task type, status, and entity type, plus search across task_type and entity_type fields. Requires superuser access.", path="/")
     async def list_tasks(
         self,
         task_service: BackgroundTaskService,
@@ -118,7 +119,7 @@ class AdminTasksController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCancelTask", summary="Cancel a background task (admin)", path="/{task_id:uuid}/cancel")
+    @post(operation_id="AdminCancelTask", summary="Cancel a background task (admin)", description="Cancels a pending or running background task. Records the cancellation in the audit log with the previous status and emits a background_task_cancelled event. Requires superuser access.", path="/{task_id:uuid}/cancel")
     async def cancel_task(
         self,
         request: Request[m.User, Token, Any],
@@ -151,7 +152,7 @@ class AdminTasksController(Controller):
         )
         return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
 
-    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", path="/{task_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", description="Permanently deletes a completed, failed, or cancelled background task. Records the deletion in the audit log with a before snapshot. Requires superuser access.", path="/{task_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_task(
         self,
         request: Request[m.User, Token, Any],

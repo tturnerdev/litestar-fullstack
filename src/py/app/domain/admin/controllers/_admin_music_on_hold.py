@@ -59,6 +59,7 @@ class AdminMusicOnHoldController(Controller):
     @get(
         operation_id="AdminListMusicOnHold",
         summary="List music on hold classes",
+        description="Returns a paginated list of music on hold classes with search by name. Includes file count, category, and default/active status. Cached for 5 minutes. Requires superuser access.",
         path="/",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),
@@ -90,7 +91,7 @@ class AdminMusicOnHoldController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCreateMusicOnHold", summary="Create a music on hold class", path="/", status_code=HTTP_201_CREATED)
+    @post(operation_id="AdminCreateMusicOnHold", summary="Create a music on hold class", description="Creates a new music on hold class and records an audit log entry. Emits a music_on_hold_created event. Requires superuser access.", path="/", status_code=HTTP_201_CREATED)
     async def create_music_on_hold(
         self,
         request: Request[m.User, Token, Any],
@@ -128,7 +129,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @get(operation_id="AdminGetMusicOnHold", summary="Get music on hold details", path="/{moh_id:uuid}")
+    @get(operation_id="AdminGetMusicOnHold", summary="Get music on hold details", description="Retrieves a single music on hold class by its UUID, including the full file list and playback settings. Requires superuser access.", path="/{moh_id:uuid}")
     async def get_music_on_hold(
         self,
         moh_service: MusicOnHoldService,
@@ -149,7 +150,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @patch(operation_id="AdminUpdateMusicOnHold", summary="Update a music on hold class", path="/{moh_id:uuid}")
+    @patch(operation_id="AdminUpdateMusicOnHold", summary="Update a music on hold class", description="Partially updates a music on hold class. Captures before/after snapshots for the audit log and emits a music_on_hold_updated event. Requires superuser access.", path="/{moh_id:uuid}")
     async def update_music_on_hold(
         self,
         request: Request[m.User, Token, Any],
@@ -193,7 +194,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @delete(operation_id="AdminDeleteMusicOnHold", summary="Delete a music on hold class", path="/{moh_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(operation_id="AdminDeleteMusicOnHold", summary="Delete a music on hold class", description="Permanently deletes a music on hold class. Records the deletion in the audit log with a before snapshot. Requires superuser access.", path="/{moh_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_music_on_hold(
         self,
         request: Request[m.User, Token, Any],

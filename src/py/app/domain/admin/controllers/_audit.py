@@ -53,7 +53,7 @@ class AuditController(Controller):
         ),
     )
 
-    @get(operation_id="AdminListAuditLogs", summary="List audit logs", path="/")
+    @get(operation_id="AdminListAuditLogs", summary="List audit logs", description="Returns a paginated list of audit log entries with search across actor email, action, and target label. Supports filtering by exact action, domain prefix, and date range. Requires superuser access.", path="/")
     async def list_logs(
         self,
         audit_service: AuditLogService,
@@ -84,7 +84,7 @@ class AuditController(Controller):
         results, total = await audit_service.list_and_count(*filters, *conditions)
         return audit_service.to_schema(results, total, filters, schema_type=AuditLogEntry)
 
-    @get(operation_id="AdminExportAuditLog", summary="Export audit logs as CSV", path="/export", media_type="text/csv")
+    @get(operation_id="AdminExportAuditLog", summary="Export audit logs as CSV", description="Exports matching audit log entries as a downloadable CSV file. Accepts the same filters as the list endpoint and returns up to 10,000 rows. Requires superuser access.", path="/export", media_type="text/csv")
     async def export_logs(
         self,
         audit_service: AuditLogService,
@@ -160,7 +160,7 @@ class AuditController(Controller):
             headers={"Content-Disposition": "attachment; filename=audit-log-export.csv"},
         )
 
-    @get(operation_id="AdminGetAuditLog", summary="Get audit log details", path="/{log_id:uuid}")
+    @get(operation_id="AdminGetAuditLog", summary="Get audit log details", description="Retrieves a single audit log entry by its UUID, including before/after snapshots and request metadata. Requires superuser access.", path="/{log_id:uuid}")
     async def get_log(
         self,
         audit_service: AuditLogService,
@@ -178,7 +178,7 @@ class AuditController(Controller):
         log = await audit_service.get(log_id)
         return audit_service.to_schema(log, schema_type=AuditLogEntry)
 
-    @get(operation_id="AdminGetUserAuditLogs", summary="Get audit logs for a user", path="/user/{user_id:uuid}")
+    @get(operation_id="AdminGetUserAuditLogs", summary="Get audit logs for a user", description="Returns a paginated list of audit log entries where the specified user was the actor. Supports filtering by action and date range. Requires superuser access.", path="/user/{user_id:uuid}")
     async def get_user_logs(
         self,
         audit_service: AuditLogService,
@@ -203,7 +203,7 @@ class AuditController(Controller):
         )
         return audit_service.to_schema(results, total, filters, schema_type=AuditLogEntry)
 
-    @get(operation_id="AdminGetTargetAuditLogs", summary="Get audit logs for a target", path="/target/{target_type:str}/{target_id:str}")
+    @get(operation_id="AdminGetTargetAuditLogs", summary="Get audit logs for a target", description="Returns a paginated list of audit log entries for a specific target identified by type and ID. Supports filtering by action and date range. Requires superuser access.", path="/target/{target_type:str}/{target_id:str}")
     async def get_target_logs(
         self,
         audit_service: AuditLogService,

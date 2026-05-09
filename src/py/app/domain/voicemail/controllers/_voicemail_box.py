@@ -57,7 +57,13 @@ class VoicemailBoxController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(operation_id="ListVoicemailBoxes", summary="List voicemail boxes", path="/api/voicemail/boxes", guards=[requires_voicemail_access])
+    @get(
+        operation_id="ListVoicemailBoxes",
+        summary="List voicemail boxes",
+        description="Returns a paginated list of voicemail boxes. Superusers see all boxes; regular users see only boxes associated with their own extensions.",
+        path="/api/voicemail/boxes",
+        guards=[requires_voicemail_access],
+    )
     async def list_voicemail_boxes(
         self,
         voicemail_boxes_service: VoicemailBoxService,
@@ -90,7 +96,14 @@ class VoicemailBoxController(Controller):
             )
         return voicemail_boxes_service.to_schema(results, total, filters, schema_type=VoicemailBox)
 
-    @post(operation_id="CreateVoicemailBox", summary="Create a voicemail box", path="/api/voicemail/boxes", status_code=HTTP_201_CREATED, guards=[requires_voicemail_access])
+    @post(
+        operation_id="CreateVoicemailBox",
+        summary="Create a voicemail box",
+        description="Creates a new voicemail box, emits a voicemail_box_created event, logs the action to the audit trail, and sends a notification to the current user.",
+        path="/api/voicemail/boxes",
+        status_code=HTTP_201_CREATED,
+        guards=[requires_voicemail_access],
+    )
     async def create_voicemail_box(
         self,
         request: Request[m.User, Token, Any],
@@ -145,6 +158,7 @@ class VoicemailBoxController(Controller):
     @get(
         operation_id="GetVoicemailBox",
         summary="Get voicemail box details",
+        description="Retrieves the full details of a single voicemail box by its ID, including its associated extension.",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
     )
@@ -168,6 +182,7 @@ class VoicemailBoxController(Controller):
     @patch(
         operation_id="UpdateVoicemailBox",
         summary="Update a voicemail box",
+        description="Partially updates a voicemail box's settings, emits a voicemail_box_updated event, and logs before/after snapshots to the audit trail.",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
     )
@@ -215,6 +230,7 @@ class VoicemailBoxController(Controller):
     @delete(
         operation_id="DeleteVoicemailBox",
         summary="Delete a voicemail box",
+        description="Permanently deletes a voicemail box and all its messages. Emits a voicemail_box_deleted event, logs the deletion to the audit trail, and sends a notification to the current user.",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
         status_code=HTTP_204_NO_CONTENT,
@@ -271,6 +287,7 @@ class VoicemailBoxController(Controller):
     @get(
         operation_id="GetVoicemailBoxUnreadCount",
         summary="Get unread voicemail count",
+        description="Returns the number of unread voicemail messages in the specified voicemail box.",
         path="/api/voicemail/boxes/{box_id:uuid}/unread",
         guards=[requires_voicemail_access],
     )

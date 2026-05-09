@@ -176,6 +176,7 @@ class AdminBulkImportController(Controller):
     @post(
         operation_id="AdminPreviewDeviceImport",
         summary="Preview device CSV import",
+        description="Parses and validates a device CSV file without persisting changes. Returns row-level validation results including duplicate MAC address detection. Requires superuser access.",
         path="/preview/devices",
     )
     async def preview_device_import(
@@ -254,6 +255,7 @@ class AdminBulkImportController(Controller):
     @post(
         operation_id="AdminImportDevices",
         summary="Import devices from CSV",
+        description="Parses, validates, and creates or updates devices in bulk from a CSV upload. Logs an audit entry and emits a bulk-import event on success. Requires superuser access.",
         path="/devices",
     )
     async def import_devices(
@@ -371,6 +373,7 @@ class AdminBulkImportController(Controller):
     @post(
         operation_id="AdminPreviewExtensionImport",
         summary="Preview extension CSV import",
+        description="Parses and validates an extension CSV file without persisting changes. Returns row-level validation results including duplicate extension number detection. Requires superuser access.",
         path="/preview/extensions",
     )
     async def preview_extension_import(
@@ -442,6 +445,7 @@ class AdminBulkImportController(Controller):
     @post(
         operation_id="AdminImportExtensions",
         summary="Import extensions from CSV",
+        description="Parses, validates, and creates or updates extensions in bulk from a CSV upload. Logs an audit entry and emits a bulk-import event on success. Requires superuser access.",
         path="/extensions",
     )
     async def import_extensions(

@@ -54,6 +54,7 @@ class BackgroundTaskController(Controller):
     @get(
         operation_id="ListTasks",
         summary="List background tasks",
+        description="Returns a paginated list of background tasks with optional filtering by task type, status, entity type, and entity ID.",
         path="/api/tasks",
         guards=[requires_task_access],
     )
@@ -83,6 +84,7 @@ class BackgroundTaskController(Controller):
     @get(
         operation_id="ListActiveTasks",
         summary="List active background tasks",
+        description="Returns all background tasks with a pending or running status for the current user, without pagination.",
         path="/api/tasks/active",
         guards=[requires_task_access],
     )
@@ -98,6 +100,7 @@ class BackgroundTaskController(Controller):
     @get(
         operation_id="GetTask",
         summary="Get background task details",
+        description="Retrieves the full details of a single background task by its ID, including status, progress, and the user who initiated it.",
         path="/api/tasks/{task_id:uuid}",
         guards=[requires_task_access],
     )
@@ -113,6 +116,7 @@ class BackgroundTaskController(Controller):
     @post(
         operation_id="CancelTask",
         summary="Cancel a background task",
+        description="Cancels a pending or running background task, emits a background_task_cancelled event, and logs the cancellation to the audit trail.",
         path="/api/tasks/{task_id:uuid}/cancel",
         guards=[requires_task_access],
     )
@@ -151,6 +155,7 @@ class BackgroundTaskController(Controller):
     @delete(
         operation_id="DeleteTask",
         summary="Delete a background task",
+        description="Permanently deletes a background task record. Only tasks in a terminal state (completed, failed, or cancelled) may be deleted; attempting to delete a pending or running task will raise a permission error.",
         path="/api/tasks/{task_id:uuid}",
         guards=[requires_task_access],
         status_code=HTTP_204_NO_CONTENT,

@@ -63,7 +63,12 @@ class MfaController(Controller):
         "oauth_account_service": Provide(provide_user_oauth_service),
     }
 
-    @get(operation_id="GetMfaStatus", summary="Get MFA status", path="/status")
+    @get(
+        operation_id="GetMfaStatus",
+        summary="Get MFA status",
+        description="Return the current MFA enrollment state for the authenticated user, including whether TOTP is enabled, when it was confirmed, and how many unused backup codes remain.",
+        path="/status",
+    )
     async def get_mfa_status(
         self,
         request: Request[m.User, Token, Any],
@@ -90,7 +95,12 @@ class MfaController(Controller):
             backup_codes_remaining=backup_codes_remaining,
         )
 
-    @get(operation_id="InitiateDisableMfaOAuth", summary="Initiate MFA disable via OAuth", path="/disable/oauth/{provider:str}")
+    @get(
+        operation_id="InitiateDisableMfaOAuth",
+        summary="Initiate MFA disable via OAuth",
+        description="Start an OAuth re-authentication flow to disable MFA for users who have no password set. Returns an authorization URL with a signed state token encoding the mfa.disabled action. Only available for users with a linked OAuth account and no local password.",
+        path="/disable/oauth/{provider:str}",
+    )
     async def initiate_disable_mfa_oauth(
         self,
         request: Request[m.User, Token, Any],
@@ -152,7 +162,12 @@ class MfaController(Controller):
         )
         return OAuthAuthorization(authorization_url=authorization_url, state=state)
 
-    @post(operation_id="InitiateMfaSetup", summary="Initiate MFA setup", path="/enable")
+    @post(
+        operation_id="InitiateMfaSetup",
+        summary="Initiate MFA setup",
+        description="Generate a new TOTP secret and store it on the user record without enabling MFA. Returns the secret, a QR code image (base64-encoded PNG), and the provisioning URI for import into an authenticator app. Fails if MFA is already enabled.",
+        path="/enable",
+    )
     async def initiate_setup(
         self,
         request: Request[m.User, Token, Any],
@@ -199,7 +214,12 @@ class MfaController(Controller):
             provisioning_uri=get_totp_provisioning_uri(secret, user.email, issuer=settings.slug),
         )
 
-    @post(operation_id="ConfirmMfaSetup", summary="Confirm MFA setup", path="/confirm")
+    @post(
+        operation_id="ConfirmMfaSetup",
+        summary="Confirm MFA setup",
+        description="Verify a TOTP code from the user's authenticator app to finalize MFA enrollment. On success, enables two-factor authentication, generates eight single-use backup recovery codes, and records the confirmation in the audit log. Rate-limited to prevent brute-force attempts.",
+        path="/confirm",
+    )
     async def confirm_setup(
         self,
         request: Request[m.User, Token, Any],
@@ -266,7 +286,14 @@ class MfaController(Controller):
         )
         return MfaBackupCodes(codes=plaintext_codes)
 
-    @delete(operation_id="DisableMfa", summary="Disable MFA", path="/disable", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="DisableMfa",
+        summary="Disable MFA",
+        description="Turn off two-factor authentication for the authenticated user after verifying their password. Clears the TOTP secret and all backup codes, records the action in the audit log, and emits an mfa_disabled event.",
+        path="/disable",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def disable_mfa(
         self,
         request: Request[m.User, Token, Any],
@@ -316,7 +343,12 @@ class MfaController(Controller):
         )
         request.app.emit(event_id="mfa_disabled", user_id=user.id)
 
-    @post(operation_id="RegenerateMfaBackupCodes", summary="Regenerate MFA backup codes", path="/regenerate-codes")
+    @post(
+        operation_id="RegenerateMfaBackupCodes",
+        summary="Regenerate MFA backup codes",
+        description="Generate a fresh set of eight backup recovery codes after verifying the user's password. All previously issued backup codes are invalidated. The new codes are shown only once and recorded in the audit log.",
+        path="/regenerate-codes",
+    )
     async def regenerate_backup_codes(
         self,
         request: Request[m.User, Token, Any],

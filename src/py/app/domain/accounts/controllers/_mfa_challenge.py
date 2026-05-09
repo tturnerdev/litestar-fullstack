@@ -48,7 +48,14 @@ class MfaChallengeController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post(operation_id="VerifyMfaChallenge", summary="Verify MFA challenge", path="/verify", exclude_from_auth=True, security=[])
+    @post(
+        operation_id="VerifyMfaChallenge",
+        summary="Verify MFA challenge",
+        description="Complete the second step of the MFA login flow by verifying a TOTP code or single-use backup recovery code. Reads the mfa_challenge cookie set during initial login, validates the code, issues OAuth2 access and refresh tokens, and clears the challenge cookie. Rate-limited to prevent brute-force attempts.",
+        path="/verify",
+        exclude_from_auth=True,
+        security=[],
+    )
     async def verify_challenge(
         self,
         request: Request[m.User, Token, Any],

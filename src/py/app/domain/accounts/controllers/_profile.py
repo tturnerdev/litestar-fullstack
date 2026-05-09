@@ -143,7 +143,12 @@ class ProfileController(Controller):
             for entry in results
         ]
 
-    @patch(operation_id="AccountProfileUpdate", summary="Update profile", path="/api/me")
+    @patch(
+        operation_id="AccountProfileUpdate",
+        summary="Update profile",
+        description="Update the authenticated user's profile fields (e.g. name, avatar). Captures before/after snapshots, records the change in the audit log, and emits a user_updated event.",
+        path="/api/me",
+    )
     async def update_profile(
         self,
         request: Request[m.User, Token, Any],
@@ -185,7 +190,12 @@ class ProfileController(Controller):
 
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @patch(operation_id="AccountPasswordUpdate", summary="Update password", path="/api/me/password")
+    @patch(
+        operation_id="AccountPasswordUpdate",
+        summary="Update password",
+        description="Change the authenticated user's password after verifying the current password. Records the password change in the audit log.",
+        path="/api/me/password",
+    )
     async def update_password(
         self,
         request: Request[m.User, Token, Any],
@@ -222,7 +232,14 @@ class ProfileController(Controller):
 
         return Message(message="Your password was successfully modified.")
 
-    @delete(operation_id="AccountDelete", summary="Delete account", path="/api/me", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="AccountDelete",
+        summary="Delete account",
+        description="Permanently delete the authenticated user's account. Captures a before snapshot, emits a user_deleted event, removes the user record, and records the deletion in the audit log.",
+        path="/api/me",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def remove_account(
         self,
         request: Request[m.User, Token, Any],

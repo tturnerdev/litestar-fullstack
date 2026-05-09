@@ -38,6 +38,7 @@ class EventStreamController(Controller):
         name="events:stream",
         path="/stream",
         summary="Stream real-time events via SSE",
+        description="Opens a long-lived Server-Sent Events connection that delivers real-time events scoped to the authenticated user's teams and personal notification channel. Sends periodic heartbeat comments to keep the connection alive.",
         media_type="text/event-stream",
         guards=[requires_active_session],
         include_in_schema=False,

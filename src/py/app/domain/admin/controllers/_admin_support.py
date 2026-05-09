@@ -42,7 +42,7 @@ class AdminSupportController(Controller):
         },
     )
 
-    @get(operation_id="AdminListTickets", summary="List tickets (admin)", path="/tickets")
+    @get(operation_id="AdminListTickets", summary="List tickets (admin)", description="Returns a paginated list of all support tickets with creator and assignee details. Supports search by ticket number and subject. Requires superuser access.", path="/tickets")
     async def list_tickets(
         self,
         ticket_service: TicketService,
@@ -77,6 +77,7 @@ class AdminSupportController(Controller):
     @get(
         operation_id="AdminGetSupportStats",
         summary="Get support statistics (admin)",
+        description="Returns aggregate support statistics including ticket counts by status, priority, and category. Cached for 5 minutes. Requires superuser access.",
         path="/stats",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

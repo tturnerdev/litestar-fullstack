@@ -35,7 +35,7 @@ class AdminGatewayController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="GetAdminGatewaySettings", summary="Get gateway settings", path="/settings")
+    @get(operation_id="GetAdminGatewaySettings", summary="Get gateway settings", description="Returns the current gateway configuration including default timeout and cache TTL values. Requires superuser access.", path="/settings")
     async def get_gateway_settings(
         self,
         request: Request[m.User, Token, Any],
@@ -54,7 +54,7 @@ class AdminGatewayController(Controller):
             default_cache_ttl=settings.gateway.DEFAULT_CACHE_TTL,
         )
 
-    @put(operation_id="UpdateAdminGatewaySettings", summary="Update gateway settings", path="/settings")
+    @put(operation_id="UpdateAdminGatewaySettings", summary="Update gateway settings", description="Updates gateway configuration such as timeout and cache TTL. Changes apply to the running process only and are recorded in the audit log. Requires superuser access.", path="/settings")
     async def update_gateway_settings(
         self,
         request: Request[m.User, Token, Any],

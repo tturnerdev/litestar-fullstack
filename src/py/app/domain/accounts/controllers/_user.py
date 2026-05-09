@@ -58,7 +58,11 @@ class UserController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListUsers", summary="List users")
+    @get(
+        operation_id="ListUsers",
+        summary="List users",
+        description="Return a paginated list of user accounts with their roles, team memberships, and linked OAuth accounts. Supports search by name or email, date range filtering on created_at/updated_at, and configurable sort order.",
+    )
     async def list_users(
         self, users_service: UserService, filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)]
     ) -> OffsetPagination[User]:
@@ -74,7 +78,12 @@ class UserController(Controller):
         results, total = await users_service.list_and_count(*filters)
         return users_service.to_schema(results, total, filters, schema_type=User)
 
-    @get(operation_id="GetUser", summary="Get user details", path="/{user_id:uuid}")
+    @get(
+        operation_id="GetUser",
+        summary="Get user details",
+        description="Retrieve a single user account by UUID, including their roles, team memberships, and linked OAuth accounts.",
+        path="/{user_id:uuid}",
+    )
     async def get_user(
         self,
         users_service: UserService,
@@ -92,7 +101,12 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @post(operation_id="CreateUser", summary="Create a user", status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="CreateUser",
+        summary="Create a user",
+        description="Create a new user account with the supplied details. Records the creation in the audit log with a snapshot of the new record and emits a user_created event.",
+        status_code=HTTP_201_CREATED,
+    )
     async def create_user(
         self,
         request: Request[m.User, Token, Any],
@@ -128,7 +142,12 @@ class UserController(Controller):
         request.app.emit(event_id="user_created", user_id=db_obj.id)
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @patch(operation_id="UpdateUser", summary="Update a user", path="/{user_id:uuid}")
+    @patch(
+        operation_id="UpdateUser",
+        summary="Update a user",
+        description="Update an existing user account's fields. Captures before/after snapshots, records the change in the audit log, and emits a user_updated event.",
+        path="/{user_id:uuid}",
+    )
     async def update_user(
         self,
         request: Request[m.User, Token, Any],
@@ -168,7 +187,14 @@ class UserController(Controller):
         )
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @delete(operation_id="DeleteUser", summary="Delete a user", path="/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="DeleteUser",
+        summary="Delete a user",
+        description="Permanently remove a user account from the system. Captures a before snapshot, emits a user_deleted event, deletes the record, and records the deletion in the audit log.",
+        path="/{user_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def delete_user(
         self,
         request: Request[m.User, Token, Any],

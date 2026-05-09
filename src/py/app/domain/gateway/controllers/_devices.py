@@ -28,6 +28,7 @@ class DevicesGatewayController(Controller):
     @get(
         operation_id="GatewayLookupDevice",
         summary="Look up a device by MAC address",
+        description="Queries all enabled external provider connections that support the devices domain and returns aggregated results for the given MAC address. Supports cached responses with an optional refresh parameter to bypass the cache.",
         path="/api/gateway/devices/{mac_address:str}",
     )
     async def get_device_data(
