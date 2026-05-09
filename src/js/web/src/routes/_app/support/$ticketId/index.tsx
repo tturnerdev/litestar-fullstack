@@ -662,6 +662,8 @@ function TicketDetailPage() {
   const deleteTicket = useDeleteTicket(ticketId)
   const { data: messagesData } = useTicketMessages(ticketId)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showCloseDialog, setShowCloseDialog] = useState(false)
+  const [showReopenDialog, setShowReopenDialog] = useState(false)
   const [activityOpen, setActivityOpen] = useState(false)
 
   // ── Inline editing state ───────────────────────────────────────────────
@@ -813,12 +815,12 @@ function TicketDetailPage() {
                   <Pencil className="mr-2 h-4 w-4" /> Edit
                 </Button>
                 {isClosed ? (
-                  <Button variant="outline" size="sm" onClick={() => reopenTicket.mutate()} disabled={reopenTicket.isPending}>
+                  <Button variant="outline" size="sm" onClick={() => setShowReopenDialog(true)} disabled={reopenTicket.isPending}>
                     {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
                     Reopen
                   </Button>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => closeTicket.mutate()} disabled={closeTicket.isPending}>
+                  <Button variant="outline" size="sm" onClick={() => setShowCloseDialog(true)} disabled={closeTicket.isPending}>
                     {closeTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
                     Close
                   </Button>
@@ -883,7 +885,7 @@ function TicketDetailPage() {
                       <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-6 text-center">
                         <p className="text-sm font-medium text-muted-foreground">This ticket is {ticket.status}.</p>
                         <p className="mt-1 text-xs text-muted-foreground/70">Reopen it to continue the conversation.</p>
-                        <Button size="sm" variant="outline" className="mt-3" onClick={() => reopenTicket.mutate()} disabled={reopenTicket.isPending}>
+                        <Button size="sm" variant="outline" className="mt-3" onClick={() => setShowReopenDialog(true)} disabled={reopenTicket.isPending}>
                           {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
                           Reopen Ticket
                         </Button>
@@ -925,9 +927,9 @@ function TicketDetailPage() {
                             disabled={ticket.status === s.value}
                             onClick={() => {
                               if (s.value === "closed") {
-                                closeTicket.mutate()
+                                setShowCloseDialog(true)
                               } else if ((ticket.status === "closed" || ticket.status === "resolved") && s.value === "open") {
-                                reopenTicket.mutate()
+                                setShowReopenDialog(true)
                               } else {
                                 updateTicket.mutate({ status: s.value })
                               }
@@ -1208,6 +1210,64 @@ function TicketDetailPage() {
           </PageSection>
         </div>
       </div>
+
+      {/* Close confirmation dialog */}
+      <AlertDialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-muted-foreground" />
+              Close ticket?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will close ticket <span className="font-medium text-foreground">{ticket.ticketNumber}</span> and mark it as resolved. You can reopen it later if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={closeTicket.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={closeTicket.isPending}
+              onClick={() => {
+                closeTicket.mutate(undefined, {
+                  onSuccess: () => setShowCloseDialog(false),
+                })
+              }}
+            >
+              {closeTicket.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Close Ticket
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reopen confirmation dialog */}
+      <AlertDialog open={showReopenDialog} onOpenChange={setShowReopenDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Unlock className="h-5 w-5 text-muted-foreground" />
+              Reopen ticket?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reopen ticket <span className="font-medium text-foreground">{ticket.ticketNumber}</span> and set its status back to open.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reopenTicket.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={reopenTicket.isPending}
+              onClick={() => {
+                reopenTicket.mutate(undefined, {
+                  onSuccess: () => setShowReopenDialog(false),
+                })
+              }}
+            >
+              {reopenTicket.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Reopen Ticket
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

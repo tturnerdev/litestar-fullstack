@@ -19,7 +19,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { DataFreshness } from "@/components/ui/data-freshness"
@@ -820,6 +820,8 @@ function InvitationsCard({ teamId }: { teamId: string }) {
     },
   })
 
+  const [revokeTarget, setRevokeTarget] = useState<string | null>(null)
+
   if (isLoading) {
     return <SkeletonCard />
   }
@@ -898,7 +900,7 @@ function InvitationsCard({ teamId }: { teamId: string }) {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => revokeInvitation.mutate(inv.id)}
+                        onClick={() => setRevokeTarget(inv.id)}
                         disabled={revokeInvitation.isPending}
                       >
                         Revoke
@@ -911,6 +913,36 @@ function InvitationsCard({ teamId }: { teamId: string }) {
           </Table>
         </div>
       </CardContent>
+      <AlertDialog
+        open={revokeTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setRevokeTarget(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke invitation?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently revoke the invitation. The recipient will no longer be able to join this team using this invite.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={revokeInvitation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              disabled={revokeInvitation.isPending}
+              onClick={() => {
+                if (revokeTarget) {
+                  revokeInvitation.mutate(revokeTarget, {
+                    onSuccess: () => setRevokeTarget(null),
+                  })
+                }
+              }}
+            >
+              {revokeInvitation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {revokeInvitation.isPending ? "Revoking..." : "Revoke"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
