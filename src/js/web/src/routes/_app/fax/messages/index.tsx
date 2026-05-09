@@ -44,6 +44,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type FaxMessage, useDeleteFaxMessage, useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -874,7 +875,7 @@ function FaxMessageRow({
         <TableCell className={cellClass}>
           <div className="flex flex-col gap-0.5">
             <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }} className="font-mono text-sm hover:underline" onClick={(e) => e.stopPropagation()}>
-              {msg.remoteNumber}
+              {formatPhoneNumber(msg.remoteNumber)}
             </Link>
             {msg.remoteName && <span className="text-xs text-muted-foreground">{msg.remoteName}</span>}
           </div>
@@ -945,7 +946,7 @@ function FaxMessageRow({
               Delete fax message?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this fax message from <strong>{msg.remoteNumber}</strong>. This action cannot be undone.
+              This will permanently delete this fax message from <strong>{formatPhoneNumber(msg.remoteNumber)}</strong>. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

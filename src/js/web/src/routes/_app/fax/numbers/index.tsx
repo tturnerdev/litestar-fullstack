@@ -62,6 +62,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -833,7 +834,7 @@ function FaxNumbersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete fax number?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete <span className="font-medium text-foreground">{numberToDelete?.number}</span>. This action cannot be undone.
+              This will permanently delete <span className="font-medium text-foreground">{formatPhoneNumber(numberToDelete?.number)}</span>. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -896,7 +897,7 @@ function FaxNumberRow({
       </TableCell>
       <TableCell className={cellClass}>
         <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
-          <span className="font-mono font-medium group-hover:underline">{faxNumber.number}</span>
+          <span className="font-mono font-medium group-hover:underline">{formatPhoneNumber(faxNumber.number)}</span>
         </Link>
       </TableCell>
       {isColumnVisible("label") && (

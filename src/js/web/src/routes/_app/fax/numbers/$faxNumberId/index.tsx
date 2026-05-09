@@ -392,7 +392,7 @@ function FaxNumberDetailPage() {
                       <div className="flex items-center gap-3">
                         <DirectionBadge direction={msg.direction} />
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-mono text-sm">{msg.remoteNumber}</span>
+                          <span className="font-mono text-sm">{formatPhoneNumber(msg.remoteNumber)}</span>
                           {msg.remoteName && <span className="text-xs text-muted-foreground">{msg.remoteName}</span>}
                         </div>
                       </div>

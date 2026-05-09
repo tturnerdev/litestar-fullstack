@@ -10,6 +10,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { formatDateTime } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 interface FaxShortcut {
   key: string
@@ -286,7 +287,7 @@ function FaxOverviewPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">
-                          {msg.direction === "inbound" ? "From" : "To"} <span className="font-mono">{msg.remoteNumber}</span>
+                          {msg.direction === "inbound" ? "From" : "To"} <span className="font-mono">{formatPhoneNumber(msg.remoteNumber)}</span>
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {msg.pageCount} page{msg.pageCount !== 1 ? "s" : ""} &middot; {formatDateTime(msg.receivedAt, "--")}
