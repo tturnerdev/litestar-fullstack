@@ -64,6 +64,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 import type { AdminUserUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
@@ -484,7 +485,7 @@ function AdminUserDetailPage() {
                     {data.phone && (
                       <span className="inline-flex items-center gap-1.5">
                         <Phone className="h-3.5 w-3.5" />
-                        {data.phone}
+                        {formatPhoneNumber(data.phone)}
                       </span>
                     )}
                   </div>
@@ -603,7 +604,7 @@ function AdminUserDetailPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Phone</p>
-                    <p>{data.phone ?? "---"}</p>
+                    <p>{data.phone ? formatPhoneNumber(data.phone) : "---"}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Email verified</p>

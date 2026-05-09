@@ -52,7 +52,8 @@ import {
 } from "@/lib/api/hooks/analytics"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
-import { formatDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/analytics/")({
   component: AnalyticsPage,
@@ -356,10 +357,10 @@ function CdrDetailDialog({ cdrId, open, onOpenChange }: { cdrId: string; open: b
                 <DispositionBadge disposition={record.disposition} />
               </DetailField>
               <DetailField label="Source">
-                <span className="font-mono text-sm">{record.source}</span>
+                <span className="font-mono text-sm">{formatPhoneNumber(record.source)}</span>
               </DetailField>
               <DetailField label="Destination">
-                <span className="font-mono text-sm">{record.destination}</span>
+                <span className="font-mono text-sm">{formatPhoneNumber(record.destination)}</span>
               </DetailField>
               <DetailField label="Date">
                 <span className="text-sm">{formatDateTime(record.callDate)}</span>
@@ -1279,7 +1280,7 @@ function CallRecordsTab() {
                       <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="text-sm whitespace-nowrap">{formatDateTime(record.callDate)}</span>
+                            <span className="cursor-default text-sm whitespace-nowrap">{formatRelativeTimeShort(record.callDate)}</span>
                           </TooltipTrigger>
                           <TooltipContent>{formatDateTime(record.callDate)}</TooltipContent>
                         </Tooltip>
@@ -1288,10 +1289,10 @@ function CallRecordsTab() {
                         <DirectionBadge direction={record.direction} />
                       </TableCell>
                       <TableCell>
-                        <span className="font-mono text-sm">{record.source}</span>
+                        <span className="font-mono text-sm">{formatPhoneNumber(record.source)}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-mono text-sm">{record.destination}</span>
+                        <span className="font-mono text-sm">{formatPhoneNumber(record.destination)}</span>
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">{formatDuration(record.duration ?? 0)}</TableCell>
                       <TableCell>
