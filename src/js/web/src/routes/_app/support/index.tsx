@@ -812,6 +812,12 @@ function SupportPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [page, totalPages, updateSearch])
 
+  useEffect(() => {
+    if (!isLoading && page > totalPages) {
+      updateSearch({ page: totalPages > 1 ? totalPages : undefined })
+    }
+  }, [page, totalPages, isLoading, updateSearch])
+
   const breadcrumbs = (
     <Breadcrumb>
       <BreadcrumbList>

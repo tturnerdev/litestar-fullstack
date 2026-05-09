@@ -519,6 +519,12 @@ function DevicesPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [page, totalPages, navigate])
 
+  useEffect(() => {
+    if (!isLoading && page > totalPages) {
+      navigate({ search: (prev) => ({ ...prev, page: totalPages > 1 ? totalPages : undefined }), replace: true })
+    }
+  }, [page, totalPages, isLoading, navigate])
+
   const breadcrumbs = (
     <Breadcrumb>
       <BreadcrumbList>
