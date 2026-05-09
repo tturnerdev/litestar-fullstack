@@ -1014,6 +1014,12 @@ function SupportPage() {
               placeholder="Search by subject or description..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  handleSearchChange("")
+                  e.currentTarget.blur()
+                }
+              }}
               className="pl-9 pr-8"
             />
             {search ? (
