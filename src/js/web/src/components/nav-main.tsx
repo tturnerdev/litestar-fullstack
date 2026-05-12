@@ -120,15 +120,13 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
             <Collapsible key={item.title} asChild open={expandedSections[item.title] ?? true} onOpenChange={(open) => handleToggle(item.title, open)} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <Link to={item.to}>
-                      <span className="relative shrink-0">
-                        {item.icon && <item.icon />}
-                        {badgeText != null && <span className="absolute -top-1 -right-1 hidden size-2 rounded-full bg-primary group-data-[collapsible=icon]:block" />}
-                      </span>
-                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-                    </Link>
+                  <SidebarMenuButton tooltip={item.title}>
+                    <span className="relative shrink-0">
+                      {item.icon && <item.icon />}
+                      {badgeText != null && <span className="absolute -top-1 -right-1 hidden size-2 rounded-full bg-primary group-data-[collapsible=icon]:block" />}
+                    </span>
+                    <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 {badgeText != null && (

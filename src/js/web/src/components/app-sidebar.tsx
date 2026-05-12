@@ -107,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Users,
         badge: badges.teams,
         items: [
-          { title: "All teams", to: "/teams" },
+          { title: "Overview", to: "/teams" },
           { title: "Create new", to: "/teams/new" },
         ],
       },
@@ -116,7 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/locations",
         icon: MapPin,
         items: [
-          { title: "All locations", to: "/locations" },
+          { title: "Overview", to: "/locations" },
           { title: "New location", to: "/locations/new" },
         ],
       },
@@ -125,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/devices",
         icon: Monitor,
         items: [
-          { title: "All devices", to: "/devices" },
+          { title: "Overview", to: "/devices" },
           { title: "Add device", to: "/devices/new" },
         ],
       },
@@ -134,6 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/voice",
         icon: Phone,
         items: [
+          { title: "Overview", to: "/voice" },
           { title: "Phone Numbers", to: "/voice/phone-numbers" },
           { title: "Extensions", to: "/voice/extensions" },
         ],
@@ -143,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/voicemail",
         icon: Voicemail,
         items: [
-          { title: "All Messages", to: "/voicemail" },
+          { title: "Overview", to: "/voicemail" },
           { title: "Voicemail Boxes", to: "/voicemail?tab=boxes" },
         ],
       },
@@ -152,6 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/fax",
         icon: Printer,
         items: [
+          { title: "Overview", to: "/fax" },
           { title: "Fax Numbers", to: "/fax/numbers" },
           { title: "Messages", to: "/fax/messages" },
           { title: "Email Routes", to: "/fax/email-routes" },
@@ -162,13 +164,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Schedules",
         to: "/schedules",
         icon: Clock,
-        items: [{ title: "All schedules", to: "/schedules" }],
+        items: [{ title: "Overview", to: "/schedules" }],
       },
       {
         title: "E911",
         to: "/e911",
         icon: ShieldAlert,
-        items: [{ title: "All registrations", to: "/e911" }],
+        items: [{ title: "Overview", to: "/e911" }],
       },
       {
         title: "Call Routing",
@@ -214,7 +216,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/tags",
         icon: Tags,
         items: [
-          { title: "All tags", to: "/tags" },
+          { title: "Overview", to: "/tags" },
           { title: "Create new", to: "/tags/new" },
         ],
       },
@@ -226,7 +228,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/connections",
         icon: Cable,
         items: [
-          { title: "All connections", to: "/connections" },
+          { title: "Overview", to: "/connections" },
           { title: "New connection", to: "/connections/new" },
         ],
       })
