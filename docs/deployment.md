@@ -24,7 +24,8 @@ these containers:
 | `app`      | `ghcr.io/tturnerdev/litestar-fullstack`             | Litestar ASGI application (HTTP). Sits behind your **external** reverse proxy, which terminates TLS. |
 | `worker`   | `ghcr.io/tturnerdev/litestar-fullstack`             | SAQ background worker. Also runs the scheduled cron jobs (hourly auth-token cleanup; OAuth-token refresh every 15 min). |
 | `backup`   | `prodrigestivill/postgres-backup-local`             | Scheduled `pg_dump` (gzipped) with daily/weekly/monthly retention into the `db-backups` volume. |
-| `storage`  | `rustfs/rustfs` *(optional, commented out)*         | S3-compatible object storage for file uploads. Off by default — the app stores uploads on local disk unless you enable it. |
+| `storage`  | `rustfs/rustfs`                                      | S3-compatible object storage for file uploads. Reached by `app`/`worker` at `http://storage:9000` on the internal network; web console not published by default. **Stateful** — data lives in the `storage-data` volume; back it up. |
+| `storage-init` | `minio/mc`                                       | One-shot job that creates the uploads bucket, then exits (`exited (0)` in Portainer — expected). Idempotent. |
 
 `app`, `worker`, and `migrator` all use the **same image**, differing only by
 command and a few environment variables.
@@ -42,8 +43,8 @@ trapped inside a single Docker volume:
 2. **Portainer** — the stack's environment variables (secrets). Keep a copy in a
    password manager / secrets store; losing `SECRET_KEY` invalidates all
    sessions and tokens.
-3. **Off-box backups** — the PostgreSQL dumps from the `backup` service (and the
-   uploads volume, if you use local-disk storage). A backup that only exists on
+3. **Off-box backups** — the PostgreSQL dumps from the `backup` service plus the
+   rustfs `storage-data` volume (uploaded files). A backup that only exists on
    the same machine does not survive hardware failure — copy it elsewhere
    (see [§5](#5-backups)).
 
@@ -110,16 +111,22 @@ be set:
 - `POSTGRES_PASSWORD` — a strong password
 - `APP_IMAGE_TAG` — the release you are deploying, e.g. `v0.3.0`
 
+- `STORAGE_ACCESS_KEY` / `STORAGE_SECRET_KEY` — credentials for the rustfs
+  object store (the app reuses them as its `AWS_ACCESS_KEY_ID` /
+  `AWS_SECRET_ACCESS_KEY`)
+
 Set `ALLOWED_CORS_ORIGINS` to your real origin, and configure email
 (`EMAIL_BACKEND=smtp` + `EMAIL_SMTP_*`, or `EMAIL_BACKEND=resend` +
-`RESEND_API_KEY`) if the app sends mail.
+`RESEND_API_KEY`) if the app sends mail. The `STORAGE_BUCKET` (default
+`uploads`) is created automatically by the `storage-init` job on deploy.
 
 ### 3.4 Deploy
 
-Deploy the stack. Order of operations: `db` and `cache` become healthy →
-`migrator` runs the migrations and exits 0 → `app` and `worker` start. The
-`app` container has an HTTP health check on `/health`. Then verify through your
-reverse proxy that the site responds.
+Deploy the stack. Order of operations: `db`, `cache`, and `storage` become
+healthy → `migrator` runs the migrations and `storage-init` creates the bucket
+(both exit 0) → `app` and `worker` start. The `app` container has an HTTP health
+check on `/health`. Then verify through your reverse proxy that the site
+responds.
 
 ---
 
@@ -167,10 +174,11 @@ docker compose -f tools/deploy/docker/docker-compose.portainer.yml \
 - **Valkey** — not backed up. It is a cache + job broker; AOF persistence
   (`--appendonly yes`) is enough to survive a restart. Losing in-flight SAQ jobs
   is acceptable (the cron jobs re-run on schedule).
-- **Uploaded files** — if you use the optional `storage` service, back up its
-  bucket/volume separately (or use a managed S3 bucket). If you do not use it,
-  the app writes uploads to local disk inside the `app` container — add a named
-  volume for that path and back it up too, or move to object storage.
+- **Uploaded files** — stored in rustfs (the `storage-data` volume). Back it up
+  alongside the database: either snapshot the volume, mirror the bucket to
+  remote object storage (`mc mirror`, `rclone`, `aws s3 sync` against
+  `http://storage:9000`), or point the app at a managed S3 bucket instead of
+  the in-stack rustfs.
 - **Configuration** — the compose file is in Git; the stack environment
   variables live in Portainer. Export/record them somewhere safe.
 
@@ -233,9 +241,10 @@ docker compose -f tools/deploy/docker/docker-compose.portainer.yml up -d
 2. Recreate the stack from Git with the **same environment variables** (restore
    them from your secrets store).
 3. Let `db` initialise an empty data directory, then restore the latest off-box
-   dump into it (as in §6.1, step 2). Restore the uploads volume from its
-   backup if applicable.
-4. `docker compose ... up -d` — `migrator` runs, `app`/`worker` start.
+   dump into it (as in §6.1, step 2). Restore the rustfs `storage-data` volume
+   (uploaded files) from its backup.
+4. `docker compose ... up -d` — `migrator` and `storage-init` run, then
+   `app`/`worker` start.
 5. Repoint the reverse proxy / DNS at the new host.
 
 ### 6.3 Broken container system (Docker / Portainer corrupted)
@@ -248,8 +257,10 @@ docker compose -f tools/deploy/docker/docker-compose.portainer.yml up -d
 
 ### 6.4 Sanity checks after any restore
 
-- `migrator` exited 0; `app` is healthy; `/health` returns 200 via the proxy.
-- Spot-check key data (user count, recent records).
+- `migrator` and `storage-init` exited 0; `app` is healthy; `/health` returns
+  200 via the proxy.
+- Spot-check key data (user count, recent records) and that file uploads /
+  downloads work.
 - Confirm the `backup` service writes a fresh dump on its next scheduled run.
 
 ---

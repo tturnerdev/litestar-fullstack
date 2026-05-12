@@ -25,10 +25,11 @@
 #   worker    SAQ background worker + scheduled cron jobs
 #             (hourly auth-token cleanup, OAuth-token refresh every 15m)
 #   backup    scheduled pg_dump with retention -> db-backups volume
-#   storage   (OPTIONAL) rustfs S3-compatible object storage — see below
+#   storage   rustfs — S3-compatible object storage for file uploads
+#   storage-init  one-shot job that creates the uploads bucket, then exits
 #
-# In Portainer, `migrator` will show as "exited (0)" after a successful
-# deploy — that is expected, it is a one-shot job.
+# In Portainer, `migrator` and `storage-init` will show as "exited (0)" after a
+# successful deploy — that is expected, they are one-shot jobs.
 # =============================================================================
 
 x-app-service: &app-service
@@ -46,6 +47,8 @@ x-app-service: &app-service
     cache:
       condition: service_healthy
     migrator:
+      condition: service_completed_successfully
+    storage-init:
       condition: service_completed_successfully
   environment: &app-env
     # --- core application ---
@@ -86,12 +89,12 @@ x-app-service: &app-service
     GOOGLE_OAUTH2_CLIENT_SECRET: ${GOOGLE_OAUTH2_CLIENT_SECRET:-}
     GITHUB_OAUTH2_CLIENT_ID: ${GITHUB_OAUTH2_CLIENT_ID:-}
     GITHUB_OAUTH2_CLIENT_SECRET: ${GITHUB_OAUTH2_CLIENT_SECRET:-}
-    # --- object storage (optional; uncomment the `storage` service below too) ---
-    # STORAGE_BACKEND: s3
-    # STORAGE_BUCKET: ${STORAGE_BUCKET:-uploads}
-    # AWS_ENDPOINT_URL: http://storage:9000
-    # AWS_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY:-}
-    # AWS_SECRET_ACCESS_KEY: ${STORAGE_SECRET_KEY:-}
+    # --- object storage (rustfs, S3-compatible) ---
+    STORAGE_BACKEND: s3
+    STORAGE_BUCKET: ${STORAGE_BUCKET:-uploads}
+    AWS_ENDPOINT_URL: http://storage:9000
+    AWS_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY:?set STORAGE_ACCESS_KEY}
+    AWS_SECRET_ACCESS_KEY: ${STORAGE_SECRET_KEY:?set STORAGE_SECRET_KEY}
 
 services:
   db:
@@ -217,31 +220,57 @@ services:
       db:
         condition: service_healthy
 
-  # ---------------------------------------------------------------------------
-  # OPTIONAL: S3-compatible object storage for file uploads.
-  # To use it: uncomment this service, the `storage-data` volume below, and the
-  # STORAGE_* / AWS_* variables in x-app-env above. Then create the bucket once
-  # (see docs/deployment.md). If you do not need object storage, leave this off
-  # and the app stores uploads on local disk inside the app container.
-  # ---------------------------------------------------------------------------
-  # storage:
-  #   image: rustfs/rustfs:latest
-  #   restart: unless-stopped
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "5"
-  #   environment:
-  #     RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?set STORAGE_ACCESS_KEY}
-  #     RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?set STORAGE_SECRET_KEY}
-  #     RUSTFS_VOLUMES: /data
-  #     RUSTFS_CONSOLE_ENABLE: "true"
-  #   volumes:
-  #     - storage-data:/data
+  storage:
+    # S3-compatible object storage for file uploads. Reached by app/worker at
+    # http://storage:9000 on the internal network. Not published to the host by
+    # default — uncomment the `ports` block to expose the web console.
+    image: rustfs/rustfs:${RUSTFS_VERSION:-latest}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?set STORAGE_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?set STORAGE_SECRET_KEY}
+      RUSTFS_VOLUMES: /data
+      RUSTFS_CONSOLE_ENABLE: "true"
+    # ports:
+    #   - "${STORAGE_CONSOLE_PORT:-9001}:9001"   # web console (put behind your proxy)
+    volumes:
+      - storage-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  storage-init:
+    # One-shot: create the uploads bucket, then exit. Idempotent.
+    image: minio/mc:latest
+    restart: "no"
+    depends_on:
+      storage:
+        condition: service_healthy
+    environment:
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?set STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?set STORAGE_SECRET_KEY}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-uploads}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        until mc alias set s3 "http://storage:9000" "$$STORAGE_ACCESS_KEY" "$$STORAGE_SECRET_KEY"; do
+          echo "waiting for storage..."; sleep 2
+        done
+        mc mb --ignore-existing "s3/$$STORAGE_BUCKET"
+        echo "bucket s3/$$STORAGE_BUCKET ready"
 
 volumes:
   db-data: {}
   cache-data: {}
   db-backups: {}
-  # storage-data: {}
+  storage-data: {}
