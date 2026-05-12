@@ -36,12 +36,12 @@ _process_start_time = time.time()
 _process_started_at = datetime.now(UTC)
 
 
-async def _get_redis_info(request: Any) -> RedisInfo | None:
+async def _get_redis_info() -> RedisInfo | None:
     """Retrieve Redis/Valkey server info via the SAQ plugin's queue redis client."""
     try:
-        from litestar_saq import get_saq_plugin
+        from app.server.plugins import get_saq_plugin
 
-        saq_plugin = get_saq_plugin(request.app)
+        saq_plugin = get_saq_plugin()
         queues = saq_plugin.get_queues()
         if not queues:
             return None
@@ -141,9 +141,9 @@ class AdminSystemController(Controller):
 
         worker_queues: list[WorkerQueueInfo] = []
         try:
-            from litestar_saq import get_saq_plugin
+            from app.server.plugins import get_saq_plugin
 
-            saq_plugin = get_saq_plugin(request.app)
+            saq_plugin = get_saq_plugin()
             for queue in saq_plugin.get_queues().values():
                 try:
                     info = await queue.info()
@@ -162,7 +162,7 @@ class AdminSystemController(Controller):
             logger.warning("SAQ plugin not available for system status", exc_info=True)
 
         # Collect Redis info
-        redis_info = await _get_redis_info(request)
+        redis_info = await _get_redis_info()
 
         # Collect database pool info
         database_pool = _get_db_pool_info(db_session)
