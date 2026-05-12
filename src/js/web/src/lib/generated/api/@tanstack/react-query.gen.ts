@@ -1197,6 +1197,8 @@ import type {
 
 /**
  * Request password reset
+ *
+ * Initiate the password reset flow by emitting a password_reset_requested event that sends a reset link via email. Returns a generic success message regardless of whether the email exists, to prevent user enumeration. Rate-limited per user.
  */
 export const forgotPasswordMutation = (
   options?: Partial<Options<ForgotPasswordData>>,
@@ -1224,6 +1226,8 @@ export const forgotPasswordMutation = (
 
 /**
  * Log in
+ *
+ * Authenticate with email and password. If MFA is enabled on the account, returns a challenge requiring a second factor; otherwise returns OAuth2 access and refresh tokens. Rate-limited to prevent brute-force attempts, with failed login attempts recorded in the audit log.
  */
 export const accountLoginMutation = (
   options?: Partial<Options<AccountLoginData>>,
@@ -1251,6 +1255,8 @@ export const accountLoginMutation = (
 
 /**
  * Log out
+ *
+ * Revoke the current refresh token family, clear the session and authentication cookies, and record the logout in the audit log.
  */
 export const accountLogoutMutation = (
   options?: Partial<Options<AccountLogoutData>>,
@@ -1278,6 +1284,8 @@ export const accountLogoutMutation = (
 
 /**
  * Refresh access token
+ *
+ * Exchange a valid refresh token cookie for a new access token. Implements token rotation: the old refresh token is revoked and a new one is issued in the response cookie.
  */
 export const tokenRefreshMutation = (
   options?: Partial<Options<TokenRefreshData>>,
@@ -1349,6 +1357,8 @@ export const validateResetTokenQueryKey = (
 
 /**
  * Validate a password reset token
+ *
+ * Check whether a password reset token is still valid and not expired. Returns the associated user ID and expiration time if valid, or valid=false if the token is invalid or expired.
  */
 export const validateResetTokenOptions = (
   options: Options<ValidateResetTokenData>,
@@ -1373,6 +1383,8 @@ export const validateResetTokenOptions = (
 
 /**
  * Reset password with token
+ *
+ * Complete the password reset flow by validating the reset token, enforcing password strength requirements, updating the user's password, and emitting a password_reset_completed event. Records the reset in the audit log.
  */
 export const resetPasswordMutation = (
   options?: Partial<Options<ResetPasswordData>>,
@@ -1400,6 +1412,8 @@ export const resetPasswordMutation = (
 
 /**
  * Revoke all other sessions
+ *
+ * Revoke every active session for the current user except the one tied to the current refresh token. Records the total number of revoked sessions in the audit log and emits a sessions_revoked_all event.
  */
 export const revokeAllSessionsMutation = (
   options?: Partial<Options<RevokeAllSessionsData>>,
@@ -1431,6 +1445,8 @@ export const getActiveSessionsQueryKey = (
 
 /**
  * List active sessions
+ *
+ * Return a paginated list of the current user's active (non-revoked, non-expired) sessions with device info and creation timestamps. The session matching the current refresh token is flagged as is_current.
  */
 export const getActiveSessionsOptions = (
   options?: Options<GetActiveSessionsData>,
@@ -1455,6 +1471,8 @@ export const getActiveSessionsOptions = (
 
 /**
  * Revoke a session
+ *
+ * Revoke a specific session by invalidating its entire refresh token family. Only sessions belonging to the authenticated user may be revoked. Emits a session_revoked event and records the action in the audit log.
  */
 export const revokeSessionMutation = (
   options?: Partial<Options<RevokeSessionData>>,
@@ -1482,6 +1500,8 @@ export const revokeSessionMutation = (
 
 /**
  * Register a new account
+ *
+ * Create a new user account with the default role, trigger a verification email, and record the registration in the audit log. Rate-limited by client IP to prevent abuse.
  */
 export const accountRegisterMutation = (
   options?: Partial<Options<AccountRegisterData>>,
@@ -1513,6 +1533,8 @@ export const adminListAuditLogsQueryKey = (
 
 /**
  * List audit logs
+ *
+ * Returns a paginated list of audit log entries with search across actor email, action, and target label. Supports filtering by exact action, domain prefix, and date range. Requires superuser access.
  */
 export const adminListAuditLogsOptions = (
   options?: Options<AdminListAuditLogsData>,
@@ -1541,6 +1563,8 @@ export const adminExportAuditLogQueryKey = (
 
 /**
  * Export audit logs as CSV
+ *
+ * Exports matching audit log entries as a downloadable CSV file. Accepts the same filters as the list endpoint and returns up to 10,000 rows. Requires superuser access.
  */
 export const adminExportAuditLogOptions = (
   options?: Options<AdminExportAuditLogData>,
@@ -1569,6 +1593,8 @@ export const adminGetTargetAuditLogsQueryKey = (
 
 /**
  * Get audit logs for a target
+ *
+ * Returns a paginated list of audit log entries for a specific target identified by type and ID. Supports filtering by action and date range. Requires superuser access.
  */
 export const adminGetTargetAuditLogsOptions = (
   options: Options<AdminGetTargetAuditLogsData>,
@@ -1597,6 +1623,8 @@ export const adminGetUserAuditLogsQueryKey = (
 
 /**
  * Get audit logs for a user
+ *
+ * Returns a paginated list of audit log entries where the specified user was the actor. Supports filtering by action and date range. Requires superuser access.
  */
 export const adminGetUserAuditLogsOptions = (
   options: Options<AdminGetUserAuditLogsData>,
@@ -1625,6 +1653,8 @@ export const adminGetAuditLogQueryKey = (
 
 /**
  * Get audit log details
+ *
+ * Retrieves a single audit log entry by its UUID, including before/after snapshots and request metadata. Requires superuser access.
  */
 export const adminGetAuditLogOptions = (
   options: Options<AdminGetAuditLogData>,
@@ -1649,6 +1679,8 @@ export const adminGetAuditLogOptions = (
 
 /**
  * Import devices from CSV
+ *
+ * Parses, validates, and creates or updates devices in bulk from a CSV upload. Logs an audit entry and emits a bulk-import event on success. Requires superuser access.
  */
 export const adminImportDevicesMutation = (
   options?: Partial<Options<AdminImportDevicesData>>,
@@ -1676,6 +1708,8 @@ export const adminImportDevicesMutation = (
 
 /**
  * Import extensions from CSV
+ *
+ * Parses, validates, and creates or updates extensions in bulk from a CSV upload. Logs an audit entry and emits a bulk-import event on success. Requires superuser access.
  */
 export const adminImportExtensionsMutation = (
   options?: Partial<Options<AdminImportExtensionsData>>,
@@ -1703,6 +1737,8 @@ export const adminImportExtensionsMutation = (
 
 /**
  * Preview device CSV import
+ *
+ * Parses and validates a device CSV file without persisting changes. Returns row-level validation results including duplicate MAC address detection. Requires superuser access.
  */
 export const adminPreviewDeviceImportMutation = (
   options?: Partial<Options<AdminPreviewDeviceImportData>>,
@@ -1730,6 +1766,8 @@ export const adminPreviewDeviceImportMutation = (
 
 /**
  * Preview extension CSV import
+ *
+ * Parses and validates an extension CSV file without persisting changes. Returns row-level validation results including duplicate extension number detection. Requires superuser access.
  */
 export const adminPreviewExtensionImportMutation = (
   options?: Partial<Options<AdminPreviewExtensionImportData>>,
@@ -1761,6 +1799,8 @@ export const getRecentActivityQueryKey = (
 
 /**
  * Get recent activity
+ *
+ * Returns recent audit log entries for the admin dashboard activity feed. Configurable lookback period (default 24 hours) and result limit (default 50). Cached for 5 minutes. Requires superuser access.
  */
 export const getRecentActivityOptions = (
   options?: Options<GetRecentActivityData>,
@@ -1789,6 +1829,8 @@ export const getDashboardStatsQueryKey = (
 
 /**
  * Get dashboard statistics
+ *
+ * Returns aggregate counts for the admin dashboard including users, teams, devices, extensions, open tickets, unread voicemails, and new user signups. Cached for 5 minutes. Requires superuser access.
  */
 export const getDashboardStatsOptions = (
   options?: Options<GetDashboardStatsData>,
@@ -1817,6 +1859,8 @@ export const getDashboardTrendsQueryKey = (
 
 /**
  * Get 7-day trend data for dashboard charts
+ *
+ * Returns daily event and new user counts for the last 7 days, suitable for dashboard chart rendering. Cached for 5 minutes. Requires superuser access.
  */
 export const getDashboardTrendsOptions = (
   options?: Options<GetDashboardTrendsData>,
@@ -1845,6 +1889,8 @@ export const adminListDeviceTemplatesQueryKey = (
 
 /**
  * List device templates
+ *
+ * Returns a paginated list of device templates with search across manufacturer, model, and display name. Results are cached for 5 minutes. Requires superuser access.
  */
 export const adminListDeviceTemplatesOptions = (
   options?: Options<AdminListDeviceTemplatesData>,
@@ -1869,6 +1915,8 @@ export const adminListDeviceTemplatesOptions = (
 
 /**
  * Create a device template
+ *
+ * Creates a new device template and records an audit log entry. Emits a device_template_created event. Requires superuser access.
  */
 export const adminCreateDeviceTemplateMutation = (
   options?: Partial<Options<AdminCreateDeviceTemplateData>>,
@@ -1896,6 +1944,8 @@ export const adminCreateDeviceTemplateMutation = (
 
 /**
  * Delete a device template
+ *
+ * Permanently deletes a device template. Records the deletion in the audit log with a before snapshot. Requires superuser access.
  */
 export const adminDeleteDeviceTemplateMutation = (
   options?: Partial<Options<AdminDeleteDeviceTemplateData>>,
@@ -1927,6 +1977,8 @@ export const adminGetDeviceTemplateQueryKey = (
 
 /**
  * Get device template details
+ *
+ * Retrieves a single device template by its UUID, including all configuration fields. Requires superuser access.
  */
 export const adminGetDeviceTemplateOptions = (
   options: Options<AdminGetDeviceTemplateData>,
@@ -1951,6 +2003,8 @@ export const adminGetDeviceTemplateOptions = (
 
 /**
  * Update a device template
+ *
+ * Partially updates a device template. Captures before/after snapshots for the audit log and emits a device_template_updated event. Requires superuser access.
  */
 export const adminUpdateDeviceTemplateMutation = (
   options?: Partial<Options<AdminUpdateDeviceTemplateData>>,
@@ -1982,6 +2036,8 @@ export const adminListDevicesQueryKey = (
 
 /**
  * List devices (admin)
+ *
+ * Returns a paginated list of all devices across the system with owner and team details. Supports search by name, SIP username, and MAC address. Requires superuser access.
  */
 export const adminListDevicesOptions = (
   options?: Options<AdminListDevicesData>,
@@ -2010,6 +2066,8 @@ export const adminGetDeviceStatsQueryKey = (
 
 /**
  * Get device statistics (admin)
+ *
+ * Returns aggregate device statistics including totals, active/online/offline/error counts, and a breakdown by device type. Cached for 5 minutes. Requires superuser access.
  */
 export const adminGetDeviceStatsOptions = (
   options?: Options<AdminGetDeviceStatsData>,
@@ -2038,6 +2096,8 @@ export const adminListFaxMessagesQueryKey = (
 
 /**
  * List fax messages (admin)
+ *
+ * Returns the 50 most recent fax messages ordered by received date, including direction, status, and error details. Requires superuser access.
  */
 export const adminListFaxMessagesOptions = (
   options?: Options<AdminListFaxMessagesData>,
@@ -2066,6 +2126,8 @@ export const adminListFaxNumbersQueryKey = (
 
 /**
  * List fax numbers (admin)
+ *
+ * Returns a paginated list of all fax numbers with owner and team details. Supports search by number and label. Requires superuser access.
  */
 export const adminListFaxNumbersOptions = (
   options?: Options<AdminListFaxNumbersData>,
@@ -2094,6 +2156,8 @@ export const adminGetFaxStatsQueryKey = (
 
 /**
  * Get fax statistics (admin)
+ *
+ * Returns aggregate fax statistics including total and active number counts, total messages, and today's inbound, outbound, and failed message counts. Cached for 5 minutes. Requires superuser access.
  */
 export const adminGetFaxStatsOptions = (
   options?: Options<AdminGetFaxStatsData>,
@@ -2122,6 +2186,8 @@ export const getAdminGatewaySettingsQueryKey = (
 
 /**
  * Get gateway settings
+ *
+ * Returns the current gateway configuration including default timeout and cache TTL values. Requires superuser access.
  */
 export const getAdminGatewaySettingsOptions = (
   options?: Options<GetAdminGatewaySettingsData>,
@@ -2146,6 +2212,8 @@ export const getAdminGatewaySettingsOptions = (
 
 /**
  * Update gateway settings
+ *
+ * Updates gateway configuration such as timeout and cache TTL. Changes apply to the running process only and are recorded in the audit log. Requires superuser access.
  */
 export const updateAdminGatewaySettingsMutation = (
   options?: Partial<Options<UpdateAdminGatewaySettingsData>>,
@@ -2177,6 +2245,8 @@ export const adminListMusicOnHoldQueryKey = (
 
 /**
  * List music on hold classes
+ *
+ * Returns a paginated list of music on hold classes with search by name. Includes file count, category, and default/active status. Cached for 5 minutes. Requires superuser access.
  */
 export const adminListMusicOnHoldOptions = (
   options?: Options<AdminListMusicOnHoldData>,
@@ -2201,6 +2271,8 @@ export const adminListMusicOnHoldOptions = (
 
 /**
  * Create a music on hold class
+ *
+ * Creates a new music on hold class and records an audit log entry. Emits a music_on_hold_created event. Requires superuser access.
  */
 export const adminCreateMusicOnHoldMutation = (
   options?: Partial<Options<AdminCreateMusicOnHoldData>>,
@@ -2228,6 +2300,8 @@ export const adminCreateMusicOnHoldMutation = (
 
 /**
  * Delete a music on hold class
+ *
+ * Permanently deletes a music on hold class. Records the deletion in the audit log with a before snapshot. Requires superuser access.
  */
 export const adminDeleteMusicOnHoldMutation = (
   options?: Partial<Options<AdminDeleteMusicOnHoldData>>,
@@ -2259,6 +2333,8 @@ export const adminGetMusicOnHoldQueryKey = (
 
 /**
  * Get music on hold details
+ *
+ * Retrieves a single music on hold class by its UUID, including the full file list and playback settings. Requires superuser access.
  */
 export const adminGetMusicOnHoldOptions = (
   options: Options<AdminGetMusicOnHoldData>,
@@ -2283,6 +2359,8 @@ export const adminGetMusicOnHoldOptions = (
 
 /**
  * Update a music on hold class
+ *
+ * Partially updates a music on hold class. Captures before/after snapshots for the audit log and emits a music_on_hold_updated event. Requires superuser access.
  */
 export const adminUpdateMusicOnHoldMutation = (
   options?: Partial<Options<AdminUpdateMusicOnHoldData>>,
@@ -2310,6 +2388,8 @@ export const adminUpdateMusicOnHoldMutation = (
 
 /**
  * Execute phone number bulk import
+ *
+ * Create phone number records from previously validated rows. Skips or rejects duplicates based on the skip_duplicates flag. Logs an audit entry and emits a phone_numbers_bulk_imported event.
  */
 export const adminExecutePhoneNumberBulkImportMutation = (
   options?: Partial<Options<AdminExecutePhoneNumberBulkImportData>>,
@@ -2337,6 +2417,8 @@ export const adminExecutePhoneNumberBulkImportMutation = (
 
 /**
  * Preview phone number bulk import
+ *
+ * Parse and validate a CSV file of phone numbers, returning a preview of valid rows, validation errors, and detected duplicates. Maximum file size is 5 MB and 1000 rows.
  */
 export const adminPreviewPhoneNumberBulkImportMutation = (
   options?: Partial<Options<AdminPreviewPhoneNumberBulkImportData>>,
@@ -2368,6 +2450,8 @@ export const adminGetSupportStatsQueryKey = (
 
 /**
  * Get support statistics (admin)
+ *
+ * Returns aggregate support statistics including ticket counts by status, priority, and category. Cached for 5 minutes. Requires superuser access.
  */
 export const adminGetSupportStatsOptions = (
   options?: Options<AdminGetSupportStatsData>,
@@ -2396,6 +2480,8 @@ export const adminListTicketsQueryKey = (
 
 /**
  * List tickets (admin)
+ *
+ * Returns a paginated list of all support tickets with creator and assignee details. Supports search by ticket number and subject. Requires superuser access.
  */
 export const adminListTicketsOptions = (
   options?: Options<AdminListTicketsData>,
@@ -2424,6 +2510,8 @@ export const getAdminSystemStatusQueryKey = (
 
 /**
  * Get system status
+ *
+ * Returns comprehensive system health information including database and Redis status, connection pool stats, worker queue depths, resource counts, and process uptime. Cached for 1 minute. Requires superuser access.
  */
 export const getAdminSystemStatusOptions = (
   options?: Options<GetAdminSystemStatusData>,
@@ -2451,6 +2539,8 @@ export const adminListTasksQueryKey = (options?: Options<AdminListTasksData>) =>
 
 /**
  * List background tasks (admin)
+ *
+ * Returns a paginated list of all background tasks across every team. Supports filtering by task type, status, and entity type, plus search across task_type and entity_type fields. Requires superuser access.
  */
 export const adminListTasksOptions = (options?: Options<AdminListTasksData>) =>
   queryOptions<
@@ -2477,6 +2567,8 @@ export const getAdminTaskStatsQueryKey = (
 
 /**
  * Get task statistics (admin)
+ *
+ * Returns aggregate background task statistics including counts by status, average duration, and totals for today and this week. Cached for 5 minutes. Requires superuser access.
  */
 export const getAdminTaskStatsOptions = (
   options?: Options<GetAdminTaskStatsData>,
@@ -2501,6 +2593,8 @@ export const getAdminTaskStatsOptions = (
 
 /**
  * Delete a background task (admin)
+ *
+ * Permanently deletes a completed, failed, or cancelled background task. Records the deletion in the audit log with a before snapshot. Requires superuser access.
  */
 export const adminDeleteTaskMutation = (
   options?: Partial<Options<AdminDeleteTaskData>>,
@@ -2528,6 +2622,8 @@ export const adminDeleteTaskMutation = (
 
 /**
  * Cancel a background task (admin)
+ *
+ * Cancels a pending or running background task. Records the cancellation in the audit log with the previous status and emits a background_task_cancelled event. Requires superuser access.
  */
 export const adminCancelTaskMutation = (
   options?: Partial<Options<AdminCancelTaskData>>,
@@ -2558,6 +2654,8 @@ export const adminListTeamsQueryKey = (options?: Options<AdminListTeamsData>) =>
 
 /**
  * List teams (admin)
+ *
+ * Returns a paginated list of all teams with member details. Supports search by name and date range filtering. Requires superuser access.
  */
 export const adminListTeamsOptions = (options?: Options<AdminListTeamsData>) =>
   queryOptions<
@@ -2580,6 +2678,8 @@ export const adminListTeamsOptions = (options?: Options<AdminListTeamsData>) =>
 
 /**
  * Delete a team (admin)
+ *
+ * Permanently deletes a team and all its memberships. Records the deletion in the audit log with a before snapshot. Requires superuser access.
  */
 export const adminDeleteTeamMutation = (
   options?: Partial<Options<AdminDeleteTeamData>>,
@@ -2610,6 +2710,8 @@ export const adminGetTeamQueryKey = (options: Options<AdminGetTeamData>) =>
 
 /**
  * Get team details (admin)
+ *
+ * Retrieves detailed information for a single team by its UUID, including the full member list. Requires superuser access.
  */
 export const adminGetTeamOptions = (options: Options<AdminGetTeamData>) =>
   queryOptions<
@@ -2632,6 +2734,8 @@ export const adminGetTeamOptions = (options: Options<AdminGetTeamData>) =>
 
 /**
  * Update a team (admin)
+ *
+ * Partially updates a team's name, description, or active status. Captures before/after snapshots for the audit log and emits an admin_team_updated event. Requires superuser access.
  */
 export const adminUpdateTeamMutation = (
   options?: Partial<Options<AdminUpdateTeamData>>,
@@ -2662,6 +2766,8 @@ export const adminListUsersQueryKey = (options?: Options<AdminListUsersData>) =>
 
 /**
  * List users (admin)
+ *
+ * Returns a paginated list of all users with roles, OAuth accounts, and team memberships. Supports search by name and email. Requires superuser access.
  */
 export const adminListUsersOptions = (options?: Options<AdminListUsersData>) =>
   queryOptions<
@@ -2684,6 +2790,8 @@ export const adminListUsersOptions = (options?: Options<AdminListUsersData>) =>
 
 /**
  * Delete a user (admin)
+ *
+ * Permanently deletes a user account. Prevents self-deletion. Records the deletion in the audit log with a before snapshot. Requires superuser access.
  */
 export const adminDeleteUserMutation = (
   options?: Partial<Options<AdminDeleteUserData>>,
@@ -2714,6 +2822,8 @@ export const adminGetUserQueryKey = (options: Options<AdminGetUserData>) =>
 
 /**
  * Get user details (admin)
+ *
+ * Retrieves detailed information for a single user by UUID, including security-sensitive fields such as password hash age. Requires superuser access.
  */
 export const adminGetUserOptions = (options: Options<AdminGetUserData>) =>
   queryOptions<
@@ -2736,6 +2846,8 @@ export const adminGetUserOptions = (options: Options<AdminGetUserData>) =>
 
 /**
  * Update a user (admin)
+ *
+ * Partially updates a user's profile, active status, superuser flag, or verification status. Captures before/after snapshots for the audit log and emits an admin_user_updated event. Requires superuser access.
  */
 export const adminUpdateUserMutation = (
   options?: Partial<Options<AdminUpdateUserData>>,
@@ -2767,6 +2879,8 @@ export const adminListExtensionsQueryKey = (
 
 /**
  * List extensions (admin)
+ *
+ * Returns a paginated list of all extensions with owner and phone number details. Supports search by extension number and display name. Requires superuser access.
  */
 export const adminListExtensionsOptions = (
   options?: Options<AdminListExtensionsData>,
@@ -2795,6 +2909,8 @@ export const adminListPhoneNumbersQueryKey = (
 
 /**
  * List phone numbers (admin)
+ *
+ * Returns a paginated list of all phone numbers with owner and team details. Supports search by number and label. Requires superuser access.
  */
 export const adminListPhoneNumbersOptions = (
   options?: Options<AdminListPhoneNumbersData>,
@@ -2823,6 +2939,8 @@ export const adminGetVoiceStatsQueryKey = (
 
 /**
  * Get voice statistics (admin)
+ *
+ * Returns aggregate voice statistics including phone number and extension counts, active Do Not Disturb entries, and a breakdown of numbers by type. Cached for 5 minutes. Requires superuser access.
  */
 export const adminGetVoiceStatsOptions = (
   options?: Options<AdminGetVoiceStatsData>,
@@ -2851,6 +2969,8 @@ export const getCallsByExtensionQueryKey = (
 
 /**
  * Get calls by extension
+ *
+ * Returns per-extension call statistics aggregated over a date range, useful for comparing call activity across extensions within a team.
  */
 export const getCallsByExtensionOptions = (
   options: Options<GetCallsByExtensionData>,
@@ -2879,6 +2999,8 @@ export const listCallRecordsQueryKey = (
 
 /**
  * List call records
+ *
+ * Returns a paginated list of call detail records with filtering by date range, direction, disposition, source, destination, and duration. Non-superusers see only records for their teams.
  */
 export const listCallRecordsOptions = (
   options?: Options<ListCallRecordsData>,
@@ -2903,6 +3025,8 @@ export const listCallRecordsOptions = (
 
 /**
  * Create a call record
+ *
+ * Creates a new call detail record via manual entry or import. Emits a call_record_created event and logs the action to the audit trail.
  */
 export const createCallRecordMutation = (
   options?: Partial<Options<CreateCallRecordData>>,
@@ -2934,6 +3058,8 @@ export const exportCallRecordsQueryKey = (
 
 /**
  * Export call records as CSV
+ *
+ * Exports call detail records as a downloadable CSV file. Supports filtering by date range, direction, and disposition. Non-superusers receive only records for their teams.
  */
 export const exportCallRecordsOptions = (
   options?: Options<ExportCallRecordsData>,
@@ -2961,6 +3087,8 @@ export const getCallRecordQueryKey = (options: Options<GetCallRecordData>) =>
 
 /**
  * Get call record details
+ *
+ * Retrieves the full details of a single call detail record by its ID.
  */
 export const getCallRecordOptions = (options: Options<GetCallRecordData>) =>
   queryOptions<
@@ -2986,6 +3114,8 @@ export const getCallSummaryQueryKey = (options: Options<GetCallSummaryData>) =>
 
 /**
  * Get call analytics summary
+ *
+ * Returns aggregate call statistics for a team within a date range, including totals and averages. Requires team membership or superuser access.
  */
 export const getCallSummaryOptions = (options: Options<GetCallSummaryData>) =>
   queryOptions<
@@ -3011,6 +3141,8 @@ export const getCallVolumeQueryKey = (options: Options<GetCallVolumeData>) =>
 
 /**
  * Get call volume over time
+ *
+ * Returns time-series call volume data points grouped by a configurable interval (hour, day, week, or month) for charting and trend analysis.
  */
 export const getCallVolumeOptions = (options: Options<GetCallVolumeData>) =>
   queryOptions<
@@ -3037,6 +3169,8 @@ export const gitHubOAuthAuthorizeQueryKey = (
 
 /**
  * Initiate GitHub OAuth
+ *
+ * Generate a GitHub OAuth2 authorization URL with a signed state parameter for the SPA to redirect to. The state encodes the provider, frontend callback URL, and a login action.
  */
 export const gitHubOAuthAuthorizeOptions = (
   options?: Options<GitHubOAuthAuthorizeData>,
@@ -3065,6 +3199,8 @@ export const gitHubOAuthCallbackQueryKey = (
 
 /**
  * Handle GitHub OAuth callback
+ *
+ * Process the GitHub OAuth2 redirect. Verifies the state token, exchanges the authorization code for tokens, retrieves the user's GitHub profile, and dispatches to login, account linking, or MFA disable flows based on the state action. Redirects the browser to the frontend callback URL with result parameters.
  */
 export const gitHubOAuthCallbackOptions = (
   options?: Options<GitHubOAuthCallbackData>,
@@ -3093,6 +3229,8 @@ export const googleOAuthAuthorizeQueryKey = (
 
 /**
  * Initiate Google OAuth
+ *
+ * Generate a Google OAuth2 authorization URL with a signed state parameter for the SPA to redirect to. The state encodes the provider, frontend callback URL, and a login action.
  */
 export const googleOAuthAuthorizeOptions = (
   options?: Options<GoogleOAuthAuthorizeData>,
@@ -3121,6 +3259,8 @@ export const googleOAuthCallbackQueryKey = (
 
 /**
  * Handle Google OAuth callback
+ *
+ * Process the Google OAuth2 redirect. Verifies the state token, exchanges the authorization code for tokens, retrieves the user's Google profile, and dispatches to login, account linking, or MFA disable flows based on the state action. Redirects the browser to the frontend callback URL with result parameters.
  */
 export const googleOAuthCallbackOptions = (
   options?: Options<GoogleOAuthCallbackData>,
@@ -3148,6 +3288,8 @@ export const listCallQueuesQueryKey = (options?: Options<ListCallQueuesData>) =>
 
 /**
  * List call queues
+ *
+ * Returns a paginated list of call queues with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.
  */
 export const listCallQueuesOptions = (options?: Options<ListCallQueuesData>) =>
   queryOptions<
@@ -3170,6 +3312,8 @@ export const listCallQueuesOptions = (options?: Options<ListCallQueuesData>) =>
 
 /**
  * Create a call queue
+ *
+ * Creates a new call queue and assigns it to the current user's team. Logs an audit entry and emits a call_queue_created event.
  */
 export const createCallQueueMutation = (
   options?: Partial<Options<CreateCallQueueData>>,
@@ -3197,6 +3341,8 @@ export const createCallQueueMutation = (
 
 /**
  * Delete a call queue
+ *
+ * Permanently deletes a call queue and all its member associations. Emits a call_queue_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteCallQueueMutation = (
   options?: Partial<Options<DeleteCallQueueData>>,
@@ -3227,6 +3373,8 @@ export const getCallQueueQueryKey = (options: Options<GetCallQueueData>) =>
 
 /**
  * Get call queue details
+ *
+ * Retrieves a single call queue by ID, including its current list of members.
  */
 export const getCallQueueOptions = (options: Options<GetCallQueueData>) =>
   queryOptions<
@@ -3249,6 +3397,8 @@ export const getCallQueueOptions = (options: Options<GetCallQueueData>) =>
 
 /**
  * Update a call queue
+ *
+ * Partially updates a call queue's configuration. Captures before/after snapshots for audit logging and emits a call_queue_updated event.
  */
 export const updateCallQueueMutation = (
   options?: Partial<Options<UpdateCallQueueData>>,
@@ -3280,6 +3430,8 @@ export const listCallQueueMembersQueryKey = (
 
 /**
  * List call queue members
+ *
+ * Returns all members belonging to the specified call queue. Validates that the parent call queue exists before listing.
  */
 export const listCallQueueMembersOptions = (
   options: Options<ListCallQueueMembersData>,
@@ -3304,6 +3456,8 @@ export const listCallQueueMembersOptions = (
 
 /**
  * Add a call queue member
+ *
+ * Adds a new member to the specified call queue. Logs an audit entry and emits a call_queue_member_created event.
  */
 export const createCallQueueMemberMutation = (
   options?: Partial<Options<CreateCallQueueMemberData>>,
@@ -3331,6 +3485,8 @@ export const createCallQueueMemberMutation = (
 
 /**
  * Remove a call queue member
+ *
+ * Removes a member from the specified call queue. Emits a call_queue_member_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteCallQueueMemberMutation = (
   options?: Partial<Options<DeleteCallQueueMemberData>>,
@@ -3358,6 +3514,8 @@ export const deleteCallQueueMemberMutation = (
 
 /**
  * Update a call queue member
+ *
+ * Partially updates a member's settings within a call queue. Captures before/after snapshots for audit logging and emits a call_queue_member_updated event.
  */
 export const updateCallQueueMemberMutation = (
   options?: Partial<Options<UpdateCallQueueMemberData>>,
@@ -3385,6 +3543,8 @@ export const updateCallQueueMemberMutation = (
 
 /**
  * Pause or unpause a call queue member
+ *
+ * Toggles the pause state for a call queue member. Logs an audit entry with the pause status in metadata and emits a call_queue_member_paused event.
  */
 export const pauseCallQueueMemberMutation = (
   options?: Partial<Options<PauseCallQueueMemberData>>,
@@ -3415,6 +3575,8 @@ export const oAuthConfigQueryKey = (options?: Options<OAuthConfigData>) =>
 
 /**
  * Get OAuth Configuration
+ *
+ * Return which OAuth providers (Google, GitHub) are enabled for the frontend login flow. Response is cached for 5 minutes.
  */
 export const oAuthConfigOptions = (options?: Options<OAuthConfigData>) =>
   queryOptions<
@@ -3441,6 +3603,8 @@ export const listConnectionsQueryKey = (
 
 /**
  * List connections
+ *
+ * Retrieve a paginated list of external service connections. Supports searching by name and optional filtering by team. Requires connections admin access.
  */
 export const listConnectionsOptions = (
   options?: Options<ListConnectionsData>,
@@ -3465,6 +3629,8 @@ export const listConnectionsOptions = (
 
 /**
  * Create a connection
+ *
+ * Register a new external service connection with its credentials. The user must belong to the target team. Records an audit log entry and emits a connection_created event.
  */
 export const createConnectionMutation = (
   options?: Partial<Options<CreateConnectionData>>,
@@ -3492,6 +3658,8 @@ export const createConnectionMutation = (
 
 /**
  * Delete a connection
+ *
+ * Delete an external service connection. Fails with HTTP 409 if devices are still managed through this connection. Records an audit log entry.
  */
 export const deleteConnectionMutation = (
   options?: Partial<Options<DeleteConnectionData>>,
@@ -3522,6 +3690,8 @@ export const getConnectionQueryKey = (options: Options<GetConnectionData>) =>
 
 /**
  * Get connection details
+ *
+ * Retrieve details for a single connection. Credential values are never returned; only the credential field names are included.
  */
 export const getConnectionOptions = (options: Options<GetConnectionData>) =>
   queryOptions<
@@ -3544,6 +3714,8 @@ export const getConnectionOptions = (options: Options<GetConnectionData>) =>
 
 /**
  * Update a connection
+ *
+ * Update a connection's name, base URL, credentials, or enabled status. Records an audit log entry and emits a connection_updated event.
  */
 export const updateConnectionMutation = (
   options?: Partial<Options<UpdateConnectionData>>,
@@ -3571,6 +3743,8 @@ export const updateConnectionMutation = (
 
 /**
  * Test a connection
+ *
+ * Test connectivity to the external service by attempting to authenticate with the stored credentials. Returns a success or failure message.
  */
 export const testConnectionMutation = (
   options?: Partial<Options<TestConnectionData>>,
@@ -3601,6 +3775,8 @@ export const listDevicesQueryKey = (options?: Options<ListDevicesData>) =>
 
 /**
  * List devices
+ *
+ * Retrieve a paginated list of devices with eager-loaded line assignments, location, and connection data. Superusers see all devices; regular users see only their own. Supports search by name, date filters, and configurable sort order.
  */
 export const listDevicesOptions = (options?: Options<ListDevicesData>) =>
   queryOptions<
@@ -3623,6 +3799,8 @@ export const listDevicesOptions = (options?: Options<ListDevicesData>) =>
 
 /**
  * Register a device
+ *
+ * Register a new device and assign it to the current user. Emits a device_created event, records an audit log entry, and sends a notification to the user.
  */
 export const createDeviceMutation = (
   options?: Partial<Options<CreateDeviceData>>,
@@ -3654,6 +3832,8 @@ export const lookupDeviceTemplateQueryKey = (
 
 /**
  * Look up device template
+ *
+ * Find a device template by manufacturer and model name. Returns wireframe data, provisioning template, and template variables. Results are cached for 10 minutes.
  */
 export const lookupDeviceTemplateOptions = (
   options: Options<LookupDeviceTemplateData>,
@@ -3678,6 +3858,8 @@ export const lookupDeviceTemplateOptions = (
 
 /**
  * Delete a device
+ *
+ * Permanently delete a device record. Emits a device_deleted event, records an audit log entry with the pre-deletion snapshot, and sends a removal notification to the device owner.
  */
 export const deleteDeviceMutation = (
   options?: Partial<Options<DeleteDeviceData>>,
@@ -3708,6 +3890,8 @@ export const getDeviceQueryKey = (options: Options<GetDeviceData>) =>
 
 /**
  * Get device details
+ *
+ * Retrieve full details for a single device including line assignments, location, and connection. Enforces device ownership so users can only access their own devices.
  */
 export const getDeviceOptions = (options: Options<GetDeviceData>) =>
   queryOptions<
@@ -3730,6 +3914,8 @@ export const getDeviceOptions = (options: Options<GetDeviceData>) =>
 
 /**
  * Update a device
+ *
+ * Partially update a device's fields. Captures before and after snapshots for audit logging and emits a device_updated event. Requires device ownership.
  */
 export const updateDeviceMutation = (
   options?: Partial<Options<UpdateDeviceData>>,
@@ -3761,6 +3947,8 @@ export const listDeviceLinesQueryKey = (
 
 /**
  * List device line assignments
+ *
+ * Retrieve all line assignments for a device, including the associated extension details for each line.
  */
 export const listDeviceLinesOptions = (options: Options<ListDeviceLinesData>) =>
   queryOptions<
@@ -3783,6 +3971,8 @@ export const listDeviceLinesOptions = (options: Options<ListDeviceLinesData>) =>
 
 /**
  * Set device line assignments
+ *
+ * Replace all line assignments for a device with the provided set. Captures before and after snapshots for audit logging and emits a device_lines_updated event.
  */
 export const setDeviceLinesMutation = (
   options?: Partial<Options<SetDeviceLinesData>>,
@@ -3810,6 +4000,8 @@ export const setDeviceLinesMutation = (
 
 /**
  * Reboot a device
+ *
+ * Enqueue a background task to reboot the device. The reboot is executed asynchronously via SAQ and tracked as a background task. Records an audit log entry and emits a device_rebooted event.
  */
 export const rebootDeviceMutation = (
   options?: Partial<Options<RebootDeviceData>>,
@@ -3837,6 +4029,8 @@ export const rebootDeviceMutation = (
 
 /**
  * Reprovision a device
+ *
+ * Enqueue a background task to reprovision the device with its current configuration. Executed asynchronously via SAQ with a 120-second timeout. Records an audit log entry and emits a device_reprovisioned event.
  */
 export const reprovisionDeviceMutation = (
   options?: Partial<Options<ReprovisionDeviceData>>,
@@ -3868,6 +4062,8 @@ export const listE911RegistrationsQueryKey = (
 
 /**
  * List E911 registrations
+ *
+ * Retrieve a paginated list of E911 registrations with eager-loaded phone number and location data. Supports optional team filtering, search by address, date filters, and configurable sort order.
  */
 export const listE911RegistrationsOptions = (
   options?: Options<ListE911RegistrationsData>,
@@ -3892,6 +4088,8 @@ export const listE911RegistrationsOptions = (
 
 /**
  * Create an E911 registration
+ *
+ * Create a new E911 address registration for a phone number. Emits an e911_registration_created event and records an audit log entry with the registration address.
  */
 export const createE911RegistrationMutation = (
   options?: Partial<Options<CreateE911RegistrationData>>,
@@ -3923,6 +4121,8 @@ export const listUnregisteredPhoneNumbersQueryKey = (
 
 /**
  * List unregistered phone numbers
+ *
+ * Retrieve all phone numbers for a team that do not yet have an E911 registration. Useful for identifying numbers that still need emergency address assignment.
  */
 export const listUnregisteredPhoneNumbersOptions = (
   options: Options<ListUnregisteredPhoneNumbersData>,
@@ -3947,6 +4147,8 @@ export const listUnregisteredPhoneNumbersOptions = (
 
 /**
  * Delete an E911 registration
+ *
+ * Permanently delete an E911 registration record. Emits an e911_registration_deleted event and records an audit log entry with the pre-deletion address snapshot.
  */
 export const deleteE911RegistrationMutation = (
   options?: Partial<Options<DeleteE911RegistrationData>>,
@@ -3978,6 +4180,8 @@ export const getE911RegistrationQueryKey = (
 
 /**
  * Get E911 registration details
+ *
+ * Retrieve full details for a single E911 registration including associated phone number and location. Requires team membership.
  */
 export const getE911RegistrationOptions = (
   options: Options<GetE911RegistrationData>,
@@ -4002,6 +4206,8 @@ export const getE911RegistrationOptions = (
 
 /**
  * Update an E911 registration
+ *
+ * Partially update an E911 registration's address or phone number assignment. Captures before and after snapshots for audit logging and emits an e911_registration_updated event.
  */
 export const updateE911RegistrationMutation = (
   options?: Partial<Options<UpdateE911RegistrationData>>,
@@ -4029,6 +4235,8 @@ export const updateE911RegistrationMutation = (
 
 /**
  * Validate an E911 registration
+ *
+ * Run address validation on an E911 registration and mark it as validated. Currently a stub that sets the validated flag; in production this would call a carrier API for real address verification.
  */
 export const validateE911RegistrationMutation = (
   options?: Partial<Options<ValidateE911RegistrationData>>,
@@ -4056,6 +4264,8 @@ export const validateE911RegistrationMutation = (
 
 /**
  * Request email verification
+ *
+ * Send a verification email to the specified address. Returns a generic success message regardless of whether the email exists, to prevent user enumeration. No-ops if the email is already verified.
  */
 export const requestEmailVerificationMutation = (
   options?: Partial<Options<RequestEmailVerificationData>>,
@@ -4087,6 +4297,8 @@ export const getEmailVerificationStatusQueryKey = (
 
 /**
  * Get email verification status
+ *
+ * Check whether a specific user's email address has been verified.
  */
 export const getEmailVerificationStatusOptions = (
   options: Options<GetEmailVerificationStatusData>,
@@ -4111,6 +4323,8 @@ export const getEmailVerificationStatusOptions = (
 
 /**
  * Verify email address
+ *
+ * Confirm a user's email address by validating the verification token. Marks the user as verified and records the verification in the audit log.
  */
 export const verifyEmailMutation = (
   options?: Partial<Options<VerifyEmailData>>,
@@ -4142,6 +4356,8 @@ export const listFaxMessagesQueryKey = (
 
 /**
  * List fax messages
+ *
+ * Retrieve a paginated list of fax messages scoped to fax numbers the current user owns or has team access to. Supports searching by remote number and name, and sorting by received date.
  */
 export const listFaxMessagesOptions = (
   options?: Options<ListFaxMessagesData>,
@@ -4166,6 +4382,8 @@ export const listFaxMessagesOptions = (
 
 /**
  * Delete a fax message
+ *
+ * Delete a fax message record. The user must have access to the associated fax number. An audit log entry is recorded and a fax_message_deleted event is emitted.
  */
 export const deleteFaxMessageMutation = (
   options?: Partial<Options<DeleteFaxMessageData>>,
@@ -4196,6 +4414,8 @@ export const getFaxMessageQueryKey = (options: Options<GetFaxMessageData>) =>
 
 /**
  * Get fax message details
+ *
+ * Retrieve details for a single fax message. Access is restricted to users who own or have team membership on the associated fax number.
  */
 export const getFaxMessageOptions = (options: Options<GetFaxMessageData>) =>
   queryOptions<
@@ -4221,6 +4441,8 @@ export const listFaxNumbersQueryKey = (options?: Options<ListFaxNumbersData>) =>
 
 /**
  * List fax numbers
+ *
+ * Retrieve a paginated list of fax numbers the current user owns or has team access to. Supports searching by number and label.
  */
 export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
   queryOptions<
@@ -4243,6 +4465,8 @@ export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
 
 /**
  * Create a fax number
+ *
+ * Provision a new fax number assigned to the current user. Optionally associates the number with a team. Records an audit log entry, emits a fax_number_created event, and sends a notification to the user.
  */
 export const createFaxNumberMutation = (
   options?: Partial<Options<CreateFaxNumberData>>,
@@ -4270,6 +4494,8 @@ export const createFaxNumberMutation = (
 
 /**
  * Delete a fax number
+ *
+ * Delete a fax number and its associated email routes. Records an audit log entry and sends a notification to the number's owner.
  */
 export const deleteFaxNumberMutation = (
   options?: Partial<Options<DeleteFaxNumberData>>,
@@ -4300,6 +4526,8 @@ export const getFaxNumberQueryKey = (options: Options<GetFaxNumberData>) =>
 
 /**
  * Get fax number details
+ *
+ * Retrieve details for a single fax number, including its email routes. Access is restricted to the number's owner, team members, and superusers.
  */
 export const getFaxNumberOptions = (options: Options<GetFaxNumberData>) =>
   queryOptions<
@@ -4322,6 +4550,8 @@ export const getFaxNumberOptions = (options: Options<GetFaxNumberData>) =>
 
 /**
  * Update a fax number
+ *
+ * Update a fax number's label, active status, or team assignment. Records an audit log entry and emits a fax_number_updated event.
  */
 export const updateFaxNumberMutation = (
   options?: Partial<Options<UpdateFaxNumberData>>,
@@ -4353,6 +4583,8 @@ export const listFaxEmailRoutesQueryKey = (
 
 /**
  * List fax email routes
+ *
+ * Retrieve a paginated list of email routes configured for a specific fax number. Supports filtering by email address, creation date, and update date.
  */
 export const listFaxEmailRoutesOptions = (
   options: Options<ListFaxEmailRoutesData>,
@@ -4377,6 +4609,8 @@ export const listFaxEmailRoutesOptions = (
 
 /**
  * Create a fax email route
+ *
+ * Add a new email routing rule to a fax number. The change is audit-logged and emits a fax_email_route_created event.
  */
 export const createFaxEmailRouteMutation = (
   options?: Partial<Options<CreateFaxEmailRouteData>>,
@@ -4404,6 +4638,8 @@ export const createFaxEmailRouteMutation = (
 
 /**
  * Delete a fax email route
+ *
+ * Remove an email route from a fax number. Validates that the route belongs to the specified fax number and records an audit log entry.
  */
 export const deleteFaxEmailRouteMutation = (
   options?: Partial<Options<DeleteFaxEmailRouteData>>,
@@ -4431,6 +4667,8 @@ export const deleteFaxEmailRouteMutation = (
 
 /**
  * Update a fax email route
+ *
+ * Update an existing email route on a fax number. Validates that the route belongs to the specified fax number and records an audit log entry.
  */
 export const updateFaxEmailRouteMutation = (
   options?: Partial<Options<UpdateFaxEmailRouteData>>,
@@ -4458,6 +4696,8 @@ export const updateFaxEmailRouteMutation = (
 
 /**
  * Send a fax
+ *
+ * Queue an outbound fax for delivery as a tracked background task. Creates a fax message record in QUEUED status and enqueues a SAQ job to send via the configured provider. Returns HTTP 202 with the background task details.
  */
 export const sendFaxMutation = (
   options?: Partial<Options<SendFaxData>>,
@@ -4485,6 +4725,8 @@ export const gatewayLookupDeviceQueryKey = (
 
 /**
  * Look up a device by MAC address
+ *
+ * Queries all enabled external provider connections that support the devices domain and returns aggregated results for the given MAC address. Supports cached responses with an optional refresh parameter to bypass the cache.
  */
 export const gatewayLookupDeviceOptions = (
   options: Options<GatewayLookupDeviceData>,
@@ -4513,6 +4755,8 @@ export const gatewayLookupExtensionQueryKey = (
 
 /**
  * Look up an extension
+ *
+ * Queries all enabled external provider connections that support the extensions domain and returns aggregated results for the given extension number. Supports cached responses with an optional refresh parameter to bypass the cache.
  */
 export const gatewayLookupExtensionOptions = (
   options: Options<GatewayLookupExtensionData>,
@@ -4541,6 +4785,8 @@ export const gatewayLookupNumberQueryKey = (
 
 /**
  * Look up a phone number
+ *
+ * Queries all enabled external provider connections that support the numbers domain and returns aggregated results for the given phone number. Supports cached responses with an optional refresh parameter to bypass the cache.
  */
 export const gatewayLookupNumberOptions = (
   options: Options<GatewayLookupNumberData>,
@@ -4568,6 +4814,8 @@ export const listIvrMenusQueryKey = (options?: Options<ListIvrMenusData>) =>
 
 /**
  * List IVR menus
+ *
+ * Returns a paginated list of IVR menus with their options. Supports searching by name, sorting, and filtering by creation/update timestamps.
  */
 export const listIvrMenusOptions = (options?: Options<ListIvrMenusData>) =>
   queryOptions<
@@ -4590,6 +4838,8 @@ export const listIvrMenusOptions = (options?: Options<ListIvrMenusData>) =>
 
 /**
  * Create an IVR menu
+ *
+ * Creates a new IVR menu and assigns it to the current user's team. Logs an audit entry and emits an ivr_menu_created event.
  */
 export const createIvrMenuMutation = (
   options?: Partial<Options<CreateIvrMenuData>>,
@@ -4617,6 +4867,8 @@ export const createIvrMenuMutation = (
 
 /**
  * Delete an IVR menu
+ *
+ * Permanently deletes an IVR menu and all its option associations. Emits an ivr_menu_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteIvrMenuMutation = (
   options?: Partial<Options<DeleteIvrMenuData>>,
@@ -4647,6 +4899,8 @@ export const getIvrMenuQueryKey = (options: Options<GetIvrMenuData>) =>
 
 /**
  * Get IVR menu details
+ *
+ * Retrieves a single IVR menu by ID, including its configured menu options.
  */
 export const getIvrMenuOptions = (options: Options<GetIvrMenuData>) =>
   queryOptions<
@@ -4669,6 +4923,8 @@ export const getIvrMenuOptions = (options: Options<GetIvrMenuData>) =>
 
 /**
  * Update an IVR menu
+ *
+ * Partially updates an IVR menu's configuration. Captures before/after snapshots for audit logging and emits an ivr_menu_updated event.
  */
 export const updateIvrMenuMutation = (
   options?: Partial<Options<UpdateIvrMenuData>>,
@@ -4700,6 +4956,8 @@ export const listIvrMenuOptionsQueryKey = (
 
 /**
  * List IVR menu options
+ *
+ * Returns all options configured for the specified IVR menu. Validates that the parent IVR menu exists before listing.
  */
 export const listIvrMenuOptionsOptions = (
   options: Options<ListIvrMenuOptionsData>,
@@ -4724,6 +4982,8 @@ export const listIvrMenuOptionsOptions = (
 
 /**
  * Add an IVR menu option
+ *
+ * Adds a new digit-mapped option to the specified IVR menu. Logs an audit entry and emits an ivr_menu_option_created event.
  */
 export const createIvrMenuOptionMutation = (
   options?: Partial<Options<CreateIvrMenuOptionData>>,
@@ -4751,6 +5011,8 @@ export const createIvrMenuOptionMutation = (
 
 /**
  * Delete an IVR menu option
+ *
+ * Removes an option from the specified IVR menu. Emits an ivr_menu_option_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteIvrMenuOptionMutation = (
   options?: Partial<Options<DeleteIvrMenuOptionData>>,
@@ -4778,6 +5040,8 @@ export const deleteIvrMenuOptionMutation = (
 
 /**
  * Update an IVR menu option
+ *
+ * Partially updates an IVR menu option's digit mapping or destination. Captures before/after snapshots for audit logging and emits an ivr_menu_option_updated event.
  */
 export const updateIvrMenuOptionMutation = (
   options?: Partial<Options<UpdateIvrMenuOptionData>>,
@@ -4805,6 +5069,8 @@ export const updateIvrMenuOptionMutation = (
 
 /**
  * Delete account
+ *
+ * Permanently delete the authenticated user's account. Captures a before snapshot, emits a user_deleted event, removes the user record, and records the deletion in the audit log.
  */
 export const accountDeleteMutation = (
   options?: Partial<Options<AccountDeleteData>>,
@@ -4859,6 +5125,8 @@ export const accountProfileOptions = (options?: Options<AccountProfileData>) =>
 
 /**
  * Update profile
+ *
+ * Update the authenticated user's profile fields (e.g. name, avatar). Captures before/after snapshots, records the change in the audit log, and emits a user_updated event.
  */
 export const accountProfileUpdateMutation = (
   options?: Partial<Options<AccountProfileUpdateData>>,
@@ -4886,6 +5154,8 @@ export const accountProfileUpdateMutation = (
 
 /**
  * Update password
+ *
+ * Change the authenticated user's password after verifying the current password. Records the password change in the audit log.
  */
 export const accountPasswordUpdateMutation = (
   options?: Partial<Options<AccountPasswordUpdateData>>,
@@ -4943,6 +5213,8 @@ export const getSecurityActivityOptions = (
 
 /**
  * Verify MFA challenge
+ *
+ * Complete the second step of the MFA login flow by verifying a TOTP code or single-use backup recovery code. Reads the mfa_challenge cookie set during initial login, validates the code, issues OAuth2 access and refresh tokens, and clears the challenge cookie. Rate-limited to prevent brute-force attempts.
  */
 export const verifyMfaChallengeMutation = (
   options?: Partial<Options<VerifyMfaChallengeData>>,
@@ -4970,6 +5242,8 @@ export const verifyMfaChallengeMutation = (
 
 /**
  * Confirm MFA setup
+ *
+ * Verify a TOTP code from the user's authenticator app to finalize MFA enrollment. On success, enables two-factor authentication, generates eight single-use backup recovery codes, and records the confirmation in the audit log. Rate-limited to prevent brute-force attempts.
  */
 export const confirmMfaSetupMutation = (
   options?: Partial<Options<ConfirmMfaSetupData>>,
@@ -4997,6 +5271,8 @@ export const confirmMfaSetupMutation = (
 
 /**
  * Disable MFA
+ *
+ * Turn off two-factor authentication for the authenticated user after verifying their password. Clears the TOTP secret and all backup codes, records the action in the audit log, and emits an mfa_disabled event.
  */
 export const disableMfaMutation = (
   options?: Partial<Options<DisableMfaData>>,
@@ -5028,6 +5304,8 @@ export const initiateDisableMfaOAuthQueryKey = (
 
 /**
  * Initiate MFA disable via OAuth
+ *
+ * Start an OAuth re-authentication flow to disable MFA for users who have no password set. Returns an authorization URL with a signed state token encoding the mfa.disabled action. Only available for users with a linked OAuth account and no local password.
  */
 export const initiateDisableMfaOAuthOptions = (
   options: Options<InitiateDisableMfaOAuthData>,
@@ -5052,6 +5330,8 @@ export const initiateDisableMfaOAuthOptions = (
 
 /**
  * Initiate MFA setup
+ *
+ * Generate a new TOTP secret and store it on the user record without enabling MFA. Returns the secret, a QR code image (base64-encoded PNG), and the provisioning URI for import into an authenticator app. Fails if MFA is already enabled.
  */
 export const initiateMfaSetupMutation = (
   options?: Partial<Options<InitiateMfaSetupData>>,
@@ -5079,6 +5359,8 @@ export const initiateMfaSetupMutation = (
 
 /**
  * Regenerate MFA backup codes
+ *
+ * Generate a fresh set of eight backup recovery codes after verifying the user's password. All previously issued backup codes are invalidated. The new codes are shown only once and recorded in the audit log.
  */
 export const regenerateMfaBackupCodesMutation = (
   options?: Partial<Options<RegenerateMfaBackupCodesData>>,
@@ -5109,6 +5391,8 @@ export const getMfaStatusQueryKey = (options?: Options<GetMfaStatusData>) =>
 
 /**
  * Get MFA status
+ *
+ * Return the current MFA enrollment state for the authenticated user, including whether TOTP is enabled, when it was confirmed, and how many unused backup codes remain.
  */
 export const getMfaStatusOptions = (options?: Options<GetMfaStatusData>) =>
   queryOptions<
@@ -5135,6 +5419,8 @@ export const listNotificationsQueryKey = (
 
 /**
  * List notifications
+ *
+ * Retrieve a paginated list of notifications for the current user. Supports search by title, date range filtering, and sorting.
  */
 export const listNotificationsOptions = (
   options?: Options<ListNotificationsData>,
@@ -5159,6 +5445,8 @@ export const listNotificationsOptions = (
 
 /**
  * Mark all notifications as read
+ *
+ * Mark every unread notification as read for the current user. Logs an audit entry and returns the new unread count of zero.
  */
 export const markAllNotificationsReadMutation = (
   options?: Partial<Options<MarkAllNotificationsReadData>>,
@@ -5278,6 +5566,8 @@ export const getUnreadNotificationCountQueryKey = (
 
 /**
  * Get unread notification count
+ *
+ * Return the total number of unread notifications for the current user.
  */
 export const getUnreadNotificationCountOptions = (
   options?: Options<GetUnreadNotificationCountData>,
@@ -5302,6 +5592,8 @@ export const getUnreadNotificationCountOptions = (
 
 /**
  * Delete a notification
+ *
+ * Permanently delete a single notification. Emits a notification_deleted event and logs an audit entry with the before-state snapshot.
  */
 export const deleteNotificationMutation = (
   options?: Partial<Options<DeleteNotificationData>>,
@@ -5329,6 +5621,8 @@ export const deleteNotificationMutation = (
 
 /**
  * Mark a notification as read
+ *
+ * Mark a single notification as read for the current user. Returns 403 if the notification belongs to a different user.
  */
 export const markNotificationReadMutation = (
   options?: Partial<Options<MarkNotificationReadData>>,
@@ -5360,6 +5654,8 @@ export const getOrganizationQueryKey = (
 
 /**
  * Get organization details
+ *
+ * Retrieve the current organization settings. Creates a default organization record if none exists. Restricted to admin and superuser roles.
  */
 export const getOrganizationOptions = (
   options?: Options<GetOrganizationData>,
@@ -5384,6 +5680,8 @@ export const getOrganizationOptions = (
 
 /**
  * Update organization settings
+ *
+ * Update the organization name and settings. Creates the organization if it does not yet exist. Emits an event and logs an audit entry. Restricted to superusers.
  */
 export const updateOrganizationMutation = (
   options?: Partial<Options<UpdateOrganizationData>>,
@@ -5415,6 +5713,8 @@ export const manageListPhoneNumbersQueryKey = (
 
 /**
  * List phone numbers
+ *
+ * Retrieve a paginated list of phone numbers. Supports search by number and friendly name, date range filtering, and sorting.
  */
 export const manageListPhoneNumbersOptions = (
   options?: Options<ManageListPhoneNumbersData>,
@@ -5439,6 +5739,8 @@ export const manageListPhoneNumbersOptions = (
 
 /**
  * Create a phone number
+ *
+ * Create a new phone number record. Emits a phone_number_created event and logs an audit entry.
  */
 export const manageCreatePhoneNumberMutation = (
   options?: Partial<Options<ManageCreatePhoneNumberData>>,
@@ -5466,6 +5768,8 @@ export const manageCreatePhoneNumberMutation = (
 
 /**
  * Delete a phone number
+ *
+ * Permanently delete a phone number record. Emits a phone_number_deleted event and logs an audit entry with the before-state snapshot.
  */
 export const manageDeletePhoneNumberMutation = (
   options?: Partial<Options<ManageDeletePhoneNumberData>>,
@@ -5497,6 +5801,8 @@ export const manageGetPhoneNumberQueryKey = (
 
 /**
  * Get a phone number
+ *
+ * Retrieve the full details of a single phone number by its ID.
  */
 export const manageGetPhoneNumberOptions = (
   options: Options<ManageGetPhoneNumberData>,
@@ -5521,6 +5827,8 @@ export const manageGetPhoneNumberOptions = (
 
 /**
  * Update a phone number
+ *
+ * Partially update a phone number's fields. Only provided fields are changed. Emits a phone_number_updated event and logs an audit entry with before/after snapshots.
  */
 export const manageUpdatePhoneNumberMutation = (
   options?: Partial<Options<ManageUpdatePhoneNumberData>>,
@@ -5552,6 +5860,8 @@ export const profileOAuthAccountsQueryKey = (
 
 /**
  * List linked OAuth accounts
+ *
+ * Return a paginated list of OAuth provider accounts linked to the authenticated user, including provider name, email, link date, and last login time. Supports search filtering by provider name and account email.
  */
 export const profileOAuthAccountsOptions = (
   options?: Options<ProfileOAuthAccountsData>,
@@ -5576,6 +5886,8 @@ export const profileOAuthAccountsOptions = (
 
 /**
  * Unlink an OAuth account
+ *
+ * Remove the link between the authenticated user and an OAuth provider. Checks that unlinking will not leave the user without any authentication method. Records the unlink in the audit log and emits an oauth_account_unlinked event.
  */
 export const profileOAuthUnlinkMutation = (
   options?: Partial<Options<ProfileOAuthUnlinkData>>,
@@ -5603,6 +5915,8 @@ export const profileOAuthUnlinkMutation = (
 
 /**
  * Link an OAuth account
+ *
+ * Initiate an OAuth flow to link a new provider account to the authenticated user. Returns an authorization URL with a signed state token encoding the link action and the user's ID. Uses the same callback endpoint as login so only one redirect URI needs to be registered with the provider.
  */
 export const profileOAuthLinkMutation = (
   options?: Partial<Options<ProfileOAuthLinkData>>,
@@ -5630,6 +5944,8 @@ export const profileOAuthLinkMutation = (
 
 /**
  * Upgrade OAuth scopes
+ *
+ * Initiate an OAuth re-authorization flow to request expanded permission scopes from the provider. Returns an authorization URL with a signed state token encoding the upgrade action and the user's ID.
  */
 export const profileOAuthUpgradeScopesMutation = (
   options?: Partial<Options<ProfileOAuthUpgradeScopesData>>,
@@ -5660,6 +5976,8 @@ export const listRingGroupsQueryKey = (options?: Options<ListRingGroupsData>) =>
 
 /**
  * List ring groups
+ *
+ * Returns a paginated list of ring groups with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.
  */
 export const listRingGroupsOptions = (options?: Options<ListRingGroupsData>) =>
   queryOptions<
@@ -5682,6 +6000,8 @@ export const listRingGroupsOptions = (options?: Options<ListRingGroupsData>) =>
 
 /**
  * Create a ring group
+ *
+ * Creates a new ring group and assigns it to the current user's team. Logs an audit entry and emits a ring_group_created event.
  */
 export const createRingGroupMutation = (
   options?: Partial<Options<CreateRingGroupData>>,
@@ -5709,6 +6029,8 @@ export const createRingGroupMutation = (
 
 /**
  * Delete a ring group
+ *
+ * Permanently deletes a ring group and all its member associations. Emits a ring_group_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteRingGroupMutation = (
   options?: Partial<Options<DeleteRingGroupData>>,
@@ -5739,6 +6061,8 @@ export const getRingGroupQueryKey = (options: Options<GetRingGroupData>) =>
 
 /**
  * Get ring group details
+ *
+ * Retrieves a single ring group by ID, including its current list of members.
  */
 export const getRingGroupOptions = (options: Options<GetRingGroupData>) =>
   queryOptions<
@@ -5761,6 +6085,8 @@ export const getRingGroupOptions = (options: Options<GetRingGroupData>) =>
 
 /**
  * Update a ring group
+ *
+ * Partially updates a ring group's configuration. Captures before/after snapshots for audit logging and emits a ring_group_updated event.
  */
 export const updateRingGroupMutation = (
   options?: Partial<Options<UpdateRingGroupData>>,
@@ -5792,6 +6118,8 @@ export const listRingGroupMembersQueryKey = (
 
 /**
  * List ring group members
+ *
+ * Returns all members belonging to the specified ring group. Validates that the parent ring group exists before listing.
  */
 export const listRingGroupMembersOptions = (
   options: Options<ListRingGroupMembersData>,
@@ -5816,6 +6144,8 @@ export const listRingGroupMembersOptions = (
 
 /**
  * Add a ring group member
+ *
+ * Adds a new member to the specified ring group. Logs an audit entry and emits a ring_group_member_created event.
  */
 export const createRingGroupMemberMutation = (
   options?: Partial<Options<CreateRingGroupMemberData>>,
@@ -5843,6 +6173,8 @@ export const createRingGroupMemberMutation = (
 
 /**
  * Remove a ring group member
+ *
+ * Removes a member from the specified ring group. Emits a ring_group_member_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteRingGroupMemberMutation = (
   options?: Partial<Options<DeleteRingGroupMemberData>>,
@@ -5870,6 +6202,8 @@ export const deleteRingGroupMemberMutation = (
 
 /**
  * Update a ring group member
+ *
+ * Partially updates a member's settings within a ring group. Captures before/after snapshots for audit logging and emits a ring_group_member_updated event.
  */
 export const updateRingGroupMemberMutation = (
   options?: Partial<Options<UpdateRingGroupMemberData>>,
@@ -5900,6 +6234,8 @@ export const listRolesQueryKey = (options?: Options<ListRolesData>) =>
 
 /**
  * List roles
+ *
+ * Return a paginated list of all roles with their assigned users. Supports searching by name or slug. Results are cached for 5 minutes.
  */
 export const listRolesOptions = (options?: Options<ListRolesData>) =>
   queryOptions<
@@ -5922,6 +6258,8 @@ export const listRolesOptions = (options?: Options<ListRolesData>) =>
 
 /**
  * Create a role
+ *
+ * Create a new role with the given name and permissions. Records the creation in the audit log and emits a role_created event.
  */
 export const createRoleMutation = (
   options?: Partial<Options<CreateRoleData>>,
@@ -5949,6 +6287,8 @@ export const createRoleMutation = (
 
 /**
  * Delete a role
+ *
+ * Permanently remove a role from the system. Built-in default roles cannot be deleted. Captures a before snapshot, records the deletion in the audit log, and emits a role_deleted event.
  */
 export const deleteRoleMutation = (
   options?: Partial<Options<DeleteRoleData>>,
@@ -5979,6 +6319,8 @@ export const getRoleQueryKey = (options: Options<GetRoleData>) =>
 
 /**
  * Get role details
+ *
+ * Retrieve a single role by its UUID, including the list of users assigned to it.
  */
 export const getRoleOptions = (options: Options<GetRoleData>) =>
   queryOptions<
@@ -6001,6 +6343,8 @@ export const getRoleOptions = (options: Options<GetRoleData>) =>
 
 /**
  * Update a role
+ *
+ * Update a role's name or permissions. Built-in default roles cannot be modified. Captures before/after snapshots, records the change in the audit log, and emits a role_updated event.
  */
 export const updateRoleMutation = (
   options?: Partial<Options<UpdateRoleData>>,
@@ -6028,6 +6372,8 @@ export const updateRoleMutation = (
 
 /**
  * Assign a role to a user
+ *
+ * Grant a role to a user identified by email. Fails with 409 if the user already has the role. Records the assignment in the audit log and emits a user_role_assigned event.
  */
 export const assignRoleMutation = (
   options?: Partial<Options<AssignRoleData>>,
@@ -6055,6 +6401,8 @@ export const assignRoleMutation = (
 
 /**
  * Revoke a role from a user
+ *
+ * Remove a role from a user identified by email. Fails with 404 if the user does not have the role. Captures a before snapshot, records the revocation in the audit log, and emits a user_role_revoked event.
  */
 export const revokeRoleMutation = (
   options?: Partial<Options<RevokeRoleData>>,
@@ -6085,6 +6433,8 @@ export const listSchedulesQueryKey = (options?: Options<ListSchedulesData>) =>
 
 /**
  * List schedules
+ *
+ * Returns a paginated list of schedules with their entries. Supports search by name, filtering by team ID and schedule type, date range filtering, and configurable sort order.
  */
 export const listSchedulesOptions = (options?: Options<ListSchedulesData>) =>
   queryOptions<
@@ -6107,6 +6457,8 @@ export const listSchedulesOptions = (options?: Options<ListSchedulesData>) =>
 
 /**
  * Create a schedule
+ *
+ * Creates a new schedule for the specified team. Validates that the user belongs to the team (unless superuser). Emits a schedule_created event and records an audit log entry.
  */
 export const createScheduleMutation = (
   options?: Partial<Options<CreateScheduleData>>,
@@ -6134,6 +6486,8 @@ export const createScheduleMutation = (
 
 /**
  * Delete a schedule
+ *
+ * Permanently deletes a schedule and all of its entries. Emits a schedule_deleted event and records an audit log entry.
  */
 export const deleteScheduleMutation = (
   options?: Partial<Options<DeleteScheduleData>>,
@@ -6164,6 +6518,8 @@ export const getScheduleQueryKey = (options: Options<GetScheduleData>) =>
 
 /**
  * Get schedule details
+ *
+ * Retrieves a single schedule by ID, including all of its time entries.
  */
 export const getScheduleOptions = (options: Options<GetScheduleData>) =>
   queryOptions<
@@ -6186,6 +6542,8 @@ export const getScheduleOptions = (options: Options<GetScheduleData>) =>
 
 /**
  * Update a schedule
+ *
+ * Updates schedule properties such as name, timezone, or type. Emits a schedule_updated event and records an audit log entry with before/after snapshots.
  */
 export const updateScheduleMutation = (
   options?: Partial<Options<UpdateScheduleData>>,
@@ -6216,6 +6574,8 @@ export const checkScheduleQueryKey = (options: Options<CheckScheduleData>) =>
 
 /**
  * Check schedule status
+ *
+ * Evaluates whether the schedule is currently open or closed at the specified time (defaults to now in the schedule's timezone). Useful for real-time routing decisions.
  */
 export const checkScheduleOptions = (options: Options<CheckScheduleData>) =>
   queryOptions<
@@ -6242,6 +6602,8 @@ export const listScheduleEntriesQueryKey = (
 
 /**
  * List schedule entries
+ *
+ * Returns all time entries belonging to a schedule. Each entry defines a day-of-week and time range that determines when the schedule is active.
  */
 export const listScheduleEntriesOptions = (
   options: Options<ListScheduleEntriesData>,
@@ -6266,6 +6628,8 @@ export const listScheduleEntriesOptions = (
 
 /**
  * Create a schedule entry
+ *
+ * Adds a new time entry to a schedule defining a day-of-week and time range. Emits a schedule_entry_created event and records an audit log entry.
  */
 export const createScheduleEntryMutation = (
   options?: Partial<Options<CreateScheduleEntryData>>,
@@ -6293,6 +6657,8 @@ export const createScheduleEntryMutation = (
 
 /**
  * Delete a schedule entry
+ *
+ * Permanently deletes a single time entry from a schedule. Emits a schedule_entry_deleted event and records an audit log entry.
  */
 export const deleteScheduleEntryMutation = (
   options?: Partial<Options<DeleteScheduleEntryData>>,
@@ -6320,6 +6686,8 @@ export const deleteScheduleEntryMutation = (
 
 /**
  * Update a schedule entry
+ *
+ * Updates an existing schedule entry's day, time range, or label. Emits a schedule_entry_updated event and records an audit log entry with before/after snapshots.
  */
 export const updateScheduleEntryMutation = (
   options?: Partial<Options<UpdateScheduleEntryData>>,
@@ -6350,6 +6718,8 @@ export const globalSearchQueryKey = (options?: Options<GlobalSearchData>) =>
 
 /**
  * Global Search
+ *
+ * Search across all entity types (teams, devices, tickets, extensions, phone numbers, fax numbers, locations, and users). Results are scoped by user permissions and limited to 20 total across all types.
  */
 export const globalSearchOptions = (options?: Options<GlobalSearchData>) =>
   queryOptions<
@@ -6372,6 +6742,8 @@ export const globalSearchOptions = (options?: Options<GlobalSearchData>) =>
 
 /**
  * Delete an attachment
+ *
+ * Permanently deletes a ticket attachment. Emits a ticket_attachment_deleted event and records an audit log entry with the file name.
  */
 export const deleteAttachmentMutation = (
   options?: Partial<Options<DeleteAttachmentData>>,
@@ -6402,6 +6774,8 @@ export const getAttachmentQueryKey = (options: Options<GetAttachmentData>) =>
 
 /**
  * Get attachment details
+ *
+ * Retrieves metadata for a single ticket attachment by ID, including file name, size, and content type.
  */
 export const getAttachmentOptions = (options: Options<GetAttachmentData>) =>
   queryOptions<
@@ -6424,6 +6798,8 @@ export const getAttachmentOptions = (options: Options<GetAttachmentData>) =>
 
 /**
  * Submit portal feedback
+ *
+ * Accepts multipart form data with a title, category, description, and optional file attachments (max 10 MB per file, 25 MB total). Sends the feedback as a formatted HTML email to support and records an audit log entry.
  */
 export const submitFeedbackMutation = (
   options?: Partial<Options<SubmitFeedbackData>>,
@@ -6454,6 +6830,8 @@ export const listTicketsQueryKey = (options?: Options<ListTicketsData>) =>
 
 /**
  * List tickets
+ *
+ * Returns a paginated list of support tickets. Superusers see all tickets; regular users only see their own. Supports search by subject, date range filtering, and configurable sort order.
  */
 export const listTicketsOptions = (options?: Options<ListTicketsData>) =>
   queryOptions<
@@ -6476,6 +6854,8 @@ export const listTicketsOptions = (options?: Options<ListTicketsData>) =>
 
 /**
  * Create a ticket
+ *
+ * Opens a new support ticket and creates the initial message from the provided markdown body. Emits a ticket_created event, records an audit log entry, and sends a notification to the submitting user.
  */
 export const createTicketMutation = (
   options?: Partial<Options<CreateTicketData>>,
@@ -6503,6 +6883,8 @@ export const createTicketMutation = (
 
 /**
  * Delete a ticket
+ *
+ * Permanently deletes a support ticket and all associated messages and attachments. Restricted to support agents. Emits a ticket_deleted event and records an audit log entry.
  */
 export const deleteTicketMutation = (
   options?: Partial<Options<DeleteTicketData>>,
@@ -6533,6 +6915,8 @@ export const getTicketQueryKey = (options: Options<GetTicketData>) =>
 
 /**
  * Get ticket details
+ *
+ * Retrieves a single support ticket by ID, including the associated user and assignee. Access is restricted to the ticket owner or a superuser.
  */
 export const getTicketOptions = (options: Options<GetTicketData>) =>
   queryOptions<
@@ -6555,6 +6939,8 @@ export const getTicketOptions = (options: Options<GetTicketData>) =>
 
 /**
  * Update a ticket
+ *
+ * Updates ticket fields such as status, priority, or assignee. Emits status change and assignment events when applicable, records an audit log entry, and notifies newly assigned agents.
  */
 export const updateTicketMutation = (
   options?: Partial<Options<UpdateTicketData>>,
@@ -6582,6 +6968,8 @@ export const updateTicketMutation = (
 
 /**
  * Upload a ticket attachment
+ *
+ * Uploads one or more files as attachments to a ticket. This is a placeholder endpoint; full multipart upload support will be available in Phase 3.
  */
 export const uploadAttachmentMutation = (
   options?: Partial<Options<UploadAttachmentData>>,
@@ -6609,6 +6997,8 @@ export const uploadAttachmentMutation = (
 
 /**
  * Close a ticket
+ *
+ * Transitions a ticket to the closed status. Emits a ticket_status_changed event, records an audit log entry, and sends a closure notification to the ticket owner.
  */
 export const closeTicketMutation = (
   options?: Partial<Options<CloseTicketData>>,
@@ -6640,6 +7030,8 @@ export const listTicketMessagesQueryKey = (
 
 /**
  * List ticket messages
+ *
+ * Returns a paginated list of messages for a ticket, sorted by creation date ascending. Internal notes are hidden from non-superusers. Supports search by message body and date range filtering.
  */
 export const listTicketMessagesOptions = (
   options: Options<ListTicketMessagesData>,
@@ -6664,6 +7056,8 @@ export const listTicketMessagesOptions = (
 
 /**
  * Create a ticket message
+ *
+ * Adds a new reply to a ticket thread. Emits a ticket_message_created event and records an audit log entry with the message snapshot.
  */
 export const createTicketMessageMutation = (
   options?: Partial<Options<CreateTicketMessageData>>,
@@ -6691,6 +7085,8 @@ export const createTicketMessageMutation = (
 
 /**
  * Delete a ticket message
+ *
+ * Permanently deletes a ticket message. Only the original author may delete within the allowed edit window. Emits a ticket_message_deleted event and records an audit log entry.
  */
 export const deleteTicketMessageMutation = (
   options?: Partial<Options<DeleteTicketMessageData>>,
@@ -6718,6 +7114,8 @@ export const deleteTicketMessageMutation = (
 
 /**
  * Update a ticket message
+ *
+ * Edits an existing ticket message. Only the original author may edit, and the edit window is enforced by the requires_ticket_message_edit guard. Emits a ticket_message_updated event and records an audit log entry.
  */
 export const updateTicketMessageMutation = (
   options?: Partial<Options<UpdateTicketMessageData>>,
@@ -6745,6 +7143,8 @@ export const updateTicketMessageMutation = (
 
 /**
  * Upload a pasted image
+ *
+ * Uploads an image pasted from the clipboard as a ticket attachment. This is a placeholder endpoint; full paste-image handling will be available in Phase 3.
  */
 export const pasteImageMutation = (
   options?: Partial<Options<PasteImageData>>,
@@ -6772,6 +7172,8 @@ export const pasteImageMutation = (
 
 /**
  * Reopen a ticket
+ *
+ * Reopens a previously closed ticket. Emits a ticket_status_changed event, records an audit log entry, and sends a reopened notification to the ticket owner.
  */
 export const reopenTicketMutation = (
   options?: Partial<Options<ReopenTicketData>>,
@@ -6802,6 +7204,8 @@ export const syncEntityQueryKey = (options: Options<SyncEntityData>) =>
 
 /**
  * Sync Entity
+ *
+ * Look up an entity by domain, field name, and value across any registered domain. Supports lookup by ID and domain-specific fields such as name, slug, or extension number.
  */
 export const syncEntityOptions = (options: Options<SyncEntityData>) =>
   queryOptions<
@@ -6958,6 +7362,8 @@ export const listTasksQueryKey = (options?: Options<ListTasksData>) =>
 
 /**
  * List background tasks
+ *
+ * Returns a paginated list of background tasks with optional filtering by task type, status, entity type, and entity ID.
  */
 export const listTasksOptions = (options?: Options<ListTasksData>) =>
   queryOptions<
@@ -6984,6 +7390,8 @@ export const listActiveTasksQueryKey = (
 
 /**
  * List active background tasks
+ *
+ * Returns all background tasks with a pending or running status for the current user, without pagination.
  */
 export const listActiveTasksOptions = (
   options?: Options<ListActiveTasksData>,
@@ -7008,6 +7416,8 @@ export const listActiveTasksOptions = (
 
 /**
  * Delete a background task
+ *
+ * Permanently deletes a background task record. Only tasks in a terminal state (completed, failed, or cancelled) may be deleted; attempting to delete a pending or running task will raise a permission error.
  */
 export const deleteTaskMutation = (
   options?: Partial<Options<DeleteTaskData>>,
@@ -7038,6 +7448,8 @@ export const getTaskQueryKey = (options: Options<GetTaskData>) =>
 
 /**
  * Get background task details
+ *
+ * Retrieves the full details of a single background task by its ID, including status, progress, and the user who initiated it.
  */
 export const getTaskOptions = (options: Options<GetTaskData>) =>
   queryOptions<
@@ -7060,6 +7472,8 @@ export const getTaskOptions = (options: Options<GetTaskData>) =>
 
 /**
  * Cancel a background task
+ *
+ * Cancels a pending or running background task, emits a background_task_cancelled event, and logs the cancellation to the audit trail.
  */
 export const cancelTaskMutation = (
   options?: Partial<Options<CancelTaskData>>,
@@ -7090,6 +7504,8 @@ export const listTeamsQueryKey = (options?: Options<ListTeamsData>) =>
 
 /**
  * List teams
+ *
+ * Returns a paginated list of teams. Users with elevated privileges see all teams; regular users only see teams they belong to. Supports search by name and configurable sort order.
  */
 export const listTeamsOptions = (options?: Options<ListTeamsData>) =>
   queryOptions<
@@ -7112,6 +7528,8 @@ export const listTeamsOptions = (options?: Options<ListTeamsData>) =>
 
 /**
  * Create a team
+ *
+ * Creates a new team with the current user set as the owner. Emits a team_created event and records an audit log entry.
  */
 export const createTeamMutation = (
   options?: Partial<Options<CreateTeamData>>,
@@ -7139,6 +7557,8 @@ export const createTeamMutation = (
 
 /**
  * Delete a team
+ *
+ * Permanently deletes a team and all associated memberships. Restricted to the team owner. Emits a team_deleted event and records an audit log entry.
  */
 export const deleteTeamMutation = (
   options?: Partial<Options<DeleteTeamData>>,
@@ -7169,6 +7589,8 @@ export const getTeamQueryKey = (options: Options<GetTeamData>) =>
 
 /**
  * Get team details
+ *
+ * Retrieves a single team by ID, including its tags and member list. Requires membership in the team.
  */
 export const getTeamOptions = (options: Options<GetTeamData>) =>
   queryOptions<
@@ -7191,6 +7613,8 @@ export const getTeamOptions = (options: Options<GetTeamData>) =>
 
 /**
  * Update a team
+ *
+ * Updates team properties such as name or description. Restricted to team admins. Emits a team_updated event and records an audit log entry with before/after snapshots.
  */
 export const updateTeamMutation = (
   options?: Partial<Options<UpdateTeamData>>,
@@ -7222,6 +7646,8 @@ export const listTeamInvitationsQueryKey = (
 
 /**
  * List team invitations
+ *
+ * Returns a paginated list of invitations for a team. Supports search by email or inviter email, date range filtering, and configurable sort order. Requires team membership.
  */
 export const listTeamInvitationsOptions = (
   options: Options<ListTeamInvitationsData>,
@@ -7246,6 +7672,8 @@ export const listTeamInvitationsOptions = (
 
 /**
  * Create a team invitation
+ *
+ * Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.
  */
 export const createTeamInvitationMutation = (
   options?: Partial<Options<CreateTeamInvitationData>>,
@@ -7273,6 +7701,8 @@ export const createTeamInvitationMutation = (
 
 /**
  * Delete a team invitation
+ *
+ * Revokes a pending team invitation. Validates that the invitation belongs to the specified team. Emits a team_invitation_deleted event and records an audit log entry.
  */
 export const deleteTeamInvitationMutation = (
   options?: Partial<Options<DeleteTeamInvitationData>>,
@@ -7300,6 +7730,8 @@ export const deleteTeamInvitationMutation = (
 
 /**
  * Accept a team invitation
+ *
+ * Accepts a pending invitation and adds the current user as a team member with the invited role. Validates ownership, duplicate membership, and acceptance status. Emits a team_invitation_accepted event, records an audit log entry, and notifies the team owner.
  */
 export const acceptTeamInvitationMutation = (
   options?: Partial<Options<AcceptTeamInvitationData>>,
@@ -7327,6 +7759,8 @@ export const acceptTeamInvitationMutation = (
 
 /**
  * Reject a team invitation
+ *
+ * Declines a pending team invitation and deletes it. Only the invited user may reject. Emits a team_invitation_rejected event, records an audit log entry, and notifies the team owner.
  */
 export const rejectTeamInvitationMutation = (
   options?: Partial<Options<RejectTeamInvitationData>>,
@@ -7357,6 +7791,8 @@ export const listLocationsQueryKey = (options: Options<ListLocationsData>) =>
 
 /**
  * List locations
+ *
+ * Retrieve a paginated list of locations for a team. Supports searching by name, city, and state, and optional filtering by location type.
  */
 export const listLocationsOptions = (options: Options<ListLocationsData>) =>
   queryOptions<
@@ -7379,6 +7815,8 @@ export const listLocationsOptions = (options: Options<ListLocationsData>) =>
 
 /**
  * Create a location
+ *
+ * Create a new location within a team. Requires team membership. Records an audit log entry and emits a location_created event.
  */
 export const createLocationMutation = (
   options?: Partial<Options<CreateLocationData>>,
@@ -7406,6 +7844,8 @@ export const createLocationMutation = (
 
 /**
  * Delete a location
+ *
+ * Delete a location from a team. Fails with HTTP 409 if devices are still assigned to the location. Records an audit log entry.
  */
 export const deleteLocationMutation = (
   options?: Partial<Options<DeleteLocationData>>,
@@ -7436,6 +7876,8 @@ export const getLocationQueryKey = (options: Options<GetLocationData>) =>
 
 /**
  * Get location details
+ *
+ * Retrieve details for a single location, including its child locations. Scoped to the specified team.
  */
 export const getLocationOptions = (options: Options<GetLocationData>) =>
   queryOptions<
@@ -7458,6 +7900,8 @@ export const getLocationOptions = (options: Options<GetLocationData>) =>
 
 /**
  * Update a location
+ *
+ * Update an existing location's attributes. Requires team membership. Records an audit log entry and emits a location_updated event.
  */
 export const updateLocationMutation = (
   options?: Partial<Options<UpdateLocationData>>,
@@ -7485,6 +7929,8 @@ export const updateLocationMutation = (
 
 /**
  * Remove a team member
+ *
+ * Removes a user from a team by email address. The team owner cannot be removed; ownership must be transferred first. Emits a team_member_removed event, records an audit log entry, and sends a removal notification to the user.
  */
 export const removeMemberFromTeamMutation = (
   options?: Partial<Options<RemoveMemberFromTeamData>>,
@@ -7512,6 +7958,8 @@ export const removeMemberFromTeamMutation = (
 
 /**
  * Add a team member
+ *
+ * Adds a user to a team by email address with the default member role. Checks for existing membership to prevent duplicates. Emits a team_member_added event, records an audit log entry, and sends a notification to the added user.
  */
 export const addMemberToTeamMutation = (
   options?: Partial<Options<AddMemberToTeamData>>,
@@ -7539,6 +7987,8 @@ export const addMemberToTeamMutation = (
 
 /**
  * Update a team member's role
+ *
+ * Changes a team member's role. Restricted to team admins. Emits a team_member_updated event, records an audit log entry with before/after snapshots, and sends a role change notification to the member.
  */
 export const updateTeamMemberMutation = (
   options?: Partial<Options<UpdateTeamMemberData>>,
@@ -7570,6 +8020,8 @@ export const listTeamPermissionsQueryKey = (
 
 /**
  * List team permissions
+ *
+ * Returns all role-based permissions configured for a team. Each entry defines view and edit access for a specific feature area and role combination.
  */
 export const listTeamPermissionsOptions = (
   options: Options<ListTeamPermissionsData>,
@@ -7594,6 +8046,8 @@ export const listTeamPermissionsOptions = (
 
 /**
  * Update team permissions
+ *
+ * Replaces the entire permission set for a team. Deletes all existing permissions and creates the new set atomically. Emits a team_permissions_updated event and records an audit log entry with before/after permission snapshots.
  */
 export const updateTeamPermissionsMutation = (
   options?: Partial<Options<UpdateTeamPermissionsData>>,
@@ -7625,6 +8079,8 @@ export const listTimeConditionsQueryKey = (
 
 /**
  * List time conditions
+ *
+ * Returns a paginated list of time conditions. Supports searching by name, sorting, and filtering by creation/update timestamps.
  */
 export const listTimeConditionsOptions = (
   options?: Options<ListTimeConditionsData>,
@@ -7649,6 +8105,8 @@ export const listTimeConditionsOptions = (
 
 /**
  * Create a time condition
+ *
+ * Creates a new time condition and assigns it to the current user's team. Logs an audit entry and emits a time_condition_created event.
  */
 export const createTimeConditionMutation = (
   options?: Partial<Options<CreateTimeConditionData>>,
@@ -7676,6 +8134,8 @@ export const createTimeConditionMutation = (
 
 /**
  * Delete a time condition
+ *
+ * Permanently deletes a time condition. Emits a time_condition_deleted event and logs an audit entry with the pre-deletion snapshot.
  */
 export const deleteTimeConditionMutation = (
   options?: Partial<Options<DeleteTimeConditionData>>,
@@ -7707,6 +8167,8 @@ export const getTimeConditionQueryKey = (
 
 /**
  * Get time condition details
+ *
+ * Retrieves a single time condition by ID, including its current override mode status.
  */
 export const getTimeConditionOptions = (
   options: Options<GetTimeConditionData>,
@@ -7731,6 +8193,8 @@ export const getTimeConditionOptions = (
 
 /**
  * Update a time condition
+ *
+ * Partially updates a time condition's configuration. Captures before/after snapshots for audit logging and emits a time_condition_updated event.
  */
 export const updateTimeConditionMutation = (
   options?: Partial<Options<UpdateTimeConditionData>>,
@@ -7758,6 +8222,8 @@ export const updateTimeConditionMutation = (
 
 /**
  * Set time condition override
+ *
+ * Sets or clears the override mode on a time condition, bypassing normal schedule-based routing. Logs an audit entry and emits both time_condition_updated and time_condition_override_changed events.
  */
 export const setTimeConditionOverrideMutation = (
   options?: Partial<Options<SetTimeConditionOverrideData>>,
@@ -7788,6 +8254,8 @@ export const listUsersQueryKey = (options?: Options<ListUsersData>) =>
 
 /**
  * List users
+ *
+ * Return a paginated list of user accounts with their roles, team memberships, and linked OAuth accounts. Supports search by name or email, date range filtering on created_at/updated_at, and configurable sort order.
  */
 export const listUsersOptions = (options?: Options<ListUsersData>) =>
   queryOptions<
@@ -7810,6 +8278,8 @@ export const listUsersOptions = (options?: Options<ListUsersData>) =>
 
 /**
  * Create a user
+ *
+ * Create a new user account with the supplied details. Records the creation in the audit log with a snapshot of the new record and emits a user_created event.
  */
 export const createUserMutation = (
   options?: Partial<Options<CreateUserData>>,
@@ -7837,6 +8307,8 @@ export const createUserMutation = (
 
 /**
  * Revoke a role from a user
+ *
+ * Remove a role from a user identified by email. Iterates the user's role assignments to find and delete the matching record. Raises an IntegrityError if the user does not have the role. Records the removal in the audit log and emits a user_role_revoked event.
  */
 export const revokeUserRoleMutation = (
   options?: Partial<Options<RevokeUserRoleData>>,
@@ -7864,6 +8336,8 @@ export const revokeUserRoleMutation = (
 
 /**
  * Assign a role to a user
+ *
+ * Grant a role to a user identified by email, using upsert semantics. If the assignment already exists, returns a message indicating so without error. Records new assignments in the audit log and emits a user_role_assigned event.
  */
 export const assignUserRoleMutation = (
   options?: Partial<Options<AssignUserRoleData>>,
@@ -7891,6 +8365,8 @@ export const assignUserRoleMutation = (
 
 /**
  * Delete a user
+ *
+ * Permanently remove a user account from the system. Captures a before snapshot, emits a user_deleted event, deletes the record, and records the deletion in the audit log.
  */
 export const deleteUserMutation = (
   options?: Partial<Options<DeleteUserData>>,
@@ -7921,6 +8397,8 @@ export const getUserQueryKey = (options: Options<GetUserData>) =>
 
 /**
  * Get user details
+ *
+ * Retrieve a single user account by UUID, including their roles, team memberships, and linked OAuth accounts.
  */
 export const getUserOptions = (options: Options<GetUserData>) =>
   queryOptions<
@@ -7943,6 +8421,8 @@ export const getUserOptions = (options: Options<GetUserData>) =>
 
 /**
  * Update a user
+ *
+ * Update an existing user account's fields. Captures before/after snapshots, records the change in the audit log, and emits a user_updated event.
  */
 export const updateUserMutation = (
   options?: Partial<Options<UpdateUserData>>,
@@ -7973,6 +8453,8 @@ export const listExtensionsQueryKey = (options?: Options<ListExtensionsData>) =>
 
 /**
  * List extensions
+ *
+ * Retrieve a paginated list of the current user's extensions with E911 status enrichment. Supports search by extension number or display name.
  */
 export const listExtensionsOptions = (options?: Options<ListExtensionsData>) =>
   queryOptions<
@@ -7995,6 +8477,8 @@ export const listExtensionsOptions = (options?: Options<ListExtensionsData>) =>
 
 /**
  * Create an extension
+ *
+ * Create a new voice extension for the current user. Checks the PBX for conflicts, logs an audit entry, emits an event, and enqueues a background task to sync the extension to the PBX.
  */
 export const createExtensionMutation = (
   options?: Partial<Options<CreateExtensionData>>,
@@ -8022,6 +8506,8 @@ export const createExtensionMutation = (
 
 /**
  * Sync extensions from PBX
+ *
+ * Import extensions from the first enabled FreePBX connection. Creates portal records for new PBX extensions and updates existing ones to match PBX data (display name, DND, forwarding). Logs an audit entry with sync results.
  */
 export const syncExtensionsMutation = (
   options?: Partial<Options<SyncExtensionsData>>,
@@ -8049,6 +8535,8 @@ export const syncExtensionsMutation = (
 
 /**
  * Delete an extension
+ *
+ * Delete an extension and enqueue a background task to remove it from the PBX. Logs an audit entry and emits a deletion event. The caller must own the extension.
  */
 export const deleteExtensionMutation = (
   options?: Partial<Options<DeleteExtensionData>>,
@@ -8079,6 +8567,8 @@ export const getExtensionQueryKey = (options: Options<GetExtensionData>) =>
 
 /**
  * Get extension details
+ *
+ * Retrieve a single extension by ID with E911 status enrichment. The caller must own the extension.
  */
 export const getExtensionOptions = (options: Options<GetExtensionData>) =>
   queryOptions<
@@ -8101,6 +8591,8 @@ export const getExtensionOptions = (options: Options<GetExtensionData>) =>
 
 /**
  * Update an extension
+ *
+ * Update an extension's display name or settings. Logs an audit entry, emits an event, and enqueues a background task to sync changes to the PBX. The caller must own the extension.
  */
 export const updateExtensionMutation = (
   options?: Partial<Options<UpdateExtensionData>>,
@@ -8132,6 +8624,8 @@ export const listExtensionDevicesQueryKey = (
 
 /**
  * List devices for an extension
+ *
+ * List all devices that have this extension assigned to a line. The caller must own the extension.
  */
 export const listExtensionDevicesOptions = (
   options: Options<ListExtensionDevicesData>,
@@ -8159,6 +8653,8 @@ export const getDndSettingsQueryKey = (options: Options<GetDndSettingsData>) =>
 
 /**
  * Get do-not-disturb settings
+ *
+ * Retrieve the DND configuration for an extension, creating a default settings record if one does not exist. The caller must own the extension.
  */
 export const getDndSettingsOptions = (options: Options<GetDndSettingsData>) =>
   queryOptions<
@@ -8181,6 +8677,8 @@ export const getDndSettingsOptions = (options: Options<GetDndSettingsData>) =>
 
 /**
  * Update do-not-disturb settings
+ *
+ * Update DND settings for an extension (e.g. enabled state, schedule). Logs an audit entry and emits a DND-updated event. The caller must own the extension.
  */
 export const updateDndSettingsMutation = (
   options?: Partial<Options<UpdateDndSettingsData>>,
@@ -8208,6 +8706,8 @@ export const updateDndSettingsMutation = (
 
 /**
  * Toggle do-not-disturb
+ *
+ * Flip the DND enabled state for an extension. Returns the new DND state after toggling. Logs an audit entry and emits a DND-toggled event. The caller must own the extension.
  */
 export const toggleDndMutation = (
   options?: Partial<Options<ToggleDndData>>,
@@ -8239,6 +8739,8 @@ export const listForwardingRulesQueryKey = (
 
 /**
  * List forwarding rules
+ *
+ * Retrieve a paginated list of forwarding rules for an extension, sorted by priority. Supports search by destination value. The caller must own the extension.
  */
 export const listForwardingRulesOptions = (
   options: Options<ListForwardingRulesData>,
@@ -8263,6 +8765,8 @@ export const listForwardingRulesOptions = (
 
 /**
  * Create a forwarding rule
+ *
+ * Add a new forwarding rule to an extension. Logs an audit entry and emits forwarding-changed and creation events. The caller must own the extension.
  */
 export const createForwardingRuleMutation = (
   options?: Partial<Options<CreateForwardingRuleData>>,
@@ -8290,6 +8794,8 @@ export const createForwardingRuleMutation = (
 
 /**
  * Replace all forwarding rules
+ *
+ * Bulk-replace all forwarding rules for an extension. Deletes existing rules and creates new ones from the request body. Logs a before/after audit entry. The caller must own the extension.
  */
 export const setForwardingRulesMutation = (
   options?: Partial<Options<SetForwardingRulesData>>,
@@ -8317,6 +8823,8 @@ export const setForwardingRulesMutation = (
 
 /**
  * Delete a forwarding rule
+ *
+ * Remove a single forwarding rule from an extension. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.
  */
 export const deleteForwardingRuleMutation = (
   options?: Partial<Options<DeleteForwardingRuleData>>,
@@ -8344,6 +8852,8 @@ export const deleteForwardingRuleMutation = (
 
 /**
  * Update a forwarding rule
+ *
+ * Update fields on a single forwarding rule. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.
  */
 export const updateForwardingRuleMutation = (
   options?: Partial<Options<UpdateForwardingRuleData>>,
@@ -8375,6 +8885,8 @@ export const getVoicemailSettingsQueryKey = (
 
 /**
  * Get voicemail settings
+ *
+ * Retrieve the voicemail box configuration for an extension, creating a default box if one does not exist. The caller must own the extension.
  */
 export const getVoicemailSettingsOptions = (
   options: Options<GetVoicemailSettingsData>,
@@ -8399,6 +8911,8 @@ export const getVoicemailSettingsOptions = (
 
 /**
  * Update voicemail settings
+ *
+ * Update voicemail box settings such as PIN, email address, or attachment preferences. If PBX-related fields change and a FreePBX connection exists, the voicemail configuration is synced to the PBX. Logs an audit entry.
  */
 export const updateVoicemailSettingsMutation = (
   options?: Partial<Options<UpdateVoicemailSettingsData>>,
@@ -8430,6 +8944,8 @@ export const listVoicemailMessagesQueryKey = (
 
 /**
  * List voicemail messages
+ *
+ * Retrieve a paginated list of voicemail messages for an extension's mailbox. Supports search by caller number, caller name, or transcription text. The caller must own the extension.
  */
 export const listVoicemailMessagesOptions = (
   options: Options<ListVoicemailMessagesData>,
@@ -8454,6 +8970,8 @@ export const listVoicemailMessagesOptions = (
 
 /**
  * Delete a voicemail message
+ *
+ * Permanently delete a voicemail message from the extension's mailbox. Logs an audit entry and emits a deletion event. The caller must own the extension.
  */
 export const deleteVoicemailMessageMutation = (
   options?: Partial<Options<DeleteVoicemailMessageData>>,
@@ -8485,6 +9003,8 @@ export const getVoicemailMessageQueryKey = (
 
 /**
  * Get a voicemail message
+ *
+ * Retrieve a single voicemail message by ID. Verifies the message belongs to the extension's voicemail box. The caller must own the extension.
  */
 export const getVoicemailMessageOptions = (
   options: Options<GetVoicemailMessageData>,
@@ -8509,6 +9029,8 @@ export const getVoicemailMessageOptions = (
 
 /**
  * Update a voicemail message
+ *
+ * Update a voicemail message's metadata such as read/unread status. Logs an audit entry and emits an update event. The caller must own the extension.
  */
 export const updateVoicemailMessageMutation = (
   options?: Partial<Options<UpdateVoicemailMessageData>>,
@@ -8540,6 +9062,8 @@ export const listPhoneNumbersQueryKey = (
 
 /**
  * List phone numbers
+ *
+ * Retrieve a paginated list of the current user's phone numbers with E911 registration status. Supports search by number or label.
  */
 export const listPhoneNumbersOptions = (
   options?: Options<ListPhoneNumbersData>,
@@ -8564,6 +9088,8 @@ export const listPhoneNumbersOptions = (
 
 /**
  * Create a phone number
+ *
+ * Register a new phone number for the current user. Logs an audit entry and emits a creation event.
  */
 export const createPhoneNumberMutation = (
   options?: Partial<Options<CreatePhoneNumberData>>,
@@ -8595,6 +9121,8 @@ export const listUnregisteredE911PhoneNumbersQueryKey = (
 
 /**
  * List phone numbers without E911
+ *
+ * List active phone numbers within a team that lack an E911 registration. The caller must be a superuser or a member of the specified team.
  */
 export const listUnregisteredE911PhoneNumbersOptions = (
   options: Options<ListUnregisteredE911PhoneNumbersData>,
@@ -8619,6 +9147,8 @@ export const listUnregisteredE911PhoneNumbersOptions = (
 
 /**
  * Delete a phone number
+ *
+ * Delete a phone number record. Logs an audit entry and emits a deletion event. The caller must own the phone number.
  */
 export const deletePhoneNumberMutation = (
   options?: Partial<Options<DeletePhoneNumberData>>,
@@ -8649,6 +9179,8 @@ export const getPhoneNumberQueryKey = (options: Options<GetPhoneNumberData>) =>
 
 /**
  * Get phone number details
+ *
+ * Retrieve a single phone number by ID with E911 registration status. The caller must own the phone number.
  */
 export const getPhoneNumberOptions = (options: Options<GetPhoneNumberData>) =>
   queryOptions<
@@ -8671,6 +9203,8 @@ export const getPhoneNumberOptions = (options: Options<GetPhoneNumberData>) =>
 
 /**
  * Update a phone number
+ *
+ * Update a phone number's label or caller ID settings. Logs an audit entry and emits an update event. The caller must own the phone number.
  */
 export const updatePhoneNumberMutation = (
   options?: Partial<Options<UpdatePhoneNumberData>>,
@@ -8702,6 +9236,8 @@ export const listVoicemailBoxesQueryKey = (
 
 /**
  * List voicemail boxes
+ *
+ * Returns a paginated list of voicemail boxes. Superusers see all boxes; regular users see only boxes associated with their own extensions.
  */
 export const listVoicemailBoxesOptions = (
   options?: Options<ListVoicemailBoxesData>,
@@ -8726,6 +9262,8 @@ export const listVoicemailBoxesOptions = (
 
 /**
  * Create a voicemail box
+ *
+ * Creates a new voicemail box, emits a voicemail_box_created event, logs the action to the audit trail, and sends a notification to the current user.
  */
 export const createVoicemailBoxMutation = (
   options?: Partial<Options<CreateVoicemailBoxData>>,
@@ -8753,6 +9291,8 @@ export const createVoicemailBoxMutation = (
 
 /**
  * Delete a voicemail box
+ *
+ * Permanently deletes a voicemail box and all its messages. Emits a voicemail_box_deleted event, logs the deletion to the audit trail, and sends a notification to the current user.
  */
 export const deleteVoicemailBoxMutation = (
   options?: Partial<Options<DeleteVoicemailBoxData>>,
@@ -8784,6 +9324,8 @@ export const getVoicemailBoxQueryKey = (
 
 /**
  * Get voicemail box details
+ *
+ * Retrieves the full details of a single voicemail box by its ID, including its associated extension.
  */
 export const getVoicemailBoxOptions = (options: Options<GetVoicemailBoxData>) =>
   queryOptions<
@@ -8806,6 +9348,8 @@ export const getVoicemailBoxOptions = (options: Options<GetVoicemailBoxData>) =>
 
 /**
  * Update a voicemail box
+ *
+ * Partially updates a voicemail box's settings, emits a voicemail_box_updated event, and logs before/after snapshots to the audit trail.
  */
 export const updateVoicemailBoxMutation = (
   options?: Partial<Options<UpdateVoicemailBoxData>>,
@@ -8837,6 +9381,8 @@ export const listVoicemailBoxMessagesQueryKey = (
 
 /**
  * List voicemail box messages
+ *
+ * Returns a paginated list of voicemail messages for a specific voicemail box with optional filtering by read status and urgency. Validates that the box exists before querying messages.
  */
 export const listVoicemailBoxMessagesOptions = (
   options: Options<ListVoicemailBoxMessagesData>,
@@ -8865,6 +9411,8 @@ export const getVoicemailBoxUnreadCountQueryKey = (
 
 /**
  * Get unread voicemail count
+ *
+ * Returns the number of unread voicemail messages in the specified voicemail box.
  */
 export const getVoicemailBoxUnreadCountOptions = (
   options: Options<GetVoicemailBoxUnreadCountData>,
@@ -8893,6 +9441,8 @@ export const listAllVoicemailMessagesQueryKey = (
 
 /**
  * List all voicemail messages
+ *
+ * Returns a paginated list of voicemail messages across all boxes with optional filtering by read status and urgency. Superusers see all messages; regular users see only messages for their extensions' voicemail boxes.
  */
 export const listAllVoicemailMessagesOptions = (
   options?: Options<ListAllVoicemailMessagesData>,
@@ -8917,6 +9467,8 @@ export const listAllVoicemailMessagesOptions = (
 
 /**
  * Delete a voicemail message
+ *
+ * Permanently deletes a voicemail message, emits a voicemail_message_deleted event, and logs the deletion with a before snapshot to the audit trail.
  */
 export const deleteVoicemailMessageByIdMutation = (
   options?: Partial<Options<DeleteVoicemailMessageByIdData>>,
@@ -8948,6 +9500,8 @@ export const getVoicemailMessageByIdQueryKey = (
 
 /**
  * Get voicemail message details
+ *
+ * Retrieves the full details of a single voicemail message by its ID, including caller information and the associated voicemail box.
  */
 export const getVoicemailMessageByIdOptions = (
   options: Options<GetVoicemailMessageByIdData>,
@@ -8972,6 +9526,8 @@ export const getVoicemailMessageByIdOptions = (
 
 /**
  * Toggle voicemail message read status
+ *
+ * Marks a voicemail message as read or unread based on the request payload and emits a voicemail_message_updated event.
  */
 export const toggleVoicemailMessageReadMutation = (
   options?: Partial<Options<ToggleVoicemailMessageReadData>>,
@@ -9002,6 +9558,8 @@ export const listWebhooksQueryKey = (options?: Options<ListWebhooksData>) =>
 
 /**
  * List webhooks
+ *
+ * Retrieve a paginated list of webhooks owned by the current user. Supports search by name, date range filtering, and sorting.
  */
 export const listWebhooksOptions = (options?: Options<ListWebhooksData>) =>
   queryOptions<
@@ -9024,6 +9582,8 @@ export const listWebhooksOptions = (options?: Options<ListWebhooksData>) =>
 
 /**
  * Create a webhook
+ *
+ * Register a new webhook for the current user. Emits a webhook_created event and logs an audit entry.
  */
 export const createWebhookMutation = (
   options?: Partial<Options<CreateWebhookData>>,
@@ -9055,6 +9615,8 @@ export const listWebhookEndpointsQueryKey = (
 
 /**
  * List webhook endpoints
+ *
+ * Retrieve a paginated list of system-level webhook endpoints. Supports search by URL and description, date range filtering, and sorting.
  */
 export const listWebhookEndpointsOptions = (
   options?: Options<ListWebhookEndpointsData>,
@@ -9079,6 +9641,8 @@ export const listWebhookEndpointsOptions = (
 
 /**
  * Create a webhook endpoint
+ *
+ * Register a new system-level webhook endpoint. Emits a webhook_endpoint_created event and logs an audit entry.
  */
 export const createWebhookEndpointMutation = (
   options?: Partial<Options<CreateWebhookEndpointData>>,
@@ -9110,6 +9674,8 @@ export const listWebhookEventTypesQueryKey = (
 
 /**
  * List webhook event types
+ *
+ * Return all registered webhook event types with their descriptions. Response is cached for 5 minutes.
  */
 export const listWebhookEventTypesOptions = (
   options?: Options<ListWebhookEventTypesData>,
@@ -9134,6 +9700,8 @@ export const listWebhookEventTypesOptions = (
 
 /**
  * Delete a webhook endpoint
+ *
+ * Permanently delete a webhook endpoint. Emits a webhook_endpoint_deleted event and logs an audit entry with the before-state snapshot.
  */
 export const deleteWebhookEndpointMutation = (
   options?: Partial<Options<DeleteWebhookEndpointData>>,
@@ -9165,6 +9733,8 @@ export const getWebhookEndpointQueryKey = (
 
 /**
  * Get webhook endpoint details
+ *
+ * Retrieve a single webhook endpoint by ID, including its subscribed event types and configuration.
  */
 export const getWebhookEndpointOptions = (
   options: Options<GetWebhookEndpointData>,
@@ -9189,6 +9759,8 @@ export const getWebhookEndpointOptions = (
 
 /**
  * Update a webhook endpoint
+ *
+ * Partially update a webhook endpoint's URL, event subscriptions, or other settings. Emits a webhook_endpoint_updated event and logs an audit entry with before/after snapshots.
  */
 export const updateWebhookEndpointMutation = (
   options?: Partial<Options<UpdateWebhookEndpointData>>,
@@ -9216,6 +9788,8 @@ export const updateWebhookEndpointMutation = (
 
 /**
  * Delete a webhook
+ *
+ * Permanently delete a webhook and its configuration. Emits a webhook_deleted event and logs an audit entry with the before-state snapshot.
  */
 export const deleteWebhookMutation = (
   options?: Partial<Options<DeleteWebhookData>>,
@@ -9246,6 +9820,8 @@ export const getWebhookQueryKey = (options: Options<GetWebhookData>) =>
 
 /**
  * Get webhook details
+ *
+ * Retrieve a single webhook by ID with its secret masked. Superusers may access any webhook; regular users may only access their own.
  */
 export const getWebhookOptions = (options: Options<GetWebhookData>) =>
   queryOptions<
@@ -9268,6 +9844,8 @@ export const getWebhookOptions = (options: Options<GetWebhookData>) =>
 
 /**
  * Update a webhook
+ *
+ * Partially update a webhook's configuration. Emits a webhook_updated event and logs an audit entry with before/after snapshots.
  */
 export const updateWebhookMutation = (
   options?: Partial<Options<UpdateWebhookData>>,
@@ -9299,6 +9877,8 @@ export const listWebhookDeliveriesQueryKey = (
 
 /**
  * List webhook deliveries
+ *
+ * Retrieve the 20 most recent delivery attempts for a specific webhook, ordered by most recent first.
  */
 export const listWebhookDeliveriesOptions = (
   options: Options<ListWebhookDeliveriesData>,
@@ -9323,6 +9903,8 @@ export const listWebhookDeliveriesOptions = (
 
 /**
  * Redeliver a webhook
+ *
+ * Manually retry a previous webhook delivery attempt. Re-sends the original payload to the webhook URL and records the new delivery result.
  */
 export const redeliverWebhookDeliveryMutation = (
   options?: Partial<Options<RedeliverWebhookDeliveryData>>,
@@ -9350,6 +9932,8 @@ export const redeliverWebhookDeliveryMutation = (
 
 /**
  * Send a test webhook
+ *
+ * Send a test payload to the webhook URL and return the result including status code, response time, and any errors. Records the delivery attempt.
  */
 export const testWebhookMutation = (
   options?: Partial<Options<TestWebhookData>>,
@@ -9380,6 +9964,8 @@ export const systemHealthQueryKey = (options?: Options<SystemHealthData>) =>
 
 /**
  * Health Check
+ *
+ * Check system health by verifying database connectivity. Returns a 200 status when healthy or 500 when the database is offline.
  */
 export const systemHealthOptions = (options?: Options<SystemHealthData>) =>
   queryOptions<

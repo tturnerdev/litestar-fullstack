@@ -12486,6 +12486,7 @@
     "/api/access/forgot-password": {
       "post": {
         "deprecated": false,
+        "description": "Initiate the password reset flow by emitting a password_reset_requested event that sends a reset link via email. Returns a generic success message regardless of whether the email exists, to prevent user enumeration. Rate-limited per user.",
         "operationId": "ForgotPassword",
         "requestBody": {
           "content": {
@@ -12557,6 +12558,7 @@
     "/api/access/login": {
       "post": {
         "deprecated": false,
+        "description": "Authenticate with email and password. If MFA is enabled on the account, returns a challenge requiring a second factor; otherwise returns OAuth2 access and refresh tokens. Rate-limited to prevent brute-force attempts, with failed login attempts recorded in the audit log.",
         "operationId": "AccountLogin",
         "parameters": [
           {
@@ -12638,6 +12640,7 @@
     "/api/access/logout": {
       "post": {
         "deprecated": false,
+        "description": "Revoke the current refresh token family, clear the session and authentication cookies, and record the logout in the audit log.",
         "operationId": "AccountLogout",
         "responses": {
           "201": {
@@ -12661,6 +12664,7 @@
     "/api/access/refresh": {
       "post": {
         "deprecated": false,
+        "description": "Exchange a valid refresh token cookie for a new access token. Implements token rotation: the old refresh token is revoked and a new one is issued in the response cookie.",
         "operationId": "TokenRefresh",
         "parameters": [
           {
@@ -12734,6 +12738,7 @@
     "/api/access/reset-password": {
       "get": {
         "deprecated": false,
+        "description": "Check whether a password reset token is still valid and not expired. Returns the associated user ID and expiration time if valid, or valid=false if the token is invalid or expired.",
         "operationId": "ValidateResetToken",
         "parameters": [
           {
@@ -12808,6 +12813,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Complete the password reset flow by validating the reset token, enforcing password strength requirements, updating the user's password, and emitting a password_reset_completed event. Records the reset in the audit log.",
         "operationId": "ResetPassword",
         "requestBody": {
           "content": {
@@ -12879,6 +12885,7 @@
     "/api/access/sessions": {
       "delete": {
         "deprecated": false,
+        "description": "Revoke every active session for the current user except the one tied to the current refresh token. Records the total number of revoked sessions in the audit log and emits a sessions_revoked_all event.",
         "operationId": "RevokeAllSessions",
         "responses": {
           "204": {
@@ -12893,6 +12900,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Return a paginated list of the current user's active (non-revoked, non-expired) sessions with device info and creation timestamps. The session matching the current refresh token is flagged as is_current.",
         "operationId": "GetActiveSessions",
         "parameters": [
           {
@@ -13082,6 +13090,7 @@
     "/api/access/sessions/{session_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Revoke a specific session by invalidating its entire refresh token family. Only sessions belonging to the authenticated user may be revoked. Emits a session_revoked event and records the action in the audit log.",
         "operationId": "RevokeSession",
         "parameters": [
           {
@@ -13148,6 +13157,7 @@
     "/api/access/signup": {
       "post": {
         "deprecated": false,
+        "description": "Create a new user account with the default role, trigger a verification email, and record the registration in the audit log. Rate-limited by client IP to prevent abuse.",
         "operationId": "AccountRegister",
         "requestBody": {
           "content": {
@@ -13219,6 +13229,7 @@
     "/api/admin/audit": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of audit log entries with search across actor email, action, and target label. Supports filtering by exact action, domain prefix, and date range. Requires superuser access.",
         "operationId": "AdminListAuditLogs",
         "parameters": [
           {
@@ -13393,7 +13404,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13414,7 +13425,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13608,6 +13619,7 @@
     "/api/admin/audit/export": {
       "get": {
         "deprecated": false,
+        "description": "Exports matching audit log entries as a downloadable CSV file. Accepts the same filters as the list endpoint and returns up to 10,000 rows. Requires superuser access.",
         "operationId": "AdminExportAuditLog",
         "parameters": [
           {
@@ -13782,7 +13794,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13803,7 +13815,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13977,6 +13989,7 @@
     "/api/admin/audit/target/{target_type}/{target_id}": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of audit log entries for a specific target identified by type and ID. Supports filtering by action and date range. Requires superuser access.",
         "operationId": "AdminGetTargetAuditLogs",
         "parameters": [
           {
@@ -14169,7 +14182,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14190,7 +14203,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14366,6 +14379,7 @@
     "/api/admin/audit/user/{user_id}": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of audit log entries where the specified user was the actor. Supports filtering by action and date range. Requires superuser access.",
         "operationId": "AdminGetUserAuditLogs",
         "parameters": [
           {
@@ -14550,7 +14564,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14571,7 +14585,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14747,6 +14761,7 @@
     "/api/admin/audit/{log_id}": {
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single audit log entry by its UUID, including before/after snapshots and request metadata. Requires superuser access.",
         "operationId": "AdminGetAuditLog",
         "parameters": [
           {
@@ -14820,6 +14835,7 @@
     "/api/admin/bulk-import/devices": {
       "post": {
         "deprecated": false,
+        "description": "Parses, validates, and creates or updates devices in bulk from a CSV upload. Logs an audit entry and emits a bulk-import event on success. Requires superuser access.",
         "operationId": "AdminImportDevices",
         "requestBody": {
           "content": {
@@ -14892,6 +14908,7 @@
     "/api/admin/bulk-import/extensions": {
       "post": {
         "deprecated": false,
+        "description": "Parses, validates, and creates or updates extensions in bulk from a CSV upload. Logs an audit entry and emits a bulk-import event on success. Requires superuser access.",
         "operationId": "AdminImportExtensions",
         "requestBody": {
           "content": {
@@ -14964,6 +14981,7 @@
     "/api/admin/bulk-import/preview/devices": {
       "post": {
         "deprecated": false,
+        "description": "Parses and validates a device CSV file without persisting changes. Returns row-level validation results including duplicate MAC address detection. Requires superuser access.",
         "operationId": "AdminPreviewDeviceImport",
         "requestBody": {
           "content": {
@@ -15036,6 +15054,7 @@
     "/api/admin/bulk-import/preview/extensions": {
       "post": {
         "deprecated": false,
+        "description": "Parses and validates an extension CSV file without persisting changes. Returns row-level validation results including duplicate extension number detection. Requires superuser access.",
         "operationId": "AdminPreviewExtensionImport",
         "requestBody": {
           "content": {
@@ -15108,6 +15127,7 @@
     "/api/admin/dashboard/activity": {
       "get": {
         "deprecated": false,
+        "description": "Returns recent audit log entries for the admin dashboard activity feed. Configurable lookback period (default 24 hours) and result limit (default 50). Cached for 5 minutes. Requires superuser access.",
         "operationId": "GetRecentActivity",
         "parameters": [
           {
@@ -15203,6 +15223,7 @@
     "/api/admin/dashboard/stats": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate counts for the admin dashboard including users, teams, devices, extensions, open tickets, unread voicemails, and new user signups. Cached for 5 minutes. Requires superuser access.",
         "operationId": "GetDashboardStats",
         "responses": {
           "200": {
@@ -15234,6 +15255,7 @@
     "/api/admin/dashboard/trends": {
       "get": {
         "deprecated": false,
+        "description": "Returns daily event and new user counts for the last 7 days, suitable for dashboard chart rendering. Cached for 5 minutes. Requires superuser access.",
         "operationId": "GetDashboardTrends",
         "responses": {
           "200": {
@@ -15265,6 +15287,7 @@
     "/api/admin/device-templates": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of device templates with search across manufacturer, model, and display name. Results are cached for 5 minutes. Requires superuser access.",
         "operationId": "AdminListDeviceTemplates",
         "parameters": [
           {
@@ -15559,6 +15582,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new device template and records an audit log entry. Emits a device_template_created event. Requires superuser access.",
         "operationId": "AdminCreateDeviceTemplate",
         "requestBody": {
           "content": {
@@ -15630,6 +15654,7 @@
     "/api/admin/device-templates/{template_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a device template. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
         "operationId": "AdminDeleteDeviceTemplate",
         "parameters": [
           {
@@ -15697,6 +15722,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single device template by its UUID, including all configuration fields. Requires superuser access.",
         "operationId": "AdminGetDeviceTemplate",
         "parameters": [
           {
@@ -15771,6 +15797,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a device template. Captures before/after snapshots for the audit log and emits a device_template_updated event. Requires superuser access.",
         "operationId": "AdminUpdateDeviceTemplate",
         "parameters": [
           {
@@ -15857,6 +15884,7 @@
     "/api/admin/devices": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all devices across the system with owner and team details. Supports search by name, SIP username, and MAC address. Requires superuser access.",
         "operationId": "AdminListDevices",
         "parameters": [
           {
@@ -16145,6 +16173,7 @@
     "/api/admin/devices/stats": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate device statistics including totals, active/online/offline/error counts, and a breakdown by device type. Cached for 5 minutes. Requires superuser access.",
         "operationId": "AdminGetDeviceStats",
         "responses": {
           "200": {
@@ -16176,6 +16205,7 @@
     "/api/admin/fax/messages": {
       "get": {
         "deprecated": false,
+        "description": "Returns the 50 most recent fax messages ordered by received date, including direction, status, and error details. Requires superuser access.",
         "operationId": "AdminListFaxMessages",
         "responses": {
           "200": {
@@ -16202,6 +16232,7 @@
     "/api/admin/fax/numbers": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all fax numbers with owner and team details. Supports search by number and label. Requires superuser access.",
         "operationId": "AdminListFaxNumbers",
         "parameters": [
           {
@@ -16490,6 +16521,7 @@
     "/api/admin/fax/stats": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate fax statistics including total and active number counts, total messages, and today's inbound, outbound, and failed message counts. Cached for 5 minutes. Requires superuser access.",
         "operationId": "AdminGetFaxStats",
         "responses": {
           "200": {
@@ -16521,6 +16553,7 @@
     "/api/admin/gateway/settings": {
       "get": {
         "deprecated": false,
+        "description": "Returns the current gateway configuration including default timeout and cache TTL values. Requires superuser access.",
         "operationId": "GetAdminGatewaySettings",
         "responses": {
           "200": {
@@ -16542,6 +16575,7 @@
       },
       "put": {
         "deprecated": false,
+        "description": "Updates gateway configuration such as timeout and cache TTL. Changes apply to the running process only and are recorded in the audit log. Requires superuser access.",
         "operationId": "UpdateAdminGatewaySettings",
         "requestBody": {
           "content": {
@@ -16613,6 +16647,7 @@
     "/api/admin/music-on-hold": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of music on hold classes with search by name. Includes file count, category, and default/active status. Cached for 5 minutes. Requires superuser access.",
         "operationId": "AdminListMusicOnHold",
         "parameters": [
           {
@@ -16907,6 +16942,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new music on hold class and records an audit log entry. Emits a music_on_hold_created event. Requires superuser access.",
         "operationId": "AdminCreateMusicOnHold",
         "requestBody": {
           "content": {
@@ -16978,6 +17014,7 @@
     "/api/admin/music-on-hold/{moh_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a music on hold class. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
         "operationId": "AdminDeleteMusicOnHold",
         "parameters": [
           {
@@ -17045,6 +17082,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single music on hold class by its UUID, including the full file list and playback settings. Requires superuser access.",
         "operationId": "AdminGetMusicOnHold",
         "parameters": [
           {
@@ -17119,6 +17157,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a music on hold class. Captures before/after snapshots for the audit log and emits a music_on_hold_updated event. Requires superuser access.",
         "operationId": "AdminUpdateMusicOnHold",
         "parameters": [
           {
@@ -17205,6 +17244,7 @@
     "/api/admin/phone-numbers/bulk-import/execute": {
       "post": {
         "deprecated": false,
+        "description": "Create phone number records from previously validated rows. Skips or rejects duplicates based on the skip_duplicates flag. Logs an audit entry and emits a phone_numbers_bulk_imported event.",
         "operationId": "AdminExecutePhoneNumberBulkImport",
         "requestBody": {
           "content": {
@@ -17277,6 +17317,7 @@
     "/api/admin/phone-numbers/bulk-import/preview": {
       "post": {
         "deprecated": false,
+        "description": "Parse and validate a CSV file of phone numbers, returning a preview of valid rows, validation errors, and detected duplicates. Maximum file size is 5 MB and 1000 rows.",
         "operationId": "AdminPreviewPhoneNumberBulkImport",
         "requestBody": {
           "content": {
@@ -17356,6 +17397,7 @@
     "/api/admin/support/stats": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate support statistics including ticket counts by status, priority, and category. Cached for 5 minutes. Requires superuser access.",
         "operationId": "AdminGetSupportStats",
         "responses": {
           "200": {
@@ -17387,6 +17429,7 @@
     "/api/admin/support/tickets": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all support tickets with creator and assignee details. Supports search by ticket number and subject. Requires superuser access.",
         "operationId": "AdminListTickets",
         "parameters": [
           {
@@ -17675,6 +17718,7 @@
     "/api/admin/system/status": {
       "get": {
         "deprecated": false,
+        "description": "Returns comprehensive system health information including database and Redis status, connection pool stats, worker queue depths, resource counts, and process uptime. Cached for 1 minute. Requires superuser access.",
         "operationId": "GetAdminSystemStatus",
         "responses": {
           "200": {
@@ -17706,6 +17750,7 @@
     "/api/admin/tasks": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all background tasks across every team. Supports filtering by task type, status, and entity type, plus search across task_type and entity_type fields. Requires superuser access.",
         "operationId": "AdminListTasks",
         "parameters": [
           {
@@ -18057,6 +18102,7 @@
     "/api/admin/tasks/stats": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate background task statistics including counts by status, average duration, and totals for today and this week. Cached for 5 minutes. Requires superuser access.",
         "operationId": "GetAdminTaskStats",
         "responses": {
           "200": {
@@ -18088,6 +18134,7 @@
     "/api/admin/tasks/{task_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a completed, failed, or cancelled background task. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
         "operationId": "AdminDeleteTask",
         "parameters": [
           {
@@ -18157,6 +18204,7 @@
     "/api/admin/tasks/{task_id}/cancel": {
       "post": {
         "deprecated": false,
+        "description": "Cancels a pending or running background task. Records the cancellation in the audit log with the previous status and emits a background_task_cancelled event. Requires superuser access.",
         "operationId": "AdminCancelTask",
         "parameters": [
           {
@@ -18233,6 +18281,7 @@
     "/api/admin/teams": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all teams with member details. Supports search by name and date range filtering. Requires superuser access.",
         "operationId": "AdminListTeams",
         "parameters": [
           {
@@ -18521,6 +18570,7 @@
     "/api/admin/teams/{team_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a team and all its memberships. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
         "operationId": "AdminDeleteTeam",
         "parameters": [
           {
@@ -18585,6 +18635,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves detailed information for a single team by its UUID, including the full member list. Requires superuser access.",
         "operationId": "AdminGetTeam",
         "parameters": [
           {
@@ -18656,6 +18707,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a team's name, description, or active status. Captures before/after snapshots for the audit log and emits an admin_team_updated event. Requires superuser access.",
         "operationId": "AdminUpdateTeam",
         "parameters": [
           {
@@ -18739,6 +18791,7 @@
     "/api/admin/users": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all users with roles, OAuth accounts, and team memberships. Supports search by name and email. Requires superuser access.",
         "operationId": "AdminListUsers",
         "parameters": [
           {
@@ -19027,6 +19080,7 @@
     "/api/admin/users/{user_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a user account. Prevents self-deletion. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
         "operationId": "AdminDeleteUser",
         "parameters": [
           {
@@ -19091,6 +19145,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves detailed information for a single user by UUID, including security-sensitive fields such as password hash age. Requires superuser access.",
         "operationId": "AdminGetUser",
         "parameters": [
           {
@@ -19162,6 +19217,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a user's profile, active status, superuser flag, or verification status. Captures before/after snapshots for the audit log and emits an admin_user_updated event. Requires superuser access.",
         "operationId": "AdminUpdateUser",
         "parameters": [
           {
@@ -19245,6 +19301,7 @@
     "/api/admin/voice/extensions": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all extensions with owner and phone number details. Supports search by extension number and display name. Requires superuser access.",
         "operationId": "AdminListExtensions",
         "parameters": [
           {
@@ -19373,6 +19430,7 @@
     "/api/admin/voice/phone-numbers": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of all phone numbers with owner and team details. Supports search by number and label. Requires superuser access.",
         "operationId": "AdminListPhoneNumbers",
         "parameters": [
           {
@@ -19661,6 +19719,7 @@
     "/api/admin/voice/stats": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate voice statistics including phone number and extension counts, active Do Not Disturb entries, and a breakdown of numbers by type. Cached for 5 minutes. Requires superuser access.",
         "operationId": "AdminGetVoiceStats",
         "responses": {
           "200": {
@@ -19692,6 +19751,7 @@
     "/api/analytics/by-extension": {
       "get": {
         "deprecated": false,
+        "description": "Returns per-extension call statistics aggregated over a date range, useful for comparing call activity across extensions within a team.",
         "operationId": "GetCallsByExtension",
         "parameters": [
           {
@@ -19794,6 +19854,7 @@
     "/api/analytics/cdrs": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of call detail records with filtering by date range, direction, disposition, source, destination, and duration. Non-superusers see only records for their teams.",
         "operationId": "ListCallRecords",
         "parameters": [
           {
@@ -20226,6 +20287,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new call detail record via manual entry or import. Emits a call_record_created event and logs the action to the audit trail.",
         "operationId": "CreateCallRecord",
         "requestBody": {
           "content": {
@@ -20297,6 +20359,7 @@
     "/api/analytics/cdrs/export": {
       "get": {
         "deprecated": false,
+        "description": "Exports call detail records as a downloadable CSV file. Supports filtering by date range, direction, and disposition. Non-superusers receive only records for their teams.",
         "operationId": "ExportCallRecords",
         "parameters": [
           {
@@ -20434,6 +20497,7 @@
     "/api/analytics/cdrs/{cdr_id}": {
       "get": {
         "deprecated": false,
+        "description": "Retrieves the full details of a single call detail record by its ID.",
         "operationId": "GetCallRecord",
         "parameters": [
           {
@@ -20510,6 +20574,7 @@
     "/api/analytics/summary": {
       "get": {
         "deprecated": false,
+        "description": "Returns aggregate call statistics for a team within a date range, including totals and averages. Requires team membership or superuser access.",
         "operationId": "GetCallSummary",
         "parameters": [
           {
@@ -20609,6 +20674,7 @@
     "/api/analytics/volume": {
       "get": {
         "deprecated": false,
+        "description": "Returns time-series call volume data points grouped by a configurable interval (hour, day, week, or month) for charting and trend analysis.",
         "operationId": "GetCallVolume",
         "parameters": [
           {
@@ -20723,6 +20789,7 @@
     "/api/auth/oauth/github": {
       "get": {
         "deprecated": false,
+        "description": "Generate a GitHub OAuth2 authorization URL with a signed state parameter for the SPA to redirect to. The state encodes the provider, frontend callback URL, and a login action.",
         "operationId": "GitHubOAuthAuthorize",
         "parameters": [
           {
@@ -20804,6 +20871,7 @@
     "/api/auth/oauth/github/callback": {
       "get": {
         "deprecated": false,
+        "description": "Process the GitHub OAuth2 redirect. Verifies the state token, exchanges the authorization code for tokens, retrieves the user's GitHub profile, and dispatches to login, account linking, or MFA disable flows based on the state action. Redirects the browser to the frontend callback URL with result parameters.",
         "operationId": "GitHubOAuthCallback",
         "parameters": [
           {
@@ -20941,6 +21009,7 @@
     "/api/auth/oauth/google": {
       "get": {
         "deprecated": false,
+        "description": "Generate a Google OAuth2 authorization URL with a signed state parameter for the SPA to redirect to. The state encodes the provider, frontend callback URL, and a login action.",
         "operationId": "GoogleOAuthAuthorize",
         "parameters": [
           {
@@ -21022,6 +21091,7 @@
     "/api/auth/oauth/google/callback": {
       "get": {
         "deprecated": false,
+        "description": "Process the Google OAuth2 redirect. Verifies the state token, exchanges the authorization code for tokens, retrieves the user's Google profile, and dispatches to login, account linking, or MFA disable flows based on the state action. Redirects the browser to the frontend callback URL with result parameters.",
         "operationId": "GoogleOAuthCallback",
         "parameters": [
           {
@@ -21141,6 +21211,7 @@
     "/api/call-queues": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of call queues with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         "operationId": "ListCallQueues",
         "parameters": [
           {
@@ -21427,6 +21498,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new call queue and assigns it to the current user's team. Logs an audit entry and emits a call_queue_created event.",
         "operationId": "CreateCallQueue",
         "requestBody": {
           "content": {
@@ -21498,6 +21570,7 @@
     "/api/call-queues/{call_queue_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a call queue and all its member associations. Emits a call_queue_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteCallQueue",
         "parameters": [
           {
@@ -21565,6 +21638,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single call queue by ID, including its current list of members.",
         "operationId": "GetCallQueue",
         "parameters": [
           {
@@ -21639,6 +21713,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a call queue's configuration. Captures before/after snapshots for audit logging and emits a call_queue_updated event.",
         "operationId": "UpdateCallQueue",
         "parameters": [
           {
@@ -21725,6 +21800,7 @@
     "/api/call-queues/{call_queue_id}/members": {
       "get": {
         "deprecated": false,
+        "description": "Returns all members belonging to the specified call queue. Validates that the parent call queue exists before listing.",
         "operationId": "ListCallQueueMembers",
         "parameters": [
           {
@@ -21802,6 +21878,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Adds a new member to the specified call queue. Logs an audit entry and emits a call_queue_member_created event.",
         "operationId": "CreateCallQueueMember",
         "parameters": [
           {
@@ -21888,6 +21965,7 @@
     "/api/call-queues/{call_queue_id}/members/{member_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Removes a member from the specified call queue. Emits a call_queue_member_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteCallQueueMember",
         "parameters": [
           {
@@ -21968,6 +22046,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a member's settings within a call queue. Captures before/after snapshots for audit logging and emits a call_queue_member_updated event.",
         "operationId": "UpdateCallQueueMember",
         "parameters": [
           {
@@ -22067,6 +22146,7 @@
     "/api/call-queues/{call_queue_id}/members/{member_id}/pause": {
       "put": {
         "deprecated": false,
+        "description": "Toggles the pause state for a call queue member. Logs an audit entry with the pause status in metadata and emits a call_queue_member_paused event.",
         "operationId": "PauseCallQueueMember",
         "parameters": [
           {
@@ -22166,6 +22246,7 @@
     "/api/config/oauth": {
       "get": {
         "deprecated": false,
+        "description": "Return which OAuth providers (Google, GitHub) are enabled for the frontend login flow. Response is cached for 5 minutes.",
         "operationId": "OAuthConfig",
         "responses": {
           "200": {
@@ -22197,6 +22278,7 @@
     "/api/connections": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of external service connections. Supports searching by name and optional filtering by team. Requires connections admin access.",
         "operationId": "ListConnections",
         "parameters": [
           {
@@ -22502,6 +22584,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Register a new external service connection with its credentials. The user must belong to the target team. Records an audit log entry and emits a connection_created event.",
         "operationId": "CreateConnection",
         "requestBody": {
           "content": {
@@ -22573,6 +22656,7 @@
     "/api/connections/{connection_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Delete an external service connection. Fails with HTTP 409 if devices are still managed through this connection. Records an audit log entry.",
         "operationId": "DeleteConnection",
         "parameters": [
           {
@@ -22640,6 +22724,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve details for a single connection. Credential values are never returned; only the credential field names are included.",
         "operationId": "GetConnection",
         "parameters": [
           {
@@ -22714,6 +22799,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update a connection's name, base URL, credentials, or enabled status. Records an audit log entry and emits a connection_updated event.",
         "operationId": "UpdateConnection",
         "parameters": [
           {
@@ -22800,6 +22886,7 @@
     "/api/connections/{connection_id}/test": {
       "post": {
         "deprecated": false,
+        "description": "Test connectivity to the external service by attempting to authenticate with the stored credentials. Returns a success or failure message.",
         "operationId": "TestConnection",
         "parameters": [
           {
@@ -22876,6 +22963,7 @@
     "/api/devices": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of devices with eager-loaded line assignments, location, and connection data. Superusers see all devices; regular users see only their own. Supports search by name, date filters, and configurable sort order.",
         "operationId": "ListDevices",
         "parameters": [
           {
@@ -23162,6 +23250,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Register a new device and assign it to the current user. Emits a device_created event, records an audit log entry, and sends a notification to the user.",
         "operationId": "CreateDevice",
         "requestBody": {
           "content": {
@@ -23233,6 +23322,7 @@
     "/api/devices/templates/lookup": {
       "get": {
         "deprecated": false,
+        "description": "Find a device template by manufacturer and model name. Returns wireframe data, provisioning template, and template variables. Results are cached for 10 minutes.",
         "operationId": "LookupDeviceTemplate",
         "parameters": [
           {
@@ -23326,6 +23416,7 @@
     "/api/devices/{device_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete a device record. Emits a device_deleted event, records an audit log entry with the pre-deletion snapshot, and sends a removal notification to the device owner.",
         "operationId": "DeleteDevice",
         "parameters": [
           {
@@ -23393,6 +23484,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve full details for a single device including line assignments, location, and connection. Enforces device ownership so users can only access their own devices.",
         "operationId": "GetDevice",
         "parameters": [
           {
@@ -23467,6 +23559,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially update a device's fields. Captures before and after snapshots for audit logging and emits a device_updated event. Requires device ownership.",
         "operationId": "UpdateDevice",
         "parameters": [
           {
@@ -23553,6 +23646,7 @@
     "/api/devices/{device_id}/lines": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve all line assignments for a device, including the associated extension details for each line.",
         "operationId": "ListDeviceLines",
         "parameters": [
           {
@@ -23630,6 +23724,7 @@
       },
       "put": {
         "deprecated": false,
+        "description": "Replace all line assignments for a device with the provided set. Captures before and after snapshots for audit logging and emits a device_lines_updated event.",
         "operationId": "SetDeviceLines",
         "parameters": [
           {
@@ -23716,6 +23811,7 @@
     "/api/devices/{device_id}/reboot": {
       "post": {
         "deprecated": false,
+        "description": "Enqueue a background task to reboot the device. The reboot is executed asynchronously via SAQ and tracked as a background task. Records an audit log entry and emits a device_rebooted event.",
         "operationId": "RebootDevice",
         "parameters": [
           {
@@ -23792,6 +23888,7 @@
     "/api/devices/{device_id}/reprovision": {
       "post": {
         "deprecated": false,
+        "description": "Enqueue a background task to reprovision the device with its current configuration. Executed asynchronously via SAQ with a 120-second timeout. Records an audit log entry and emits a device_reprovisioned event.",
         "operationId": "ReprovisionDevice",
         "parameters": [
           {
@@ -23868,6 +23965,7 @@
     "/api/e911": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of E911 registrations with eager-loaded phone number and location data. Supports optional team filtering, search by address, date filters, and configurable sort order.",
         "operationId": "ListE911Registrations",
         "parameters": [
           {
@@ -24176,6 +24274,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Create a new E911 address registration for a phone number. Emits an e911_registration_created event and records an audit log entry with the registration address.",
         "operationId": "CreateE911Registration",
         "requestBody": {
           "content": {
@@ -24247,6 +24346,7 @@
     "/api/e911/unregistered": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve all phone numbers for a team that do not yet have an E911 registration. Useful for identifying numbers that still need emergency address assignment.",
         "operationId": "ListUnregisteredPhoneNumbers",
         "parameters": [
           {
@@ -24328,6 +24428,7 @@
     "/api/e911/{registration_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete an E911 registration record. Emits an e911_registration_deleted event and records an audit log entry with the pre-deletion address snapshot.",
         "operationId": "DeleteE911Registration",
         "parameters": [
           {
@@ -24395,6 +24496,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve full details for a single E911 registration including associated phone number and location. Requires team membership.",
         "operationId": "GetE911Registration",
         "parameters": [
           {
@@ -24469,6 +24571,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially update an E911 registration's address or phone number assignment. Captures before and after snapshots for audit logging and emits an e911_registration_updated event.",
         "operationId": "UpdateE911Registration",
         "parameters": [
           {
@@ -24555,6 +24658,7 @@
     "/api/e911/{registration_id}/validate": {
       "post": {
         "deprecated": false,
+        "description": "Run address validation on an E911 registration and mark it as validated. Currently a stub that sets the validated flag; in production this would call a carrier API for real address verification.",
         "operationId": "ValidateE911Registration",
         "parameters": [
           {
@@ -24631,6 +24735,7 @@
     "/api/email-verification/request": {
       "post": {
         "deprecated": false,
+        "description": "Send a verification email to the specified address. Returns a generic success message regardless of whether the email exists, to prevent user enumeration. No-ops if the email is already verified.",
         "operationId": "RequestEmailVerification",
         "requestBody": {
           "content": {
@@ -24702,6 +24807,7 @@
     "/api/email-verification/status/{user_id}": {
       "get": {
         "deprecated": false,
+        "description": "Check whether a specific user's email address has been verified.",
         "operationId": "GetEmailVerificationStatus",
         "parameters": [
           {
@@ -24775,6 +24881,7 @@
     "/api/email-verification/verify": {
       "post": {
         "deprecated": false,
+        "description": "Confirm a user's email address by validating the verification token. Marks the user as verified and records the verification in the audit log.",
         "operationId": "VerifyEmail",
         "requestBody": {
           "content": {
@@ -24846,6 +24953,7 @@
     "/api/fax/messages": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of fax messages scoped to fax numbers the current user owns or has team access to. Supports searching by remote number and name, and sorting by received date.",
         "operationId": "ListFaxMessages",
         "parameters": [
           {
@@ -25134,6 +25242,7 @@
     "/api/fax/messages/{message_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Delete a fax message record. The user must have access to the associated fax number. An audit log entry is recorded and a fax_message_deleted event is emitted.",
         "operationId": "DeleteFaxMessage",
         "parameters": [
           {
@@ -25201,6 +25310,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve details for a single fax message. Access is restricted to users who own or have team membership on the associated fax number.",
         "operationId": "GetFaxMessage",
         "parameters": [
           {
@@ -25277,6 +25387,7 @@
     "/api/fax/numbers": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of fax numbers the current user owns or has team access to. Supports searching by number and label.",
         "operationId": "ListFaxNumbers",
         "parameters": [
           {
@@ -25563,6 +25674,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Provision a new fax number assigned to the current user. Optionally associates the number with a team. Records an audit log entry, emits a fax_number_created event, and sends a notification to the user.",
         "operationId": "CreateFaxNumber",
         "requestBody": {
           "content": {
@@ -25634,6 +25746,7 @@
     "/api/fax/numbers/{fax_number_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Delete a fax number and its associated email routes. Records an audit log entry and sends a notification to the number's owner.",
         "operationId": "DeleteFaxNumber",
         "parameters": [
           {
@@ -25701,6 +25814,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve details for a single fax number, including its email routes. Access is restricted to the number's owner, team members, and superusers.",
         "operationId": "GetFaxNumber",
         "parameters": [
           {
@@ -25775,6 +25889,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update a fax number's label, active status, or team assignment. Records an audit log entry and emits a fax_number_updated event.",
         "operationId": "UpdateFaxNumber",
         "parameters": [
           {
@@ -25861,6 +25976,7 @@
     "/api/fax/numbers/{fax_number_id}/email-routes": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of email routes configured for a specific fax number. Supports filtering by email address, creation date, and update date.",
         "operationId": "ListFaxEmailRoutes",
         "parameters": [
           {
@@ -26136,6 +26252,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Add a new email routing rule to a fax number. The change is audit-logged and emits a fax_email_route_created event.",
         "operationId": "CreateFaxEmailRoute",
         "parameters": [
           {
@@ -26219,6 +26336,7 @@
     "/api/fax/numbers/{fax_number_id}/email-routes/{route_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Remove an email route from a fax number. Validates that the route belongs to the specified fax number and records an audit log entry.",
         "operationId": "DeleteFaxEmailRoute",
         "parameters": [
           {
@@ -26296,6 +26414,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update an existing email route on a fax number. Validates that the route belongs to the specified fax number and records an audit log entry.",
         "operationId": "UpdateFaxEmailRoute",
         "parameters": [
           {
@@ -26392,6 +26511,7 @@
     "/api/fax/send": {
       "post": {
         "deprecated": false,
+        "description": "Queue an outbound fax for delivery as a tracked background task. Creates a fax message record in QUEUED status and enqueues a SAQ job to send via the configured provider. Returns HTTP 202 with the background task details.",
         "operationId": "SendFax",
         "requestBody": {
           "content": {
@@ -26463,6 +26583,7 @@
     "/api/gateway/devices/{mac_address}": {
       "get": {
         "deprecated": false,
+        "description": "Queries all enabled external provider connections that support the devices domain and returns aggregated results for the given MAC address. Supports cached responses with an optional refresh parameter to bypass the cache.",
         "operationId": "GatewayLookupDevice",
         "parameters": [
           {
@@ -26552,6 +26673,7 @@
     "/api/gateway/extensions/{extension_number}": {
       "get": {
         "deprecated": false,
+        "description": "Queries all enabled external provider connections that support the extensions domain and returns aggregated results for the given extension number. Supports cached responses with an optional refresh parameter to bypass the cache.",
         "operationId": "GatewayLookupExtension",
         "parameters": [
           {
@@ -26641,6 +26763,7 @@
     "/api/gateway/numbers/{phone_number}": {
       "get": {
         "deprecated": false,
+        "description": "Queries all enabled external provider connections that support the numbers domain and returns aggregated results for the given phone number. Supports cached responses with an optional refresh parameter to bypass the cache.",
         "operationId": "GatewayLookupNumber",
         "parameters": [
           {
@@ -26730,6 +26853,7 @@
     "/api/ivr-menus": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of IVR menus with their options. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         "operationId": "ListIvrMenus",
         "parameters": [
           {
@@ -27016,6 +27140,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new IVR menu and assigns it to the current user's team. Logs an audit entry and emits an ivr_menu_created event.",
         "operationId": "CreateIvrMenu",
         "requestBody": {
           "content": {
@@ -27087,6 +27212,7 @@
     "/api/ivr-menus/{ivr_menu_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes an IVR menu and all its option associations. Emits an ivr_menu_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteIvrMenu",
         "parameters": [
           {
@@ -27154,6 +27280,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single IVR menu by ID, including its configured menu options.",
         "operationId": "GetIvrMenu",
         "parameters": [
           {
@@ -27228,6 +27355,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates an IVR menu's configuration. Captures before/after snapshots for audit logging and emits an ivr_menu_updated event.",
         "operationId": "UpdateIvrMenu",
         "parameters": [
           {
@@ -27314,6 +27442,7 @@
     "/api/ivr-menus/{ivr_menu_id}/options": {
       "get": {
         "deprecated": false,
+        "description": "Returns all options configured for the specified IVR menu. Validates that the parent IVR menu exists before listing.",
         "operationId": "ListIvrMenuOptions",
         "parameters": [
           {
@@ -27391,6 +27520,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Adds a new digit-mapped option to the specified IVR menu. Logs an audit entry and emits an ivr_menu_option_created event.",
         "operationId": "CreateIvrMenuOption",
         "parameters": [
           {
@@ -27477,6 +27607,7 @@
     "/api/ivr-menus/{ivr_menu_id}/options/{option_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Removes an option from the specified IVR menu. Emits an ivr_menu_option_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteIvrMenuOption",
         "parameters": [
           {
@@ -27557,6 +27688,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates an IVR menu option's digit mapping or destination. Captures before/after snapshots for audit logging and emits an ivr_menu_option_updated event.",
         "operationId": "UpdateIvrMenuOption",
         "parameters": [
           {
@@ -27656,6 +27788,7 @@
     "/api/me": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete the authenticated user's account. Captures a before snapshot, emits a user_deleted event, removes the user record, and records the deletion in the audit log.",
         "operationId": "AccountDelete",
         "responses": {
           "204": {
@@ -27692,6 +27825,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update the authenticated user's profile fields (e.g. name, avatar). Captures before/after snapshots, records the change in the audit log, and emits a user_updated event.",
         "operationId": "AccountProfileUpdate",
         "requestBody": {
           "content": {
@@ -27763,6 +27897,7 @@
     "/api/me/password": {
       "patch": {
         "deprecated": false,
+        "description": "Change the authenticated user's password after verifying the current password. Records the password change in the audit log.",
         "operationId": "AccountPasswordUpdate",
         "requestBody": {
           "content": {
@@ -27861,6 +27996,7 @@
     "/api/mfa/challenge/verify": {
       "post": {
         "deprecated": false,
+        "description": "Complete the second step of the MFA login flow by verifying a TOTP code or single-use backup recovery code. Reads the mfa_challenge cookie set during initial login, validates the code, issues OAuth2 access and refresh tokens, and clears the challenge cookie. Rate-limited to prevent brute-force attempts.",
         "operationId": "VerifyMfaChallenge",
         "parameters": [
           {
@@ -27944,6 +28080,7 @@
     "/api/mfa/confirm": {
       "post": {
         "deprecated": false,
+        "description": "Verify a TOTP code from the user's authenticator app to finalize MFA enrollment. On success, enables two-factor authentication, generates eight single-use backup recovery codes, and records the confirmation in the audit log. Rate-limited to prevent brute-force attempts.",
         "operationId": "ConfirmMfaSetup",
         "requestBody": {
           "content": {
@@ -28015,6 +28152,7 @@
     "/api/mfa/disable": {
       "delete": {
         "deprecated": false,
+        "description": "Turn off two-factor authentication for the authenticated user after verifying their password. Clears the TOTP secret and all backup codes, records the action in the audit log, and emits an mfa_disabled event.",
         "operationId": "DisableMfa",
         "requestBody": {
           "content": {
@@ -28079,6 +28217,7 @@
     "/api/mfa/disable/oauth/{provider}": {
       "get": {
         "deprecated": false,
+        "description": "Start an OAuth re-authentication flow to disable MFA for users who have no password set. Returns an authorization URL with a signed state token encoding the mfa.disabled action. Only available for users with a linked OAuth account and no local password.",
         "operationId": "InitiateDisableMfaOAuth",
         "parameters": [
           {
@@ -28151,6 +28290,7 @@
     "/api/mfa/enable": {
       "post": {
         "deprecated": false,
+        "description": "Generate a new TOTP secret and store it on the user record without enabling MFA. Returns the secret, a QR code image (base64-encoded PNG), and the provisioning URI for import into an authenticator app. Fails if MFA is already enabled.",
         "operationId": "InitiateMfaSetup",
         "responses": {
           "201": {
@@ -28174,6 +28314,7 @@
     "/api/mfa/regenerate-codes": {
       "post": {
         "deprecated": false,
+        "description": "Generate a fresh set of eight backup recovery codes after verifying the user's password. All previously issued backup codes are invalidated. The new codes are shown only once and recorded in the audit log.",
         "operationId": "RegenerateMfaBackupCodes",
         "requestBody": {
           "content": {
@@ -28245,6 +28386,7 @@
     "/api/mfa/status": {
       "get": {
         "deprecated": false,
+        "description": "Return the current MFA enrollment state for the authenticated user, including whether TOTP is enabled, when it was confirmed, and how many unused backup codes remain.",
         "operationId": "GetMfaStatus",
         "responses": {
           "200": {
@@ -28268,6 +28410,7 @@
     "/api/notifications": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of notifications for the current user. Supports search by title, date range filtering, and sorting.",
         "operationId": "ListNotifications",
         "parameters": [
           {
@@ -28556,6 +28699,7 @@
     "/api/notifications/mark-all-read": {
       "post": {
         "deprecated": false,
+        "description": "Mark every unread notification as read for the current user. Logs an audit entry and returns the new unread count of zero.",
         "operationId": "MarkAllNotificationsRead",
         "responses": {
           "201": {
@@ -28690,6 +28834,7 @@
     "/api/notifications/unread-count": {
       "get": {
         "deprecated": false,
+        "description": "Return the total number of unread notifications for the current user.",
         "operationId": "GetUnreadNotificationCount",
         "responses": {
           "200": {
@@ -28713,6 +28858,7 @@
     "/api/notifications/{notification_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete a single notification. Emits a notification_deleted event and logs an audit entry with the before-state snapshot.",
         "operationId": "DeleteNotification",
         "parameters": [
           {
@@ -28782,6 +28928,7 @@
     "/api/notifications/{notification_id}/read": {
       "patch": {
         "deprecated": false,
+        "description": "Mark a single notification as read for the current user. Returns 403 if the notification belongs to a different user.",
         "operationId": "MarkNotificationRead",
         "parameters": [
           {
@@ -28858,6 +29005,7 @@
     "/api/organization": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve the current organization settings. Creates a default organization record if none exists. Restricted to admin and superuser roles.",
         "operationId": "GetOrganization",
         "responses": {
           "200": {
@@ -28887,6 +29035,7 @@
       },
       "put": {
         "deprecated": false,
+        "description": "Update the organization name and settings. Creates the organization if it does not yet exist. Emits an event and logs an audit entry. Restricted to superusers.",
         "operationId": "UpdateOrganization",
         "requestBody": {
           "content": {
@@ -28958,6 +29107,7 @@
     "/api/phone-numbers": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of phone numbers. Supports search by number and friendly name, date range filtering, and sorting.",
         "operationId": "ManageListPhoneNumbers",
         "parameters": [
           {
@@ -29244,6 +29394,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Create a new phone number record. Emits a phone_number_created event and logs an audit entry.",
         "operationId": "ManageCreatePhoneNumber",
         "requestBody": {
           "content": {
@@ -29315,6 +29466,7 @@
     "/api/phone-numbers/{phone_number_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete a phone number record. Emits a phone_number_deleted event and logs an audit entry with the before-state snapshot.",
         "operationId": "ManageDeletePhoneNumber",
         "parameters": [
           {
@@ -29379,6 +29531,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve the full details of a single phone number by its ID.",
         "operationId": "ManageGetPhoneNumber",
         "parameters": [
           {
@@ -29450,6 +29603,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially update a phone number's fields. Only provided fields are changed. Emits a phone_number_updated event and logs an audit entry with before/after snapshots.",
         "operationId": "ManageUpdatePhoneNumber",
         "parameters": [
           {
@@ -29533,6 +29687,7 @@
     "/api/profile/oauth/accounts": {
       "get": {
         "deprecated": false,
+        "description": "Return a paginated list of OAuth provider accounts linked to the authenticated user, including provider name, email, link date, and last login time. Supports search filtering by provider name and account email.",
         "operationId": "ProfileOAuthAccounts",
         "parameters": [
           {
@@ -29762,6 +29917,7 @@
     "/api/profile/oauth/{provider}": {
       "delete": {
         "deprecated": false,
+        "description": "Remove the link between the authenticated user and an OAuth provider. Checks that unlinking will not leave the user without any authentication method. Records the unlink in the audit log and emits an oauth_account_unlinked event.",
         "operationId": "ProfileOAuthUnlink",
         "parameters": [
           {
@@ -29827,6 +29983,7 @@
     "/api/profile/oauth/{provider}/link": {
       "post": {
         "deprecated": false,
+        "description": "Initiate an OAuth flow to link a new provider account to the authenticated user. Returns an authorization URL with a signed state token encoding the link action and the user's ID. Uses the same callback endpoint as login so only one redirect URI needs to be registered with the provider.",
         "operationId": "ProfileOAuthLink",
         "parameters": [
           {
@@ -29917,6 +30074,7 @@
     "/api/profile/oauth/{provider}/upgrade-scopes": {
       "post": {
         "deprecated": false,
+        "description": "Initiate an OAuth re-authorization flow to request expanded permission scopes from the provider. Returns an authorization URL with a signed state token encoding the upgrade action and the user's ID.",
         "operationId": "ProfileOAuthUpgradeScopes",
         "parameters": [
           {
@@ -30007,6 +30165,7 @@
     "/api/ring-groups": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of ring groups with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         "operationId": "ListRingGroups",
         "parameters": [
           {
@@ -30293,6 +30452,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new ring group and assigns it to the current user's team. Logs an audit entry and emits a ring_group_created event.",
         "operationId": "CreateRingGroup",
         "requestBody": {
           "content": {
@@ -30364,6 +30524,7 @@
     "/api/ring-groups/{ring_group_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a ring group and all its member associations. Emits a ring_group_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteRingGroup",
         "parameters": [
           {
@@ -30431,6 +30592,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single ring group by ID, including its current list of members.",
         "operationId": "GetRingGroup",
         "parameters": [
           {
@@ -30505,6 +30667,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a ring group's configuration. Captures before/after snapshots for audit logging and emits a ring_group_updated event.",
         "operationId": "UpdateRingGroup",
         "parameters": [
           {
@@ -30591,6 +30754,7 @@
     "/api/ring-groups/{ring_group_id}/members": {
       "get": {
         "deprecated": false,
+        "description": "Returns all members belonging to the specified ring group. Validates that the parent ring group exists before listing.",
         "operationId": "ListRingGroupMembers",
         "parameters": [
           {
@@ -30668,6 +30832,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Adds a new member to the specified ring group. Logs an audit entry and emits a ring_group_member_created event.",
         "operationId": "CreateRingGroupMember",
         "parameters": [
           {
@@ -30754,6 +30919,7 @@
     "/api/ring-groups/{ring_group_id}/members/{member_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Removes a member from the specified ring group. Emits a ring_group_member_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteRingGroupMember",
         "parameters": [
           {
@@ -30834,6 +31000,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a member's settings within a ring group. Captures before/after snapshots for audit logging and emits a ring_group_member_updated event.",
         "operationId": "UpdateRingGroupMember",
         "parameters": [
           {
@@ -30933,6 +31100,7 @@
     "/api/roles": {
       "get": {
         "deprecated": false,
+        "description": "Return a paginated list of all roles with their assigned users. Supports searching by name or slug. Results are cached for 5 minutes.",
         "operationId": "ListRoles",
         "parameters": [
           {
@@ -31151,6 +31319,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Create a new role with the given name and permissions. Records the creation in the audit log and emits a role_created event.",
         "operationId": "CreateRole",
         "requestBody": {
           "content": {
@@ -31222,6 +31391,7 @@
     "/api/roles/{role_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently remove a role from the system. Built-in default roles cannot be deleted. Captures a before snapshot, records the deletion in the audit log, and emits a role_deleted event.",
         "operationId": "DeleteRole",
         "parameters": [
           {
@@ -31289,6 +31459,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single role by its UUID, including the list of users assigned to it.",
         "operationId": "GetRole",
         "parameters": [
           {
@@ -31363,6 +31534,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update a role's name or permissions. Built-in default roles cannot be modified. Captures before/after snapshots, records the change in the audit log, and emits a role_updated event.",
         "operationId": "UpdateRole",
         "parameters": [
           {
@@ -31449,6 +31621,7 @@
     "/api/roles/{role_slug}/assign": {
       "post": {
         "deprecated": false,
+        "description": "Grant a role to a user identified by email. Fails with 409 if the user already has the role. Records the assignment in the audit log and emits a user_role_assigned event.",
         "operationId": "AssignRole",
         "parameters": [
           {
@@ -31534,6 +31707,7 @@
     "/api/roles/{role_slug}/revoke": {
       "post": {
         "deprecated": false,
+        "description": "Remove a role from a user identified by email. Fails with 404 if the user does not have the role. Captures a before snapshot, records the revocation in the audit log, and emits a user_role_revoked event.",
         "operationId": "RevokeRole",
         "parameters": [
           {
@@ -31619,6 +31793,7 @@
     "/api/schedules": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of schedules with their entries. Supports search by name, filtering by team ID and schedule type, date range filtering, and configurable sort order.",
         "operationId": "ListSchedules",
         "parameters": [
           {
@@ -31948,6 +32123,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new schedule for the specified team. Validates that the user belongs to the team (unless superuser). Emits a schedule_created event and records an audit log entry.",
         "operationId": "CreateSchedule",
         "requestBody": {
           "content": {
@@ -32019,6 +32195,7 @@
     "/api/schedules/{schedule_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a schedule and all of its entries. Emits a schedule_deleted event and records an audit log entry.",
         "operationId": "DeleteSchedule",
         "parameters": [
           {
@@ -32086,6 +32263,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single schedule by ID, including all of its time entries.",
         "operationId": "GetSchedule",
         "parameters": [
           {
@@ -32160,6 +32338,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Updates schedule properties such as name, timezone, or type. Emits a schedule_updated event and records an audit log entry with before/after snapshots.",
         "operationId": "UpdateSchedule",
         "parameters": [
           {
@@ -32246,6 +32425,7 @@
     "/api/schedules/{schedule_id}/check": {
       "get": {
         "deprecated": false,
+        "description": "Evaluates whether the schedule is currently open or closed at the specified time (defaults to now in the schedule's timezone). Useful for real-time routing decisions.",
         "operationId": "CheckSchedule",
         "parameters": [
           {
@@ -32344,6 +32524,7 @@
     "/api/schedules/{schedule_id}/entries": {
       "get": {
         "deprecated": false,
+        "description": "Returns all time entries belonging to a schedule. Each entry defines a day-of-week and time range that determines when the schedule is active.",
         "operationId": "ListScheduleEntries",
         "parameters": [
           {
@@ -32421,6 +32602,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Adds a new time entry to a schedule defining a day-of-week and time range. Emits a schedule_entry_created event and records an audit log entry.",
         "operationId": "CreateScheduleEntry",
         "parameters": [
           {
@@ -32507,6 +32689,7 @@
     "/api/schedules/{schedule_id}/entries/{entry_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a single time entry from a schedule. Emits a schedule_entry_deleted event and records an audit log entry.",
         "operationId": "DeleteScheduleEntry",
         "parameters": [
           {
@@ -32587,6 +32770,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Updates an existing schedule entry's day, time range, or label. Emits a schedule_entry_updated event and records an audit log entry with before/after snapshots.",
         "operationId": "UpdateScheduleEntry",
         "parameters": [
           {
@@ -32686,6 +32870,7 @@
     "/api/search": {
       "get": {
         "deprecated": false,
+        "description": "Search across all entity types (teams, devices, tickets, extensions, phone numbers, fax numbers, locations, and users). Results are scoped by user permissions and limited to 20 total across all types.",
         "operationId": "GlobalSearch",
         "parameters": [
           {
@@ -32773,6 +32958,7 @@
     "/api/support/attachments/{attachment_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a ticket attachment. Emits a ticket_attachment_deleted event and records an audit log entry with the file name.",
         "operationId": "DeleteAttachment",
         "parameters": [
           {
@@ -32840,6 +33026,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves metadata for a single ticket attachment by ID, including file name, size, and content type.",
         "operationId": "GetAttachment",
         "parameters": [
           {
@@ -32916,6 +33103,7 @@
     "/api/support/feedback": {
       "post": {
         "deprecated": false,
+        "description": "Accepts multipart form data with a title, category, description, and optional file attachments (max 10 MB per file, 25 MB total). Sends the feedback as a formatted HTML email to support and records an audit log entry.",
         "operationId": "SubmitFeedback",
         "requestBody": {
           "content": {
@@ -32988,6 +33176,7 @@
     "/api/support/tickets": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of support tickets. Superusers see all tickets; regular users only see their own. Supports search by subject, date range filtering, and configurable sort order.",
         "operationId": "ListTickets",
         "parameters": [
           {
@@ -33274,6 +33463,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Opens a new support ticket and creates the initial message from the provided markdown body. Emits a ticket_created event, records an audit log entry, and sends a notification to the submitting user.",
         "operationId": "CreateTicket",
         "requestBody": {
           "content": {
@@ -33345,6 +33535,7 @@
     "/api/support/tickets/{ticket_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a support ticket and all associated messages and attachments. Restricted to support agents. Emits a ticket_deleted event and records an audit log entry.",
         "operationId": "DeleteTicket",
         "parameters": [
           {
@@ -33412,6 +33603,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single support ticket by ID, including the associated user and assignee. Access is restricted to the ticket owner or a superuser.",
         "operationId": "GetTicket",
         "parameters": [
           {
@@ -33486,6 +33678,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Updates ticket fields such as status, priority, or assignee. Emits status change and assignment events when applicable, records an audit log entry, and notifies newly assigned agents.",
         "operationId": "UpdateTicket",
         "parameters": [
           {
@@ -33572,6 +33765,7 @@
     "/api/support/tickets/{ticket_id}/attachments": {
       "post": {
         "deprecated": false,
+        "description": "Uploads one or more files as attachments to a ticket. This is a placeholder endpoint; full multipart upload support will be available in Phase 3.",
         "operationId": "UploadAttachment",
         "parameters": [
           {
@@ -33646,6 +33840,7 @@
     "/api/support/tickets/{ticket_id}/close": {
       "post": {
         "deprecated": false,
+        "description": "Transitions a ticket to the closed status. Emits a ticket_status_changed event, records an audit log entry, and sends a closure notification to the ticket owner.",
         "operationId": "CloseTicket",
         "parameters": [
           {
@@ -33722,6 +33917,7 @@
     "/api/support/tickets/{ticket_id}/messages": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of messages for a ticket, sorted by creation date ascending. Internal notes are hidden from non-superusers. Supports search by message body and date range filtering.",
         "operationId": "ListTicketMessages",
         "parameters": [
           {
@@ -34019,6 +34215,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Adds a new reply to a ticket thread. Emits a ticket_message_created event and records an audit log entry with the message snapshot.",
         "operationId": "CreateTicketMessage",
         "parameters": [
           {
@@ -34103,6 +34300,7 @@
     "/api/support/tickets/{ticket_id}/messages/{msg_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a ticket message. Only the original author may delete within the allowed edit window. Emits a ticket_message_deleted event and records an audit log entry.",
         "operationId": "DeleteTicketMessage",
         "parameters": [
           {
@@ -34181,6 +34379,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Edits an existing ticket message. Only the original author may edit, and the edit window is enforced by the requires_ticket_message_edit guard. Emits a ticket_message_updated event and records an audit log entry.",
         "operationId": "UpdateTicketMessage",
         "parameters": [
           {
@@ -34278,6 +34477,7 @@
     "/api/support/tickets/{ticket_id}/paste-image": {
       "post": {
         "deprecated": false,
+        "description": "Uploads an image pasted from the clipboard as a ticket attachment. This is a placeholder endpoint; full paste-image handling will be available in Phase 3.",
         "operationId": "PasteImage",
         "parameters": [
           {
@@ -34352,6 +34552,7 @@
     "/api/support/tickets/{ticket_id}/reopen": {
       "post": {
         "deprecated": false,
+        "description": "Reopens a previously closed ticket. Emits a ticket_status_changed event, records an audit log entry, and sends a reopened notification to the ticket owner.",
         "operationId": "ReopenTicket",
         "parameters": [
           {
@@ -34428,6 +34629,7 @@
     "/api/sync/{domain}/{field_name}/{value}": {
       "get": {
         "deprecated": false,
+        "description": "Look up an entity by domain, field name, and value across any registered domain. Supports lookup by ID and domain-specific fields such as name, slug, or extension number.",
         "operationId": "SyncEntity",
         "parameters": [
           {
@@ -35102,6 +35304,7 @@
     "/api/tasks": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of background tasks with optional filtering by task type, status, entity type, and entity ID.",
         "operationId": "ListTasks",
         "parameters": [
           {
@@ -35475,6 +35678,7 @@
     "/api/tasks/active": {
       "get": {
         "deprecated": false,
+        "description": "Returns all background tasks with a pending or running status for the current user, without pagination.",
         "operationId": "ListActiveTasks",
         "responses": {
           "200": {
@@ -35501,6 +35705,7 @@
     "/api/tasks/{task_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a background task record. Only tasks in a terminal state (completed, failed, or cancelled) may be deleted; attempting to delete a pending or running task will raise a permission error.",
         "operationId": "DeleteTask",
         "parameters": [
           {
@@ -35568,6 +35773,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves the full details of a single background task by its ID, including status, progress, and the user who initiated it.",
         "operationId": "GetTask",
         "parameters": [
           {
@@ -35644,6 +35850,7 @@
     "/api/tasks/{task_id}/cancel": {
       "post": {
         "deprecated": false,
+        "description": "Cancels a pending or running background task, emits a background_task_cancelled event, and logs the cancellation to the audit trail.",
         "operationId": "CancelTask",
         "parameters": [
           {
@@ -35720,6 +35927,7 @@
     "/api/teams": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of teams. Users with elevated privileges see all teams; regular users only see teams they belong to. Supports search by name and configurable sort order.",
         "operationId": "ListTeams",
         "parameters": [
           {
@@ -36006,6 +36214,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new team with the current user set as the owner. Emits a team_created event and records an audit log entry.",
         "operationId": "CreateTeam",
         "requestBody": {
           "content": {
@@ -36077,6 +36286,7 @@
     "/api/teams/{team_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a team and all associated memberships. Restricted to the team owner. Emits a team_deleted event and records an audit log entry.",
         "operationId": "DeleteTeam",
         "parameters": [
           {
@@ -36144,6 +36354,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single team by ID, including its tags and member list. Requires membership in the team.",
         "operationId": "GetTeam",
         "parameters": [
           {
@@ -36218,6 +36429,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Updates team properties such as name or description. Restricted to team admins. Emits a team_updated event and records an audit log entry with before/after snapshots.",
         "operationId": "UpdateTeam",
         "parameters": [
           {
@@ -36304,6 +36516,7 @@
     "/api/teams/{team_id}/invitations": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of invitations for a team. Supports search by email or inviter email, date range filtering, and configurable sort order. Requires team membership.",
         "operationId": "ListTeamInvitations",
         "parameters": [
           {
@@ -36579,6 +36792,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.",
         "operationId": "CreateTeamInvitation",
         "parameters": [
           {
@@ -36662,6 +36876,7 @@
     "/api/teams/{team_id}/invitations/{invitation_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Revokes a pending team invitation. Validates that the invitation belongs to the specified team. Emits a team_invitation_deleted event and records an audit log entry.",
         "operationId": "DeleteTeamInvitation",
         "parameters": [
           {
@@ -36738,6 +36953,7 @@
     "/api/teams/{team_id}/invitations/{invitation_id}/accept": {
       "post": {
         "deprecated": false,
+        "description": "Accepts a pending invitation and adds the current user as a team member with the invited role. Validates ownership, duplicate membership, and acceptance status. Emits a team_invitation_accepted event, records an audit log entry, and notifies the team owner.",
         "operationId": "AcceptTeamInvitation",
         "parameters": [
           {
@@ -36821,6 +37037,7 @@
     "/api/teams/{team_id}/invitations/{invitation_id}/reject": {
       "post": {
         "deprecated": false,
+        "description": "Declines a pending team invitation and deletes it. Only the invited user may reject. Emits a team_invitation_rejected event, records an audit log entry, and notifies the team owner.",
         "operationId": "RejectTeamInvitation",
         "parameters": [
           {
@@ -36904,6 +37121,7 @@
     "/api/teams/{team_id}/locations": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of locations for a team. Supports searching by name, city, and state, and optional filtering by location type.",
         "operationId": "ListLocations",
         "parameters": [
           {
@@ -37224,6 +37442,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Create a new location within a team. Requires team membership. Records an audit log entry and emits a location_created event.",
         "operationId": "CreateLocation",
         "parameters": [
           {
@@ -37310,6 +37529,7 @@
     "/api/teams/{team_id}/locations/{location_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Delete a location from a team. Fails with HTTP 409 if devices are still assigned to the location. Records an audit log entry.",
         "operationId": "DeleteLocation",
         "parameters": [
           {
@@ -37390,6 +37610,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve details for a single location, including its child locations. Scoped to the specified team.",
         "operationId": "GetLocation",
         "parameters": [
           {
@@ -37477,6 +37698,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update an existing location's attributes. Requires team membership. Records an audit log entry and emits a location_updated event.",
         "operationId": "UpdateLocation",
         "parameters": [
           {
@@ -37576,6 +37798,7 @@
     "/api/teams/{team_id}/members": {
       "delete": {
         "deprecated": false,
+        "description": "Removes a user from a team by email address. The team owner cannot be removed; ownership must be transferred first. Emits a team_member_removed event, records an audit log entry, and sends a removal notification to the user.",
         "operationId": "RemoveMemberFromTeam",
         "parameters": [
           {
@@ -37660,6 +37883,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Adds a user to a team by email address with the default member role. Checks for existing membership to prevent duplicates. Emits a team_member_added event, records an audit log entry, and sends a notification to the added user.",
         "operationId": "AddMemberToTeam",
         "parameters": [
           {
@@ -37746,6 +37970,7 @@
     "/api/teams/{team_id}/members/{user_id}": {
       "patch": {
         "deprecated": false,
+        "description": "Changes a team member's role. Restricted to team admins. Emits a team_member_updated event, records an audit log entry with before/after snapshots, and sends a role change notification to the member.",
         "operationId": "UpdateTeamMember",
         "parameters": [
           {
@@ -37845,6 +38070,7 @@
     "/api/teams/{team_id}/permissions": {
       "get": {
         "deprecated": false,
+        "description": "Returns all role-based permissions configured for a team. Each entry defines view and edit access for a specific feature area and role combination.",
         "operationId": "ListTeamPermissions",
         "parameters": [
           {
@@ -37922,6 +38148,7 @@
       },
       "put": {
         "deprecated": false,
+        "description": "Replaces the entire permission set for a team. Deletes all existing permissions and creates the new set atomically. Emits a team_permissions_updated event and records an audit log entry with before/after permission snapshots.",
         "operationId": "UpdateTeamPermissions",
         "parameters": [
           {
@@ -38011,6 +38238,7 @@
     "/api/time-conditions": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of time conditions. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         "operationId": "ListTimeConditions",
         "parameters": [
           {
@@ -38297,6 +38525,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new time condition and assigns it to the current user's team. Logs an audit entry and emits a time_condition_created event.",
         "operationId": "CreateTimeCondition",
         "requestBody": {
           "content": {
@@ -38368,6 +38597,7 @@
     "/api/time-conditions/{time_condition_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a time condition. Emits a time_condition_deleted event and logs an audit entry with the pre-deletion snapshot.",
         "operationId": "DeleteTimeCondition",
         "parameters": [
           {
@@ -38435,6 +38665,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves a single time condition by ID, including its current override mode status.",
         "operationId": "GetTimeCondition",
         "parameters": [
           {
@@ -38509,6 +38740,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a time condition's configuration. Captures before/after snapshots for audit logging and emits a time_condition_updated event.",
         "operationId": "UpdateTimeCondition",
         "parameters": [
           {
@@ -38595,6 +38827,7 @@
     "/api/time-conditions/{time_condition_id}/override": {
       "put": {
         "deprecated": false,
+        "description": "Sets or clears the override mode on a time condition, bypassing normal schedule-based routing. Logs an audit entry and emits both time_condition_updated and time_condition_override_changed events.",
         "operationId": "SetTimeConditionOverride",
         "parameters": [
           {
@@ -38681,6 +38914,7 @@
     "/api/users": {
       "get": {
         "deprecated": false,
+        "description": "Return a paginated list of user accounts with their roles, team memberships, and linked OAuth accounts. Supports search by name or email, date range filtering on created_at/updated_at, and configurable sort order.",
         "operationId": "ListUsers",
         "parameters": [
           {
@@ -38967,6 +39201,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Create a new user account with the supplied details. Records the creation in the audit log with a snapshot of the new record and emits a user_created event.",
         "operationId": "CreateUser",
         "requestBody": {
           "content": {
@@ -39038,6 +39273,7 @@
     "/api/users/roles": {
       "delete": {
         "deprecated": false,
+        "description": "Remove a role from a user identified by email. Iterates the user's role assignments to find and delete the matching record. Raises an IntegrityError if the user does not have the role. Records the removal in the audit log and emits a user_role_revoked event.",
         "operationId": "RevokeUserRole",
         "parameters": [
           {
@@ -39123,6 +39359,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Grant a role to a user identified by email, using upsert semantics. If the assignment already exists, returns a message indicating so without error. Records new assignments in the audit log and emits a user_role_assigned event.",
         "operationId": "AssignUserRole",
         "parameters": [
           {
@@ -39210,6 +39447,7 @@
     "/api/users/{user_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently remove a user account from the system. Captures a before snapshot, emits a user_deleted event, deletes the record, and records the deletion in the audit log.",
         "operationId": "DeleteUser",
         "parameters": [
           {
@@ -39277,6 +39515,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single user account by UUID, including their roles, team memberships, and linked OAuth accounts.",
         "operationId": "GetUser",
         "parameters": [
           {
@@ -39351,6 +39590,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update an existing user account's fields. Captures before/after snapshots, records the change in the audit log, and emits a user_updated event.",
         "operationId": "UpdateUser",
         "parameters": [
           {
@@ -39437,6 +39677,7 @@
     "/api/voice/extensions": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of the current user's extensions with E911 status enrichment. Supports search by extension number or display name.",
         "operationId": "ListExtensions",
         "parameters": [
           {
@@ -39723,6 +39964,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Create a new voice extension for the current user. Checks the PBX for conflicts, logs an audit entry, emits an event, and enqueues a background task to sync the extension to the PBX.",
         "operationId": "CreateExtension",
         "requestBody": {
           "content": {
@@ -39794,6 +40036,7 @@
     "/api/voice/extensions/sync": {
       "post": {
         "deprecated": false,
+        "description": "Import extensions from the first enabled FreePBX connection. Creates portal records for new PBX extensions and updates existing ones to match PBX data (display name, DND, forwarding). Logs an audit entry with sync results.",
         "operationId": "SyncExtensions",
         "responses": {
           "201": {
@@ -39817,6 +40060,7 @@
     "/api/voice/extensions/{ext_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Delete an extension and enqueue a background task to remove it from the PBX. Logs an audit entry and emits a deletion event. The caller must own the extension.",
         "operationId": "DeleteExtension",
         "parameters": [
           {
@@ -39884,6 +40128,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single extension by ID with E911 status enrichment. The caller must own the extension.",
         "operationId": "GetExtension",
         "parameters": [
           {
@@ -39958,6 +40203,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update an extension's display name or settings. Logs an audit entry, emits an event, and enqueues a background task to sync changes to the PBX. The caller must own the extension.",
         "operationId": "UpdateExtension",
         "parameters": [
           {
@@ -40044,6 +40290,7 @@
     "/api/voice/extensions/{ext_id}/devices": {
       "get": {
         "deprecated": false,
+        "description": "List all devices that have this extension assigned to a line. The caller must own the extension.",
         "operationId": "ListExtensionDevices",
         "parameters": [
           {
@@ -40123,6 +40370,7 @@
     "/api/voice/extensions/{ext_id}/dnd": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve the DND configuration for an extension, creating a default settings record if one does not exist. The caller must own the extension.",
         "operationId": "GetDndSettings",
         "parameters": [
           {
@@ -40197,6 +40445,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update DND settings for an extension (e.g. enabled state, schedule). Logs an audit entry and emits a DND-updated event. The caller must own the extension.",
         "operationId": "UpdateDndSettings",
         "parameters": [
           {
@@ -40283,6 +40532,7 @@
     "/api/voice/extensions/{ext_id}/dnd/toggle": {
       "post": {
         "deprecated": false,
+        "description": "Flip the DND enabled state for an extension. Returns the new DND state after toggling. Logs an audit entry and emits a DND-toggled event. The caller must own the extension.",
         "operationId": "ToggleDnd",
         "parameters": [
           {
@@ -40359,6 +40609,7 @@
     "/api/voice/extensions/{ext_id}/forwarding": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of forwarding rules for an extension, sorted by priority. Supports search by destination value. The caller must own the extension.",
         "operationId": "ListForwardingRules",
         "parameters": [
           {
@@ -40658,6 +40909,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Add a new forwarding rule to an extension. Logs an audit entry and emits forwarding-changed and creation events. The caller must own the extension.",
         "operationId": "CreateForwardingRule",
         "parameters": [
           {
@@ -40742,6 +40994,7 @@
       },
       "put": {
         "deprecated": false,
+        "description": "Bulk-replace all forwarding rules for an extension. Deletes existing rules and creates new ones from the request body. Logs a before/after audit entry. The caller must own the extension.",
         "operationId": "SetForwardingRules",
         "parameters": [
           {
@@ -40834,6 +41087,7 @@
     "/api/voice/extensions/{ext_id}/forwarding/{rule_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Remove a single forwarding rule from an extension. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.",
         "operationId": "DeleteForwardingRule",
         "parameters": [
           {
@@ -40914,6 +41168,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update fields on a single forwarding rule. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.",
         "operationId": "UpdateForwardingRule",
         "parameters": [
           {
@@ -41013,6 +41268,7 @@
     "/api/voice/extensions/{ext_id}/voicemail": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve the voicemail box configuration for an extension, creating a default box if one does not exist. The caller must own the extension.",
         "operationId": "GetVoicemailSettings",
         "parameters": [
           {
@@ -41087,6 +41343,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update voicemail box settings such as PIN, email address, or attachment preferences. If PBX-related fields change and a FreePBX connection exists, the voicemail configuration is synced to the PBX. Logs an audit entry.",
         "operationId": "UpdateVoicemailSettings",
         "parameters": [
           {
@@ -41173,6 +41430,7 @@
     "/api/voice/extensions/{ext_id}/voicemail/messages": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of voicemail messages for an extension's mailbox. Supports search by caller number, caller name, or transcription text. The caller must own the extension.",
         "operationId": "ListVoicemailMessages",
         "parameters": [
           {
@@ -41474,6 +41732,7 @@
     "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete a voicemail message from the extension's mailbox. Logs an audit entry and emits a deletion event. The caller must own the extension.",
         "operationId": "DeleteVoicemailMessage",
         "parameters": [
           {
@@ -41554,6 +41813,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single voicemail message by ID. Verifies the message belongs to the extension's voicemail box. The caller must own the extension.",
         "operationId": "GetVoicemailMessage",
         "parameters": [
           {
@@ -41641,6 +41901,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update a voicemail message's metadata such as read/unread status. Logs an audit entry and emits an update event. The caller must own the extension.",
         "operationId": "UpdateVoicemailMessage",
         "parameters": [
           {
@@ -41740,6 +42001,7 @@
     "/api/voice/phone-numbers": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of the current user's phone numbers with E911 registration status. Supports search by number or label.",
         "operationId": "ListPhoneNumbers",
         "parameters": [
           {
@@ -42026,6 +42288,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Register a new phone number for the current user. Logs an audit entry and emits a creation event.",
         "operationId": "CreatePhoneNumber",
         "requestBody": {
           "content": {
@@ -42097,6 +42360,7 @@
     "/api/voice/phone-numbers/unregistered-e911": {
       "get": {
         "deprecated": false,
+        "description": "List active phone numbers within a team that lack an E911 registration. The caller must be a superuser or a member of the specified team.",
         "operationId": "ListUnregisteredE911PhoneNumbers",
         "parameters": [
           {
@@ -42178,6 +42442,7 @@
     "/api/voice/phone-numbers/{phone_number_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Delete a phone number record. Logs an audit entry and emits a deletion event. The caller must own the phone number.",
         "operationId": "DeletePhoneNumber",
         "parameters": [
           {
@@ -42245,6 +42510,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single phone number by ID with E911 registration status. The caller must own the phone number.",
         "operationId": "GetPhoneNumber",
         "parameters": [
           {
@@ -42319,6 +42585,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Update a phone number's label or caller ID settings. Logs an audit entry and emits an update event. The caller must own the phone number.",
         "operationId": "UpdatePhoneNumber",
         "parameters": [
           {
@@ -42405,6 +42672,7 @@
     "/api/voicemail/boxes": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of voicemail boxes. Superusers see all boxes; regular users see only boxes associated with their own extensions.",
         "operationId": "ListVoicemailBoxes",
         "parameters": [
           {
@@ -42691,6 +42959,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Creates a new voicemail box, emits a voicemail_box_created event, logs the action to the audit trail, and sends a notification to the current user.",
         "operationId": "CreateVoicemailBox",
         "requestBody": {
           "content": {
@@ -42762,6 +43031,7 @@
     "/api/voicemail/boxes/{box_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a voicemail box and all its messages. Emits a voicemail_box_deleted event, logs the deletion to the audit trail, and sends a notification to the current user.",
         "operationId": "DeleteVoicemailBox",
         "parameters": [
           {
@@ -42829,6 +43099,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves the full details of a single voicemail box by its ID, including its associated extension.",
         "operationId": "GetVoicemailBox",
         "parameters": [
           {
@@ -42903,6 +43174,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially updates a voicemail box's settings, emits a voicemail_box_updated event, and logs before/after snapshots to the audit trail.",
         "operationId": "UpdateVoicemailBox",
         "parameters": [
           {
@@ -42989,6 +43261,7 @@
     "/api/voicemail/boxes/{box_id}/messages": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of voicemail messages for a specific voicemail box with optional filtering by read status and urgency. Validates that the box exists before querying messages.",
         "operationId": "ListVoicemailBoxMessages",
         "parameters": [
           {
@@ -43286,6 +43559,7 @@
     "/api/voicemail/boxes/{box_id}/unread": {
       "get": {
         "deprecated": false,
+        "description": "Returns the number of unread voicemail messages in the specified voicemail box.",
         "operationId": "GetVoicemailBoxUnreadCount",
         "parameters": [
           {
@@ -43362,6 +43636,7 @@
     "/api/voicemail/messages": {
       "get": {
         "deprecated": false,
+        "description": "Returns a paginated list of voicemail messages across all boxes with optional filtering by read status and urgency. Superusers see all messages; regular users see only messages for their extensions' voicemail boxes.",
         "operationId": "ListAllVoicemailMessages",
         "parameters": [
           {
@@ -43646,6 +43921,7 @@
     "/api/voicemail/messages/{message_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently deletes a voicemail message, emits a voicemail_message_deleted event, and logs the deletion with a before snapshot to the audit trail.",
         "operationId": "DeleteVoicemailMessageById",
         "parameters": [
           {
@@ -43713,6 +43989,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieves the full details of a single voicemail message by its ID, including caller information and the associated voicemail box.",
         "operationId": "GetVoicemailMessageById",
         "parameters": [
           {
@@ -43789,6 +44066,7 @@
     "/api/voicemail/messages/{message_id}/read": {
       "put": {
         "deprecated": false,
+        "description": "Marks a voicemail message as read or unread based on the request payload and emits a voicemail_message_updated event.",
         "operationId": "ToggleVoicemailMessageRead",
         "parameters": [
           {
@@ -43875,6 +44153,7 @@
     "/api/webhooks": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of webhooks owned by the current user. Supports search by name, date range filtering, and sorting.",
         "operationId": "ListWebhooks",
         "parameters": [
           {
@@ -44161,6 +44440,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Register a new webhook for the current user. Emits a webhook_created event and logs an audit entry.",
         "operationId": "CreateWebhook",
         "requestBody": {
           "content": {
@@ -44232,6 +44512,7 @@
     "/api/webhooks/endpoints": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve a paginated list of system-level webhook endpoints. Supports search by URL and description, date range filtering, and sorting.",
         "operationId": "ListWebhookEndpoints",
         "parameters": [
           {
@@ -44518,6 +44799,7 @@
       },
       "post": {
         "deprecated": false,
+        "description": "Register a new system-level webhook endpoint. Emits a webhook_endpoint_created event and logs an audit entry.",
         "operationId": "CreateWebhookEndpoint",
         "requestBody": {
           "content": {
@@ -44589,6 +44871,7 @@
     "/api/webhooks/endpoints/event-types": {
       "get": {
         "deprecated": false,
+        "description": "Return all registered webhook event types with their descriptions. Response is cached for 5 minutes.",
         "operationId": "ListWebhookEventTypes",
         "responses": {
           "200": {
@@ -44623,6 +44906,7 @@
     "/api/webhooks/endpoints/{endpoint_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete a webhook endpoint. Emits a webhook_endpoint_deleted event and logs an audit entry with the before-state snapshot.",
         "operationId": "DeleteWebhookEndpoint",
         "parameters": [
           {
@@ -44688,6 +44972,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single webhook endpoint by ID, including its subscribed event types and configuration.",
         "operationId": "GetWebhookEndpoint",
         "parameters": [
           {
@@ -44760,6 +45045,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially update a webhook endpoint's URL, event subscriptions, or other settings. Emits a webhook_endpoint_updated event and logs an audit entry with before/after snapshots.",
         "operationId": "UpdateWebhookEndpoint",
         "parameters": [
           {
@@ -44844,6 +45130,7 @@
     "/api/webhooks/{webhook_id}": {
       "delete": {
         "deprecated": false,
+        "description": "Permanently delete a webhook and its configuration. Emits a webhook_deleted event and logs an audit entry with the before-state snapshot.",
         "operationId": "DeleteWebhook",
         "parameters": [
           {
@@ -44911,6 +45198,7 @@
       },
       "get": {
         "deprecated": false,
+        "description": "Retrieve a single webhook by ID with its secret masked. Superusers may access any webhook; regular users may only access their own.",
         "operationId": "GetWebhook",
         "parameters": [
           {
@@ -44985,6 +45273,7 @@
       },
       "patch": {
         "deprecated": false,
+        "description": "Partially update a webhook's configuration. Emits a webhook_updated event and logs an audit entry with before/after snapshots.",
         "operationId": "UpdateWebhook",
         "parameters": [
           {
@@ -45071,6 +45360,7 @@
     "/api/webhooks/{webhook_id}/deliveries": {
       "get": {
         "deprecated": false,
+        "description": "Retrieve the 20 most recent delivery attempts for a specific webhook, ordered by most recent first.",
         "operationId": "ListWebhookDeliveries",
         "parameters": [
           {
@@ -45150,6 +45440,7 @@
     "/api/webhooks/{webhook_id}/deliveries/{delivery_id}/redeliver": {
       "post": {
         "deprecated": false,
+        "description": "Manually retry a previous webhook delivery attempt. Re-sends the original payload to the webhook URL and records the new delivery result.",
         "operationId": "RedeliverWebhookDelivery",
         "parameters": [
           {
@@ -45239,6 +45530,7 @@
     "/api/webhooks/{webhook_id}/test": {
       "post": {
         "deprecated": false,
+        "description": "Send a test payload to the webhook URL and return the result including status code, response time, and any errors. Records the delivery attempt.",
         "operationId": "TestWebhook",
         "parameters": [
           {
@@ -45315,6 +45607,7 @@
     "/health": {
       "get": {
         "deprecated": false,
+        "description": "Check system health by verifying database connectivity. Returns a 200 status when healthy or 500 when the database is offline.",
         "operationId": "SystemHealth",
         "responses": {
           "200": {
