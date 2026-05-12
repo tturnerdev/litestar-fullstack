@@ -1,4 +1,4 @@
-import { AlertCircle, Info, ShieldAlert, ShieldCheck } from "lucide-react"
+import { AlertCircle, Info, Loader2, ShieldAlert, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { BackupCodesDisplay } from "@/components/mfa/backup-codes-display"
@@ -163,7 +163,8 @@ export function MfaSection() {
               <Button onClick={() => setRegenOpen(false)}>Done</Button>
             ) : (
               <Button onClick={handleRegenerate} disabled={regenerate.isPending}>
-                Regenerate
+                {regenerate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {regenerate.isPending ? "Regenerating..." : "Regenerate"}
               </Button>
             )}
           </DialogFooter>
