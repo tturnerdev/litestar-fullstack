@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/error-boundary"
 import { RootErrorBoundary } from "@/components/ui/error-boundary"
 import { NotFoundPage } from "@/components/ui/not-found-page"
 import { client } from "@/lib/generated/api/client.gen"
+import { recordActivity } from "@/lib/session-activity"
 import { ThemeProvider } from "@/lib/theme-context"
 
 // Import the generated route tree
@@ -149,11 +150,31 @@ client.interceptors.response.use(async (response, request, options) => {
   }
 })
 
+// Track successful API responses as user activity for session timeout.
+// This ensures that background polling or user-initiated fetches keep the
+// session alive without requiring explicit mouse/keyboard interaction.
+client.interceptors.response.use((response) => {
+  if (response.ok) {
+    recordActivity()
+  }
+  return response
+})
+
 // Ensure non-OK responses throw so callers (React Query, checkAuth, etc.)
 // see them as errors rather than successful responses with undefined data.
 client.interceptors.error.use(async (error) => {
   throw error
 })
+
+// Track user interaction as activity for session-timeout detection.
+// Uses { passive: true, capture: true } so these listeners never block
+// normal event propagation and fire before any stopPropagation() calls.
+for (const eventName of ["mousedown", "keydown", "scroll", "touchstart"] as const) {
+  document.addEventListener(eventName, recordActivity, {
+    passive: true,
+    capture: true,
+  })
+}
 
 // Create the router using the generated route tree
 const router = createRouter({
