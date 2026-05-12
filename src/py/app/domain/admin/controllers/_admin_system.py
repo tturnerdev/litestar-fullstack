@@ -43,10 +43,10 @@ async def _get_redis_info() -> RedisInfo | None:
 
         saq_plugin = get_saq_plugin()
         queues = saq_plugin.get_queues()
-        if not queues:
+        if not queues.queues:
             return None
         # Get the redis client from the first available queue
-        queue = next(iter(queues.values()))
+        queue = next(iter(queues.queues.values()))
         info = await queue.redis.info()
         return RedisInfo(
             status="online",
@@ -144,7 +144,7 @@ class AdminSystemController(Controller):
             from app.server.plugins import get_saq_plugin
 
             saq_plugin = get_saq_plugin()
-            for queue in saq_plugin.get_queues().values():
+            for queue in saq_plugin.get_queues().queues.values():
                 try:
                     info = await queue.info()
                     worker_queues.append(

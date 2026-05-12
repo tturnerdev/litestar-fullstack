@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 REFRESH_COOKIE_NAME = "refresh_token"
-REFRESH_TOKEN_MAX_AGE = 604800 # 7 days
+REFRESH_TOKEN_MAX_AGE = 604800  # 7 days
 LOGIN_RATE_LIMIT_WINDOW_MINUTES = 15
 LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 10
 SIGNUP_RATE_LIMIT_WINDOW_MINUTES = 60
@@ -276,10 +276,11 @@ class AccessController(Controller):
         actor_email = None
         actor_name = None
         try:
-            if hasattr(request, "user") and request.user:
-                actor_id = request.user.id
-                actor_email = request.user.email
-                actor_name = request.user.name
+            user = request.scope.get("user")
+            if user:
+                actor_id = user.id
+                actor_email = user.email
+                actor_name = user.name
         except Exception:  # noqa: BLE001
             logger.warning("Failed to extract actor info during logout", exc_info=True)
 
@@ -406,16 +407,16 @@ class AccessController(Controller):
         )
 
         items = [
-            {
-                "id": token.id,
-                "device_info": token.device_info,
-                "created_at": token.created_at,
-                "expires_at": token.expires_at,
-                "is_current": token.token_hash == current_token_hash,
-            }
+            ActiveSession(
+                id=token.id,
+                created_at=token.created_at,
+                expires_at=token.expires_at,
+                device_info=token.device_info,
+                is_current=token.token_hash == current_token_hash,
+            )
             for token in active_tokens
         ]
-        return refresh_token_service.to_schema(items, total, filters, schema_type=ActiveSession)
+        return refresh_token_service.to_schema(items, total, filters)
 
     @delete(
         operation_id="RevokeSession",
