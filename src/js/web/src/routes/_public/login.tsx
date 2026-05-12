@@ -1,6 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { z } from "zod"
 import { AuthForm } from "@/components/auth/auth-form"
+import { useAuthStore } from "@/lib/auth"
+import { getSafeRedirectUrl } from "@/lib/redirect-utils"
 
 export const Route = createFileRoute("/_public/login")({
   validateSearch: (search) =>
@@ -9,6 +11,12 @@ export const Route = createFileRoute("/_public/login")({
         redirect: z.string().optional(),
       })
       .parse(search),
+  beforeLoad: ({ search }) => {
+    const { isAuthenticated } = useAuthStore.getState()
+    if (isAuthenticated) {
+      throw redirect({ to: getSafeRedirectUrl(search.redirect) })
+    }
+  },
   component: LoginPage,
 })
 

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, redirect } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { ArrowLeft, CheckCircle2, KeyRound, Mail as MailIcon } from "lucide-react"
 import { useState } from "react"
@@ -14,9 +14,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useAuthStore } from "@/lib/auth"
 import { forgotPassword } from "@/lib/generated/api"
+import { DEFAULT_AUTH_REDIRECT } from "@/lib/redirect-utils"
 
 export const Route = createFileRoute("/_public/forgot-password")({
+  beforeLoad: () => {
+    const { isAuthenticated } = useAuthStore.getState()
+    if (isAuthenticated) {
+      throw redirect({ to: DEFAULT_AUTH_REDIRECT })
+    }
+  },
   component: ForgotPasswordPage,
 })
 
