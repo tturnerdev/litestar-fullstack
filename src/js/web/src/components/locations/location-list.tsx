@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { AlertCircle, Building2, Eye, Loader2, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -135,19 +135,45 @@ export function LocationList({
     sortOrder: sortDir ?? undefined,
   })
 
-  // Report freshness state to parent for DataFreshness indicator
-  useEffect(() => {
-    if (onFreshnessChange && dataUpdatedAt) {
-      onFreshnessChange({ dataUpdatedAt, isRefetching, refetch: () => refetch() })
-    }
-  }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
+  // Report freshness state to parent for DataFreshness indicator.
+  // Use refs to hold callback props so we don't create new objects on every
+  // render (which would trigger parent re-renders in a loop).
+  const refetchRef = useRef(refetch)
+  refetchRef.current = refetch
 
-  const locations = data?.items ?? []
+  const onFreshnessChangeRef = useRef(onFreshnessChange)
+  onFreshnessChangeRef.current = onFreshnessChange
+
+  const onLocationsChangeRef = useRef(onLocationsChange)
+  onLocationsChangeRef.current = onLocationsChange
+
+  const stableRefetch = useCallback(() => {
+    refetchRef.current()
+  }, [])
+
+  const stableOnFreshnessChange = useCallback((state: LocationFreshnessState) => {
+    onFreshnessChangeRef.current?.(state)
+  }, [])
+
+  const stableOnLocationsChange = useCallback((locs: Location[]) => {
+    onLocationsChangeRef.current?.(locs)
+  }, [])
+
+  useEffect(() => {
+    if (dataUpdatedAt) {
+      stableOnFreshnessChange({ dataUpdatedAt, isRefetching, refetch: stableRefetch })
+    }
+  }, [stableOnFreshnessChange, dataUpdatedAt, isRefetching, stableRefetch])
+
+  // Stabilize the locations array reference — `data?.items ?? []` would create
+  // a new empty array on every render when data is undefined, which triggers
+  // the onLocationsChange effect in an infinite loop.
+  const locations = useMemo(() => data?.items ?? [], [data])
 
   // Report locations data to parent for page-level export
   useEffect(() => {
-    onLocationsChange?.(locations)
-  }, [onLocationsChange, locations])
+    stableOnLocationsChange(locations)
+  }, [stableOnLocationsChange, locations])
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
