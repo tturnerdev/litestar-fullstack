@@ -1,0 +1,247 @@
+# =============================================================================
+# Production stack — deploy as a Portainer "Stack"
+# =============================================================================
+# This file is intentionally separate from docker-compose.yml (the local
+# all-in-one dev/test stack). It does NOT affect local development.
+#
+# Design notes
+# ------------
+# * Pulls pre-built images from GHCR (published by
+#   .github/workflows/release-images.yaml). Set APP_IMAGE_TAG to a released
+#   version (e.g. v0.3.0) — avoid :latest in production.
+# * TLS is terminated by an EXTERNAL reverse proxy. This stack only publishes
+#   the app's plain-HTTP port (APP_PORT, default 8000). Point your proxy at it.
+# * All secrets/credentials are supplied as environment variables — in
+#   Portainer use the Stack "Environment variables" section. See
+#   .env.portainer.example for the full list of variables and which are
+#   required.
+#
+# Services
+# --------
+#   db        PostgreSQL                  (stateful — backed up by `backup`)
+#   cache     Valkey (Redis-compatible)   (queue + cache; AOF persisted)
+#   migrator  one-shot `database upgrade`; runs before app/worker, then exits
+#   app       Litestar ASGI application   (HTTP — behind your reverse proxy)
+#   worker    SAQ background worker + scheduled cron jobs
+#             (hourly auth-token cleanup, OAuth-token refresh every 15m)
+#   backup    scheduled pg_dump with retention -> db-backups volume
+#   storage   (OPTIONAL) rustfs S3-compatible object storage — see below
+#
+# In Portainer, `migrator` will show as "exited (0)" after a successful
+# deploy — that is expected, it is a one-shot job.
+# =============================================================================
+
+x-app-service: &app-service
+  image: ghcr.io/tturnerdev/litestar-fullstack:${APP_IMAGE_TAG:-latest}
+  pull_policy: always
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+  depends_on:
+    db:
+      condition: service_healthy
+    cache:
+      condition: service_healthy
+    migrator:
+      condition: service_completed_successfully
+  environment: &app-env
+    # --- core application ---
+    SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY (e.g. `openssl rand -hex 32`)}
+    APP_URL: ${APP_URL:?set APP_URL (public URL, e.g. https://app.example.com)}
+    LITESTAR_DEBUG: "false"
+    LITESTAR_HOST: "0.0.0.0"
+    LITESTAR_PORT: "8000"
+    # Trust X-Forwarded-* from your reverse proxy so client IP / scheme are
+    # correct. Use "*" only if the app port is not otherwise reachable.
+    LITESTAR_TRUSTED_PROXIES: ${LITESTAR_TRUSTED_PROXIES:-*}
+    COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    LOG_LEVEL: ${LOG_LEVEL:-20}
+    ALLOWED_CORS_ORIGINS: ${ALLOWED_CORS_ORIGINS:-["*"]}
+    VITE_DEV_MODE: "false"
+    # --- database ---
+    DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-app}
+    DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-10}
+    DATABASE_MAX_POOL_OVERFLOW: ${DATABASE_MAX_POOL_OVERFLOW:-10}
+    DATABASE_POOL_TIMEOUT: ${DATABASE_POOL_TIMEOUT:-30}
+    DATABASE_POOL_RECYCLE: ${DATABASE_POOL_RECYCLE:-300}
+    DATABASE_PRE_POOL_PING: ${DATABASE_PRE_POOL_PING:-true}
+    # --- background queue / cache ---
+    SAQ_REDIS_URL: redis://cache:6379/0
+    SAQ_USE_SERVER_LIFESPAN: "false"
+    # --- email (defaults to `console` = emails are logged, not sent) ---
+    EMAIL_BACKEND: ${EMAIL_BACKEND:-console}
+    EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-noreply@localhost}
+    EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Litestar App}
+    EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-}
+    EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+    EMAIL_SMTP_USER: ${EMAIL_SMTP_USER:-}
+    EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD:-}
+    EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
+    RESEND_API_KEY: ${RESEND_API_KEY:-}
+    # --- OAuth (optional) ---
+    GOOGLE_OAUTH2_CLIENT_ID: ${GOOGLE_OAUTH2_CLIENT_ID:-}
+    GOOGLE_OAUTH2_CLIENT_SECRET: ${GOOGLE_OAUTH2_CLIENT_SECRET:-}
+    GITHUB_OAUTH2_CLIENT_ID: ${GITHUB_OAUTH2_CLIENT_ID:-}
+    GITHUB_OAUTH2_CLIENT_SECRET: ${GITHUB_OAUTH2_CLIENT_SECRET:-}
+    # --- object storage (optional; uncomment the `storage` service below too) ---
+    # STORAGE_BACKEND: s3
+    # STORAGE_BUCKET: ${STORAGE_BUCKET:-uploads}
+    # AWS_ENDPOINT_URL: http://storage:9000
+    # AWS_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY:-}
+    # AWS_SECRET_ACCESS_KEY: ${STORAGE_SECRET_KEY:-}
+
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION:-17}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      # Keep PGDATA in a subdirectory of the volume mount (recommended).
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  cache:
+    image: valkey/valkey:${VALKEY_VERSION:-8}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - cache-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  migrator:
+    <<: *app-service
+    restart: "no"
+    command: ["litestar", "database", "upgrade", "--no-prompt"]
+    # migrator must not depend on itself; only needs the database.
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    <<: *app-service
+    command: ["litestar", "run", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      # host:container — point your external reverse proxy at host:${APP_PORT}.
+      # To restrict to the local host only, set APP_PORT and prefix 127.0.0.1,
+      # e.g. "127.0.0.1:8000:8000".
+      - "${APP_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).status == 200 else 1)"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "${APP_CPU_LIMIT:-2}"
+          memory: ${APP_MEM_LIMIT:-1g}
+
+  worker:
+    <<: *app-service
+    command: ["litestar", "workers", "run"]
+    environment:
+      <<: *app-env
+      # Workers use short-lived connections; disable the SQLAlchemy pool.
+      DATABASE_POOL_DISABLED: "true"
+      # The SAQ admin web UI is served by the app process, not the worker.
+      SAQ_WEB_ENABLED: "false"
+      SAQ_PROCESSES: ${SAQ_PROCESSES:-1}
+      SAQ_CONCURRENCY: ${SAQ_CONCURRENCY:-10}
+    deploy:
+      resources:
+        limits:
+          cpus: "${WORKER_CPU_LIMIT:-1}"
+          memory: ${WORKER_MEM_LIMIT:-1g}
+
+  backup:
+    # Scheduled logical backups (pg_dump, gzipped) with rotation.
+    # https://github.com/prodrigestivill/docker-postgres-backup-local
+    image: prodrigestivill/postgres-backup-local:${PG_BACKUP_VERSION:-17}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
+      BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}
+      BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-6}
+      # Include DROP ... IF EXISTS statements so a dump can be restored over an
+      # existing database.
+      POSTGRES_EXTRA_OPTS: "--clean --if-exists"
+      HEALTHCHECK_PORT: "8080"
+    volumes:
+      # Named volume by default. For easy off-box copying you may instead bind
+      # a host path here, e.g. - /srv/litestar-backups:/backups
+      - db-backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # OPTIONAL: S3-compatible object storage for file uploads.
+  # To use it: uncomment this service, the `storage-data` volume below, and the
+  # STORAGE_* / AWS_* variables in x-app-env above. Then create the bucket once
+  # (see docs/deployment.md). If you do not need object storage, leave this off
+  # and the app stores uploads on local disk inside the app container.
+  # ---------------------------------------------------------------------------
+  # storage:
+  #   image: rustfs/rustfs:latest
+  #   restart: unless-stopped
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "5"
+  #   environment:
+  #     RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?set STORAGE_ACCESS_KEY}
+  #     RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?set STORAGE_SECRET_KEY}
+  #     RUSTFS_VOLUMES: /data
+  #     RUSTFS_CONSOLE_ENABLE: "true"
+  #   volumes:
+  #     - storage-data:/data
+
+volumes:
+  db-data: {}
+  cache-data: {}
+  db-backups: {}
+  # storage-data: {}
