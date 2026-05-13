@@ -60,6 +60,41 @@ async def test_set_avatar_requires_authentication(client: AsyncClient) -> None:
     assert response.status_code == 401
 
 
+async def test_avatar_is_served_inline_as_image(authenticated_client: AsyncTestClient) -> None:
+    response = await authenticated_client.put(
+        "/api/me/avatar",
+        files={"data": ("me.png", _PNG, "image/png")},
+    )
+    assert response.status_code == 200
+    avatar_url = response.json()["avatarUrl"]
+    content = await authenticated_client.get(avatar_url)
+    assert content.status_code == 200
+    assert content.headers["content-type"].startswith("image/png")
+    assert content.headers["content-disposition"].startswith("inline")
+    assert content.headers.get("x-content-type-options") == "nosniff"
+
+
+async def test_other_authenticated_user_can_view_avatar(
+    seeded_client: AsyncClient,
+    superuser_token_headers: dict[str, str],
+    user_token_headers: dict[str, str],
+) -> None:
+    # superuser sets an avatar
+    set_response = await seeded_client.put(
+        "/api/me/avatar",
+        files={"data": ("super.png", _PNG, "image/png")},
+        headers=superuser_token_headers,
+    )
+    assert set_response.status_code == 200
+    avatar_url = set_response.json()["avatarUrl"]
+
+    # a different authenticated user can fetch it (avatars are intentionally
+    # readable to any authenticated user so the UI can display them).
+    other = await seeded_client.get(avatar_url, headers=user_token_headers)
+    assert other.status_code == 200
+    assert other.content == _PNG
+
+
 async def test_team_admin_can_set_team_logo(
     authenticated_client: AsyncTestClient,
     test_team: m.Team,

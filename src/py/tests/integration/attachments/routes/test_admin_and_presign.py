@@ -58,17 +58,38 @@ async def test_presign_returns_400_for_unsupported_backend(
     assert response.status_code == 400
 
 
-async def test_complete_upload_returns_400_when_object_missing(
+async def test_complete_upload_rejects_path_outside_callers_namespace(
     seeded_client: AsyncClient,
     user_token_headers: dict[str, str],
 ) -> None:
-    response = await seeded_client.post(
-        "/api/uploads/complete",
-        json={
-            "path": "attachment/does-not-exist.bin",
-            "originalFilename": "does-not-exist.bin",
-            "contentType": "application/octet-stream",
-        },
-        headers=user_token_headers,
-    )
-    assert response.status_code == 400
+    # Either of these would let an attacker claim someone else's object.
+    bad_paths = [
+        "attachment/some-other-user-id/foo.bin",
+        "../etc/passwd",
+        "/absolute/path",
+        "attachment/..%2f..%2fevil.bin",
+    ]
+    for path in bad_paths:
+        response = await seeded_client.post(
+            "/api/uploads/complete",
+            json={
+                "path": path,
+                "originalFilename": "anything.bin",
+                "contentType": "application/octet-stream",
+            },
+            headers=user_token_headers,
+        )
+        assert response.status_code == 400, f"path {path!r} unexpectedly accepted: {response.text}"
+
+
+async def test_presign_rejects_restricted_purposes(
+    seeded_client: AsyncClient,
+    user_token_headers: dict[str, str],
+) -> None:
+    for purpose in ("avatar", "team_logo"):
+        response = await seeded_client.post(
+            "/api/uploads/presign",
+            json={"filename": "x.png", "contentType": "image/png", "purpose": purpose},
+            headers=user_token_headers,
+        )
+        assert response.status_code == 400, f"purpose {purpose!r} unexpectedly accepted"

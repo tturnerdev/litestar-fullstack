@@ -76,6 +76,27 @@ async def test_delete_upload_removes_it(
     assert get_response.status_code == 404
 
 
+async def test_download_forces_attachment_disposition_and_octet_stream(
+    seeded_client: AsyncClient,
+    user_token_headers: dict[str, str],
+) -> None:
+    # Upload an HTML-shaped payload with a permissive content type.
+    response = await seeded_client.post(
+        "/api/uploads",
+        files={"data": ("evil.html", b"<script>alert(1)</script>", "text/html")},
+        headers=user_token_headers,
+    )
+    assert response.status_code == 201
+    attachment_id = response.json()["id"]
+
+    content_response = await seeded_client.get(f"/api/uploads/{attachment_id}/content", headers=user_token_headers)
+    # Server must NOT serve user content as text/html on the app origin — that would be stored XSS.
+    assert content_response.status_code == 200
+    assert content_response.headers["content-type"].startswith("application/octet-stream")
+    assert content_response.headers["content-disposition"].startswith("attachment")
+    assert content_response.headers.get("x-content-type-options") == "nosniff"
+
+
 async def test_other_user_cannot_access_but_superuser_can(
     seeded_client: AsyncClient,
     superuser_token_headers: dict[str, str],

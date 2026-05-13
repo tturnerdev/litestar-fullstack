@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, MediaType, Response, delete, get, post
+from litestar import Controller, Response, delete, get, post
 from litestar.datastructures import (
     UploadFile,  # noqa: TC002  (resolved at runtime by Litestar for the request signature)
 )
 from litestar.enums import RequestEncodingType
-from litestar.exceptions import PermissionDeniedException
+from litestar.exceptions import ClientException, PermissionDeniedException
 from litestar.params import Body, Dependency, Parameter
 
 from app.db import models as m
@@ -32,14 +32,66 @@ if TYPE_CHECKING:
     from app.domain.admin.services import AuditLogService
 
 
+# Purposes whose content is intended to be displayed inline (e.g. as an
+# ``<img src>``) and is therefore readable to any authenticated user.
+_PUBLIC_VIEW_PURPOSES: frozenset[m.AttachmentPurpose] = frozenset(
+    {m.AttachmentPurpose.AVATAR, m.AttachmentPurpose.TEAM_LOGO}
+)
+
+# Image content types we will serve inline for ``_PUBLIC_VIEW_PURPOSES`` content.
+# Anything else (HTML, SVG, JS, arbitrary documents) is forced to download as
+# ``application/octet-stream`` to prevent stored-XSS / content-sniffing
+# attacks against the application origin.
+_SAFE_INLINE_CONTENT_TYPES: frozenset[str] = frozenset(
+    {"image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"}
+)
+
+
 def _content_url(attachment_id: UUID) -> str:
     return f"/api/uploads/{attachment_id}/content"
 
 
 def _assert_access(attachment: m.Attachment, user: m.User) -> None:
+    """Authorization for read access to a stored attachment.
+
+    Avatars and team logos are visible to any authenticated user — they are
+    displayed inline in the UI and gating them per-uploader is impractical.
+    All other purposes are restricted to the uploader or a superuser.
+    """
     if user.is_superuser or attachment.uploaded_by_id == user.id:
         return
+    if attachment.purpose in _PUBLIC_VIEW_PURPOSES:
+        return
     raise PermissionDeniedException(detail="You do not have access to this attachment.")
+
+
+def _safe_download_response(content: bytes, attachment: m.Attachment) -> Response[bytes]:
+    """Return a response for streamed attachment bytes with appropriate hardening.
+
+    For attachments whose purpose is inline-display (avatars, team logos), we
+    allow the recorded content-type only if it is in a safe image whitelist;
+    everything else is forced to ``application/octet-stream`` with
+    ``Content-Disposition: attachment``. ``X-Content-Type-Options: nosniff`` is
+    always set so browsers do not promote a downloaded blob to HTML.
+    """
+    if attachment.purpose in _PUBLIC_VIEW_PURPOSES and attachment.content_type in _SAFE_INLINE_CONTENT_TYPES:
+        media_type = attachment.content_type
+        disposition = f'inline; filename="{attachment.original_filename}"'
+    else:
+        media_type = "application/octet-stream"
+        disposition = f'attachment; filename="{attachment.original_filename}"'
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={
+            "content-disposition": disposition,
+            "x-content-type-options": "nosniff",
+        },
+    )
+
+
+def _user_is_team_member(user: m.User, team_id: UUID) -> bool:
+    return user.is_superuser or any(membership.team.id == team_id for membership in user.teams)
 
 
 class AttachmentController(Controller):
@@ -91,6 +143,11 @@ class AttachmentController(Controller):
         purpose: m.AttachmentPurpose = m.AttachmentPurpose.ATTACHMENT,
     ) -> Attachment:
         """Upload a file and store it in object storage."""
+        from app.domain.attachments.services._attachment import RESTRICTED_PURPOSES
+
+        if purpose in RESTRICTED_PURPOSES:
+            msg = "Avatars and team logos must be uploaded through their dedicated endpoints."
+            raise ClientException(detail=msg)
         db_obj = await attachments_service.create_from_upload(
             data,
             uploaded_by_id=current_user.id,
@@ -124,11 +181,10 @@ class AttachmentController(Controller):
         try:
             purpose = m.AttachmentPurpose(data.purpose)
         except ValueError as exc:
-            from litestar.exceptions import ClientException
-
             msg = f"Unknown purpose: {data.purpose!r}"
             raise ClientException(detail=msg) from exc
         path, url, expires_in = await attachments_service.presign_upload(
+            uploaded_by_id=current_user.id,
             original_filename=data.filename,
             purpose=purpose,
         )
@@ -146,16 +202,16 @@ class AttachmentController(Controller):
         try:
             purpose = m.AttachmentPurpose(data.purpose)
         except ValueError as exc:
-            from litestar.exceptions import ClientException
-
             msg = f"Unknown purpose: {data.purpose!r}"
             raise ClientException(detail=msg) from exc
+        if data.team_id is not None and not _user_is_team_member(current_user, data.team_id):
+            raise PermissionDeniedException(detail="You are not a member of that team.")
         db_obj = await attachments_service.complete_upload(
+            uploaded_by_id=current_user.id,
             path=data.path,
             original_filename=data.original_filename,
             content_type=data.content_type,
             purpose=purpose,
-            uploaded_by_id=current_user.id,
             team_id=data.team_id,
         )
         await audit_service.log_action(
@@ -190,22 +246,25 @@ class AttachmentController(Controller):
         schema.download_url = _content_url(schema.id)
         return schema
 
-    @get(operation_id="DownloadUpload", path="/{attachment_id:uuid}/content", media_type=MediaType.TEXT)
+    @get(operation_id="DownloadUpload", path="/{attachment_id:uuid}/content", media_type="application/octet-stream")
     async def download_upload(
         self,
         attachments_service: AttachmentService,
         current_user: m.User,
         attachment_id: Annotated[UUID, Parameter(title="Attachment ID", description="The attachment to download.")],
     ) -> Response[bytes]:
-        """Stream the raw bytes of an uploaded file."""
+        """Stream the raw bytes of an uploaded file.
+
+        For attachment-purpose downloads (and any non-image content) the
+        response is forced to ``application/octet-stream`` with
+        ``Content-Disposition: attachment`` to prevent stored-XSS via uploaded
+        HTML/SVG/JS. Avatars and team logos with a whitelisted image content
+        type are served inline so the browser can render them.
+        """
         db_obj = await attachments_service.get(attachment_id)
         _assert_access(db_obj, current_user)
         content = await AttachmentService.get_content(db_obj)
-        return Response(
-            content=content,
-            media_type=db_obj.content_type,
-            headers={"content-disposition": f'inline; filename="{db_obj.original_filename}"'},
-        )
+        return _safe_download_response(content, db_obj)
 
     @delete(operation_id="DeleteUpload", path="/{attachment_id:uuid}", return_dto=None)
     async def delete_upload(
