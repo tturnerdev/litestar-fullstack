@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -307,9 +307,9 @@ def _build_cdr_filters(
     """
     clauses: list[Any] = []
     if start_date is not None:
-        clauses.append(m.CallRecord.call_date >= start_date)
+        clauses.append(m.CallRecord.call_date >= datetime.combine(start_date, time.min, tzinfo=UTC))
     if end_date is not None:
-        clauses.append(m.CallRecord.call_date < end_date + timedelta(days=1))
+        clauses.append(m.CallRecord.call_date < datetime.combine(end_date + timedelta(days=1), time.min, tzinfo=UTC))
     if direction is not None:
         clauses.append(m.CallRecord.direction == direction)
     if disposition is not None:
