@@ -6,6 +6,7 @@ from uuid import UUID
 from advanced_alchemy.base import UUIDv7AuditBase
 from advanced_alchemy.types import EncryptedString
 from sqlalchemy import ForeignKey, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.models._voice_enums import GreetingType
@@ -59,6 +60,10 @@ class VoicemailBox(UUIDv7AuditBase):
         uselist=True,
         cascade="all, delete",
     )
+
+    @hybrid_property
+    def extension_number(self) -> str | None:
+        return self.extension.extension_number if self.extension else None
 
     def __repr__(self) -> str:
         return f"<VoicemailBox id={self.id} extension_id={self.extension_id}>"

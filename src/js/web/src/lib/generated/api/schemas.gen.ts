@@ -10533,6 +10533,16 @@ export const VoicemailBoxSchema = {
       format: "uuid",
       type: "string",
     },
+    extensionNumber: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     greetingFilePath: {
       oneOf: [
         {

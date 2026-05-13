@@ -35,12 +35,12 @@ const tips = [
 ]
 
 function NewLocationPage() {
-  useDocumentTitle("New Location")
+  useDocumentTitle("Add Location")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Locations"
-        title="Create New Location"
+        title="Add Location"
         description="Add a new location to organize where your devices and extensions are placed."
         breadcrumbs={
           <Breadcrumb>
@@ -58,7 +58,7 @@ function NewLocationPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>New Location</BreadcrumbPage>
+                <BreadcrumbPage>Add Location</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

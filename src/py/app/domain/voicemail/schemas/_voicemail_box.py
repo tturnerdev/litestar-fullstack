@@ -17,6 +17,7 @@ class VoicemailBox(CamelizedBaseStruct):
 
     id: UUID
     extension_id: UUID
+    extension_number: str | None = None
     is_enabled: bool = True
     pin: str | None = None
     email_address: str | None = None

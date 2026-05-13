@@ -12,6 +12,7 @@ import {
   MailOpen,
   MoreVertical,
   Play,
+  Power,
   Search,
   Square,
   Trash2,
@@ -56,6 +57,7 @@ import {
   useDeleteVoicemailBox,
   useDeleteVoicemailMessage,
   useToggleVoicemailRead,
+  useUpdateVoicemailBox,
   useVoicemailBoxes,
   useVoicemailMessages,
   type VoicemailBox,
@@ -1131,7 +1133,10 @@ function BoxesTab() {
 function BoxRow({ box }: { box: VoicemailBox }) {
   const navigate = useNavigate()
   const deleteBoxMutation = useDeleteVoicemailBox()
+  const updateBoxMutation = useUpdateVoicemailBox(box.id)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const displayName = box.extensionNumber ?? box.extensionId.slice(0, 8)
 
   return (
     <>
@@ -1147,7 +1152,7 @@ function BoxRow({ box }: { box: VoicemailBox }) {
       >
         <TableCell>
           <Link to="/voicemail/$boxId" params={{ boxId: box.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
-            <span className="font-mono font-medium group-hover:underline">{box.extensionId.slice(0, 8)}</span>
+            <span className="font-mono font-medium group-hover:underline">{displayName}</span>
           </Link>
         </TableCell>
         <TableCell>
@@ -1183,7 +1188,7 @@ function BoxRow({ box }: { box: VoicemailBox }) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                 <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">Actions for {box.extensionId.slice(0, 8)}</span>
+                <span className="sr-only">Actions for {displayName}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -1192,6 +1197,13 @@ function BoxRow({ box }: { box: VoicemailBox }) {
                   <Eye className="mr-2 h-4 w-4" />
                   View details
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={updateBoxMutation.isPending}
+                onClick={() => updateBoxMutation.mutate({ isEnabled: !box.isEnabled })}
+              >
+                <Power className="mr-2 h-4 w-4" />
+                {box.isEnabled ? "Disable" : "Enable"}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
@@ -1211,7 +1223,7 @@ function BoxRow({ box }: { box: VoicemailBox }) {
               Delete voicemail box
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{box.extensionId.slice(0, 8)}</span> and all associated messages.
+              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{displayName}</span> and all associated messages.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

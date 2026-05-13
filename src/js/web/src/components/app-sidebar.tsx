@@ -106,28 +106,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/teams",
         icon: Users,
         badge: badges.teams,
-        items: [
-          { title: "Overview", to: "/teams" },
-          { title: "Create new", to: "/teams/new" },
-        ],
+        items: [{ title: "Overview", to: "/teams" }],
       },
       {
         title: "Locations",
         to: "/locations",
         icon: MapPin,
-        items: [
-          { title: "Overview", to: "/locations" },
-          { title: "New location", to: "/locations/new" },
-        ],
+        items: [{ title: "Overview", to: "/locations" }],
       },
       {
         title: "Devices",
         to: "/devices",
         icon: Monitor,
-        items: [
-          { title: "Overview", to: "/devices" },
-          { title: "Add device", to: "/devices/new" },
-        ],
+        items: [{ title: "Overview", to: "/devices" }],
       },
       {
         title: "Voice",
@@ -201,10 +192,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Support",
         to: "/support",
         icon: LifeBuoy,
-        items: [
-          { title: "Tickets", to: "/support" },
-          { title: "New Ticket", to: "/support/new" },
-        ],
+        items: [{ title: "Tickets", to: "/support" }],
       },
       {
         title: "Tasks",
@@ -215,10 +203,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Tags",
         to: "/tags",
         icon: Tags,
-        items: [
-          { title: "Overview", to: "/tags" },
-          { title: "Create new", to: "/tags/new" },
-        ],
+        items: [{ title: "Overview", to: "/tags" }],
       },
     ]
 
@@ -227,10 +212,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Connections",
         to: "/connections",
         icon: Cable,
-        items: [
-          { title: "Overview", to: "/connections" },
-          { title: "New connection", to: "/connections/new" },
-        ],
+        items: [{ title: "Overview", to: "/connections" }],
       })
     }
 

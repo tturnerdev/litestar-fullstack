@@ -208,7 +208,7 @@ function LocationsPage() {
             </Button>
             <Button size="sm" asChild>
               <Link to="/locations/new">
-                <Plus className="mr-2 h-4 w-4" /> New location
+                <Plus className="mr-2 h-4 w-4" /> Add location
                 <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
               </Link>
             </Button>
