@@ -32,6 +32,7 @@ import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
 import { Route as AppTeamsTeamIdRouteImport } from './routes/_app/teams/$teamId'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
+import { Route as AppAdminAttachmentsRouteImport } from './routes/_app/admin/attachments'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
@@ -153,6 +154,11 @@ const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminAttachmentsRoute = AppAdminAttachmentsRouteImport.update({
+  id: '/attachments',
+  path: '/attachments',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/admin/attachments': typeof AppAdminAttachmentsRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
   '/admin/': typeof AppAdminIndexRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/admin/attachments': typeof AppAdminAttachmentsRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
   '/admin': typeof AppAdminIndexRoute
@@ -270,6 +278,7 @@ export interface FileRoutesById {
   '/_public/terms': typeof PublicTermsRoute
   '/_public/verify-email': typeof PublicVerifyEmailRoute
   '/_app/admin/audit': typeof AppAdminAuditRoute
+  '/_app/admin/attachments': typeof AppAdminAttachmentsRoute
   '/_app/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/admin/': typeof AppAdminIndexRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/admin/attachments'
     | '/teams/$teamId'
     | '/teams/new'
     | '/admin/'
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/admin/attachments'
     | '/teams/$teamId'
     | '/teams/new'
     | '/admin'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/_public/terms'
     | '/_public/verify-email'
     | '/_app/admin/audit'
+    | '/_app/admin/attachments'
     | '/_app/teams/$teamId'
     | '/_app/teams/new'
     | '/_app/admin/'
@@ -546,6 +558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAuditRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/attachments': {
+      id: '/_app/admin/attachments'
+      path: '/attachments'
+      fullPath: '/admin/attachments'
+      preLoaderRoute: typeof AppAdminAttachmentsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/users/': {
       id: '/_app/admin/users/'
       path: '/users'
@@ -600,6 +619,7 @@ declare module '@tanstack/react-router' {
 
 interface AppAdminRouteChildren {
   AppAdminAuditRoute: typeof AppAdminAuditRoute
+  AppAdminAttachmentsRoute: typeof AppAdminAttachmentsRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppAdminTeamsTeamIdRoute: typeof AppAdminTeamsTeamIdRoute
   AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
@@ -609,6 +629,7 @@ interface AppAdminRouteChildren {
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAuditRoute: AppAdminAuditRoute,
+  AppAdminAttachmentsRoute: AppAdminAttachmentsRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
   AppAdminTeamsTeamIdRoute: AppAdminTeamsTeamIdRoute,
   AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
