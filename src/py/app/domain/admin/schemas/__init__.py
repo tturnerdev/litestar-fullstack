@@ -1,5 +1,6 @@
 """Admin domain schemas."""
 
+from app.domain.admin.schemas._attachments import AdminAttachment
 from app.domain.admin.schemas._audit import AuditLogEntry
 from app.domain.admin.schemas._dashboard import ActivityLogEntry, DashboardStats, RecentActivity
 from app.domain.admin.schemas._teams import AdminTeamDetail, AdminTeamSummary, AdminTeamUpdate
@@ -7,6 +8,7 @@ from app.domain.admin.schemas._users import AdminUserDetail, AdminUserSummary, A
 
 __all__ = (
     "ActivityLogEntry",
+    "AdminAttachment",
     "AdminTeamDetail",
     "AdminTeamSummary",
     "AdminTeamUpdate",

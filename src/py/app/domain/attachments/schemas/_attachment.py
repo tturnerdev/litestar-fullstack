@@ -21,3 +21,33 @@ class Attachment(CamelizedBaseStruct):
     updated_at: datetime
     download_url: str | None = None
     """Relative URL to stream the file content (set by the controller)."""
+
+
+class PresignRequest(CamelizedBaseStruct):
+    """Request body for ``POST /api/uploads/presign``."""
+
+    filename: str
+    content_type: str = "application/octet-stream"
+    purpose: str = "attachment"
+    team_id: UUID | None = None
+
+
+class PresignResponse(CamelizedBaseStruct):
+    """Response body for ``POST /api/uploads/presign``."""
+
+    upload_url: str
+    """Presigned ``PUT`` URL — the client uploads the file directly here."""
+    path: str
+    """The object-storage path the client will pass to ``POST /api/uploads/complete``."""
+    expires_in: int
+    """Seconds until ``upload_url`` expires."""
+
+
+class CompleteUploadRequest(CamelizedBaseStruct):
+    """Request body for ``POST /api/uploads/complete``."""
+
+    path: str
+    original_filename: str
+    content_type: str = "application/octet-stream"
+    purpose: str = "attachment"
+    team_id: UUID | None = None

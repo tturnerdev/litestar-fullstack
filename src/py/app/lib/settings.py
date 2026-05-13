@@ -193,6 +193,7 @@ class SaqSettings:
             The SAQ configuration.
         """
         from app.domain.accounts import jobs as account_jobs
+        from app.domain.attachments import jobs as attachment_jobs
         from app.domain.system import jobs as system_jobs
         from app.lib.worker import after_process, before_process, on_shutdown, on_startup
 
@@ -204,7 +205,11 @@ class SaqSettings:
                 QueueConfig(
                     name="background-tasks",
                     dsn=self.REDIS_URL,
-                    tasks=[system_jobs.cleanup_auth_tokens, account_jobs.refresh_oauth_tokens],
+                    tasks=[
+                        system_jobs.cleanup_auth_tokens,
+                        account_jobs.refresh_oauth_tokens,
+                        attachment_jobs.cleanup_orphan_attachments,
+                    ],
                     scheduled_tasks=[
                         CronJob(
                             function=system_jobs.cleanup_auth_tokens,
@@ -217,6 +222,12 @@ class SaqSettings:
                             cron="*/15 * * * *",
                             timeout=600,
                             ttl=1800,
+                        ),
+                        CronJob(
+                            function=attachment_jobs.cleanup_orphan_attachments,
+                            cron="0 3 * * *",
+                            timeout=1800,
+                            ttl=3600,
                         ),
                     ],
                     concurrency=self.CONCURRENCY,
@@ -323,9 +334,15 @@ class StorageSettings:
     )
     """Filesystem root used when ``BACKEND=local``."""
     PRESIGN_EXPIRY: int = field(default_factory=get_env("STORAGE_PRESIGN_EXPIRY", 3600, int))
-    """Lifetime in seconds for presigned download URLs."""
+    """Lifetime in seconds for presigned download/upload URLs."""
     MAX_UPLOAD_BYTES: int = field(default_factory=get_env("STORAGE_MAX_UPLOAD_BYTES", 26214400, int))
     """Maximum accepted upload size in bytes (default 25 MiB)."""
+    MAX_UPLOADS_PER_HOUR: int = field(default_factory=get_env("STORAGE_MAX_UPLOADS_PER_HOUR", 0, int))
+    """Per-user rolling-hour upload limit (0 = unlimited)."""
+    TEAM_QUOTA_BYTES: int = field(default_factory=get_env("STORAGE_TEAM_QUOTA_BYTES", 0, int))
+    """Maximum total bytes of attachments per team (0 = unlimited)."""
+    ORPHAN_GC_GRACE_SECONDS: int = field(default_factory=get_env("STORAGE_ORPHAN_GC_GRACE_SECONDS", 3600, int))
+    """Objects in the bucket newer than this are never treated as orphans by the GC job."""
     REGISTRY_KEY: str = "uploads"
     """Key the backend is registered under in advanced-alchemy's storage registry."""
 
