@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from advanced_alchemy.base import UUIDv7AuditBase
 from advanced_alchemy.types import EncryptedString
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -43,6 +44,18 @@ class User(UUIDv7AuditBase):
         deferred_group="security_sensitive",
     )
     avatar_url: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)
+    """Display URL for the user's avatar (an uploaded attachment or an OAuth provider URL)."""
+    avatar_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey(
+            "attachment.id",
+            ondelete="SET NULL",
+            use_alter=True,
+            name="fk_user_account_avatar_id_attachment",
+        ),
+        nullable=True,
+        default=None,
+    )
+    """The uploaded attachment backing :attr:`avatar_url`, if the avatar was uploaded by the user."""
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)

@@ -5,16 +5,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, delete, get, patch, post
-from litestar.params import Dependency, Parameter
+from litestar import Controller, delete, get, patch, post, put
+from litestar.datastructures import (
+    UploadFile,  # noqa: TC002  (resolved at runtime by Litestar for the request signature)
+)
+from litestar.enums import RequestEncodingType
+from litestar.params import Body, Dependency, Parameter
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.attachments.services import AttachmentService
 from app.domain.teams.guards import requires_team_admin, requires_team_membership, requires_team_ownership
 from app.domain.teams.schemas import Team, TeamCreate, TeamUpdate
 from app.domain.teams.services import TeamService
-from app.lib.deps import create_service_dependencies
+from app.lib.deps import create_service_dependencies, create_service_provider
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -25,21 +30,24 @@ class TeamController(Controller):
     """Teams."""
 
     tags = ["Teams"]
-    dependencies = create_service_dependencies(
-        TeamService,
-        key="teams_service",
-        load=[selectinload(m.Team.tags), selectinload(m.Team.members)],
-        filters={
-            "id_filter": UUID,
-            "search": "name",
-            "pagination_type": "limit_offset",
-            "pagination_size": 20,
-            "created_at": True,
-            "updated_at": True,
-            "sort_field": "name",
-            "sort_order": "asc",
-        },
-    )
+    dependencies = {
+        **create_service_dependencies(
+            TeamService,
+            key="teams_service",
+            load=[selectinload(m.Team.tags), selectinload(m.Team.members)],
+            filters={
+                "id_filter": UUID,
+                "search": "name",
+                "pagination_type": "limit_offset",
+                "pagination_size": 20,
+                "created_at": True,
+                "updated_at": True,
+                "sort_field": "name",
+                "sort_order": "asc",
+            },
+        ),
+        "attachments_service": create_service_provider(AttachmentService),
+    }
 
     @get(component="team/list", operation_id="ListTeams", path="/api/teams")
     async def list_teams(
@@ -142,3 +150,43 @@ class TeamController(Controller):
             team_id: Team ID
         """
         _ = await teams_service.delete(team_id)
+
+    @put(operation_id="SetTeamLogo", path="/api/teams/{team_id:uuid}/logo", guards=[requires_team_admin])
+    async def set_team_logo(
+        self,
+        teams_service: TeamService,
+        attachments_service: AttachmentService,
+        current_user: m.User,
+        team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to set the logo for.")],
+        data: Annotated[UploadFile, Body(media_type=RequestEncodingType.MULTI_PART)],
+    ) -> Team:
+        """Upload and set a team's logo.
+
+        Args:
+            teams_service: Team Service
+            attachments_service: The attachments service.
+            current_user: Current User
+            team_id: Team ID
+            data: The uploaded image.
+
+        Returns:
+            Team
+        """
+        team = await teams_service.get(team_id)
+        previous_logo_id = team.logo_id
+        attachment = await attachments_service.create_from_upload(
+            data,
+            uploaded_by_id=current_user.id,
+            team_id=team_id,
+            purpose=m.AttachmentPurpose.TEAM_LOGO,
+        )
+        await teams_service.update(
+            item_id=team_id,
+            data={"logo_id": attachment.id, "logo_url": f"/api/uploads/{attachment.id}/content"},
+        )
+        if previous_logo_id and previous_logo_id != attachment.id:
+            previous = await attachments_service.get_one_or_none(id=previous_logo_id)
+            if previous is not None:
+                await attachments_service.delete_with_object(previous)
+        fresh_obj = await teams_service.get_one(id=team_id)
+        return teams_service.to_schema(fresh_obj, schema_type=Team)
