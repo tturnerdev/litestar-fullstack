@@ -6,6 +6,7 @@ import { z } from "zod"
 import { ConnectedAccounts } from "@/components/profile/connected-accounts"
 import { MfaSection } from "@/components/profile/mfa-section"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { AvatarUploader } from "@/components/uploads/avatar-uploader"
 import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
 
 const profileSearchSchema = z
@@ -48,6 +49,9 @@ function ProfilePage() {
     <PageContainer className="flex-1 space-y-8">
       <PageHeader eyebrow="Account" title="Profile settings" description="Manage security, connected accounts, and authentication options." />
       <PageSection>
+        <AvatarUploader />
+      </PageSection>
+      <PageSection delay={0.1}>
         <div className="grid gap-6 lg:grid-cols-2">
           <MfaSection />
           <ConnectedAccounts />
