@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.554.0 (2026-05-13)
+
+### Fixed
+- **Team update error** — Fix `msgspec.ValidationError: Object missing required field 'slug'` when updating a team by serializing to schema before the audit log flush expires SQLAlchemy attributes. Applied same fix to organization update.
+- **Duplicate success toast on team update** — Remove redundant success toast notifications from team edit, team detail, and team settings components; the `useUpdateTeam` hook already shows one.
+
 ## v0.553.0 (2026-05-13)
 
 ### Security
