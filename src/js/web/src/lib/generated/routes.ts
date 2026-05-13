@@ -6,6 +6,9 @@
 const API_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) ?? '';
 
 /** Semantic string aliases derived from OpenAPI `format`. */
+/** ISO 8601 date string (YYYY-MM-DD) */
+export type DateOnly = string;
+
 /** RFC 3339 date-time string */
 export type DateTime = string;
 
@@ -1160,8 +1163,8 @@ export interface RouteQueryParams {
   'export_call_records': {
     direction?: string;
     disposition?: string;
-    end_date?: DateTime;
-    start_date?: DateTime;
+    end_date?: DateOnly;
+    start_date?: DateOnly;
   };
   'export_logs': {
     action?: string;
@@ -1188,8 +1191,8 @@ export interface RouteQueryParams {
   };
   'get_attachment': Record<string, never>;
   'get_by_extension': {
-    end_date: DateTime;
-    start_date: DateTime;
+    end_date: DateOnly;
+    start_date: DateOnly;
     team_id: UUID;
   };
   'get_call_queue': Record<string, never>;
@@ -1241,8 +1244,8 @@ export interface RouteQueryParams {
   'get_stats_api_admin_support_stats': Record<string, never>;
   'get_stats_api_admin_voice_stats': Record<string, never>;
   'get_summary': {
-    end_date: DateTime;
-    start_date: DateTime;
+    end_date: DateOnly;
+    start_date: DateOnly;
     team_id: UUID;
   };
   'get_system_status': Record<string, never>;
@@ -1299,9 +1302,9 @@ export interface RouteQueryParams {
   'get_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
   'get_voicemail_settings': Record<string, never>;
   'get_volume': {
-    end_date: DateTime;
+    end_date: DateOnly;
     interval?: string;
-    start_date: DateTime;
+    start_date: DateOnly;
     team_id: UUID;
   };
   'get_webhook': Record<string, never>;
@@ -1353,7 +1356,7 @@ export interface RouteQueryParams {
     destination?: string;
     direction?: string;
     disposition?: string;
-    end_date?: DateTime;
+    end_date?: DateOnly;
     ids?: string[];
     max_duration?: number;
     min_duration?: number;
@@ -1363,7 +1366,7 @@ export interface RouteQueryParams {
     searchString?: string;
     sortOrder?: "asc" | "desc";
     source?: string;
-    start_date?: DateTime;
+    start_date?: DateOnly;
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };

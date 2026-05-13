@@ -968,8 +968,8 @@
       "queryParameters": {
         "direction": "string | undefined",
         "disposition": "string | undefined",
-        "end_date": "DateTime | undefined",
-        "start_date": "DateTime | undefined"
+        "end_date": "DateOnly | undefined",
+        "start_date": "DateOnly | undefined"
       },
       "uri": "/api/analytics/cdrs/export"
     },
@@ -1035,8 +1035,8 @@
         "GET"
       ],
       "queryParameters": {
-        "end_date": "DateTime",
-        "start_date": "DateTime",
+        "end_date": "DateOnly",
+        "start_date": "DateOnly",
         "team_id": "UUID"
       },
       "uri": "/api/analytics/by-extension"
@@ -1449,8 +1449,8 @@
         "GET"
       ],
       "queryParameters": {
-        "end_date": "DateTime",
-        "start_date": "DateTime",
+        "end_date": "DateOnly",
+        "start_date": "DateOnly",
         "team_id": "UUID"
       },
       "uri": "/api/analytics/summary"
@@ -1748,9 +1748,9 @@
         "GET"
       ],
       "queryParameters": {
-        "end_date": "DateTime",
+        "end_date": "DateOnly",
         "interval": "string | undefined",
-        "start_date": "DateTime",
+        "start_date": "DateOnly",
         "team_id": "UUID"
       },
       "uri": "/api/analytics/volume"
@@ -1884,7 +1884,7 @@
         "destination": "string | undefined",
         "direction": "string | undefined",
         "disposition": "string | undefined",
-        "end_date": "DateTime | undefined",
+        "end_date": "DateOnly | undefined",
         "ids": "string[] | undefined",
         "max_duration": "number | undefined",
         "min_duration": "number | undefined",
@@ -1894,7 +1894,7 @@
         "searchString": "string | undefined",
         "sortOrder": "\"asc\" | \"desc\" | undefined",
         "source": "string | undefined",
-        "start_date": "DateTime | undefined",
+        "start_date": "DateOnly | undefined",
         "updatedAfter": "DateTime | undefined",
         "updatedBefore": "DateTime | undefined"
       },

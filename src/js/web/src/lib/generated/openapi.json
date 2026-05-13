@@ -13404,7 +13404,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13446,7 +13446,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13467,7 +13467,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13794,7 +13794,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13836,7 +13836,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13857,7 +13857,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14182,7 +14182,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14224,7 +14224,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14245,7 +14245,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14564,7 +14564,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14606,7 +14606,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14627,7 +14627,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -19774,7 +19774,7 @@
             "name": "start_date",
             "required": true,
             "schema": {
-              "format": "date-time",
+              "format": "date",
               "type": "string"
             }
           },
@@ -19786,7 +19786,7 @@
             "name": "end_date",
             "required": true,
             "schema": {
-              "format": "date-time",
+              "format": "date",
               "type": "string"
             }
           }
@@ -20072,7 +20072,7 @@
             "schema": {
               "oneOf": [
                 {
-                  "format": "date-time",
+                  "format": "date",
                   "type": "string"
                 },
                 {
@@ -20091,7 +20091,7 @@
             "schema": {
               "oneOf": [
                 {
-                  "format": "date-time",
+                  "format": "date",
                   "type": "string"
                 },
                 {
@@ -20372,7 +20372,7 @@
             "schema": {
               "oneOf": [
                 {
-                  "format": "date-time",
+                  "format": "date",
                   "type": "string"
                 },
                 {
@@ -20391,7 +20391,7 @@
             "schema": {
               "oneOf": [
                 {
-                  "format": "date-time",
+                  "format": "date",
                   "type": "string"
                 },
                 {
@@ -20597,7 +20597,7 @@
             "name": "start_date",
             "required": true,
             "schema": {
-              "format": "date-time",
+              "format": "date",
               "type": "string"
             }
           },
@@ -20609,7 +20609,7 @@
             "name": "end_date",
             "required": true,
             "schema": {
-              "format": "date-time",
+              "format": "date",
               "type": "string"
             }
           }
@@ -20697,7 +20697,7 @@
             "name": "start_date",
             "required": true,
             "schema": {
-              "format": "date-time",
+              "format": "date",
               "type": "string"
             }
           },
@@ -20709,7 +20709,7 @@
             "name": "end_date",
             "required": true,
             "schema": {
-              "format": "date-time",
+              "format": "date",
               "type": "string"
             }
           },
