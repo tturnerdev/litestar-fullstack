@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from advanced_alchemy.base import UUIDv7AuditBase
 from advanced_alchemy.mixins import SlugKey
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.models._team_tag import team_tag
@@ -24,6 +25,19 @@ class Team(UUIDv7AuditBase, SlugKey):
     __pii_columns__ = {"name", "description"}
     name: Mapped[str] = mapped_column(nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)
+    logo_url: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)
+    """Display URL for the team logo (an uploaded attachment)."""
+    logo_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey(
+            "attachment.id",
+            ondelete="SET NULL",
+            use_alter=True,
+            name="fk_team_logo_id_attachment",
+        ),
+        nullable=True,
+        default=None,
+    )
+    """The uploaded attachment backing :attr:`logo_url`."""
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     members: Mapped[list[TeamMember]] = relationship(
         back_populates="team",

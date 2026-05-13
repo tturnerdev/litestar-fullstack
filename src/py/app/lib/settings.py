@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -192,6 +193,7 @@ class SaqSettings:
             The SAQ configuration.
         """
         from app.domain.accounts import jobs as account_jobs
+        from app.domain.attachments import jobs as attachment_jobs
         from app.domain.system import jobs as system_jobs
         from app.lib.worker import after_process, before_process, on_shutdown, on_startup
 
@@ -203,7 +205,11 @@ class SaqSettings:
                 QueueConfig(
                     name="background-tasks",
                     dsn=self.REDIS_URL,
-                    tasks=[system_jobs.cleanup_auth_tokens, account_jobs.refresh_oauth_tokens],
+                    tasks=[
+                        system_jobs.cleanup_auth_tokens,
+                        account_jobs.refresh_oauth_tokens,
+                        attachment_jobs.cleanup_orphan_attachments,
+                    ],
                     scheduled_tasks=[
                         CronJob(
                             function=system_jobs.cleanup_auth_tokens,
@@ -216,6 +222,12 @@ class SaqSettings:
                             cron="*/15 * * * *",
                             timeout=600,
                             ttl=1800,
+                        ),
+                        CronJob(
+                            function=attachment_jobs.cleanup_orphan_attachments,
+                            cron="0 3 * * *",
+                            timeout=1800,
+                            ttl=3600,
                         ),
                     ],
                     concurrency=self.CONCURRENCY,
@@ -292,6 +304,47 @@ class EmailSettings:
             from_email=self.FROM_EMAIL,
             from_name=self.FROM_NAME,
         )
+
+
+@dataclass
+class StorageSettings:
+    """Object storage configuration for file uploads.
+
+    Prefix is ``STORAGE_`` plus the standard ``AWS_*`` variables for the S3 backend.
+    The configured backend is registered with advanced-alchemy's storage registry
+    under :attr:`REGISTRY_KEY` (see :mod:`app.lib.storage`).
+    """
+
+    BACKEND: str = field(default_factory=get_env("STORAGE_BACKEND", "s3"))
+    """Storage backend: ``s3`` (obstore S3 — AWS, MinIO, rustfs, ...), ``local`` (local filesystem), ``memory`` (in-memory; tests)."""
+    BUCKET: str = field(default_factory=get_env("STORAGE_BUCKET", "uploads"))
+    """Bucket / container name."""
+    ENDPOINT_URL: str = field(default_factory=get_env("AWS_ENDPOINT_URL", ""))
+    """S3 endpoint override (e.g. ``http://storage:9000`` for in-cluster rustfs). Leave empty for real AWS."""
+    ACCESS_KEY_ID: str = field(default_factory=get_env("AWS_ACCESS_KEY_ID", ""))
+    """S3 access key id."""
+    SECRET_ACCESS_KEY: str = field(default_factory=get_env("AWS_SECRET_ACCESS_KEY", ""))
+    """S3 secret access key."""
+    REGION: str = field(default_factory=get_env("AWS_REGION", "us-east-1"))
+    """S3 region (rustfs/MinIO ignore it; real AWS requires it)."""
+    ALLOW_HTTP: bool = field(default_factory=get_env("STORAGE_ALLOW_HTTP", True))
+    """Allow plain-HTTP S3 endpoints (needed for in-cluster rustfs/MinIO). Set ``False`` for real AWS."""
+    LOCAL_PATH: str = field(
+        default_factory=get_env("STORAGE_LOCAL_PATH", str(Path(tempfile.gettempdir()) / "litestar-uploads"))
+    )
+    """Filesystem root used when ``BACKEND=local``."""
+    PRESIGN_EXPIRY: int = field(default_factory=get_env("STORAGE_PRESIGN_EXPIRY", 3600, int))
+    """Lifetime in seconds for presigned download/upload URLs."""
+    MAX_UPLOAD_BYTES: int = field(default_factory=get_env("STORAGE_MAX_UPLOAD_BYTES", 26214400, int))
+    """Maximum accepted upload size in bytes (default 25 MiB)."""
+    MAX_UPLOADS_PER_HOUR: int = field(default_factory=get_env("STORAGE_MAX_UPLOADS_PER_HOUR", 0, int))
+    """Per-user rolling-hour upload limit (0 = unlimited)."""
+    TEAM_QUOTA_BYTES: int = field(default_factory=get_env("STORAGE_TEAM_QUOTA_BYTES", 0, int))
+    """Maximum total bytes of attachments per team (0 = unlimited)."""
+    ORPHAN_GC_GRACE_SECONDS: int = field(default_factory=get_env("STORAGE_ORPHAN_GC_GRACE_SECONDS", 3600, int))
+    """Objects in the bucket newer than this are never treated as orphans by the GC job."""
+    REGISTRY_KEY: str = "uploads"
+    """Key the backend is registered under in advanced-alchemy's storage registry."""
 
 
 @dataclass
@@ -529,6 +582,7 @@ class Settings:
     saq: SaqSettings = field(default_factory=SaqSettings)
     log: LogSettings = field(default_factory=LogSettings)
     email: EmailSettings = field(default_factory=EmailSettings)
+    storage: StorageSettings = field(default_factory=StorageSettings)
 
     @classmethod
     @lru_cache(maxsize=1, typed=True)
@@ -547,10 +601,11 @@ class Settings:
             vite: ViteSettings = ViteSettings()
             app: AppSettings = AppSettings()
             log: LogSettings = LogSettings()
+            storage: StorageSettings = StorageSettings()
         except Exception as e:  # noqa: BLE001
             logger.fatal("Could not load settings. %s", e)
             sys.exit(1)
-        return Settings(app=app, db=db, vite=vite, server=server, saq=saq, log=log)
+        return Settings(app=app, db=db, vite=vite, server=server, saq=saq, log=log, storage=storage)
 
 
 def get_settings(dotenv_filename: str = ".env") -> Settings:
