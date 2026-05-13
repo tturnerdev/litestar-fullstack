@@ -69,7 +69,7 @@ export function SendFaxForm() {
   const { data: recentMessages } = useFaxMessages({
     pageSize: 50,
     sortOrder: "desc",
-    orderBy: "createdAt",
+    orderBy: "created_at",
   })
   const currentTeam = useAuthStore((s) => s.currentTeam)
   const sendFax = useSendFax()

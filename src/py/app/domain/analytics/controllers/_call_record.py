@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import datetime
+from datetime import date, timedelta
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -65,8 +65,8 @@ class CallRecordController(Controller):
         call_records_service: CallRecordService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        start_date: Annotated[datetime | None, Parameter(required=False)] = None,
-        end_date: Annotated[datetime | None, Parameter(required=False)] = None,
+        start_date: Annotated[date | None, Parameter(required=False)] = None,
+        end_date: Annotated[date | None, Parameter(required=False)] = None,
         direction: Annotated[str | None, Parameter(query="direction", required=False)] = None,
         disposition: Annotated[str | None, Parameter(query="disposition", required=False)] = None,
         source: Annotated[str | None, Parameter(query="source", required=False)] = None,
@@ -196,8 +196,8 @@ class CallRecordController(Controller):
         self,
         call_records_service: CallRecordService,
         current_user: m.User,
-        start_date: Annotated[datetime | None, Parameter(required=False)] = None,
-        end_date: Annotated[datetime | None, Parameter(required=False)] = None,
+        start_date: Annotated[date | None, Parameter(required=False)] = None,
+        end_date: Annotated[date | None, Parameter(required=False)] = None,
         direction: Annotated[str | None, Parameter(query="direction", required=False)] = None,
         disposition: Annotated[str | None, Parameter(query="disposition", required=False)] = None,
     ) -> Response[bytes]:
@@ -280,8 +280,8 @@ def _escape_like(val: str) -> str:
 def _build_cdr_filters(
     *,
     current_user: m.User | None = None,
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     direction: str | None = None,
     disposition: str | None = None,
     source: str | None = None,

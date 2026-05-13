@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date
 from typing import Annotated
 from uuid import UUID
 
@@ -37,8 +37,8 @@ class CallAnalyticsController(Controller):
         call_records_service: CallRecordService,
         current_user: m.User,
         team_id: Annotated[UUID, Parameter(required=True)],
-        start_date: Annotated[datetime, Parameter(required=True)],
-        end_date: Annotated[datetime, Parameter(required=True)],
+        start_date: Annotated[date, Parameter(required=True)],
+        end_date: Annotated[date, Parameter(required=True)],
     ) -> CallAnalyticsSummary:
         """Get aggregate call statistics for a team within a date range.
 
@@ -66,8 +66,8 @@ class CallAnalyticsController(Controller):
         call_records_service: CallRecordService,
         current_user: m.User,
         team_id: Annotated[UUID, Parameter(required=True)],
-        start_date: Annotated[datetime, Parameter(required=True)],
-        end_date: Annotated[datetime, Parameter(required=True)],
+        start_date: Annotated[date, Parameter(required=True)],
+        end_date: Annotated[date, Parameter(required=True)],
         interval: Annotated[str, Parameter(query="interval", required=False)] = "day",
     ) -> list[CallVolumePoint]:
         """Get call volume over time for charting.
@@ -97,8 +97,8 @@ class CallAnalyticsController(Controller):
         call_records_service: CallRecordService,
         current_user: m.User,
         team_id: Annotated[UUID, Parameter(required=True)],
-        start_date: Annotated[datetime, Parameter(required=True)],
-        end_date: Annotated[datetime, Parameter(required=True)],
+        start_date: Annotated[date, Parameter(required=True)],
+        end_date: Annotated[date, Parameter(required=True)],
     ) -> list[ExtensionStats]:
         """Get per-extension call statistics.
 

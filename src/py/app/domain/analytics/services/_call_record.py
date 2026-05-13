@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
@@ -27,8 +27,8 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
     async def get_summary(
         self,
         team_id: UUID,
-        start_date: datetime,
-        end_date: datetime,
+        start_date: date,
+        end_date: date,
     ) -> CallAnalyticsSummary:
         """Compute aggregate call statistics for a team within a date range.
 
@@ -82,8 +82,8 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
     async def get_volume(
         self,
         team_id: UUID,
-        start_date: datetime,
-        end_date: datetime,
+        start_date: date,
+        end_date: date,
         interval: str = "day",
     ) -> list[CallVolumePoint]:
         """Compute call volume over time for charting.
@@ -146,8 +146,8 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
     async def get_by_extension(
         self,
         team_id: UUID,
-        start_date: datetime,
-        end_date: datetime,
+        start_date: date,
+        end_date: date,
     ) -> list[ExtensionStats]:
         """Compute per-extension call statistics.
 

@@ -193,7 +193,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/analytics",
         icon: BarChart3,
         items: [
-          { title: "Dashboard", to: "/analytics" },
+          { title: "Overview", to: "/analytics" },
           { title: "Call Records", to: "/analytics?tab=records" },
         ],
       },
