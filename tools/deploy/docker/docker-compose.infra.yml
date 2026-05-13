@@ -94,6 +94,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+  storage-init:
+    image: minio/mc:latest
+    depends_on:
+      storage:
+        condition: service_healthy
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        until mc alias set s3 "http://storage:9000" app app; do echo "waiting for storage..."; sleep 2; done
+        mc mb --ignore-existing s3/uploads
+        echo "bucket s3/uploads ready"
 volumes:
   db-data: {}
   cache-data: {}
