@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime, timedelta, time
+from datetime import UTC, date, datetime, time, timedelta
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
