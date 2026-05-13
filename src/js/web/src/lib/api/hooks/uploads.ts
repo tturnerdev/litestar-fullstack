@@ -33,7 +33,7 @@ export interface Attachment {
   createdAt: string
   updatedAt: string
   /** Relative path, e.g. `/api/uploads/{id}/content`. */
-  downloadUrl: string
+  downloadUrl?: string
 }
 
 export interface AttachmentListParams {
@@ -87,6 +87,14 @@ function getAccessToken(): string | null {
     return null
   }
   return window.localStorage.getItem("access_token")
+}
+
+// Re-declare the global the litestar-vite plugin injects so this file doesn't
+// rely on the augmentation in `main.tsx` being in the tsconfig include path.
+declare global {
+  interface Window {
+    __LITESTAR_CSRF__?: string
+  }
 }
 
 function getCsrfToken(): string | undefined {
@@ -413,7 +421,9 @@ export async function downloadAttachment(attachment: Pick<Attachment, "id" | "or
 }
 
 /**
- * Human-readable byte size helper, used by attachment-related UI.
+ * Human-readable byte size helper, used by attachment-related UI. Uses
+ * binary (1024-based) units to match the server's MAX_UPLOAD_BYTES which is
+ * expressed in MiB.
  */
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -422,8 +432,8 @@ export function formatBytes(bytes: number): string {
   if (bytes === 0) {
     return "0 B"
   }
-  const units = ["B", "KB", "MB", "GB", "TB"]
-  const exp = Math.min(units.length - 1, Math.floor(Math.log10(bytes) / 3))
-  const value = bytes / 1000 ** exp
+  const units = ["B", "KiB", "MiB", "GiB", "TiB"]
+  const exp = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)))
+  const value = bytes / 1024 ** exp
   return `${value.toFixed(value >= 10 || exp === 0 ? 0 : 1)} ${units[exp]}`
 }

@@ -31,7 +31,10 @@ export function AttachmentTable() {
     )
   }
 
-  const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+  // Use the limit the server actually returned, not our requested PAGE_SIZE,
+  // so total-pages stays correct if the backend caps page size differently.
+  const effectivePageSize = data.limit > 0 ? data.limit : PAGE_SIZE
+  const totalPages = Math.max(1, Math.ceil(data.total / effectivePageSize))
 
   const handleDownload = async (attachment: Attachment) => {
     setDownloadingId(attachment.id)

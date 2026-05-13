@@ -219,7 +219,14 @@ export function FileUpload({
         </div>
         {isPending ? (
           <div className="w-full max-w-xs">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+              aria-label="Upload progress"
+              className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+            >
               <div className="h-full bg-primary transition-[width]" style={{ width: `${progress}%` }} />
             </div>
           </div>

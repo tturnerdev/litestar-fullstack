@@ -80,7 +80,7 @@ export function AvatarUploader() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Avatar className="h-20 w-20 rounded-full">
             <AvatarImage src={user.avatarUrl ?? undefined} alt={displayName} />
-            <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+            <AvatarFallback className="text-lg text-muted-foreground">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-1 flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -97,7 +97,14 @@ export function AvatarUploader() {
               )}
             </div>
             {setAvatar.isPending && (
-              <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
+              <div
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress}
+                aria-label="Avatar upload progress"
+                className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted"
+              >
                 <div className="h-full bg-primary transition-[width]" style={{ width: `${progress}%` }} />
               </div>
             )}
