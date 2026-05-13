@@ -1,3 +1,4 @@
+from app.db.models._attachment import Attachment, AttachmentPurpose
 from app.db.models._audit_log import AuditLog
 from app.db.models._email_verification_token import EmailVerificationToken
 from app.db.models._oauth_account import UserOAuthAccount
@@ -14,6 +15,8 @@ from app.db.models._user import User
 from app.db.models._user_role import UserRole
 
 __all__ = (
+    "Attachment",
+    "AttachmentPurpose",
     "AuditLog",
     "EmailVerificationToken",
     "PasswordResetToken",
