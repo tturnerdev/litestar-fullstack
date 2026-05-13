@@ -36,17 +36,31 @@ _process_start_time = time.time()
 _process_started_at = datetime.now(UTC)
 
 
+def _get_saq_queues() -> list[Any]:
+    """Get SAQ queue instances from the plugin config.
+
+    Uses ``SAQPlugin.get_queue(name)`` per configured queue rather than
+    accessing ``TaskQueues.queues`` directly, which avoids attribute errors
+    when the ``TaskQueues`` dataclass wrapping is inconsistent at runtime.
+
+    Returns:
+        List of SAQ ``Queue`` objects, or an empty list if none are configured.
+    """
+    from app.server.plugins import get_saq_plugin
+
+    saq_plugin = get_saq_plugin()
+    return [saq_plugin.get_queue(qc.name) for qc in saq_plugin.config.queue_configs]
+
+
 async def _get_redis_info() -> RedisInfo | None:
     """Retrieve Redis/Valkey server info via the SAQ plugin's queue redis client."""
     try:
-        from app.server.plugins import get_saq_plugin
-
-        saq_plugin = get_saq_plugin()
-        queues = saq_plugin.get_queues()
-        if not queues.queues:
+        queues = _get_saq_queues()
+        if not queues:
             return None
-        # Get the redis client from the first available queue
-        queue = next(iter(queues.queues.values()))
+        queue = queues[0]
+        if not hasattr(queue, "redis"):
+            return None
         info = await queue.redis.info()
         return RedisInfo(
             status="online",
@@ -141,10 +155,7 @@ class AdminSystemController(Controller):
 
         worker_queues: list[WorkerQueueInfo] = []
         try:
-            from app.server.plugins import get_saq_plugin
-
-            saq_plugin = get_saq_plugin()
-            for queue in saq_plugin.get_queues().queues.values():
+            for queue in _get_saq_queues():
                 try:
                     info = await queue.info()
                     worker_queues.append(
