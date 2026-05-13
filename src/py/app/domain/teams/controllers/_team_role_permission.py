@@ -47,7 +47,7 @@ class TeamRolePermissionController(Controller):
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to retrieve permissions for.")],
     ) -> list[TeamRolePermission]:
         results = await permissions_service.list(m.TeamRolePermission.team_id == team_id)
-        return permissions_service.to_schema(results, schema_type=TeamRolePermission)
+        return [permissions_service.to_schema(item, schema_type=TeamRolePermission) for item in results]
 
     @put(
         operation_id="UpdateTeamPermissions",
@@ -98,4 +98,4 @@ class TeamRolePermissionController(Controller):
             request=request,
         )
         request.app.emit(event_id="team_permissions_updated", team_id=team_id)
-        return permissions_service.to_schema(created, schema_type=TeamRolePermission)
+        return [permissions_service.to_schema(item, schema_type=TeamRolePermission) for item in created]
