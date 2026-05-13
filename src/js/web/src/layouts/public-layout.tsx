@@ -1,10 +1,12 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router"
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuthStore } from "@/lib/auth"
 import { useTheme } from "@/lib/theme-context"
 
 export function PublicLayout() {
   const { toggleTheme, theme } = useTheme()
+  const { isAuthenticated } = useAuthStore()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
@@ -20,7 +22,7 @@ export function PublicLayout() {
     pathname === "/verify-email" ||
     pathname.startsWith("/auth/")
 
-  const showHeaderFooter = !isLandingPage && !isAuthPage
+  const showHeaderFooter = !isLandingPage && !isAuthPage && !isAuthenticated
 
   return (
     <div className="flex min-h-screen flex-col">
