@@ -1,5 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AppSidebar } from "@/components/app-sidebar"
 import { HelpMenu } from "@/components/help/help-menu"
@@ -43,13 +44,23 @@ export function AppLayout() {
   const currentTeam = useAuthStore((state) => state.currentTeam)
   const user = useAuthStore((state) => state.user)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const prevTeamIdRef = useRef(currentTeam?.id)
 
   // Establish SSE connection for real-time cache invalidation and notifications
   useEventStream()
+
+  // Invalidate all queries when the active team changes so views refresh
+  useEffect(() => {
+    if (prevTeamIdRef.current && currentTeam?.id && prevTeamIdRef.current !== currentTeam.id) {
+      queryClient.invalidateQueries()
+    }
+    prevTeamIdRef.current = currentTeam?.id
+  }, [currentTeam?.id, queryClient])
 
   const goTo = useCallback((path: string) => navigate({ to: path }), [navigate])
 
