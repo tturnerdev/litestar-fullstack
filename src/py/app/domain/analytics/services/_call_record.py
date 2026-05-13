@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
@@ -65,7 +65,7 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
         ).where(
             m.CallRecord.team_id == team_id,
             m.CallRecord.call_date >= start_date,
-            m.CallRecord.call_date <= end_date,
+            m.CallRecord.call_date < end_date + timedelta(days=1),
         )
         result = await self.repository.session.execute(stmt)
         row = result.one()
@@ -127,7 +127,7 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
             .where(
                 m.CallRecord.team_id == team_id,
                 m.CallRecord.call_date >= start_date,
-                m.CallRecord.call_date <= end_date,
+                m.CallRecord.call_date < end_date + timedelta(days=1),
             )
             .group_by(period_col)
             .order_by(period_col)
@@ -181,7 +181,7 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
             .where(
                 m.CallRecord.team_id == team_id,
                 m.CallRecord.call_date >= start_date,
-                m.CallRecord.call_date <= end_date,
+                m.CallRecord.call_date < end_date + timedelta(days=1),
             )
             .group_by(m.CallRecord.source)
             .order_by(func.count().desc())

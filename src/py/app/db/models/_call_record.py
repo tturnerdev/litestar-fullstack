@@ -69,4 +69,4 @@ class CallRecord(UUIDv7AuditBase):
     )
 
     def __repr__(self) -> str:
-        return f"<CallRecord id={self.id} call_id={self.call_id}>"
+        return f"<CallRecord id={self.id} unique_id={self.unique_id}>"

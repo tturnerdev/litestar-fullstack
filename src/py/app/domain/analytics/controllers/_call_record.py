@@ -309,7 +309,7 @@ def _build_cdr_filters(
     if start_date is not None:
         clauses.append(m.CallRecord.call_date >= start_date)
     if end_date is not None:
-        clauses.append(m.CallRecord.call_date <= end_date)
+        clauses.append(m.CallRecord.call_date < end_date + timedelta(days=1))
     if direction is not None:
         clauses.append(m.CallRecord.direction == direction)
     if disposition is not None:
