@@ -78,8 +78,15 @@ class ScheduleController(Controller):
         schedules_service: ScheduleService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        team_id: Annotated[UUID | None, Parameter(title="Team ID", description="Filter by team.", query="teamId", required=False)] = None,
-        schedule_type: Annotated[str | None, Parameter(title="Schedule Type", description="Filter by schedule type.", query="scheduleType", required=False)] = None,
+        team_id: Annotated[
+            UUID | None, Parameter(title="Team ID", description="Filter by team.", query="teamId", required=False)
+        ] = None,
+        schedule_type: Annotated[
+            str | None,
+            Parameter(
+                title="Schedule Type", description="Filter by schedule type.", query="scheduleType", required=False
+            ),
+        ] = None,
     ) -> OffsetPagination[ScheduleList]:
         """List schedules.
 
@@ -135,6 +142,7 @@ class ScheduleController(Controller):
         db_obj = await schedules_service.create(obj)
         request.app.emit(event_id="schedule_created", schedule_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = schedules_service.to_schema(db_obj, schema_type=ScheduleDetail)
         await log_audit(
             audit_service,
             action="schedule.created",
@@ -148,7 +156,7 @@ class ScheduleController(Controller):
             after=after,
             request=request,
         )
-        return schedules_service.to_schema(db_obj, schema_type=ScheduleDetail)
+        return result
 
     @get(
         operation_id="GetSchedule",
@@ -210,6 +218,7 @@ class ScheduleController(Controller):
         )
         request.app.emit(event_id="schedule_updated", schedule_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
+        result = schedules_service.to_schema(fresh_obj, schema_type=ScheduleDetail)
         await log_audit(
             audit_service,
             action="schedule.updated",
@@ -223,7 +232,7 @@ class ScheduleController(Controller):
             after=after,
             request=request,
         )
-        return schedules_service.to_schema(fresh_obj, schema_type=ScheduleDetail)
+        return result
 
     @delete(
         operation_id="DeleteSchedule",
@@ -283,7 +292,10 @@ class ScheduleController(Controller):
         self,
         schedules_service: ScheduleService,
         schedule_id: Annotated[UUID, Parameter(title="Schedule ID", description="The schedule to check.")],
-        time: Annotated[datetime | None, Parameter(title="Check Time", description="ISO datetime to check (defaults to now).", required=False)] = None,
+        time: Annotated[
+            datetime | None,
+            Parameter(title="Check Time", description="ISO datetime to check (defaults to now).", required=False),
+        ] = None,
     ) -> ScheduleCheckResponse:
         """Check whether a schedule is open or closed at a given time.
 
@@ -338,7 +350,9 @@ class ScheduleController(Controller):
         audit_service: AuditLogService,
         current_user: m.User,
         data: ScheduleEntryCreate,
-        schedule_id: Annotated[UUID, Parameter(title="Schedule ID", description="The schedule to create the entry for.")],
+        schedule_id: Annotated[
+            UUID, Parameter(title="Schedule ID", description="The schedule to create the entry for.")
+        ],
     ) -> ScheduleEntryDetail:
         """Create a new entry in a schedule.
 
@@ -358,6 +372,7 @@ class ScheduleController(Controller):
         db_obj = await entries_service.create(obj)
         request.app.emit(event_id="schedule_entry_created", entry_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = entries_service.to_schema(db_obj, schema_type=ScheduleEntryDetail)
         await log_audit(
             audit_service,
             action="schedule_entry.created",
@@ -371,7 +386,7 @@ class ScheduleController(Controller):
             after=after,
             request=request,
         )
-        return entries_service.to_schema(db_obj, schema_type=ScheduleEntryDetail)
+        return result
 
     @patch(
         operation_id="UpdateScheduleEntry",
@@ -411,6 +426,7 @@ class ScheduleController(Controller):
         )
         request.app.emit(event_id="schedule_entry_updated", entry_id=entry_id)
         after = capture_snapshot(fresh_obj)
+        result = entries_service.to_schema(fresh_obj, schema_type=ScheduleEntryDetail)
         await log_audit(
             audit_service,
             action="schedule_entry.updated",
@@ -424,7 +440,7 @@ class ScheduleController(Controller):
             after=after,
             request=request,
         )
-        return entries_service.to_schema(fresh_obj, schema_type=ScheduleEntryDetail)
+        return result
 
     @delete(
         operation_id="DeleteScheduleEntry",

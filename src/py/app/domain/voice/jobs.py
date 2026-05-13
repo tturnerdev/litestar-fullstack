@@ -40,7 +40,9 @@ async def extension_create_job(ctx: Context, *, task_id: str) -> dict:
         # TODO: Configure extension settings on PBX
         await task_service.update_progress(task.id, 75)
         # TODO: Verify extension is registered
-        task = await task_service.complete_task(task.id, result={"extension_id": extension_id, "action": "extension.create"})
+        task = await task_service.complete_task(
+            task.id, result={"extension_id": extension_id, "action": "extension.create"}
+        )
         await broadcast_entity_event(task)
     return {"status": "completed"}
 
@@ -69,7 +71,9 @@ async def extension_update_job(ctx: Context, *, task_id: str) -> dict:
         # TODO: Push updated settings to PBX
         await task_service.update_progress(task.id, 75)
         # TODO: Verify settings applied
-        task = await task_service.complete_task(task.id, result={"extension_id": extension_id, "action": "extension.update"})
+        task = await task_service.complete_task(
+            task.id, result={"extension_id": extension_id, "action": "extension.update"}
+        )
         await broadcast_entity_event(task)
     return {"status": "completed"}
 

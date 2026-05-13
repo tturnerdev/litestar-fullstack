@@ -44,7 +44,9 @@ async def ticket_created_event_handler(ticket_id: UUID) -> None:
                     action_url=f"/support/tickets/{ticket_id}",
                 )
             except Exception:
-                await logger.aerror("Failed to create notification for ticket_created", ticket_id=ticket_id, exc_info=True)
+                await logger.aerror(
+                    "Failed to create notification for ticket_created", ticket_id=ticket_id, exc_info=True
+                )
 
 
 @listener("ticket_message_created")

@@ -20,7 +20,6 @@ import {
   X,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
@@ -185,7 +184,6 @@ function TeamDetail() {
 
     updateTeamMutation.mutate(payload, {
       onSuccess: () => {
-        toast.success("Team updated successfully")
         setEditing(false)
       },
     })

@@ -128,6 +128,7 @@ class RoleController(Controller):
             The created role.
         """
         db_obj = await roles_service.create(data.to_dict())
+        result = roles_service.to_schema(db_obj, schema_type=Role)
         await log_audit(
             audit_service,
             action="account.role.created",
@@ -142,7 +143,7 @@ class RoleController(Controller):
             request=request,
         )
         request.app.emit(event_id="role_created", role_id=db_obj.id)
-        return roles_service.to_schema(db_obj, schema_type=Role)
+        return result
 
     @patch(
         operation_id="UpdateRole",
@@ -179,6 +180,7 @@ class RoleController(Controller):
         before = capture_snapshot(db_obj)
         db_obj = await roles_service.update(item_id=role_id, data=data.to_dict())
         request.app.emit(event_id="role_updated", role_id=db_obj.id)
+        result = roles_service.to_schema(db_obj, schema_type=Role)
         await log_audit(
             audit_service,
             action="account.role.updated",
@@ -192,7 +194,7 @@ class RoleController(Controller):
             after=capture_snapshot(db_obj),
             request=request,
         )
-        return roles_service.to_schema(db_obj, schema_type=Role)
+        return result
 
     @delete(
         operation_id="DeleteRole",

@@ -36,7 +36,9 @@ class FaxEmailRouteService(service.SQLAlchemyAsyncRepositoryService[m.FaxEmailRo
                 raise ValidationException(_DUPLICATE_FAX_EMAIL_ROUTE_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.FaxEmailRoute], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.FaxEmailRoute]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.FaxEmailRoute], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.FaxEmailRoute]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "email_address" in data and item_id is not None:
             data["email_address"] = data["email_address"].strip().lower()

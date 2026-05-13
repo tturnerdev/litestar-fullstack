@@ -44,7 +44,9 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
                 raise ValidationException(_DUPLICATE_DEVICE_TEMPLATE_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.DeviceTemplate], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.DeviceTemplate]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.DeviceTemplate], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.DeviceTemplate]:
         data = service.schema_dump(data)
         if service.is_dict(data) and ("manufacturer" in data or "model" in data):
             if "manufacturer" in data:

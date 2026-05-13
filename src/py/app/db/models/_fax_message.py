@@ -21,7 +21,9 @@ class FaxMessage(UUIDv7AuditBase):
     __tablename__ = "fax_message"
     __table_args__ = {"comment": "Sent and received fax message records"}
     __pii_columns__ = {"remote_number", "remote_name", "delivered_to_emails"}
-    fax_number_id: Mapped[UUID] = mapped_column(ForeignKey("fax_number.id", ondelete="cascade"), nullable=False, index=True)
+    fax_number_id: Mapped[UUID] = mapped_column(
+        ForeignKey("fax_number.id", ondelete="cascade"), nullable=False, index=True
+    )
     direction: Mapped[FaxDirection] = mapped_column(String(length=20), nullable=False)
     remote_number: Mapped[str] = mapped_column(String(length=20), nullable=False)
     remote_name: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)

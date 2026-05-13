@@ -119,6 +119,7 @@ class CallQueueController(Controller):
         obj["team_id"] = current_user.teams[0].team_id if current_user.teams else None
         db_obj = await call_queues_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = call_queues_service.to_schema(db_obj, schema_type=CallQueue)
         await log_audit(
             audit_service,
             action="call_routing.call_queue.created",
@@ -133,7 +134,7 @@ class CallQueueController(Controller):
             request=request,
         )
         request.app.emit(event_id="call_queue_created", call_queue_id=db_obj.id)
-        return call_queues_service.to_schema(db_obj, schema_type=CallQueue)
+        return result
 
     @get(
         operation_id="GetCallQueue",
@@ -191,6 +192,7 @@ class CallQueueController(Controller):
         before = capture_snapshot(await call_queues_service.get(call_queue_id))
         fresh_obj = await call_queues_service.update(item_id=call_queue_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = call_queues_service.to_schema(fresh_obj, schema_type=CallQueue)
         await log_audit(
             audit_service,
             action="call_routing.call_queue.updated",
@@ -205,7 +207,7 @@ class CallQueueController(Controller):
             request=request,
         )
         request.app.emit(event_id="call_queue_updated", call_queue_id=call_queue_id)
-        return call_queues_service.to_schema(fresh_obj, schema_type=CallQueue)
+        return result
 
     @delete(
         operation_id="DeleteCallQueue",
@@ -318,6 +320,7 @@ class CallQueueController(Controller):
         obj["call_queue_id"] = call_queue_id
         db_obj = await call_queue_members_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = call_queue_members_service.to_schema(db_obj, schema_type=CallQueueMember)
         await log_audit(
             audit_service,
             action="call_routing.call_queue_member.created",
@@ -332,7 +335,7 @@ class CallQueueController(Controller):
             request=request,
         )
         request.app.emit(event_id="call_queue_member_created", member_id=db_obj.id)
-        return call_queue_members_service.to_schema(db_obj, schema_type=CallQueueMember)
+        return result
 
     @patch(
         operation_id="UpdateCallQueueMember",
@@ -368,11 +371,10 @@ class CallQueueController(Controller):
             CallQueueMember
         """
         await call_queues_service.get(call_queue_id)
-        before = capture_snapshot(
-            await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id)
-        )
+        before = capture_snapshot(await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id))
         fresh_obj = await call_queue_members_service.update(item_id=member_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = call_queue_members_service.to_schema(fresh_obj, schema_type=CallQueueMember)
         await log_audit(
             audit_service,
             action="call_routing.call_queue_member.updated",
@@ -387,7 +389,7 @@ class CallQueueController(Controller):
             request=request,
         )
         request.app.emit(event_id="call_queue_member_updated", member_id=member_id)
-        return call_queue_members_service.to_schema(fresh_obj, schema_type=CallQueueMember)
+        return result
 
     @delete(
         operation_id="DeleteCallQueueMember",
@@ -472,14 +474,13 @@ class CallQueueController(Controller):
             CallQueueMember
         """
         await call_queues_service.get(call_queue_id)
-        before = capture_snapshot(
-            await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id)
-        )
+        before = capture_snapshot(await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id))
         fresh_obj = await call_queue_members_service.update(
             item_id=member_id,
             data={"is_paused": data.is_paused},
         )
         after = capture_snapshot(fresh_obj)
+        result = call_queue_members_service.to_schema(fresh_obj, schema_type=CallQueueMember)
         await log_audit(
             audit_service,
             action="call_routing.call_queue_member.paused",
@@ -500,4 +501,4 @@ class CallQueueController(Controller):
             member_id=member_id,
             is_paused=data.is_paused,
         )
-        return call_queue_members_service.to_schema(fresh_obj, schema_type=CallQueueMember)
+        return result

@@ -46,7 +46,9 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
                 raise ValidationException(_DUPLICATE_CONNECTION_NAME_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.Connection], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Connection]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Connection], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Connection]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()
@@ -89,7 +91,12 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
             try:
                 success, error_message = await provider.health_check(db_obj)
             except Exception:
-                await logger.aerror("Provider health check failed", provider=db_obj.provider, connection_id=str(connection_id), exc_info=True)
+                await logger.aerror(
+                    "Provider health check failed",
+                    provider=db_obj.provider,
+                    connection_id=str(connection_id),
+                    exc_info=True,
+                )
                 success = False
                 error_message = "Health check raised an unexpected error"
         else:

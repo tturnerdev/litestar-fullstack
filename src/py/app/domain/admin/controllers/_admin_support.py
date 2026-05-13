@@ -42,7 +42,12 @@ class AdminSupportController(Controller):
         },
     )
 
-    @get(operation_id="AdminListTickets", summary="List tickets (admin)", description="Returns a paginated list of all support tickets with creator and assignee details. Supports search by ticket number and subject. Requires superuser access.", path="/tickets")
+    @get(
+        operation_id="AdminListTickets",
+        summary="List tickets (admin)",
+        description="Returns a paginated list of all support tickets with creator and assignee details. Supports search by ticket number and subject. Requires superuser access.",
+        path="/tickets",
+    )
     async def list_tickets(
         self,
         ticket_service: TicketService,
@@ -99,7 +104,8 @@ class AdminSupportController(Controller):
         priority_counts: dict[str, int] = dict(priority_result.all())
 
         category_stmt = select(
-            func.coalesce(m.Ticket.category, "uncategorized"), func.count(),
+            func.coalesce(m.Ticket.category, "uncategorized"),
+            func.count(),
         ).group_by(func.coalesce(m.Ticket.category, "uncategorized"))
         category_result = await ticket_service.repository.session.execute(category_stmt)
         category_counts: dict[str, int] = dict(category_result.all())

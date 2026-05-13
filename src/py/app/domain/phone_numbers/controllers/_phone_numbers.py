@@ -137,6 +137,7 @@ class PhoneNumberController(Controller):
         result = await phone_number_service.create(data.to_dict(), auto_commit=True)
         request.app.emit(event_id="phone_number_created", phone_number_id=result.id)
         after = capture_snapshot(result)
+        schema_result = phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
         await log_audit(
             audit_service,
             action="phone_number.created",
@@ -149,7 +150,7 @@ class PhoneNumberController(Controller):
             after=after,
             request=request,
         )
-        return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
+        return schema_result
 
     @patch(
         operation_id="ManageUpdatePhoneNumber",
@@ -190,6 +191,7 @@ class PhoneNumberController(Controller):
         fresh_obj = await phone_number_service.update(item_id=phone_number_id, data=update_data, auto_commit=True)
         request.app.emit(event_id="phone_number_updated", phone_number_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
+        schema_result = phone_number_service.to_schema(fresh_obj, schema_type=PhoneNumberDetail)
         await log_audit(
             audit_service,
             action="phone_number.updated",
@@ -203,7 +205,7 @@ class PhoneNumberController(Controller):
             after=after,
             request=request,
         )
-        return phone_number_service.to_schema(fresh_obj, schema_type=PhoneNumberDetail)
+        return schema_result
 
     @delete(
         operation_id="ManageDeletePhoneNumber",

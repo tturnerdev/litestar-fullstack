@@ -74,9 +74,6 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team", teamId] })
       queryClient.invalidateQueries({ queryKey: ["teams"] })
-      toast.success("Team updated", {
-        description: "Your changes have been saved.",
-      })
       form.reset(form.getValues())
     },
     onError: (error: Error) => {

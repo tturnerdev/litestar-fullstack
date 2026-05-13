@@ -567,6 +567,8 @@ class AccessController(Controller):
         after = capture_snapshot(user)
         request.app.emit(event_id="user_created", user_id=user.id, mailer=app_mailer)
 
+        result = users_service.to_schema(user, schema_type=User)
+
         await log_audit(
             audit_service,
             action="account.register",
@@ -581,7 +583,7 @@ class AccessController(Controller):
             request=request,
         )
 
-        return users_service.to_schema(user, schema_type=User)
+        return result
 
     @post(
         operation_id="ForgotPassword",

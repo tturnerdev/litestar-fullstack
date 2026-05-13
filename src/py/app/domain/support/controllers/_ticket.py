@@ -100,7 +100,11 @@ class TicketController(Controller):
         data: TicketCreate,
     ) -> Ticket:
         """Open a new support ticket."""
-        if data.team_id and not current_user.is_superuser and not any(tm.team_id == data.team_id for tm in current_user.teams):
+        if (
+            data.team_id
+            and not current_user.is_superuser
+            and not any(tm.team_id == data.team_id for tm in current_user.teams)
+        ):
             raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         body_markdown = obj.pop("body_markdown")
@@ -119,6 +123,7 @@ class TicketController(Controller):
         )
         request.app.emit(event_id="ticket_message_created", ticket_id=db_obj.id, message_id=initial_msg.id)
         after = capture_snapshot(db_obj)
+        result = tickets_service.to_schema(db_obj, schema_type=Ticket)
         await log_audit(
             audit_service,
             action="support.ticket.created",
@@ -142,7 +147,7 @@ class TicketController(Controller):
             )
         except Exception:
             logger.warning("Failed to send ticket creation notification", exc_info=True)
-        return tickets_service.to_schema(db_obj, schema_type=Ticket)
+        return result
 
     @get(
         operation_id="GetTicket",
@@ -200,6 +205,7 @@ class TicketController(Controller):
                 assigned_to_id=db_obj.assigned_to_id,
             )
         after = capture_snapshot(db_obj)
+        result = tickets_service.to_schema(db_obj, schema_type=Ticket)
         await log_audit(
             audit_service,
             action="support.ticket.updated",
@@ -224,7 +230,7 @@ class TicketController(Controller):
                 )
             except Exception:
                 logger.warning("Failed to send ticket assignment notification", exc_info=True)
-        return tickets_service.to_schema(db_obj, schema_type=Ticket)
+        return result
 
     @delete(
         operation_id="DeleteTicket",
@@ -291,6 +297,7 @@ class TicketController(Controller):
             new_status=db_obj.status,
         )
         after = capture_snapshot(db_obj)
+        result = tickets_service.to_schema(db_obj, schema_type=Ticket)
         await log_audit(
             audit_service,
             action="support.ticket.closed",
@@ -314,7 +321,7 @@ class TicketController(Controller):
             )
         except Exception:
             logger.warning("Failed to send ticket closed notification", exc_info=True)
-        return tickets_service.to_schema(db_obj, schema_type=Ticket)
+        return result
 
     @post(
         operation_id="ReopenTicket",
@@ -344,6 +351,7 @@ class TicketController(Controller):
             new_status=db_obj.status,
         )
         after = capture_snapshot(db_obj)
+        result = tickets_service.to_schema(db_obj, schema_type=Ticket)
         await log_audit(
             audit_service,
             action="support.ticket.reopened",
@@ -367,4 +375,4 @@ class TicketController(Controller):
             )
         except Exception:
             logger.warning("Failed to send ticket reopened notification", exc_info=True)
-        return tickets_service.to_schema(db_obj, schema_type=Ticket)
+        return result

@@ -71,7 +71,9 @@ class E911RegistrationController(Controller):
         e911_service: E911RegistrationService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        team_id: Annotated[UUID | None, Parameter(title="Team ID", description="Filter by team.", query="teamId", required=False)] = None,
+        team_id: Annotated[
+            UUID | None, Parameter(title="Team ID", description="Filter by team.", query="teamId", required=False)
+        ] = None,
     ) -> OffsetPagination[E911Registration]:
         """List E911 registrations.
 
@@ -122,6 +124,7 @@ class E911RegistrationController(Controller):
         db_obj = await e911_service.create(obj)
         request.app.emit(event_id="e911_registration_created", registration_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = e911_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="e911.registration.created",
@@ -135,7 +138,7 @@ class E911RegistrationController(Controller):
             after=after,
             request=request,
         )
-        return e911_service.to_schema_enriched(db_obj)
+        return result
 
     @get(
         operation_id="GetE911Registration",
@@ -147,7 +150,9 @@ class E911RegistrationController(Controller):
     async def get_registration(
         self,
         e911_service: E911RegistrationService,
-        registration_id: Annotated[UUID, Parameter(title="Registration ID", description="The E911 registration to retrieve.")],
+        registration_id: Annotated[
+            UUID, Parameter(title="Registration ID", description="The E911 registration to retrieve.")
+        ],
     ) -> E911Registration:
         """Get details about an E911 registration.
 
@@ -175,7 +180,9 @@ class E911RegistrationController(Controller):
         e911_service: E911RegistrationService,
         audit_service: AuditLogService,
         current_user: m.User,
-        registration_id: Annotated[UUID, Parameter(title="Registration ID", description="The E911 registration to update.")],
+        registration_id: Annotated[
+            UUID, Parameter(title="Registration ID", description="The E911 registration to update.")
+        ],
     ) -> E911Registration:
         """Update an E911 registration.
 
@@ -197,6 +204,7 @@ class E911RegistrationController(Controller):
         )
         request.app.emit(event_id="e911_registration_updated", registration_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
+        result = e911_service.to_schema_enriched(fresh_obj)
         await log_audit(
             audit_service,
             action="e911.registration.updated",
@@ -210,7 +218,7 @@ class E911RegistrationController(Controller):
             after=after,
             request=request,
         )
-        return e911_service.to_schema_enriched(fresh_obj)
+        return result
 
     @delete(
         operation_id="DeleteE911Registration",
@@ -227,7 +235,9 @@ class E911RegistrationController(Controller):
         e911_service: E911RegistrationService,
         audit_service: AuditLogService,
         current_user: m.User,
-        registration_id: Annotated[UUID, Parameter(title="Registration ID", description="The E911 registration to delete.")],
+        registration_id: Annotated[
+            UUID, Parameter(title="Registration ID", description="The E911 registration to delete.")
+        ],
     ) -> None:
         """Delete an E911 registration.
 
@@ -270,7 +280,9 @@ class E911RegistrationController(Controller):
         e911_service: E911RegistrationService,
         audit_service: AuditLogService,
         current_user: m.User,
-        registration_id: Annotated[UUID, Parameter(title="Registration ID", description="The E911 registration to validate.")],
+        registration_id: Annotated[
+            UUID, Parameter(title="Registration ID", description="The E911 registration to validate.")
+        ],
     ) -> E911Registration:
         """Validate an E911 registration address.
 
@@ -290,6 +302,7 @@ class E911RegistrationController(Controller):
         before = capture_snapshot(await e911_service.get(registration_id))
         db_obj = await e911_service.validate_registration(registration_id)
         after = capture_snapshot(db_obj)
+        result = e911_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="e911.registration.validated",
@@ -303,7 +316,7 @@ class E911RegistrationController(Controller):
             after=after,
             request=request,
         )
-        return e911_service.to_schema_enriched(db_obj)
+        return result
 
     @get(
         operation_id="ListUnregisteredPhoneNumbers",
@@ -316,7 +329,9 @@ class E911RegistrationController(Controller):
         self,
         e911_service: E911RegistrationService,
         current_user: m.User,
-        team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")],
+        team_id: Annotated[
+            UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")
+        ],
     ) -> list[UnregisteredPhoneNumber]:
         """List phone numbers without E911 registrations.
 

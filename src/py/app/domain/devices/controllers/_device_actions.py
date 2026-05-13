@@ -99,6 +99,7 @@ class DeviceActionsController(Controller):
             timeout=120,
         )
         request.app.emit(event_id="device_rebooted", device_id=device.id)
+        result = task_service.to_schema(task, schema_type=BackgroundTaskDetail)
         await log_audit(
             audit_service,
             action="device.reboot",
@@ -110,7 +111,7 @@ class DeviceActionsController(Controller):
             target_label=device.name,
             request=request,
         )
-        return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
+        return result
 
     @post(
         operation_id="ReprovisionDevice",
@@ -143,6 +144,7 @@ class DeviceActionsController(Controller):
             timeout=120,
         )
         request.app.emit(event_id="device_reprovisioned", device_id=device.id)
+        result = task_service.to_schema(task, schema_type=BackgroundTaskDetail)
         await log_audit(
             audit_service,
             action="device.reprovision",
@@ -154,7 +156,7 @@ class DeviceActionsController(Controller):
             target_label=device.name,
             request=request,
         )
-        return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
+        return result
 
     @get(
         operation_id="ListDeviceLines",
@@ -197,6 +199,7 @@ class DeviceActionsController(Controller):
         lines_data = [line.to_dict() for line in data.lines]
         device = await devices_service.set_device_lines(device_id, lines_data)
         after = capture_snapshot(device)
+        result = devices_service.to_schema_enriched(device)
         await log_audit(
             audit_service,
             action="device.set_lines",
@@ -211,10 +214,12 @@ class DeviceActionsController(Controller):
             request=request,
         )
         request.app.emit(event_id="device_lines_updated", device_id=device.id)
-        return devices_service.to_schema_enriched(device)
+        return result
 
     @get(
         operation_id="GetDeviceScreenshot",
+        summary="Capture a device screenshot",
+        description="Fetch a live screenshot from the device's web interface via its local IP address. Returns the raw BMP image. Requires the device to have a valid IP and phone credentials.",
         path="/api/devices/{device_id:uuid}/screenshot",
         media_type="image/bmp",
         include_in_schema=False,
@@ -252,6 +257,8 @@ class DeviceActionsController(Controller):
 
     @post(
         operation_id="SendDeviceAction",
+        summary="Send an action to a device",
+        description="Send a Yealink Action URI command to the device over its local network. Supports key presses, speaker toggle, and other phone-specific actions.",
         path="/api/devices/{device_id:uuid}/action",
         include_in_schema=False,
         guards=[requires_feature_permission("devices", "edit")],
@@ -260,7 +267,12 @@ class DeviceActionsController(Controller):
         self,
         devices_service: DeviceService,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to send an action to.")],
-        key: Annotated[str, Parameter(query="key", title="Action Key", description="Yealink Action URI key value (e.g. F1, L1, SPEAKER).")],
+        key: Annotated[
+            str,
+            Parameter(
+                query="key", title="Action Key", description="Yealink Action URI key value (e.g. F1, L1, SPEAKER)."
+            ),
+        ],
     ) -> DeviceActionResponse:
         device = await devices_service.get(device_id)
         ip = _validate_device_ip(device)
@@ -273,21 +285,29 @@ class DeviceActionsController(Controller):
                 resp.raise_for_status()
         except httpx.TimeoutException:
             return DeviceActionResponse(
-                device_id=device.id, action="key_press", status="error",
+                device_id=device.id,
+                action="key_press",
+                status="error",
                 message="Device timed out.",
             )
         except httpx.HTTPStatusError as exc:
             return DeviceActionResponse(
-                device_id=device.id, action="key_press", status="error",
+                device_id=device.id,
+                action="key_press",
+                status="error",
                 message=f"Device returned {exc.response.status_code}.",
             )
         except httpx.HTTPError:
             return DeviceActionResponse(
-                device_id=device.id, action="key_press", status="error",
+                device_id=device.id,
+                action="key_press",
+                status="error",
                 message="Could not connect to device.",
             )
 
         return DeviceActionResponse(
-            device_id=device.id, action="key_press", status="ok",
+            device_id=device.id,
+            action="key_press",
+            status="ok",
             message=f"Sent key={key} to device.",
         )

@@ -96,6 +96,7 @@ class OrganizationController(Controller):
                 create_data["name"] = "My Organization"
             db_obj = await organization_service.create(create_data)
             after = capture_snapshot(db_obj)
+            result = organization_service.to_schema(db_obj, schema_type=Organization)
             await log_audit(
                 audit_service,
                 action="organization.settings_update",
@@ -118,6 +119,7 @@ class OrganizationController(Controller):
             )
             request.app.emit(event_id="organization_updated", organization_id=db_obj.id)
             after = capture_snapshot(db_obj)
+            result = organization_service.to_schema(db_obj, schema_type=Organization)
             await log_audit(
                 audit_service,
                 action="organization.settings_update",
@@ -131,4 +133,4 @@ class OrganizationController(Controller):
                 after=after,
                 request=request,
             )
-        return organization_service.to_schema(db_obj, schema_type=Organization)
+        return result

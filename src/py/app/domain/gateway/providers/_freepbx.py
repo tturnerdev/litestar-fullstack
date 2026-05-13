@@ -516,8 +516,12 @@ class FreePBXProvider(GatewayProvider):
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code in (401, 403):
                 self._invalidate_token(connection)
-                await logger.awarning("freepbx_query_number_auth_failed", phone_number=phone_number, status=exc.response.status_code)
-                return ProviderResult(status="auth_failed", error=f"Authentication failed (HTTP {exc.response.status_code})")
+                await logger.awarning(
+                    "freepbx_query_number_auth_failed", phone_number=phone_number, status=exc.response.status_code
+                )
+                return ProviderResult(
+                    status="auth_failed", error=f"Authentication failed (HTTP {exc.response.status_code})"
+                )
             await logger.awarning("freepbx_query_number_error", phone_number=phone_number, error=str(exc))
             return ProviderResult(status="error", error=str(exc))
         except Exception as exc:  # noqa: BLE001
@@ -538,8 +542,12 @@ class FreePBXProvider(GatewayProvider):
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code in (401, 403):
                 self._invalidate_token(connection)
-                await logger.awarning("freepbx_query_extension_auth_failed", extension=extension, status=exc.response.status_code)
-                return ProviderResult(status="auth_failed", error=f"Authentication failed (HTTP {exc.response.status_code})")
+                await logger.awarning(
+                    "freepbx_query_extension_auth_failed", extension=extension, status=exc.response.status_code
+                )
+                return ProviderResult(
+                    status="auth_failed", error=f"Authentication failed (HTTP {exc.response.status_code})"
+                )
             await logger.awarning("freepbx_query_extension_error", extension=extension, error=str(exc))
             return ProviderResult(status="error", error=str(exc))
         except Exception as exc:  # noqa: BLE001
@@ -561,8 +569,12 @@ class FreePBXProvider(GatewayProvider):
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code in (401, 403):
                 self._invalidate_token(connection)
-                await logger.awarning("freepbx_query_device_auth_failed", mac_address=mac_address, status=exc.response.status_code)
-                return ProviderResult(status="auth_failed", error=f"Authentication failed (HTTP {exc.response.status_code})")
+                await logger.awarning(
+                    "freepbx_query_device_auth_failed", mac_address=mac_address, status=exc.response.status_code
+                )
+                return ProviderResult(
+                    status="auth_failed", error=f"Authentication failed (HTTP {exc.response.status_code})"
+                )
             await logger.awarning("freepbx_query_device_error", mac_address=mac_address, error=str(exc))
             return ProviderResult(status="error", error=str(exc))
         except Exception as exc:  # noqa: BLE001
@@ -685,7 +697,11 @@ class FreePBXProvider(GatewayProvider):
         delete: bool | None = None,
     ) -> dict[str, Any]:
         fields = self._build_voicemail_fields(
-            password=password, name=name, email=email, attach=attach, delete=delete,
+            password=password,
+            name=name,
+            email=email,
+            attach=attach,
+            delete=delete,
         )
         query = _GQL_ENABLE_VOICEMAIL.format(ext=ext_number, fields=fields)
         result = await self._execute_graphql(query, connection)
@@ -731,22 +747,26 @@ class FreePBXProvider(GatewayProvider):
         matching_routes: list[dict[str, Any]] = []
         for route in all_routes:
             route_did = re.sub(r"[^\d]", "", route.get("extension", ""))
-            if route_did and (route_did == normalized or normalized.endswith(route_did) or route_did.endswith(normalized)):
+            if route_did and (
+                route_did == normalized or normalized.endswith(route_did) or route_did.endswith(normalized)
+            ):
                 destination_raw = route.get("destinationConnection", "") or ""
                 parsed = parse_destination(destination_raw)
-                matching_routes.append({
-                    "description": route.get("description", ""),
-                    "did": route.get("extension", ""),
-                    "cid_pattern": route.get("cidnum", ""),
-                    "destination": destination_raw,
-                    "destination_label": parsed["label"],
-                    "destination_type": parsed["type"],
-                    "destination_target": parsed["target"],
-                    "privacy_manager": _to_bool(route.get("privacyman")),
-                    "alert_info": route.get("alertinfo") or None,
-                    "group_prefix": route.get("grppre") or None,
-                    "delay_answer": _to_int(route.get("delay_answer")),
-                })
+                matching_routes.append(
+                    {
+                        "description": route.get("description", ""),
+                        "did": route.get("extension", ""),
+                        "cid_pattern": route.get("cidnum", ""),
+                        "destination": destination_raw,
+                        "destination_label": parsed["label"],
+                        "destination_type": parsed["type"],
+                        "destination_target": parsed["target"],
+                        "privacy_manager": _to_bool(route.get("privacyman")),
+                        "alert_info": route.get("alertinfo") or None,
+                        "group_prefix": route.get("grppre") or None,
+                        "delay_answer": _to_int(route.get("delay_answer")),
+                    }
+                )
 
         # 2. Fetch all extensions and find those using this number as outbound CID
         ext_resp = await self._execute_graphql(_GQL_ALL_EXTENSIONS, connection)
@@ -759,13 +779,17 @@ class FreePBXProvider(GatewayProvider):
             outbound_cid = user.get("outboundCid", "") or ""
             # Extract digits from the outbound CID string (e.g., '"John" <15551234567>')
             cid_digits = re.sub(r"[^\d]", "", outbound_cid)
-            if cid_digits and (cid_digits == normalized or normalized.endswith(cid_digits) or cid_digits.endswith(normalized)):
-                extensions_using.append({
-                    "extension_id": ext.get("extensionId", ""),
-                    "name": user.get("name", ""),
-                    "outbound_cid": outbound_cid,
-                    "type": "outbound_cid",
-                })
+            if cid_digits and (
+                cid_digits == normalized or normalized.endswith(cid_digits) or cid_digits.endswith(normalized)
+            ):
+                extensions_using.append(
+                    {
+                        "extension_id": ext.get("extensionId", ""),
+                        "name": user.get("name", ""),
+                        "outbound_cid": outbound_cid,
+                        "type": "outbound_cid",
+                    }
+                )
 
         # 3. Fetch recent call detail records for this number
         recent_calls = await self._fetch_cdrs(phone_number, connection)
@@ -905,10 +929,7 @@ class FreePBXProvider(GatewayProvider):
             description_normalized = re.sub(r"[^a-f0-9]", "", description)
             device_id_normalized = re.sub(r"[^a-f0-9]", "", device_id)
 
-            if normalized_mac and (
-                normalized_mac in description_normalized
-                or normalized_mac in device_id_normalized
-            ):
+            if normalized_mac and (normalized_mac in description_normalized or normalized_mac in device_id_normalized):
                 user = device.get("user") or {}
                 matched_device = {
                     "device_id": device.get("deviceId", ""),
@@ -939,8 +960,7 @@ class FreePBXProvider(GatewayProvider):
                 device_id_normalized = re.sub(r"[^a-f0-9]", "", device_id)
 
                 if normalized_mac and (
-                    normalized_mac in description_normalized
-                    or normalized_mac in device_id_normalized
+                    normalized_mac in description_normalized or normalized_mac in device_id_normalized
                 ):
                     user = ext.get("user") or {}
                     matched_device = {
@@ -989,7 +1009,9 @@ class FreePBXProvider(GatewayProvider):
                 return None
 
             follow_me_list_raw = fm_data.get("followMeList", "")
-            follow_me_list = _parse_hyphen_list(follow_me_list_raw) if isinstance(follow_me_list_raw, str) else follow_me_list_raw
+            follow_me_list = (
+                _parse_hyphen_list(follow_me_list_raw) if isinstance(follow_me_list_raw, str) else follow_me_list_raw
+            )
 
             no_answer_dest_raw = fm_data.get("noAnswerDestination", "")
             no_answer_parsed = parse_destination(no_answer_dest_raw) if no_answer_dest_raw else None
@@ -1022,18 +1044,22 @@ class FreePBXProvider(GatewayProvider):
             matching: list[dict[str, Any]] = []
             for group in all_groups:
                 group_list_raw = group.get("groupList", "")
-                members = _parse_hyphen_list(group_list_raw) if isinstance(group_list_raw, str) else (group_list_raw or [])
+                members = (
+                    _parse_hyphen_list(group_list_raw) if isinstance(group_list_raw, str) else (group_list_raw or [])
+                )
 
                 # Check if the extension is a member (strip any suffix like # for external numbers)
                 member_ids = [re.sub(r"[#*]$", "", m_item) for m_item in members]
                 if extension in member_ids:
-                    matching.append({
-                        "group_number": group.get("groupNumber", ""),
-                        "description": group.get("description", ""),
-                        "strategy": group.get("strategy", ""),
-                        "ring_time": _to_int(group.get("groupTime")),
-                        "member_extensions": members,
-                    })
+                    matching.append(
+                        {
+                            "group_number": group.get("groupNumber", ""),
+                            "description": group.get("description", ""),
+                            "strategy": group.get("strategy", ""),
+                            "ring_time": _to_int(group.get("groupTime")),
+                            "member_extensions": members,
+                        }
+                    )
 
         except Exception:  # noqa: BLE001
             await logger.adebug("freepbx_ring_groups_query_failed", extension=extension)
@@ -1110,19 +1136,18 @@ class FreePBXProvider(GatewayProvider):
                 src_digits = re.sub(r"[^\d]", "", src)
                 dst_digits = re.sub(r"[^\d]", "", dst)
 
-                if (
-                    identifier in (src, dst)
-                    or (normalized and normalized in (src_digits, dst_digits))
-                ):
-                    results.append({
-                        "date": record.get("calldate", ""),
-                        "source": src,
-                        "destination": dst,
-                        "duration": _to_int(record.get("duration")),
-                        "disposition": record.get("disposition", ""),
-                        "channel": record.get("channel", ""),
-                        "uniqueId": record.get("uniqueid", ""),
-                    })
+                if identifier in (src, dst) or (normalized and normalized in (src_digits, dst_digits)):
+                    results.append(
+                        {
+                            "date": record.get("calldate", ""),
+                            "source": src,
+                            "destination": dst,
+                            "duration": _to_int(record.get("duration")),
+                            "disposition": record.get("disposition", ""),
+                            "channel": record.get("channel", ""),
+                            "uniqueId": record.get("uniqueid", ""),
+                        }
+                    )
 
                     if len(results) >= limit:
                         break

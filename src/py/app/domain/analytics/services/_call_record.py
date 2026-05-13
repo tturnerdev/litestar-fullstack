@@ -54,7 +54,12 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
             func.coalesce(
                 func.sum(
                     case(
-                        (m.CallRecord.disposition.in_([CallDisposition.NO_ANSWER, CallDisposition.BUSY, CallDisposition.FAILED]), 1),
+                        (
+                            m.CallRecord.disposition.in_(
+                                [CallDisposition.NO_ANSWER, CallDisposition.BUSY, CallDisposition.FAILED]
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ),
@@ -122,7 +127,12 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
                 func.coalesce(
                     func.sum(
                         case(
-                            (m.CallRecord.disposition.in_([CallDisposition.NO_ANSWER, CallDisposition.BUSY, CallDisposition.FAILED]), 1),
+                            (
+                                m.CallRecord.disposition.in_(
+                                    [CallDisposition.NO_ANSWER, CallDisposition.BUSY, CallDisposition.FAILED]
+                                ),
+                                1,
+                            ),
                             else_=0,
                         )
                     ),
@@ -175,7 +185,12 @@ class CallRecordService(service.SQLAlchemyAsyncRepositoryService[m.CallRecord]):
                 func.coalesce(
                     func.sum(
                         case(
-                            (m.CallRecord.disposition.in_([CallDisposition.NO_ANSWER, CallDisposition.BUSY, CallDisposition.FAILED]), 1),
+                            (
+                                m.CallRecord.disposition.in_(
+                                    [CallDisposition.NO_ANSWER, CallDisposition.BUSY, CallDisposition.FAILED]
+                                ),
+                                1,
+                            ),
                             else_=0,
                         )
                     ),

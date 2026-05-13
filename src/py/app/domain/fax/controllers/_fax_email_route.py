@@ -150,6 +150,7 @@ class FaxEmailRouteController(Controller):
         payload = data.to_dict()
         payload["fax_number_id"] = fax_number_id
         db_obj = await fax_email_routes_service.create(payload)
+        result = fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -165,7 +166,7 @@ class FaxEmailRouteController(Controller):
             request=request,
         )
         request.app.emit(event_id="fax_email_route_created", route_id=db_obj.id)
-        return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
+        return result
 
     @patch(
         operation_id="UpdateFaxEmailRoute",
@@ -209,6 +210,7 @@ class FaxEmailRouteController(Controller):
             raise ClientException(detail="Route does not belong to this fax number.")
         before = capture_snapshot(existing)
         db_obj = await fax_email_routes_service.update(item_id=route_id, data=data.to_dict())
+        result = fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -224,7 +226,7 @@ class FaxEmailRouteController(Controller):
             request=request,
         )
         request.app.emit(event_id="fax_email_route_updated", route_id=route_id)
-        return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
+        return result
 
     @delete(
         operation_id="DeleteFaxEmailRoute",

@@ -36,7 +36,9 @@ class FaxNumberService(service.SQLAlchemyAsyncRepositoryService[m.FaxNumber]):
                 raise ValidationException(_DUPLICATE_FAX_NUMBER_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.FaxNumber], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.FaxNumber]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.FaxNumber], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.FaxNumber]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "number" in data:
             data["number"] = data["number"].strip()

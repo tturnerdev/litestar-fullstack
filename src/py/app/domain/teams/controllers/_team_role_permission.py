@@ -84,6 +84,7 @@ class TeamRolePermissionController(Controller):
             )
             created.append(obj)
             after_permissions.append(capture_snapshot(obj))
+        result = [permissions_service.to_schema(item, schema_type=TeamRolePermission) for item in created]
         await log_audit(
             audit_service,
             action="team.permissions.updated",
@@ -98,4 +99,4 @@ class TeamRolePermissionController(Controller):
             request=request,
         )
         request.app.emit(event_id="team_permissions_updated", team_id=team_id)
-        return [permissions_service.to_schema(item, schema_type=TeamRolePermission) for item in created]
+        return result

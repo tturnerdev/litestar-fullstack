@@ -128,6 +128,7 @@ class DeviceController(Controller):
         db_obj = await devices_service.create(obj)
         request.app.emit(event_id="device_created", device_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = devices_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="device.created",
@@ -150,7 +151,7 @@ class DeviceController(Controller):
             )
         except Exception:
             logger.warning("Failed to send device registration notification", exc_info=True)
-        return devices_service.to_schema_enriched(db_obj)
+        return result
 
     @get(
         operation_id="GetDevice",
@@ -213,6 +214,7 @@ class DeviceController(Controller):
         fresh_obj = await devices_service.get_one(id=device_id)
         request.app.emit(event_id="device_updated", device_id=device_id)
         after = capture_snapshot(fresh_obj)
+        result = devices_service.to_schema_enriched(fresh_obj)
         await log_audit(
             audit_service,
             action="device.updated",
@@ -226,7 +228,7 @@ class DeviceController(Controller):
             after=after,
             request=request,
         )
-        return devices_service.to_schema_enriched(fresh_obj)
+        return result
 
     @delete(
         operation_id="DeleteDevice",

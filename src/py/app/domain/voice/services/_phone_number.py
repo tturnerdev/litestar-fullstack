@@ -47,7 +47,9 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
                 raise ValidationException(_DUPLICATE_PHONE_NUMBER_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.PhoneNumber], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.PhoneNumber]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.PhoneNumber], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.PhoneNumber]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "number" in data:
             data["number"] = data["number"].strip()

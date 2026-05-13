@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.553.0 (2026-05-13)
+
+### Security
+- **Restrict webhooks to Super Admins** — Webhook endpoints now require superuser access instead of any active user. Removed per-method ownership checks (redundant under superuser guard) and user_id scoping from list endpoint so admins see all webhooks. Sidebar link hidden for non-superusers.
+
 ## v0.364.0 (2026-05-08)
 
 ### Fixed

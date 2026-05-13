@@ -42,7 +42,12 @@ class AdminDevicesController(Controller):
         },
     )
 
-    @get(operation_id="AdminListDevices", summary="List devices (admin)", description="Returns a paginated list of all devices across the system with owner and team details. Supports search by name, SIP username, and MAC address. Requires superuser access.", path="/")
+    @get(
+        operation_id="AdminListDevices",
+        summary="List devices (admin)",
+        description="Returns a paginated list of all devices across the system with owner and team details. Supports search by name, SIP username, and MAC address. Requires superuser access.",
+        path="/",
+    )
     async def list_devices(
         self,
         device_service: DeviceService,

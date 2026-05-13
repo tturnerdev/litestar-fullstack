@@ -118,6 +118,7 @@ class IvrMenuController(Controller):
         obj["team_id"] = current_user.teams[0].team_id if current_user.teams else None
         db_obj = await ivr_menus_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = ivr_menus_service.to_schema(db_obj, schema_type=IvrMenu)
         await log_audit(
             audit_service,
             action="call_routing.ivr_menu.created",
@@ -132,7 +133,7 @@ class IvrMenuController(Controller):
             request=request,
         )
         request.app.emit(event_id="ivr_menu_created", ivr_menu_id=db_obj.id)
-        return ivr_menus_service.to_schema(db_obj, schema_type=IvrMenu)
+        return result
 
     @get(
         operation_id="GetIvrMenu",
@@ -190,6 +191,7 @@ class IvrMenuController(Controller):
         before = capture_snapshot(await ivr_menus_service.get(ivr_menu_id))
         fresh_obj = await ivr_menus_service.update(item_id=ivr_menu_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = ivr_menus_service.to_schema(fresh_obj, schema_type=IvrMenu)
         await log_audit(
             audit_service,
             action="call_routing.ivr_menu.updated",
@@ -204,7 +206,7 @@ class IvrMenuController(Controller):
             request=request,
         )
         request.app.emit(event_id="ivr_menu_updated", ivr_menu_id=ivr_menu_id)
-        return ivr_menus_service.to_schema(fresh_obj, schema_type=IvrMenu)
+        return result
 
     @delete(
         operation_id="DeleteIvrMenu",
@@ -317,6 +319,7 @@ class IvrMenuController(Controller):
         obj["ivr_menu_id"] = ivr_menu_id
         db_obj = await ivr_menu_options_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = ivr_menu_options_service.to_schema(db_obj, schema_type=IvrMenuOption)
         await log_audit(
             audit_service,
             action="call_routing.ivr_menu_option.created",
@@ -331,7 +334,7 @@ class IvrMenuController(Controller):
             request=request,
         )
         request.app.emit(event_id="ivr_menu_option_created", option_id=db_obj.id)
-        return ivr_menu_options_service.to_schema(db_obj, schema_type=IvrMenuOption)
+        return result
 
     @patch(
         operation_id="UpdateIvrMenuOption",
@@ -370,6 +373,7 @@ class IvrMenuController(Controller):
         before = capture_snapshot(await ivr_menu_options_service.get_one(id=option_id, ivr_menu_id=ivr_menu_id))
         fresh_obj = await ivr_menu_options_service.update(item_id=option_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = ivr_menu_options_service.to_schema(fresh_obj, schema_type=IvrMenuOption)
         await log_audit(
             audit_service,
             action="call_routing.ivr_menu_option.updated",
@@ -384,7 +388,7 @@ class IvrMenuController(Controller):
             request=request,
         )
         request.app.emit(event_id="ivr_menu_option_updated", option_id=option_id)
-        return ivr_menu_options_service.to_schema(fresh_obj, schema_type=IvrMenuOption)
+        return result
 
     @delete(
         operation_id="DeleteIvrMenuOption",

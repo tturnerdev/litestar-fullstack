@@ -485,6 +485,7 @@ interface OverviewMetric {
 }
 
 function SystemOverviewCard() {
+  const isSuperuser = useAuthStore((state) => state.user?.isSuperuser) ?? false
   const { data: phoneNumbersData, isLoading: phoneNumbersLoading } = usePhoneNumbers(1, 1)
   const { data: extensionsData, isLoading: extensionsLoading } = useExtensions(1, 1)
   const { data: schedulesData, isLoading: schedulesLoading } = useSchedules({ page: 1, pageSize: 1 })
@@ -515,14 +516,18 @@ function SystemOverviewCard() {
       href: "/schedules",
       isLoading: schedulesLoading,
     },
-    {
-      label: "Connections",
-      value: connectionsData?.total,
-      icon: CheckCircle2,
-      iconClassName: "text-emerald-600 dark:text-emerald-400",
-      href: "/connections",
-      isLoading: connectionsLoading,
-    },
+    ...(isSuperuser
+      ? [
+          {
+            label: "Connections",
+            value: connectionsData?.total,
+            icon: CheckCircle2,
+            iconClassName: "text-emerald-600 dark:text-emerald-400",
+            href: "/connections",
+            isLoading: connectionsLoading,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -559,7 +564,7 @@ function HomePage() {
 
   const { data: tagsData, isLoading: tagsLoading, isError: tagsError } = useTags({ page: 1, pageSize: 1 })
 
-  const { data: rolesData, isLoading: rolesLoading, isError: rolesError } = useRoles()
+  const { data: rolesData, isLoading: rolesLoading } = useRoles({ enabled: isSuperuser })
 
   const { data: adminStats, isLoading: adminStatsLoading } = useAdminDashboardStats({ enabled: isSuperuser })
 
@@ -608,7 +613,7 @@ function HomePage() {
       .slice(0, 5)
   }, [teams])
 
-  const hasError = teamsError || tagsError || rolesError
+  const hasError = teamsError || tagsError
 
   if (hasError) {
     return (
@@ -724,23 +729,14 @@ function HomePage() {
             href="/tags"
             index={1}
           />
-          <StatCard
-            label="Roles"
-            value={rolesData?.total}
-            icon={ShieldCheck}
-            iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
-            isLoading={rolesLoading}
-            index={2}
-          />
           {isSuperuser ? (
             <StatCard
-              label="Total Users"
-              value={adminStats?.totalUsers}
-              icon={Users}
-              iconClassName="bg-orange-500/10 text-orange-600 dark:text-orange-400"
-              isLoading={adminStatsLoading}
-              href="/admin"
-              index={3}
+              label="Roles"
+              value={rolesData?.total}
+              icon={ShieldCheck}
+              iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
+              isLoading={rolesLoading}
+              index={2}
             />
           ) : (
             <StatCard
@@ -749,6 +745,17 @@ function HomePage() {
               icon={Users}
               iconClassName="bg-orange-500/10 text-orange-600 dark:text-orange-400"
               isLoading={teamsLoading}
+              index={2}
+            />
+          )}
+          {isSuperuser && (
+            <StatCard
+              label="Total Users"
+              value={adminStats?.totalUsers}
+              icon={Users}
+              iconClassName="bg-orange-500/10 text-orange-600 dark:text-orange-400"
+              isLoading={adminStatsLoading}
+              href="/admin"
               index={3}
             />
           )}
@@ -778,9 +785,11 @@ function HomePage() {
           <SectionErrorBoundary name="System Overview">
             <SystemOverviewCard />
           </SectionErrorBoundary>
-          <SectionErrorBoundary name="Integration Status">
-            <ConnectionsStatusCard />
-          </SectionErrorBoundary>
+          {isSuperuser && (
+            <SectionErrorBoundary name="Integration Status">
+              <ConnectionsStatusCard />
+            </SectionErrorBoundary>
+          )}
         </div>
       </PageSection>
 

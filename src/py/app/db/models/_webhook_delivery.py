@@ -49,7 +49,10 @@ class WebhookDelivery(UUIDv7AuditBase):
     max_retries: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     """Maximum number of retries allowed for this delivery."""
     next_retry_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None, index=True,
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+        index=True,
     )
     """When the next retry should be attempted. None means no retry pending."""
 

@@ -360,7 +360,6 @@ class DatabaseSeeder:
             # Create line assignments
             if created and dev.get("lines"):
                 for line in dev["lines"]:
-                    ext_id = self.extension_ids.get(line.get("extension_number"))
                     await self._get_or_create(
                         m.DeviceLineAssignment,
                         lookup={"device_id": device.id, "line_number": line["line_number"]},
@@ -407,7 +406,7 @@ class DatabaseSeeder:
         self.console.print("[bold]Support Tickets[/bold]")
         admin_id = self.user_ids.get("admin@example.com")
 
-        for idx, ticket_data in enumerate(_TICKETS, start=1):
+        for _idx, ticket_data in enumerate(_TICKETS, start=1):
             reporter_email = ticket_data.get("user_email", "admin@example.com")
             reporter_id = self.user_ids.get(reporter_email, admin_id)
             assignee_email = ticket_data.get("assigned_to_email")
@@ -740,7 +739,12 @@ _DEVICES = [
         "user_email": "admin@example.com",
         "status": m.DeviceStatus.ONLINE,
         "lines": [
-            {"line_number": 1, "label": "Alice Admin", "extension_number": "100", "line_type": m.DeviceLineType.PRIVATE},
+            {
+                "line_number": 1,
+                "label": "Alice Admin",
+                "extension_number": "100",
+                "line_type": m.DeviceLineType.PRIVATE,
+            },
             {"line_number": 2, "label": "Main Office", "line_type": m.DeviceLineType.SHARED},
         ],
     },
@@ -755,7 +759,12 @@ _DEVICES = [
         "user_email": "admin@example.com",
         "status": m.DeviceStatus.OFFLINE,
         "lines": [
-            {"line_number": 1, "label": "Alice Admin", "extension_number": "100", "line_type": m.DeviceLineType.PRIVATE},
+            {
+                "line_number": 1,
+                "label": "Alice Admin",
+                "extension_number": "100",
+                "line_type": m.DeviceLineType.PRIVATE,
+            },
         ],
     },
     {
@@ -770,7 +779,12 @@ _DEVICES = [
         "user_email": "bob.manager@example.com",
         "status": m.DeviceStatus.ONLINE,
         "lines": [
-            {"line_number": 1, "label": "Bob Manager", "extension_number": "101", "line_type": m.DeviceLineType.PRIVATE},
+            {
+                "line_number": 1,
+                "label": "Bob Manager",
+                "extension_number": "101",
+                "line_type": m.DeviceLineType.PRIVATE,
+            },
         ],
     },
     {
@@ -816,7 +830,12 @@ _DEVICES = [
         "user_email": "admin@example.com",
         "status": m.DeviceStatus.ONLINE,
         "lines": [
-            {"line_number": 1, "label": "Lobby Phone", "extension_number": "201", "line_type": m.DeviceLineType.PRIVATE},
+            {
+                "line_number": 1,
+                "label": "Lobby Phone",
+                "extension_number": "201",
+                "line_type": m.DeviceLineType.PRIVATE,
+            },
         ],
     },
     {
@@ -830,7 +849,12 @@ _DEVICES = [
         "user_email": "dave.support@example.com",
         "status": m.DeviceStatus.OFFLINE,
         "lines": [
-            {"line_number": 1, "label": "Dave Support", "extension_number": "103", "line_type": m.DeviceLineType.PRIVATE},
+            {
+                "line_number": 1,
+                "label": "Dave Support",
+                "extension_number": "103",
+                "line_type": m.DeviceLineType.PRIVATE,
+            },
         ],
     },
     {
@@ -845,7 +869,12 @@ _DEVICES = [
         "user_email": "bob.manager@example.com",
         "status": m.DeviceStatus.ONLINE,
         "lines": [
-            {"line_number": 1, "label": "Branch Rcpt", "extension_number": "300", "line_type": m.DeviceLineType.PRIVATE},
+            {
+                "line_number": 1,
+                "label": "Branch Rcpt",
+                "extension_number": "300",
+                "line_type": m.DeviceLineType.PRIVATE,
+            },
         ],
     },
 ]

@@ -254,10 +254,12 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
         """
         results, _ = await self.list_and_count(
             m.BackgroundTask.initiated_by_id == user_id,
-            m.BackgroundTask.status.in_([
-                m.BackgroundTaskStatus.PENDING,
-                m.BackgroundTaskStatus.RUNNING,
-            ]),
+            m.BackgroundTask.status.in_(
+                [
+                    m.BackgroundTaskStatus.PENDING,
+                    m.BackgroundTaskStatus.RUNNING,
+                ]
+            ),
         )
         return list(results)
 
@@ -272,11 +274,13 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
         """
         cutoff = datetime.now(UTC) - timedelta(days=older_than_days)
         results, _ = await self.list_and_count(
-            m.BackgroundTask.status.in_([
-                m.BackgroundTaskStatus.COMPLETED,
-                m.BackgroundTaskStatus.FAILED,
-                m.BackgroundTaskStatus.CANCELLED,
-            ]),
+            m.BackgroundTask.status.in_(
+                [
+                    m.BackgroundTaskStatus.COMPLETED,
+                    m.BackgroundTaskStatus.FAILED,
+                    m.BackgroundTaskStatus.CANCELLED,
+                ]
+            ),
             m.BackgroundTask.completed_at < cutoff,
         )
         count = len(results)

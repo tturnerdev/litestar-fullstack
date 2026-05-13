@@ -169,10 +169,16 @@ class TestDashboardStats:
             new_users_today=0,
             new_users_week=0,
             events_today=0,
+            total_devices=0,
+            devices_online=0,
+            total_extensions=0,
+            open_tickets=0,
+            unread_voicemails=0,
         )
 
         assert stats.total_users == 0
         assert stats.events_today == 0
+        assert stats.total_devices == 0
 
     def test_dashboard_stats_with_values(self) -> None:
         """Verify DashboardStats preserves all values."""
@@ -184,6 +190,11 @@ class TestDashboardStats:
             new_users_today=5,
             new_users_week=25,
             events_today=300,
+            total_devices=42,
+            devices_online=38,
+            total_extensions=60,
+            open_tickets=7,
+            unread_voicemails=3,
         )
 
         assert stats.total_users == 150
@@ -193,6 +204,8 @@ class TestDashboardStats:
         assert stats.new_users_today == 5
         assert stats.new_users_week == 25
         assert stats.events_today == 300
+        assert stats.total_devices == 42
+        assert stats.open_tickets == 7
 
 
 # ---------------------------------------------------------------------------
@@ -210,10 +223,7 @@ class TestAdminTrends:
 
     def test_seven_day_trends(self) -> None:
         """Verify a full 7-day trend dataset."""
-        points = [
-            TrendPoint(date=f"Apr {20 + i}", events=i * 10, new_users=i)
-            for i in range(7)
-        ]
+        points = [TrendPoint(date=f"Apr {20 + i}", events=i * 10, new_users=i) for i in range(7)]
         trends = AdminTrends(points=points)
 
         assert len(trends.points) == 7

@@ -38,7 +38,9 @@ class MusicOnHoldService(service.SQLAlchemyAsyncRepositoryService[m.MusicOnHold]
                 raise ValidationException(_DUPLICATE_MOH_NAME_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.MusicOnHold], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.MusicOnHold]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.MusicOnHold], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.MusicOnHold]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()

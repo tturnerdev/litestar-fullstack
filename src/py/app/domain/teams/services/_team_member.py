@@ -35,7 +35,9 @@ class TeamMemberService(service.SQLAlchemyAsyncRepositoryService[m.TeamMember]):
                 raise ValidationException(_DUPLICATE_TEAM_MEMBER_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.TeamMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.TeamMember]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.TeamMember], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.TeamMember]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "user_id" in data and "team_id" in data:
             existing = await self.repository.list(

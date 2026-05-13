@@ -58,7 +58,9 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
                 raise ValidationException(_DUPLICATE_WEBHOOK_NAME_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.Webhook], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Webhook]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Webhook], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Webhook]:
         """Validate that no other webhook with the same name already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data):
@@ -81,4 +83,3 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
             if data.get("description"):
                 data["description"] = data["description"].strip()
         return data
-

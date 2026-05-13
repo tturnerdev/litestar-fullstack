@@ -405,7 +405,4 @@ def get_all_event_types() -> list[dict[str, str]]:
     Returns:
         List of dicts with 'event' and 'description' keys.
     """
-    return [
-        {"event": evt.value, "description": EVENT_DESCRIPTIONS.get(evt, "")}
-        for evt in WebhookEventType
-    ]
+    return [{"event": evt.value, "description": EVENT_DESCRIPTIONS.get(evt, "")} for evt in WebhookEventType]

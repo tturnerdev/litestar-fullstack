@@ -63,10 +63,21 @@ class BackgroundTaskController(Controller):
         task_service: BackgroundTaskService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        task_type: Annotated[str | None, Parameter(title="Task Type", description="Filter by task type.", query="taskType", required=False)] = None,
-        status: Annotated[str | None, Parameter(title="Status", description="Filter by status.", query="status", required=False)] = None,
-        entity_type: Annotated[str | None, Parameter(title="Entity Type", description="Filter by entity type.", query="entityType", required=False)] = None,
-        entity_id: Annotated[UUID | None, Parameter(title="Entity ID", description="Filter by entity ID.", query="entityId", required=False)] = None,
+        task_type: Annotated[
+            str | None,
+            Parameter(title="Task Type", description="Filter by task type.", query="taskType", required=False),
+        ] = None,
+        status: Annotated[
+            str | None, Parameter(title="Status", description="Filter by status.", query="status", required=False)
+        ] = None,
+        entity_type: Annotated[
+            str | None,
+            Parameter(title="Entity Type", description="Filter by entity type.", query="entityType", required=False),
+        ] = None,
+        entity_id: Annotated[
+            UUID | None,
+            Parameter(title="Entity ID", description="Filter by entity ID.", query="entityId", required=False),
+        ] = None,
     ) -> OffsetPagination[BackgroundTaskList]:
         """List background tasks with optional filters."""
         extra_filters = []
@@ -132,6 +143,7 @@ class BackgroundTaskController(Controller):
         existing = await task_service.get(task_id)
         previous_status = existing.status
         db_obj = await task_service.cancel_task(task_id)
+        result = task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
         request.app.emit(event_id="background_task_cancelled", task_id=task_id)
         await log_audit(
             audit_service,
@@ -150,7 +162,7 @@ class BackgroundTaskController(Controller):
             },
             request=request,
         )
-        return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
+        return result
 
     @delete(
         operation_id="DeleteTask",

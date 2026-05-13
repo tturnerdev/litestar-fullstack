@@ -54,28 +54,32 @@ class VoicemailController(Controller):
         VoicemailSettings,
         VoicemailSettingsUpdate,
     ]
-    dependencies = create_service_dependencies(
-        VoicemailMessageService,
-        key="voicemail_messages_service",
-        filters={
-            "id_filter": UUID,
-            "pagination_type": "limit_offset",
-            "pagination_size": 20,
-            "created_at": True,
-            "updated_at": True,
-            "sort_field": "created_at",
-            "sort_order": "desc",
-            "search": "caller_number,caller_name,transcription",
-        },
-    ) | create_service_dependencies(
-        VoicemailBoxService,
-        key="voicemail_boxes_service",
-        load=[selectinload(m.VoicemailBox.extension)],
-    ) | {
-        "extensions_service": Provide(provide_extensions_service),
-        "audit_service": Provide(provide_audit_log_service),
-        "gateway_connections": Provide(provide_gateway_connections),
-    }
+    dependencies = (
+        create_service_dependencies(
+            VoicemailMessageService,
+            key="voicemail_messages_service",
+            filters={
+                "id_filter": UUID,
+                "pagination_type": "limit_offset",
+                "pagination_size": 20,
+                "created_at": True,
+                "updated_at": True,
+                "sort_field": "created_at",
+                "sort_order": "desc",
+                "search": "caller_number,caller_name,transcription",
+            },
+        )
+        | create_service_dependencies(
+            VoicemailBoxService,
+            key="voicemail_boxes_service",
+            load=[selectinload(m.VoicemailBox.extension)],
+        )
+        | {
+            "extensions_service": Provide(provide_extensions_service),
+            "audit_service": Provide(provide_audit_log_service),
+            "gateway_connections": Provide(provide_gateway_connections),
+        }
+    )
 
     @get(
         operation_id="GetVoicemailSettings",
@@ -120,6 +124,7 @@ class VoicemailController(Controller):
         before = capture_snapshot(db_obj)
         db_obj = await voicemail_boxes_service.update(item_id=db_obj.id, data=data.to_dict())
         after = capture_snapshot(db_obj)
+        result = voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
         await log_audit(
             audit_service,
             action="voice.voicemail.updated",
@@ -136,9 +141,7 @@ class VoicemailController(Controller):
         request.app.emit(event_id="voicemail_box_updated", voicemail_box_id=db_obj.id)
 
         pbx_fields = ("is_enabled", "pin", "email_address", "email_attach_audio")
-        has_pbx_change = any(
-            not isinstance(getattr(data, f), type(msgspec.UNSET)) for f in pbx_fields
-        )
+        has_pbx_change = any(not isinstance(getattr(data, f), type(msgspec.UNSET)) for f in pbx_fields)
         pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
         await logger.ainfo(
             "voicemail_pbx_check",
@@ -167,7 +170,7 @@ class VoicemailController(Controller):
             except Exception as exc:
                 await logger.awarning("pbx_voicemail_update_failed", ext=ext_num, error=str(exc))
 
-        return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
+        return result
 
     @get(
         operation_id="ListVoicemailMessages",
@@ -242,6 +245,7 @@ class VoicemailController(Controller):
         before = capture_snapshot(db_obj)
         db_obj = await voicemail_messages_service.update(item_id=db_obj.id, data=data.to_dict())
         after = capture_snapshot(db_obj)
+        result = voicemail_messages_service.to_schema(db_obj, schema_type=VoicemailMessage)
         await log_audit(
             audit_service,
             action="voice.voicemail_message.updated",
@@ -256,7 +260,7 @@ class VoicemailController(Controller):
             request=request,
         )
         request.app.emit(event_id="voicemail_message_updated", message_id=msg_id)
-        return voicemail_messages_service.to_schema(db_obj, schema_type=VoicemailMessage)
+        return result
 
     @delete(
         operation_id="DeleteVoicemailMessage",

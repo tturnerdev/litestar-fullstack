@@ -85,11 +85,7 @@ class VoicemailBoxController(Controller):
         if current_user.is_superuser:
             results, total = await voicemail_boxes_service.list_and_count(*filters)
         else:
-            user_extension_ids = (
-                select(m.Extension.id)
-                .where(m.Extension.user_id == current_user.id)
-                .scalar_subquery()
-            )
+            user_extension_ids = select(m.Extension.id).where(m.Extension.user_id == current_user.id).scalar_subquery()
             results, total = await voicemail_boxes_service.list_and_count(
                 *filters,
                 m.VoicemailBox.extension_id.in_(user_extension_ids),
@@ -130,6 +126,7 @@ class VoicemailBoxController(Controller):
         db_obj = await voicemail_boxes_service.create(obj)
         request.app.emit(event_id="voicemail_box_created", voicemail_box_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailBox)
         await log_audit(
             audit_service,
             action="voicemail.box.created",
@@ -153,7 +150,7 @@ class VoicemailBoxController(Controller):
             )
         except Exception:
             logger.warning("Failed to send voicemail box creation notification", exc_info=True)
-        return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailBox)
+        return result
 
     @get(
         operation_id="GetVoicemailBox",
@@ -212,6 +209,7 @@ class VoicemailBoxController(Controller):
         db_obj = await voicemail_boxes_service.update(item_id=box_id, data=data.to_dict())
         request.app.emit(event_id="voicemail_box_updated", voicemail_box_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailBox)
         await log_audit(
             audit_service,
             action="voicemail.box.updated",
@@ -225,7 +223,7 @@ class VoicemailBoxController(Controller):
             after=after,
             request=request,
         )
-        return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailBox)
+        return result
 
     @delete(
         operation_id="DeleteVoicemailBox",

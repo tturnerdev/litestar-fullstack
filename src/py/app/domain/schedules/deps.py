@@ -16,7 +16,10 @@ provide_schedules_service = create_service_provider(
 
 provide_schedule_entries_service = create_service_provider(
     ScheduleEntryService,
-    error_messages={"duplicate_key": "This schedule entry already exists.", "integrity": "Schedule entry operation failed."},
+    error_messages={
+        "duplicate_key": "This schedule entry already exists.",
+        "integrity": "Schedule entry operation failed.",
+    },
 )
 
 __all__ = ("provide_schedule_entries_service", "provide_schedules_service")

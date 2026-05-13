@@ -46,7 +46,9 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
                 raise ValidationException(_DUPLICATE_EXTENSION_NUMBER_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.Extension], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Extension]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Extension], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Extension]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             if "display_name" in data:

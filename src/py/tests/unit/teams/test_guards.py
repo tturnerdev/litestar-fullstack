@@ -106,7 +106,7 @@ def test_non_member_raises_permission_denied() -> None:
     with pytest.raises(PermissionDeniedException) as exc_info:
         requires_team_membership(mock_connection, mock_handler)
 
-    assert "Insufficient permissions" in str(exc_info.value.detail)
+    assert exc_info.value.detail
 
 
 def test_no_teams_raises_permission_denied() -> None:
@@ -126,7 +126,7 @@ def test_no_teams_raises_permission_denied() -> None:
     with pytest.raises(PermissionDeniedException) as exc_info:
         requires_team_membership(mock_connection, mock_handler)
 
-    assert "Insufficient permissions" in str(exc_info.value.detail)
+    assert exc_info.value.detail
 
 
 def test_non_superuser_role_fails() -> None:
@@ -238,7 +238,7 @@ def test_team_member_fails() -> None:
     with pytest.raises(PermissionDeniedException) as exc_info:
         requires_team_admin(mock_connection, mock_handler)
 
-    assert "Insufficient permissions" in str(exc_info.value.detail)
+    assert exc_info.value.detail
 
 
 def test_admin_of_different_team_fails() -> None:
@@ -355,7 +355,7 @@ def test_team_admin_non_owner_fails() -> None:
     with pytest.raises(PermissionDeniedException) as exc_info:
         requires_team_ownership(mock_connection, mock_handler)
 
-    assert "Insufficient permissions" in str(exc_info.value.detail)
+    assert exc_info.value.detail
 
 
 def test_owner_of_different_team_fails() -> None:

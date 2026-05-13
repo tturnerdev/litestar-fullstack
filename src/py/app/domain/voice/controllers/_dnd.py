@@ -78,6 +78,7 @@ class DndController(Controller):
         before = capture_snapshot(db_obj)
         db_obj = await dnd_service.update(item_id=db_obj.id, data=data.to_dict())
         after = capture_snapshot(db_obj)
+        result = dnd_service.to_schema(db_obj, schema_type=DndSettings)
         await log_audit(
             audit_service,
             action="voice.dnd.updated",
@@ -92,7 +93,7 @@ class DndController(Controller):
             request=request,
         )
         request.app.emit(event_id="dnd_updated", extension_id=db_obj.id)
-        return dnd_service.to_schema(db_obj, schema_type=DndSettings)
+        return result
 
     @post(
         operation_id="ToggleDnd",
@@ -116,6 +117,7 @@ class DndController(Controller):
         before = capture_snapshot(db_obj)
         db_obj = await dnd_service.toggle_dnd(db_obj.id)
         after = capture_snapshot(db_obj)
+        result = dnd_service.to_schema(db_obj, schema_type=DndToggleResponse)
         await log_audit(
             audit_service,
             action="voice.dnd.toggled",
@@ -130,4 +132,4 @@ class DndController(Controller):
             request=request,
         )
         request.app.emit(event_id="dnd_toggled", extension_id=ext_id, is_enabled=db_obj.is_enabled)
-        return dnd_service.to_schema(db_obj, schema_type=DndToggleResponse)
+        return result

@@ -73,7 +73,13 @@ class AdminDeviceTemplatesController(Controller):
         results, total = await template_service.list_and_count(*filters)
         return template_service.to_schema(results, total, filters, schema_type=DeviceTemplateList)
 
-    @post(operation_id="AdminCreateDeviceTemplate", summary="Create a device template", description="Creates a new device template and records an audit log entry. Emits a device_template_created event. Requires superuser access.", path="/", status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="AdminCreateDeviceTemplate",
+        summary="Create a device template",
+        description="Creates a new device template and records an audit log entry. Emits a device_template_created event. Requires superuser access.",
+        path="/",
+        status_code=HTTP_201_CREATED,
+    )
     async def create_template(
         self,
         request: Request[m.User, Token, Any],
@@ -84,6 +90,7 @@ class AdminDeviceTemplatesController(Controller):
         """Create a new device template."""
         db_obj = await template_service.create(data.to_dict())
         after = capture_snapshot(db_obj)
+        result = template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
         await log_audit(
             audit_service,
             action="admin.device_template.created",
@@ -98,9 +105,14 @@ class AdminDeviceTemplatesController(Controller):
             request=request,
         )
         request.app.emit(event_id="device_template_created", template_id=db_obj.id)
-        return template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
+        return result
 
-    @get(operation_id="AdminGetDeviceTemplate", summary="Get device template details", description="Retrieves a single device template by its UUID, including all configuration fields. Requires superuser access.", path="/{template_id:uuid}")
+    @get(
+        operation_id="AdminGetDeviceTemplate",
+        summary="Get device template details",
+        description="Retrieves a single device template by its UUID, including all configuration fields. Requires superuser access.",
+        path="/{template_id:uuid}",
+    )
     async def get_template(
         self,
         template_service: DeviceTemplateService,
@@ -110,7 +122,12 @@ class AdminDeviceTemplatesController(Controller):
         db_obj = await template_service.get(template_id)
         return template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
 
-    @patch(operation_id="AdminUpdateDeviceTemplate", summary="Update a device template", description="Partially updates a device template. Captures before/after snapshots for the audit log and emits a device_template_updated event. Requires superuser access.", path="/{template_id:uuid}")
+    @patch(
+        operation_id="AdminUpdateDeviceTemplate",
+        summary="Update a device template",
+        description="Partially updates a device template. Captures before/after snapshots for the audit log and emits a device_template_updated event. Requires superuser access.",
+        path="/{template_id:uuid}",
+    )
     async def update_template(
         self,
         request: Request[m.User, Token, Any],
@@ -127,6 +144,7 @@ class AdminDeviceTemplatesController(Controller):
             data=data.to_dict(),
         )
         after = capture_snapshot(db_obj)
+        result = template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
         await log_audit(
             audit_service,
             action="admin.device_template.updated",
@@ -141,9 +159,16 @@ class AdminDeviceTemplatesController(Controller):
             request=request,
         )
         request.app.emit(event_id="device_template_updated", template_id=db_obj.id)
-        return template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
+        return result
 
-    @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", description="Permanently deletes a device template. Records the deletion in the audit log with a before snapshot. Requires superuser access.", path="/{template_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="AdminDeleteDeviceTemplate",
+        summary="Delete a device template",
+        description="Permanently deletes a device template. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
+        path="/{template_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def delete_template(
         self,
         request: Request[m.User, Token, Any],

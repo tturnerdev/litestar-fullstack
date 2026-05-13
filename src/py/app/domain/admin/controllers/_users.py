@@ -62,7 +62,12 @@ class AdminUsersController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="AdminListUsers", summary="List users (admin)", description="Returns a paginated list of all users with roles, OAuth accounts, and team memberships. Supports search by name and email. Requires superuser access.", path="/")
+    @get(
+        operation_id="AdminListUsers",
+        summary="List users (admin)",
+        description="Returns a paginated list of all users with roles, OAuth accounts, and team memberships. Supports search by name and email. Requires superuser access.",
+        path="/",
+    )
     async def list_users(
         self,
         request: Request[m.User, Token, Any],
@@ -82,7 +87,12 @@ class AdminUsersController(Controller):
         results, total = await users_service.list_and_count(*filters)
         return users_service.to_schema(results, total, filters, schema_type=AdminUserSummary)
 
-    @get(operation_id="AdminGetUser", summary="Get user details (admin)", description="Retrieves detailed information for a single user by UUID, including security-sensitive fields such as password hash age. Requires superuser access.", path="/{user_id:uuid}")
+    @get(
+        operation_id="AdminGetUser",
+        summary="Get user details (admin)",
+        description="Retrieves detailed information for a single user by UUID, including security-sensitive fields such as password hash age. Requires superuser access.",
+        path="/{user_id:uuid}",
+    )
     async def get_user(
         self,
         request: Request[m.User, Token, Any],
@@ -103,7 +113,12 @@ class AdminUsersController(Controller):
 
         return users_service.to_schema(user, schema_type=AdminUserDetail)
 
-    @patch(operation_id="AdminUpdateUser", summary="Update a user (admin)", description="Partially updates a user's profile, active status, superuser flag, or verification status. Captures before/after snapshots for the audit log and emits an admin_user_updated event. Requires superuser access.", path="/{user_id:uuid}")
+    @patch(
+        operation_id="AdminUpdateUser",
+        summary="Update a user (admin)",
+        description="Partially updates a user's profile, active status, superuser flag, or verification status. Captures before/after snapshots for the audit log and emits an admin_user_updated event. Requires superuser access.",
+        path="/{user_id:uuid}",
+    )
     async def update_user(
         self,
         request: Request[m.User, Token, Any],
@@ -134,6 +149,7 @@ class AdminUsersController(Controller):
         before = capture_snapshot(db_obj)
         user = await users_service.update(item_id=user_id, data=update_data, auto_commit=True)
         after = capture_snapshot(user)
+        result = users_service.to_schema(user, schema_type=AdminUserDetail)
         await log_audit(
             audit_service,
             action="admin.user.updated",
@@ -149,9 +165,16 @@ class AdminUsersController(Controller):
         )
 
         request.app.emit(event_id="admin_user_updated", user_id=user.id)
-        return users_service.to_schema(user, schema_type=AdminUserDetail)
+        return result
 
-    @delete(operation_id="AdminDeleteUser", summary="Delete a user (admin)", description="Permanently deletes a user account. Prevents self-deletion. Records the deletion in the audit log with a before snapshot. Requires superuser access.", path="/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="AdminDeleteUser",
+        summary="Delete a user (admin)",
+        description="Permanently deletes a user account. Prevents self-deletion. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
+        path="/{user_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def delete_user(
         self,
         request: Request[m.User, Token, Any],

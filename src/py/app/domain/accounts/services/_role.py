@@ -26,9 +26,7 @@ class RoleService(AutoSlugServiceMixin[m.Role], service.SQLAlchemyAsyncRepositor
     repository_type = Repo
     match_fields = ["name"]
 
-    async def to_model_on_create(
-        self, data: service.ModelDictT[m.Role]
-    ) -> service.ModelDictT[m.Role]:
+    async def to_model_on_create(self, data: service.ModelDictT[m.Role]) -> service.ModelDictT[m.Role]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["name"] = data["name"].strip()
@@ -39,7 +37,9 @@ class RoleService(AutoSlugServiceMixin[m.Role], service.SQLAlchemyAsyncRepositor
                 raise ValidationException(_DUPLICATE_ROLE_NAME_MSG)
         return await super().to_model_on_create(data)
 
-    async def to_model_on_update(self, data: ModelDictT[m.Role], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Role]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Role], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Role]:
         """Validate that no other role with the same name already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:

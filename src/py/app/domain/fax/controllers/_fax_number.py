@@ -121,11 +121,16 @@ class FaxNumberController(Controller):
         notifications_service: NotificationService,
         current_user: m.User,
     ) -> FaxNumber:
-        if data.team_id and not current_user.is_superuser and not any(tm.team_id == data.team_id for tm in current_user.teams):
+        if (
+            data.team_id
+            and not current_user.is_superuser
+            and not any(tm.team_id == data.team_id for tm in current_user.teams)
+        ):
             raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await fax_numbers_service.create(obj)
+        result = fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -151,7 +156,7 @@ class FaxNumberController(Controller):
             )
         except Exception:
             logger.warning("Failed to send fax number creation notification", exc_info=True)
-        return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
+        return result
 
     @get(
         operation_id="GetFaxNumber",
@@ -221,6 +226,7 @@ class FaxNumberController(Controller):
             raise PermissionDeniedException(detail="Insufficient permissions to access this fax number.")
         before = capture_snapshot(existing)
         db_obj = await fax_numbers_service.update(item_id=fax_number_id, data=data.to_dict())
+        result = fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -236,7 +242,7 @@ class FaxNumberController(Controller):
             request=request,
         )
         request.app.emit(event_id="fax_number_updated", fax_number_id=fax_number_id)
-        return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
+        return result
 
     @delete(
         operation_id="DeleteFaxNumber",

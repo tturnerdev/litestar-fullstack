@@ -45,7 +45,9 @@ class CallQueueService(service.SQLAlchemyAsyncRepositoryService[m.CallQueue]):
             data["name"] = data["name"].strip()
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.CallQueue], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.CallQueue]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.CallQueue], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.CallQueue]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()
@@ -79,7 +81,9 @@ class CallQueueMemberService(service.SQLAlchemyAsyncRepositoryService[m.CallQueu
                 raise ValidationException(_DUPLICATE_MEMBER_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.CallQueueMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.CallQueueMember]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.CallQueueMember], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.CallQueueMember]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "extension_id" in data:
             call_queue_id = data.get("call_queue_id")

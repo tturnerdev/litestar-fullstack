@@ -29,7 +29,9 @@ class DoNotDisturbService(service.SQLAlchemyAsyncRepositoryService[m.DoNotDistur
         try:
             return await self.create({"extension_id": extension_id})
         except IntegrityError:
-            logger.warning("Race condition creating DND record for extension %s, fetching existing", extension_id, exc_info=True)
+            logger.warning(
+                "Race condition creating DND record for extension %s, fetching existing", extension_id, exc_info=True
+            )
             await self.repository.session.rollback()
             return await self.get_one(extension_id=extension_id)
 

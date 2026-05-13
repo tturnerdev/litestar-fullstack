@@ -47,29 +47,33 @@ class FaxMessageController(Controller):
     """Fax Messages."""
 
     tags = ["Fax Messages"]
-    dependencies = create_service_dependencies(
-        FaxMessageService,
-        key="fax_messages_service",
-        load=[selectinload(m.FaxMessage.fax_number)],
-        filters={
-            "search": "remote_number,remote_name",
-            "id_filter": UUID,
-            "pagination_type": "limit_offset",
-            "pagination_size": 20,
-            "created_at": True,
-            "updated_at": True,
-            "sort_field": "received_at",
-            "sort_order": "desc",
-        },
-    ) | create_service_dependencies(
-        FaxNumberService,
-        key="fax_numbers_service",
-        load=[selectinload(m.FaxNumber.email_routes)],
-    ) | {
-        "audit_service": Provide(provide_audit_log_service),
-        "notifications_service": Provide(provide_notifications_service),
-        "task_service": Provide(provide_background_tasks_service),
-    }
+    dependencies = (
+        create_service_dependencies(
+            FaxMessageService,
+            key="fax_messages_service",
+            load=[selectinload(m.FaxMessage.fax_number)],
+            filters={
+                "search": "remote_number,remote_name",
+                "id_filter": UUID,
+                "pagination_type": "limit_offset",
+                "pagination_size": 20,
+                "created_at": True,
+                "updated_at": True,
+                "sort_field": "received_at",
+                "sort_order": "desc",
+            },
+        )
+        | create_service_dependencies(
+            FaxNumberService,
+            key="fax_numbers_service",
+            load=[selectinload(m.FaxNumber.email_routes)],
+        )
+        | {
+            "audit_service": Provide(provide_audit_log_service),
+            "notifications_service": Provide(provide_notifications_service),
+            "task_service": Provide(provide_background_tasks_service),
+        }
+    )
 
     @get(
         component="fax/message-list",
@@ -101,9 +105,7 @@ class FaxMessageController(Controller):
                 (m.FaxNumber.user_id == current_user.id)
                 | (
                     m.FaxNumber.team_id.in_(
-                        select(m.TeamMember.team_id)
-                        .where(m.TeamMember.user_id == current_user.id)
-                        .scalar_subquery()
+                        select(m.TeamMember.team_id).where(m.TeamMember.user_id == current_user.id).scalar_subquery()
                     )
                 )
             )

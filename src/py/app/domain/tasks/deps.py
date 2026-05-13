@@ -12,6 +12,4 @@ provide_background_tasks_service = create_service_provider(
     error_messages={"duplicate_key": "This task already exists.", "integrity": "Task operation failed."},
 )
 
-__all__ = (
-    "provide_background_tasks_service",
-)
+__all__ = ("provide_background_tasks_service",)

@@ -90,7 +90,13 @@ class TagController(Controller):
         db_obj = await tags_service.get(tag_id)
         return tags_service.to_schema(db_obj, schema_type=Tag)
 
-    @post(operation_id="CreateTag", summary="Create a tag", path="", guards=[requires_superuser], status_code=HTTP_201_CREATED)
+    @post(
+        operation_id="CreateTag",
+        summary="Create a tag",
+        path="",
+        guards=[requires_superuser],
+        status_code=HTTP_201_CREATED,
+    )
     async def create_tag(
         self,
         request: Request[m.User, Token, Any],
@@ -113,6 +119,7 @@ class TagController(Controller):
         """
         db_obj = await tags_service.create(data.to_dict())
         after = capture_snapshot(db_obj)
+        result = tags_service.to_schema(db_obj, schema_type=Tag)
         await log_audit(
             audit_service,
             action="tag.created",
@@ -126,7 +133,7 @@ class TagController(Controller):
             request=request,
         )
         request.app.emit(event_id="tag_created", tag_id=db_obj.id)
-        return tags_service.to_schema(db_obj, schema_type=Tag)
+        return result
 
     @patch(operation_id="UpdateTag", summary="Update a tag", path="/{tag_id:uuid}", guards=[requires_superuser])
     async def update_tag(
@@ -154,6 +161,7 @@ class TagController(Controller):
         before = capture_snapshot(await tags_service.get(tag_id))
         fresh_obj = await tags_service.update(item_id=tag_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = tags_service.to_schema(fresh_obj, schema_type=Tag)
         await log_audit(
             audit_service,
             action="tag.updated",
@@ -168,9 +176,16 @@ class TagController(Controller):
             request=request,
         )
         request.app.emit(event_id="tag_updated", tag_id=tag_id)
-        return tags_service.to_schema(fresh_obj, schema_type=Tag)
+        return result
 
-    @delete(operation_id="DeleteTag", summary="Delete a tag", path="/{tag_id:uuid}", guards=[requires_superuser], return_dto=None, status_code=HTTP_204_NO_CONTENT)
+    @delete(
+        operation_id="DeleteTag",
+        summary="Delete a tag",
+        path="/{tag_id:uuid}",
+        guards=[requires_superuser],
+        return_dto=None,
+        status_code=HTTP_204_NO_CONTENT,
+    )
     async def delete_tag(
         self,
         request: Request[m.User, Token, Any],

@@ -1198,10 +1198,7 @@ function BoxRow({ box }: { box: VoicemailBox }) {
                   View details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={updateBoxMutation.isPending}
-                onClick={() => updateBoxMutation.mutate({ isEnabled: !box.isEnabled })}
-              >
+              <DropdownMenuItem disabled={updateBoxMutation.isPending} onClick={() => updateBoxMutation.mutate({ isEnabled: !box.isEnabled })}>
                 <Power className="mr-2 h-4 w-4" />
                 {box.isEnabled ? "Disable" : "Enable"}
               </DropdownMenuItem>
@@ -1223,8 +1220,8 @@ function BoxRow({ box }: { box: VoicemailBox }) {
               Delete voicemail box
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{displayName}</span> and all associated messages.
-              This action cannot be undone.
+              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{displayName}</span> and all associated messages. This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -129,6 +129,7 @@ class ConnectionController(Controller):
         db_obj = await connections_service.create(obj)
         request.app.emit(event_id="connection_created", connection_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
         await log_audit(
             audit_service,
             action="connection.created",
@@ -142,7 +143,7 @@ class ConnectionController(Controller):
             after=after,
             request=request,
         )
-        return await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
+        return result
 
     @get(
         operation_id="GetConnection",
@@ -208,6 +209,8 @@ class ConnectionController(Controller):
         )
         request.app.emit(event_id="connection_updated", connection_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        detail = await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
+        object.__setattr__(detail, "credential_fields", _mask_credentials(db_obj))
         await log_audit(
             audit_service,
             action="connection.updated",
@@ -221,8 +224,6 @@ class ConnectionController(Controller):
             after=after,
             request=request,
         )
-        detail = await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
-        object.__setattr__(detail, "credential_fields", _mask_credentials(db_obj))
         return detail
 
     @delete(

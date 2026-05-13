@@ -74,14 +74,27 @@ class AdminTasksController(Controller):
             total_this_week=raw["total_this_week"],
         )
 
-    @get(operation_id="AdminListTasks", summary="List background tasks (admin)", description="Returns a paginated list of all background tasks across every team. Supports filtering by task type, status, and entity type, plus search across task_type and entity_type fields. Requires superuser access.", path="/")
+    @get(
+        operation_id="AdminListTasks",
+        summary="List background tasks (admin)",
+        description="Returns a paginated list of all background tasks across every team. Supports filtering by task type, status, and entity type, plus search across task_type and entity_type fields. Requires superuser access.",
+        path="/",
+    )
     async def list_tasks(
         self,
         task_service: BackgroundTaskService,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        task_type: Annotated[str | None, Parameter(title="Task Type", description="Filter by task type.", query="taskType", required=False)] = None,
-        status: Annotated[str | None, Parameter(title="Status", description="Filter by status.", query="status", required=False)] = None,
-        entity_type: Annotated[str | None, Parameter(title="Entity Type", description="Filter by entity type.", query="entityType", required=False)] = None,
+        task_type: Annotated[
+            str | None,
+            Parameter(title="Task Type", description="Filter by task type.", query="taskType", required=False),
+        ] = None,
+        status: Annotated[
+            str | None, Parameter(title="Status", description="Filter by status.", query="status", required=False)
+        ] = None,
+        entity_type: Annotated[
+            str | None,
+            Parameter(title="Entity Type", description="Filter by entity type.", query="entityType", required=False),
+        ] = None,
     ) -> OffsetPagination[AdminTaskSummary]:
         """List all background tasks across every team."""
         extra_filters = []
@@ -119,7 +132,12 @@ class AdminTasksController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCancelTask", summary="Cancel a background task (admin)", description="Cancels a pending or running background task. Records the cancellation in the audit log with the previous status and emits a background_task_cancelled event. Requires superuser access.", path="/{task_id:uuid}/cancel")
+    @post(
+        operation_id="AdminCancelTask",
+        summary="Cancel a background task (admin)",
+        description="Cancels a pending or running background task. Records the cancellation in the audit log with the previous status and emits a background_task_cancelled event. Requires superuser access.",
+        path="/{task_id:uuid}/cancel",
+    )
     async def cancel_task(
         self,
         request: Request[m.User, Token, Any],
@@ -131,6 +149,7 @@ class AdminTasksController(Controller):
         existing = await task_service.get(task_id)
         previous_status = existing.status
         db_obj = await task_service.cancel_task(task_id)
+        result = task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
         request.app.emit(event_id="background_task_cancelled", task_id=task_id)
         await log_audit(
             audit_service,
@@ -150,9 +169,16 @@ class AdminTasksController(Controller):
             },
             request=request,
         )
-        return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
+        return result
 
-    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", description="Permanently deletes a completed, failed, or cancelled background task. Records the deletion in the audit log with a before snapshot. Requires superuser access.", path="/{task_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
+    @delete(
+        operation_id="AdminDeleteTask",
+        summary="Delete a background task (admin)",
+        description="Permanently deletes a completed, failed, or cancelled background task. Records the deletion in the audit log with a before snapshot. Requires superuser access.",
+        path="/{task_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+    )
     async def delete_task(
         self,
         request: Request[m.User, Token, Any],

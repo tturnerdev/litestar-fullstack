@@ -43,7 +43,9 @@ class ScheduleService(service.SQLAlchemyAsyncRepositoryService[m.Schedule]):
                 raise ValidationException(_DUPLICATE_SCHEDULE_NAME_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.Schedule], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Schedule]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Schedule], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Schedule]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()
@@ -136,7 +138,9 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
                 raise ValidationException(_DUPLICATE_SCHEDULE_ENTRY_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.ScheduleEntry], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.ScheduleEntry]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.ScheduleEntry], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.ScheduleEntry]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             if data.get("label"):

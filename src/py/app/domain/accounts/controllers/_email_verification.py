@@ -91,6 +91,8 @@ class EmailVerificationController(Controller):
         verification_token = await verification_service.verify_token(data.token)
         user = await users_service.verify_email(user_id=verification_token.user_id, email=verification_token.email)
 
+        result = users_service.to_schema(user, schema_type=User)
+
         await log_audit(
             audit_service,
             action="account.email.verified",
@@ -103,7 +105,7 @@ class EmailVerificationController(Controller):
             request=request,
         )
 
-        return users_service.to_schema(user, schema_type=User)
+        return result
 
     @get(
         "/status/{user_id:uuid}",

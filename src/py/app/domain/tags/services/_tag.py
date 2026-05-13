@@ -27,9 +27,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
     repository_type = Repo
     match_fields = ["name"]
 
-    async def to_model_on_create(
-        self, data: service.ModelDictT[m.Tag]
-    ) -> service.ModelDictT[m.Tag]:
+    async def to_model_on_create(self, data: service.ModelDictT[m.Tag]) -> service.ModelDictT[m.Tag]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["name"] = data["name"].strip()
@@ -43,7 +41,9 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
                 raise ValidationException(_DUPLICATE_TAG_NAME_MSG)
         return await super().to_model_on_create(data)
 
-    async def to_model_on_update(self, data: ModelDictT[m.Tag], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Tag]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Tag], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Tag]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             if "name" in data:

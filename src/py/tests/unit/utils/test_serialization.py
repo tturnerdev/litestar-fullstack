@@ -74,6 +74,23 @@ def test_convert_datetime_to_gmt_iso() -> None:
     assert convert_datetime_to_gmt_iso(dt_tz) == "2024-01-01T11:00:00Z"
 
 
+def test_convert_datetime_naive() -> None:
+    dt = datetime.datetime(2024, 6, 15, 8, 30, 0)  # noqa: DTZ001
+    result = convert_datetime_to_gmt_iso(dt)
+    assert result == "2024-06-15T08:30:00Z"
+
+
 def test_convert_date_to_iso() -> None:
     d = datetime.date(2024, 1, 1)
     assert convert_date_to_iso(d) == "2024-01-01"
+
+
+def test_from_json_string() -> None:
+    result = from_json('{"key": "value"}')
+    assert result == {"key": "value"}
+
+
+def test_to_json_nested() -> None:
+    data = {"outer": {"inner": [1, 2, 3]}}
+    result = from_json(to_json(data))
+    assert result == data

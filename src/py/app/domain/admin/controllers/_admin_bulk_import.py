@@ -545,4 +545,3 @@ class AdminBulkImportController(Controller):
             skipped=skipped,
             errors=errors,
         )
-

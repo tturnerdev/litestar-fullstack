@@ -101,6 +101,7 @@ class ForwardingController(Controller):
         db_obj = await forwarding_rules_service.create(obj)
         request.app.emit(event_id="forwarding_created", rule_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
         await log_audit(
             audit_service,
             action="voice.forwarding_rule.created",
@@ -115,7 +116,7 @@ class ForwardingController(Controller):
             request=request,
         )
         request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)
-        return forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
+        return result
 
     @put(
         operation_id="SetForwardingRules",
@@ -195,6 +196,7 @@ class ForwardingController(Controller):
         db_obj = await forwarding_rules_service.update(item_id=db_obj.id, data=data.to_dict())
         request.app.emit(event_id="forwarding_updated", rule_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
         await log_audit(
             audit_service,
             action="voice.forwarding_rule.updated",
@@ -209,7 +211,7 @@ class ForwardingController(Controller):
             request=request,
         )
         request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)
-        return forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
+        return result
 
     @delete(
         operation_id="DeleteForwardingRule",

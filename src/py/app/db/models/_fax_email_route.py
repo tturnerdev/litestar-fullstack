@@ -17,7 +17,9 @@ class FaxEmailRoute(UUIDv7AuditBase):
     __tablename__ = "fax_email_route"
     __table_args__ = {"comment": "Fax-to-email delivery routing rules"}
     __pii_columns__ = {"email_address"}
-    fax_number_id: Mapped[UUID] = mapped_column(ForeignKey("fax_number.id", ondelete="cascade"), nullable=False, index=True)
+    fax_number_id: Mapped[UUID] = mapped_column(
+        ForeignKey("fax_number.id", ondelete="cascade"), nullable=False, index=True
+    )
     email_address: Mapped[str] = mapped_column(String(length=320), nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     notify_on_failure: Mapped[bool] = mapped_column(default=True, nullable=False)

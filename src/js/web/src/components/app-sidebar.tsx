@@ -229,18 +229,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         badge: unreadCount,
         badgeVariant: "default",
       },
-      {
-        title: "Webhooks",
-        to: "/webhooks",
-        icon: Webhook,
-      },
+      ...(user?.isSuperuser
+        ? [
+            {
+              title: "Webhooks",
+              to: "/webhooks",
+              icon: Webhook,
+            },
+          ]
+        : []),
       {
         title: "Settings",
         to: "/settings",
         icon: Settings,
       },
     ],
-    [unreadCount],
+    [unreadCount, user?.isSuperuser],
   )
 
   const navAdmin = useMemo<NavMainItem[]>(() => {

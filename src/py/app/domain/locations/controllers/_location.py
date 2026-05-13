@@ -65,7 +65,12 @@ class LocationController(Controller):
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to list locations for.")],
-        location_type: Annotated[str | None, Parameter(title="Location Type", description="Filter by location type.", query="locationType", required=False)] = None,
+        location_type: Annotated[
+            str | None,
+            Parameter(
+                title="Location Type", description="Filter by location type.", query="locationType", required=False
+            ),
+        ] = None,
     ) -> OffsetPagination[Location]:
         """List locations for a team.
 
@@ -118,6 +123,7 @@ class LocationController(Controller):
         obj = data.to_dict()
         obj["team_id"] = team_id
         db_obj = await locations_service.create(obj)
+        result = await locations_service.to_schema_enriched(db_obj)
         request.app.emit(event_id="location_created", location_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
@@ -133,7 +139,7 @@ class LocationController(Controller):
             after=after,
             request=request,
         )
-        return await locations_service.to_schema_enriched(db_obj)
+        return result
 
     @get(
         operation_id="GetLocation",
@@ -197,6 +203,7 @@ class LocationController(Controller):
             item_id=location_id,
             data=data.to_dict(),
         )
+        result = await locations_service.to_schema_enriched(fresh_obj)
         request.app.emit(event_id="location_updated", location_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
@@ -212,7 +219,7 @@ class LocationController(Controller):
             after=after,
             request=request,
         )
-        return await locations_service.to_schema_enriched(fresh_obj)
+        return result
 
     @delete(
         operation_id="DeleteLocation",

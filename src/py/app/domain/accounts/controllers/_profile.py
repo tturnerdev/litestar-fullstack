@@ -51,28 +51,30 @@ class ProfileController(Controller):
         return users_service.to_schema(current_user, schema_type=User)
 
     # Security-relevant actions shown on the user's profile page.
-    _SECURITY_ACTIONS: frozenset[str] = frozenset({
-        "account.login",
-        "account.logout",
-        "account.password_change",
-        "account.password_reset",
-        "account.session_revoke",
-        "account.sessions_revoke_all",
-        "account.profile_update",
-        "account.oauth_unlink",
-        "account.email.verified",
-        "account.register",
-        "account.delete",
-        "account.oauth.linked",
-        "account.oauth.upgraded",
-        "mfa.setup.confirmed",
-        "mfa.setup.failed",
-        "mfa.disabled",
-        "mfa.disabled.oauth",
-        "mfa.challenge.success",
-        "mfa.challenge.failed",
-        "mfa.backup_codes.regenerated",
-    })
+    _SECURITY_ACTIONS: frozenset[str] = frozenset(
+        {
+            "account.login",
+            "account.logout",
+            "account.password_change",
+            "account.password_reset",
+            "account.session_revoke",
+            "account.sessions_revoke_all",
+            "account.profile_update",
+            "account.oauth_unlink",
+            "account.email.verified",
+            "account.register",
+            "account.delete",
+            "account.oauth.linked",
+            "account.oauth.upgraded",
+            "mfa.setup.confirmed",
+            "mfa.setup.failed",
+            "mfa.disabled",
+            "mfa.disabled.oauth",
+            "mfa.challenge.success",
+            "mfa.challenge.failed",
+            "mfa.backup_codes.regenerated",
+        }
+    )
 
     # Human-readable labels for security actions.
     _ACTION_LABELS: dict[str, str] = {
@@ -173,6 +175,8 @@ class ProfileController(Controller):
         db_obj = await users_service.update(data, item_id=current_user.id)
         after = capture_snapshot(db_obj)
 
+        result = users_service.to_schema(db_obj, schema_type=User)
+
         await log_audit(
             audit_service,
             action="account.profile_update",
@@ -188,7 +192,7 @@ class ProfileController(Controller):
         )
         request.app.emit(event_id="user_updated", user_id=current_user.id)
 
-        return users_service.to_schema(db_obj, schema_type=User)
+        return result
 
     @patch(
         operation_id="AccountPasswordUpdate",

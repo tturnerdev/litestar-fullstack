@@ -138,6 +138,7 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.create(obj)
         request.app.emit(event_id="extension_created", extension_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = extensions_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="voice.extension.created",
@@ -166,7 +167,7 @@ class ExtensionController(Controller):
                     payload={"extension_id": str(db_obj.id), "extension_number": db_obj.extension_number},
                 )
 
-        return extensions_service.to_schema_enriched(db_obj)
+        return result
 
     @get(
         operation_id="GetExtension",
@@ -226,6 +227,7 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.update(item_id=db_obj.id, data=data.to_dict())
         request.app.emit(event_id="extension_updated", extension_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = extensions_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="voice.extension.updated",
@@ -253,7 +255,7 @@ class ExtensionController(Controller):
                 payload={"extension_id": str(db_obj.id), "extension_number": db_obj.extension_number},
             )
 
-        return extensions_service.to_schema_enriched(db_obj)
+        return result
 
     @delete(
         operation_id="DeleteExtension",

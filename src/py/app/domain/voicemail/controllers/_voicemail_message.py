@@ -33,26 +33,30 @@ class VoicemailMessageController(Controller):
     """Voicemail Messages."""
 
     tags = ["Voicemail"]
-    dependencies = create_service_dependencies(
-        VoicemailMessageService,
-        key="voicemail_messages_service",
-        load=[selectinload(m.VoicemailMessage.voicemail_box)],
-        filters={
-            "id_filter": UUID,
-            "pagination_type": "limit_offset",
-            "pagination_size": 20,
-            "created_at": True,
-            "updated_at": True,
-            "sort_field": "received_at",
-            "sort_order": "desc",
-        },
-    ) | create_service_dependencies(
-        VoicemailBoxService,
-        key="voicemail_boxes_service",
-        load=[selectinload(m.VoicemailBox.extension)],
-    ) | {
-        "audit_service": Provide(provide_audit_log_service),
-    }
+    dependencies = (
+        create_service_dependencies(
+            VoicemailMessageService,
+            key="voicemail_messages_service",
+            load=[selectinload(m.VoicemailMessage.voicemail_box)],
+            filters={
+                "id_filter": UUID,
+                "pagination_type": "limit_offset",
+                "pagination_size": 20,
+                "created_at": True,
+                "updated_at": True,
+                "sort_field": "received_at",
+                "sort_order": "desc",
+            },
+        )
+        | create_service_dependencies(
+            VoicemailBoxService,
+            key="voicemail_boxes_service",
+            load=[selectinload(m.VoicemailBox.extension)],
+        )
+        | {
+            "audit_service": Provide(provide_audit_log_service),
+        }
+    )
 
     @get(
         operation_id="ListAllVoicemailMessages",
@@ -91,9 +95,7 @@ class VoicemailMessageController(Controller):
             extra_filters.append(m.VoicemailMessage.is_urgent == is_urgent)
 
         if current_user.is_superuser:
-            results, total = await voicemail_messages_service.list_and_count(
-                *filters, *extra_filters
-            )
+            results, total = await voicemail_messages_service.list_and_count(*filters, *extra_filters)
         else:
             user_box_ids = (
                 select(m.VoicemailBox.id)
@@ -144,9 +146,7 @@ class VoicemailMessageController(Controller):
         if is_urgent is not None:
             extra_filters.append(m.VoicemailMessage.is_urgent == is_urgent)
 
-        results, total = await voicemail_messages_service.list_and_count(
-            *filters, *extra_filters
-        )
+        results, total = await voicemail_messages_service.list_and_count(*filters, *extra_filters)
         return voicemail_messages_service.to_schema(results, total, filters, schema_type=VoicemailMessage)
 
     @get(

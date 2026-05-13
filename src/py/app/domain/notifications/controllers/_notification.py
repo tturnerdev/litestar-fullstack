@@ -212,9 +212,7 @@ class NotificationController(Controller):
         notifications_service: NotificationService,
         audit_service: AuditLogService,
         current_user: m.User,
-        notification_id: Annotated[
-            UUID, Parameter(title="Notification ID", description="The notification to delete.")
-        ],
+        notification_id: Annotated[UUID, Parameter(title="Notification ID", description="The notification to delete.")],
     ) -> None:
         """Delete a notification.
 

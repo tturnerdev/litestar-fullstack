@@ -28,7 +28,13 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 30_000,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: (failureCount, error) => {
+        if (error && typeof error === "object" && "status_code" in error) {
+          const status = (error as { status_code: number }).status_code
+          if (status === 401 || status === 403 || status === 404) return false
+        }
+        return failureCount < 1
+      },
     },
   },
 })

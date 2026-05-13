@@ -112,6 +112,7 @@ class TimeConditionController(Controller):
         obj["team_id"] = current_user.teams[0].team_id if current_user.teams else None
         db_obj = await time_conditions_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = time_conditions_service.to_schema(db_obj, schema_type=TimeCondition)
         await log_audit(
             audit_service,
             action="call_routing.time_condition.created",
@@ -126,7 +127,7 @@ class TimeConditionController(Controller):
             request=request,
         )
         request.app.emit(event_id="time_condition_created", time_condition_id=db_obj.id)
-        return time_conditions_service.to_schema(db_obj, schema_type=TimeCondition)
+        return result
 
     @get(
         operation_id="GetTimeCondition",
@@ -188,6 +189,7 @@ class TimeConditionController(Controller):
         before = capture_snapshot(await time_conditions_service.get(time_condition_id))
         fresh_obj = await time_conditions_service.update(item_id=time_condition_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
         await log_audit(
             audit_service,
             action="call_routing.time_condition.updated",
@@ -202,7 +204,7 @@ class TimeConditionController(Controller):
             request=request,
         )
         request.app.emit(event_id="time_condition_updated", time_condition_id=time_condition_id)
-        return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
+        return result
 
     @delete(
         operation_id="DeleteTimeCondition",
@@ -288,6 +290,7 @@ class TimeConditionController(Controller):
             data={"override_mode": data.override_mode},
         )
         after = capture_snapshot(fresh_obj)
+        result = time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
         await log_audit(
             audit_service,
             action="call_routing.time_condition.overridden",
@@ -307,4 +310,4 @@ class TimeConditionController(Controller):
             time_condition_id=time_condition_id,
             override_mode=data.override_mode,
         )
-        return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
+        return result

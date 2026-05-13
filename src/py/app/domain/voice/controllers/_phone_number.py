@@ -92,6 +92,7 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.create(obj)
         request.app.emit(event_id="phone_number_created", phone_number_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = phone_numbers_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="voice.phone_number.created",
@@ -105,7 +106,7 @@ class PhoneNumberController(Controller):
             after=after,
             request=request,
         )
-        return phone_numbers_service.to_schema_enriched(db_obj)
+        return result
 
     @get(
         operation_id="ListUnregisteredE911PhoneNumbers",
@@ -118,7 +119,9 @@ class PhoneNumberController(Controller):
         self,
         phone_numbers_service: PhoneNumberService,
         current_user: m.User,
-        team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")],
+        team_id: Annotated[
+            UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")
+        ],
     ) -> list[PhoneNumber]:
         """List active phone numbers without E911 registration."""
         if not current_user.is_superuser and not any(tm.team_id == team_id for tm in current_user.teams):
@@ -139,7 +142,9 @@ class PhoneNumberController(Controller):
         self,
         phone_numbers_service: PhoneNumberService,
         current_user: m.User,
-        phone_number_id: Annotated[UUID, Parameter(title="Phone Number ID", description="The phone number to retrieve.")],
+        phone_number_id: Annotated[
+            UUID, Parameter(title="Phone Number ID", description="The phone number to retrieve.")
+        ],
     ) -> PhoneNumber:
         """Get phone number details."""
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
@@ -167,6 +172,7 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.update(item_id=db_obj.id, data=data.to_dict())
         request.app.emit(event_id="phone_number_updated", phone_number_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = phone_numbers_service.to_schema_enriched(db_obj)
         await log_audit(
             audit_service,
             action="voice.phone_number.updated",
@@ -180,7 +186,7 @@ class PhoneNumberController(Controller):
             after=after,
             request=request,
         )
-        return phone_numbers_service.to_schema_enriched(db_obj)
+        return result
 
     @delete(
         operation_id="DeletePhoneNumber",

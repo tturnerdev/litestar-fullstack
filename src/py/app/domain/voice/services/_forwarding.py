@@ -35,7 +35,9 @@ class ForwardingRuleService(service.SQLAlchemyAsyncRepositoryService[m.Forwardin
                 raise ValidationException(_DUPLICATE_FORWARDING_RULE_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.ForwardingRule], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.ForwardingRule]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.ForwardingRule], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.ForwardingRule]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "rule_type" in data:
             extension_id = data.get("extension_id")

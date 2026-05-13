@@ -14,7 +14,7 @@ from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
-from app.domain.accounts.guards import requires_active_user
+from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.webhooks.deps import provide_webhook_delivery_service
 from app.domain.webhooks.schemas import (
@@ -60,7 +60,7 @@ class WebhookController(Controller):
     """Webhooks."""
 
     tags = ["Webhooks"]
-    guards = [requires_active_user]
+    guards = [requires_superuser]
     dependencies = create_service_dependencies(
         WebhookService,
         key="webhooks_service",
@@ -88,23 +88,18 @@ class WebhookController(Controller):
     async def list_webhooks(
         self,
         webhooks_service: WebhookService,
-        current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
     ) -> OffsetPagination[WebhookList]:
-        """List webhooks for the current user.
+        """List all webhooks.
 
         Args:
             webhooks_service: Webhook Service
-            current_user: Current User
             filters: Filters
 
         Returns:
             OffsetPagination[WebhookList]
         """
-        results, total = await webhooks_service.list_and_count(
-            *filters,
-            m.Webhook.user_id == current_user.id,
-        )
+        results, total = await webhooks_service.list_and_count(*filters)
         return webhooks_service.to_schema(results, total, filters, schema_type=WebhookList)
 
     @post(
@@ -163,22 +158,18 @@ class WebhookController(Controller):
     async def get_webhook(
         self,
         webhooks_service: WebhookService,
-        current_user: m.User,
         webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook to retrieve.")],
     ) -> WebhookDetail:
         """Get details about a webhook.
 
         Args:
             webhooks_service: Webhook Service
-            current_user: Current User
             webhook_id: Webhook ID
 
         Returns:
             WebhookDetail
         """
         db_obj = await webhooks_service.get(webhook_id)
-        if db_obj.user_id != current_user.id and not current_user.is_superuser:
-            raise NotFoundException(detail="Webhook not found.")
         return _to_detail(webhooks_service, db_obj)
 
     @patch(
@@ -210,8 +201,6 @@ class WebhookController(Controller):
             WebhookDetail
         """
         existing = await webhooks_service.get(webhook_id)
-        if existing.user_id != current_user.id and not current_user.is_superuser:
-            raise NotFoundException(detail="Webhook not found.")
         before = capture_snapshot(existing)
         fresh_obj = await webhooks_service.update(
             item_id=webhook_id,
@@ -260,8 +249,6 @@ class WebhookController(Controller):
             webhook_id: Webhook ID
         """
         db_obj = await webhooks_service.get(webhook_id)
-        if db_obj.user_id != current_user.id and not current_user.is_superuser:
-            raise NotFoundException(detail="Webhook not found.")
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
         request.app.emit(event_id="webhook_deleted", webhook_id=webhook_id)
@@ -290,7 +277,6 @@ class WebhookController(Controller):
         self,
         webhooks_service: WebhookService,
         delivery_service: WebhookDeliveryService,
-        current_user: m.User,
         webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook to list deliveries for.")],
     ) -> list[WebhookDeliveryList]:
         """List the 20 most recent deliveries for a webhook.
@@ -298,15 +284,12 @@ class WebhookController(Controller):
         Args:
             webhooks_service: Webhook Service
             delivery_service: Webhook Delivery Service
-            current_user: Current User
             webhook_id: Webhook ID
 
         Returns:
             list[WebhookDeliveryList]
         """
-        db_obj = await webhooks_service.get(webhook_id)
-        if db_obj.user_id != current_user.id and not current_user.is_superuser:
-            raise NotFoundException(detail="Webhook not found.")
+        await webhooks_service.get(webhook_id)
 
         from advanced_alchemy.filters import LimitOffset, OrderBy
 
@@ -327,7 +310,6 @@ class WebhookController(Controller):
         self,
         webhooks_service: WebhookService,
         delivery_service: WebhookDeliveryService,
-        current_user: m.User,
         webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook that owns the delivery.")],
         delivery_id: Annotated[UUID, Parameter(title="Delivery ID", description="The delivery to redeliver.")],
     ) -> WebhookDeliveryDetail:
@@ -336,16 +318,13 @@ class WebhookController(Controller):
         Args:
             webhooks_service: Webhook Service
             delivery_service: Webhook Delivery Service
-            current_user: Current User
             webhook_id: Webhook ID
             delivery_id: Delivery ID
 
         Returns:
             WebhookDeliveryDetail
         """
-        db_obj = await webhooks_service.get(webhook_id)
-        if db_obj.user_id != current_user.id and not current_user.is_superuser:
-            raise NotFoundException(detail="Webhook not found.")
+        await webhooks_service.get(webhook_id)
 
         delivery = await delivery_service.get(delivery_id)
         if delivery.webhook_id != webhook_id:
@@ -365,7 +344,6 @@ class WebhookController(Controller):
         self,
         webhooks_service: WebhookService,
         delivery_service: WebhookDeliveryService,
-        current_user: m.User,
         webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook to test.")],
     ) -> WebhookTestResult:
         """Send a test payload to a webhook URL and return the result.
@@ -373,15 +351,12 @@ class WebhookController(Controller):
         Args:
             webhooks_service: Webhook Service
             delivery_service: Webhook Delivery Service
-            current_user: Current User
             webhook_id: Webhook ID
 
         Returns:
             WebhookTestResult
         """
         db_obj = await webhooks_service.get(webhook_id)
-        if db_obj.user_id != current_user.id and not current_user.is_superuser:
-            raise NotFoundException(detail="Webhook not found.")
 
         test_payload = {
             "event": "webhook.test",
@@ -425,14 +400,16 @@ class WebhookController(Controller):
             error = str(exc)
 
         # Record the delivery attempt
-        await delivery_service.create({
-            "webhook_id": webhook_id,
-            "event": "webhook.test",
-            "status_code": status_code,
-            "response_time_ms": elapsed_ms,
-            "success": success,
-            "error": error,
-        })
+        await delivery_service.create(
+            {
+                "webhook_id": webhook_id,
+                "event": "webhook.test",
+                "status_code": status_code,
+                "response_time_ms": elapsed_ms,
+                "success": success,
+                "error": error,
+            }
+        )
 
         return WebhookTestResult(
             success=success,

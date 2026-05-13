@@ -126,6 +126,7 @@ class UserController(Controller):
             The created user.
         """
         db_obj = await users_service.create(data.to_dict())
+        result = users_service.to_schema(db_obj, schema_type=User)
         await log_audit(
             audit_service,
             action="account.user.created",
@@ -140,7 +141,7 @@ class UserController(Controller):
             request=request,
         )
         request.app.emit(event_id="user_created", user_id=db_obj.id)
-        return users_service.to_schema(db_obj, schema_type=User)
+        return result
 
     @patch(
         operation_id="UpdateUser",
@@ -171,6 +172,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         before = capture_snapshot(db_obj)
         db_obj = await users_service.update(item_id=user_id, data=data.to_dict())
+        result = users_service.to_schema(db_obj, schema_type=User)
         request.app.emit(event_id="user_updated", user_id=db_obj.id)
         await log_audit(
             audit_service,
@@ -185,7 +187,7 @@ class UserController(Controller):
             after=capture_snapshot(db_obj),
             request=request,
         )
-        return users_service.to_schema(db_obj, schema_type=User)
+        return result
 
     @delete(
         operation_id="DeleteUser",

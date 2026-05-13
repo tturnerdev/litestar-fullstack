@@ -72,7 +72,14 @@ class TeamInvitationController(Controller):
         "users_service": Provide(provide_users_service),
     }
 
-    @post(operation_id="CreateTeamInvitation", summary="Create a team invitation", description="Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.", path="", status_code=HTTP_201_CREATED, guards=[requires_team_admin])
+    @post(
+        operation_id="CreateTeamInvitation",
+        summary="Create a team invitation",
+        description="Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.",
+        path="",
+        status_code=HTTP_201_CREATED,
+        guards=[requires_team_admin],
+    )
     async def create_team_invitation(
         self,
         current_user: m.User,
@@ -116,6 +123,7 @@ class TeamInvitationController(Controller):
         after = capture_snapshot(db_obj)
         request.app.emit(event_id="team_invitation_created", invitation_id=db_obj.id, mailer=app_mailer)
 
+        result = team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
         await log_audit(
             audit_service,
             action="team.invitation.created",
@@ -143,9 +151,15 @@ class TeamInvitationController(Controller):
         except Exception:
             logger.warning("Failed to send team invitation notification", exc_info=True)
 
-        return team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
+        return result
 
-    @get(operation_id="ListTeamInvitations", summary="List team invitations", description="Returns a paginated list of invitations for a team. Supports search by email or inviter email, date range filtering, and configurable sort order. Requires team membership.", path="", guards=[requires_team_membership])
+    @get(
+        operation_id="ListTeamInvitations",
+        summary="List team invitations",
+        description="Returns a paginated list of invitations for a team. Supports search by email or inviter email, date range filtering, and configurable sort order. Requires team membership.",
+        path="",
+        guards=[requires_team_membership],
+    )
     async def list_team_invitations(
         self,
         team_invitations_service: TeamInvitationService,
@@ -165,7 +179,15 @@ class TeamInvitationController(Controller):
         db_objs, total = await team_invitations_service.list_and_count(*filters, m.TeamInvitation.team_id == team_id)
         return team_invitations_service.to_schema(db_objs, total, filters, schema_type=TeamInvitation)
 
-    @delete(operation_id="DeleteTeamInvitation", summary="Delete a team invitation", description="Revokes a pending team invitation. Validates that the invitation belongs to the specified team. Emits a team_invitation_deleted event and records an audit log entry.", path="/{invitation_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None, guards=[requires_team_admin])
+    @delete(
+        operation_id="DeleteTeamInvitation",
+        summary="Delete a team invitation",
+        description="Revokes a pending team invitation. Validates that the invitation belongs to the specified team. Emits a team_invitation_deleted event and records an audit log entry.",
+        path="/{invitation_id:uuid}",
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
+        guards=[requires_team_admin],
+    )
     async def delete_team_invitation(
         self,
         request: Request[m.User, Token, Any],
@@ -209,7 +231,12 @@ class TeamInvitationController(Controller):
             request=request,
         )
 
-    @post(operation_id="AcceptTeamInvitation", summary="Accept a team invitation", description="Accepts a pending invitation and adds the current user as a team member with the invited role. Validates ownership, duplicate membership, and acceptance status. Emits a team_invitation_accepted event, records an audit log entry, and notifies the team owner.", path="/{invitation_id:uuid}/accept")
+    @post(
+        operation_id="AcceptTeamInvitation",
+        summary="Accept a team invitation",
+        description="Accepts a pending invitation and adds the current user as a team member with the invited role. Validates ownership, duplicate membership, and acceptance status. Emits a team_invitation_accepted event, records an audit log entry, and notifies the team owner.",
+        path="/{invitation_id:uuid}/accept",
+    )
     async def accept_team_invitation(
         self,
         request: Request[m.User, Token, Any],
@@ -294,7 +321,12 @@ class TeamInvitationController(Controller):
 
         return Message(message="Team invitation accepted")
 
-    @post(operation_id="RejectTeamInvitation", summary="Reject a team invitation", description="Declines a pending team invitation and deletes it. Only the invited user may reject. Emits a team_invitation_rejected event, records an audit log entry, and notifies the team owner.", path="/{invitation_id:uuid}/reject")
+    @post(
+        operation_id="RejectTeamInvitation",
+        summary="Reject a team invitation",
+        description="Declines a pending team invitation and deletes it. Only the invited user may reject. Emits a team_invitation_rejected event, records an audit log entry, and notifies the team owner.",
+        path="/{invitation_id:uuid}/reject",
+    )
     async def reject_team_invitation(
         self,
         request: Request[m.User, Token, Any],

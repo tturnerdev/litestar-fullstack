@@ -198,15 +198,12 @@ class TestCountRecentActions:
         service.count = AsyncMock(return_value=5)
 
         actor_id = uuid4()
-        before = datetime.now(UTC)
 
         result = await service.count_recent_actions(
             action="login.failed",
             actor_id=actor_id,
             window_minutes=15,
         )
-
-        after = datetime.now(UTC)
 
         assert result == 5
         service.count.assert_awaited_once()
@@ -249,10 +246,10 @@ class TestCountRecentActions:
 
 
 class TestAdminUserLogging:
-    """Tests for admin user audit convenience methods."""
+    """Tests for admin user audit via log_action."""
 
-    async def test_log_admin_user_update_records_changes(self) -> None:
-        """Verify log_admin_user_update creates proper audit entry."""
+    async def test_log_action_admin_user_update(self) -> None:
+        """Verify log_action records an admin user update."""
         service = _make_service()
 
         expected_log = _make_audit_log(action="admin.user.update")
@@ -261,13 +258,15 @@ class TestAdminUserLogging:
         actor_id = uuid4()
         user_id = uuid4()
 
-        result = await service.log_admin_user_update(
+        result = await service.log_action(
+            action="admin.user.update",
             actor_id=actor_id,
             actor_email="admin@example.com",
             actor_name="Admin User",
-            user_id=user_id,
-            user_email="target@example.com",
-            changes=["name", "is_active"],
+            target_type="user",
+            target_id=str(user_id),
+            target_label="target@example.com",
+            details={"changes": ["name", "is_active"]},
         )
 
         service.create.assert_awaited_once()
@@ -282,27 +281,28 @@ class TestAdminUserLogging:
         assert call_data["details"] == {"changes": ["name", "is_active"]}
         assert result is expected_log
 
-    async def test_log_admin_user_update_with_request(self) -> None:
-        """Verify request info is forwarded to log_action."""
+    async def test_log_action_with_request_extracts_ip(self) -> None:
+        """Verify request info is extracted by log_action."""
         service = _make_service()
         service.create = AsyncMock(return_value=_make_audit_log())
 
         mock_request = _make_request(ip="10.0.0.99")
 
-        await service.log_admin_user_update(
+        await service.log_action(
+            action="admin.user.update",
             actor_id=uuid4(),
             actor_email="admin@example.com",
-            user_id=uuid4(),
-            user_email="user@example.com",
-            changes=["is_superuser"],
+            target_type="user",
+            target_id=str(uuid4()),
+            target_label="user@example.com",
             request=mock_request,
         )
 
         call_data = service.create.call_args[0][0]
         assert call_data["ip_address"] == "10.0.0.99"
 
-    async def test_log_admin_user_delete_records_deletion(self) -> None:
-        """Verify log_admin_user_delete creates proper audit entry."""
+    async def test_log_action_admin_user_delete(self) -> None:
+        """Verify log_action records an admin user deletion."""
         service = _make_service()
 
         expected_log = _make_audit_log(action="admin.user.delete")
@@ -311,11 +311,13 @@ class TestAdminUserLogging:
         actor_id = uuid4()
         user_id = uuid4()
 
-        result = await service.log_admin_user_delete(
+        result = await service.log_action(
+            action="admin.user.delete",
             actor_id=actor_id,
             actor_email="admin@example.com",
-            user_id=user_id,
-            user_email="deleted@example.com",
+            target_type="user",
+            target_id=str(user_id),
+            target_label="deleted@example.com",
         )
 
         call_data = service.create.call_args[0][0]
@@ -323,21 +325,20 @@ class TestAdminUserLogging:
         assert call_data["target_type"] == "user"
         assert call_data["target_id"] == str(user_id)
         assert call_data["target_label"] == "deleted@example.com"
-        # delete does not include details
         assert call_data["details"] is None
         assert result is expected_log
 
 
 # ---------------------------------------------------------------------------
-# log_admin_team_update / log_admin_team_delete
+# log_action for admin team operations
 # ---------------------------------------------------------------------------
 
 
 class TestAdminTeamLogging:
-    """Tests for admin team audit convenience methods."""
+    """Tests for admin team audit via log_action."""
 
-    async def test_log_admin_team_update_records_changes(self) -> None:
-        """Verify log_admin_team_update creates proper audit entry."""
+    async def test_log_action_admin_team_update(self) -> None:
+        """Verify log_action records an admin team update."""
         service = _make_service()
 
         expected_log = _make_audit_log(action="admin.team.update")
@@ -346,12 +347,14 @@ class TestAdminTeamLogging:
         actor_id = uuid4()
         team_id = uuid4()
 
-        result = await service.log_admin_team_update(
+        result = await service.log_action(
+            action="admin.team.update",
             actor_id=actor_id,
             actor_email="admin@example.com",
-            team_id=team_id,
-            team_name="Engineering",
-            changes=["name", "description"],
+            target_type="team",
+            target_id=str(team_id),
+            target_label="Engineering",
+            details={"changes": ["name", "description"]},
         )
 
         call_data = service.create.call_args[0][0]
@@ -362,8 +365,8 @@ class TestAdminTeamLogging:
         assert call_data["details"] == {"changes": ["name", "description"]}
         assert result is expected_log
 
-    async def test_log_admin_team_delete_records_deletion(self) -> None:
-        """Verify log_admin_team_delete creates proper audit entry."""
+    async def test_log_action_admin_team_delete(self) -> None:
+        """Verify log_action records an admin team deletion."""
         service = _make_service()
 
         expected_log = _make_audit_log(action="admin.team.delete")
@@ -372,11 +375,13 @@ class TestAdminTeamLogging:
         actor_id = uuid4()
         team_id = uuid4()
 
-        result = await service.log_admin_team_delete(
+        result = await service.log_action(
+            action="admin.team.delete",
             actor_id=actor_id,
             actor_email="admin@example.com",
-            team_id=team_id,
-            team_name="Legacy Team",
+            target_type="team",
+            target_id=str(team_id),
+            target_label="Legacy Team",
         )
 
         call_data = service.create.call_args[0][0]
@@ -387,18 +392,20 @@ class TestAdminTeamLogging:
         assert call_data["details"] is None
         assert result is expected_log
 
-    async def test_log_admin_team_update_with_actor_name(self) -> None:
+    async def test_log_action_records_actor_name(self) -> None:
         """Verify actor_name is recorded when provided."""
         service = _make_service()
         service.create = AsyncMock(return_value=_make_audit_log())
 
-        await service.log_admin_team_update(
+        await service.log_action(
+            action="admin.team.update",
             actor_id=uuid4(),
             actor_email="admin@example.com",
             actor_name="Super Admin",
-            team_id=uuid4(),
-            team_name="DevOps",
-            changes=["is_active"],
+            target_type="team",
+            target_id=str(uuid4()),
+            target_label="DevOps",
+            details={"changes": ["is_active"]},
         )
 
         call_data = service.create.call_args[0][0]

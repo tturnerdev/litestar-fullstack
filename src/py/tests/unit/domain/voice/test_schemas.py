@@ -227,6 +227,16 @@ class TestExtensionCreate:
         assert create.phone_number_id == phone_id
         assert create.is_active is False
 
+    def test_non_digit_extension_raises(self) -> None:
+        """Extension number must contain only digits."""
+        with pytest.raises(ValueError, match="only digits"):
+            ExtensionCreate(extension_number="ABC")
+
+    def test_mixed_chars_extension_raises(self) -> None:
+        """Extension number with mixed chars must be rejected."""
+        with pytest.raises(ValueError, match="only digits"):
+            ExtensionCreate(extension_number="10A")
+
 
 class TestExtensionUpdate:
     """Tests for ExtensionUpdate schema."""

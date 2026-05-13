@@ -54,7 +54,9 @@ class LocationService(service.SQLAlchemyAsyncRepositoryService[m.Location]):
                 data.pop("parent_id", None)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.Location], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Location]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Location], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Location]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             if "name" in data:

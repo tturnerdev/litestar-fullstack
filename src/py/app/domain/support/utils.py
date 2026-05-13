@@ -8,6 +8,16 @@ from __future__ import annotations
 import html
 import re
 
+_SAFE_URL_SCHEMES = re.compile(r"^https?://|^mailto:|^#|^/", re.IGNORECASE)
+
+
+def _safe_url(url: str) -> str:
+    """Return the URL if it uses a safe scheme, otherwise strip it."""
+    decoded = html.unescape(url)
+    if _SAFE_URL_SCHEMES.match(decoded):
+        return url
+    return ""
+
 
 def render_markdown(text: str) -> str:
     """Render markdown text to sanitized HTML.
@@ -32,9 +42,11 @@ def render_markdown(text: str) -> str:
     # Fenced code blocks (``` ... ```)
     result = re.sub(
         r"```(\w*)\n(.*?)```",
-        lambda m: f'<pre><code class="language-{m.group(1)}">{m.group(2)}</code></pre>'
-        if m.group(1)
-        else f"<pre><code>{m.group(2)}</code></pre>",
+        lambda m: (
+            f'<pre><code class="language-{m.group(1)}">{m.group(2)}</code></pre>'
+            if m.group(1)
+            else f"<pre><code>{m.group(2)}</code></pre>"
+        ),
         result,
         flags=re.DOTALL,
     )
@@ -54,10 +66,23 @@ def render_markdown(text: str) -> str:
     result = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", result)
     result = re.sub(r"\*(.+?)\*", r"<em>\1</em>", result)
 
-    # Images ![alt](url)
-    result = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" />', result)
+    # Images ![alt](url) — only allow safe URL schemes
+    result = re.sub(
+        r"!\[([^\]]*)\]\(([^)]+)\)",
+        lambda m: f'<img src="{_safe_url(m.group(2))}" alt="{m.group(1)}" />' if _safe_url(m.group(2)) else m.group(1),
+        result,
+    )
 
-    result = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2" rel="noopener noreferrer">\1</a>', result)
+    # Links [text](url) — only allow safe URL schemes
+    result = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        lambda m: (
+            f'<a href="{_safe_url(m.group(2))}" rel="noopener noreferrer">{m.group(1)}</a>'
+            if _safe_url(m.group(2))
+            else m.group(1)
+        ),
+        result,
+    )
 
     # Blockquotes
     result = re.sub(r"^&gt;\s*(.+)$", r"<blockquote>\1</blockquote>", result, flags=re.MULTILINE)

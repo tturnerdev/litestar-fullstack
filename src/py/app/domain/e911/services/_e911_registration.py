@@ -55,7 +55,9 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
                 raise ValidationException(_DUPLICATE_E911_REGISTRATION_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.E911Registration], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.E911Registration]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.E911Registration], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.E911Registration]:
         data = service.schema_dump(data)
         data = self._strip_address_fields(data)
         if service.is_dict(data) and "phone_number_id" in data:
@@ -179,4 +181,3 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
         )
         result = await self.repository.session.execute(stmt)
         return list(result.scalars().all())
-

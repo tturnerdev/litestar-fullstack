@@ -45,7 +45,9 @@ class RingGroupService(service.SQLAlchemyAsyncRepositoryService[m.RingGroup]):
             data["name"] = data["name"].strip()
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.RingGroup], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.RingGroup]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.RingGroup], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.RingGroup]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()
@@ -79,7 +81,9 @@ class RingGroupMemberService(service.SQLAlchemyAsyncRepositoryService[m.RingGrou
                 raise ValidationException(_DUPLICATE_MEMBER_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.RingGroupMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.RingGroupMember]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.RingGroupMember], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.RingGroupMember]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "extension_id" in data:
             ring_group_id = data.get("ring_group_id")

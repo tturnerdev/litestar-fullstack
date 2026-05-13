@@ -46,7 +46,9 @@ class TimeConditionService(service.SQLAlchemyAsyncRepositoryService[m.TimeCondit
             data["name"] = data["name"].strip()
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.TimeCondition], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.TimeCondition]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.TimeCondition], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.TimeCondition]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()

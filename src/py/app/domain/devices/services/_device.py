@@ -58,7 +58,9 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
                 data["sip_server"] = "sip.default.local"
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Device]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.Device]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             if "name" in data:
@@ -202,7 +204,6 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
 
 
 class DeviceLineAssignmentService(service.SQLAlchemyAsyncRepositoryService[m.DeviceLineAssignment]):
-
     class Repo(repository.SQLAlchemyAsyncRepository[m.DeviceLineAssignment]):
         model_type = m.DeviceLineAssignment
 

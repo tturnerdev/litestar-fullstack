@@ -45,7 +45,9 @@ class IvrMenuService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenu]):
             data["name"] = data["name"].strip()
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.IvrMenu], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.IvrMenu]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.IvrMenu], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.IvrMenu]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
             data["name"] = data["name"].strip()
@@ -86,7 +88,9 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
             data["digit"] = data["digit"].strip()
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.IvrMenuOption], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.IvrMenuOption]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.IvrMenuOption], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.IvrMenuOption]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "digit" in data:
             data["digit"] = data["digit"].strip()

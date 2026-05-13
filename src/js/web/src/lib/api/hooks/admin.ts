@@ -361,7 +361,7 @@ export function useAdminUserAuditLogs(userId: string, page = 1, pageSize = 10) {
   })
 }
 
-export function useRoles() {
+export function useRoles(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
@@ -371,7 +371,8 @@ export function useRoles() {
       const response = await listRoles({ query })
       return response.data as { items: Role[]; total: number }
     },
-    staleTime: 10 * 60 * 1000, // roles are reference data, change very rarely
+    staleTime: 10 * 60 * 1000,
+    enabled: options?.enabled,
   })
 }
 

@@ -92,24 +92,24 @@ class CallRecordController(Controller):
         Returns:
             OffsetPagination[CallRecordList]
         """
-        extra_filters = list(_build_cdr_filters(
-            current_user=current_user,
-            start_date=start_date,
-            end_date=end_date,
-            direction=direction,
-            disposition=disposition,
-            source=source,
-            destination=destination,
-            min_duration=min_duration,
-            max_duration=max_duration,
-        ))
+        extra_filters = list(
+            _build_cdr_filters(
+                current_user=current_user,
+                start_date=start_date,
+                end_date=end_date,
+                direction=direction,
+                disposition=disposition,
+                source=source,
+                destination=destination,
+                min_duration=min_duration,
+                max_duration=max_duration,
+            )
+        )
         if current_user.is_superuser:
             results, total = await call_records_service.list_and_count(*filters, *extra_filters)
         else:
             user_team_ids = (
-                select(m.TeamMember.team_id)
-                .where(m.TeamMember.user_id == current_user.id)
-                .scalar_subquery()
+                select(m.TeamMember.team_id).where(m.TeamMember.user_id == current_user.id).scalar_subquery()
             )
             results, total = await call_records_service.list_and_count(
                 *filters,
@@ -169,8 +169,9 @@ class CallRecordController(Controller):
             CallRecordDetail
         """
         db_obj = await call_records_service.create(data.to_dict())
-        request.app.emit(event_id="call_record_created", call_record_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
+        request.app.emit(event_id="call_record_created", call_record_id=db_obj.id)
         await log_audit(
             audit_service,
             action="analytics.cdr_create",
@@ -184,7 +185,7 @@ class CallRecordController(Controller):
             after=after,
             request=request,
         )
-        return call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
+        return result
 
     @get(
         operation_id="ExportCallRecords",
@@ -214,20 +215,20 @@ class CallRecordController(Controller):
         Returns:
             CSV file response
         """
-        extra_filters = list(_build_cdr_filters(
-            current_user=current_user,
-            start_date=start_date,
-            end_date=end_date,
-            direction=direction,
-            disposition=disposition,
-        ))
+        extra_filters = list(
+            _build_cdr_filters(
+                current_user=current_user,
+                start_date=start_date,
+                end_date=end_date,
+                direction=direction,
+                disposition=disposition,
+            )
+        )
         if current_user.is_superuser:
             results, _ = await call_records_service.list_and_count(*extra_filters)
         else:
             user_team_ids = (
-                select(m.TeamMember.team_id)
-                .where(m.TeamMember.user_id == current_user.id)
-                .scalar_subquery()
+                select(m.TeamMember.team_id).where(m.TeamMember.user_id == current_user.id).scalar_subquery()
             )
             results, _ = await call_records_service.list_and_count(
                 *extra_filters,
@@ -236,33 +237,37 @@ class CallRecordController(Controller):
 
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow([
-            "Call Date",
-            "Source",
-            "Destination",
-            "Caller ID",
-            "Direction",
-            "Disposition",
-            "Duration (s)",
-            "Billable (s)",
-            "Cost",
-            "Channel",
-            "Unique ID",
-        ])
+        writer.writerow(
+            [
+                "Call Date",
+                "Source",
+                "Destination",
+                "Caller ID",
+                "Direction",
+                "Disposition",
+                "Duration (s)",
+                "Billable (s)",
+                "Cost",
+                "Channel",
+                "Unique ID",
+            ]
+        )
         for record in results:
-            writer.writerow([
-                record.call_date.isoformat() if record.call_date else "",
-                record.source,
-                record.destination,
-                record.caller_id or "",
-                record.direction,
-                record.disposition,
-                record.duration,
-                record.billable_seconds,
-                str(record.cost) if record.cost is not None else "",
-                record.channel or "",
-                record.unique_id or "",
-            ])
+            writer.writerow(
+                [
+                    record.call_date.isoformat() if record.call_date else "",
+                    record.source,
+                    record.destination,
+                    record.caller_id or "",
+                    record.direction,
+                    record.disposition,
+                    record.duration,
+                    record.billable_seconds,
+                    str(record.cost) if record.cost is not None else "",
+                    record.channel or "",
+                    record.unique_id or "",
+                ]
+            )
 
         csv_bytes = output.getvalue().encode("utf-8")
         return Response(

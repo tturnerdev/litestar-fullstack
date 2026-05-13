@@ -104,6 +104,7 @@ class TicketMessageController(Controller):
         db_obj = await messages_service.create(obj)
         request.app.emit(event_id="ticket_message_created", ticket_id=ticket_id, message_id=db_obj.id)
         after = capture_snapshot(db_obj)
+        result = messages_service.to_schema(db_obj, schema_type=TicketMessage)
         await log_audit(
             audit_service,
             action="support.message_create",
@@ -117,7 +118,7 @@ class TicketMessageController(Controller):
             after=after,
             request=request,
         )
-        return messages_service.to_schema(db_obj, schema_type=TicketMessage)
+        return result
 
     @patch(
         operation_id="UpdateTicketMessage",
@@ -144,6 +145,7 @@ class TicketMessageController(Controller):
         )
         request.app.emit(event_id="ticket_message_updated", ticket_id=ticket_id, message_id=msg_id)
         after = capture_snapshot(db_obj)
+        result = messages_service.to_schema(db_obj, schema_type=TicketMessage)
         await log_audit(
             audit_service,
             action="support.message_update",
@@ -157,7 +159,7 @@ class TicketMessageController(Controller):
             after=after,
             request=request,
         )
-        return messages_service.to_schema(db_obj, schema_type=TicketMessage)
+        return result
 
     @delete(
         operation_id="DeleteTicketMessage",

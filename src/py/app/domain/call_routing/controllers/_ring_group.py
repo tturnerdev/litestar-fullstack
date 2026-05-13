@@ -118,6 +118,7 @@ class RingGroupController(Controller):
         obj["team_id"] = current_user.teams[0].team_id if current_user.teams else None
         db_obj = await ring_groups_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = ring_groups_service.to_schema(db_obj, schema_type=RingGroup)
         await log_audit(
             audit_service,
             action="call_routing.ring_group.created",
@@ -132,7 +133,7 @@ class RingGroupController(Controller):
             request=request,
         )
         request.app.emit(event_id="ring_group_created", ring_group_id=db_obj.id)
-        return ring_groups_service.to_schema(db_obj, schema_type=RingGroup)
+        return result
 
     @get(
         operation_id="GetRingGroup",
@@ -190,6 +191,7 @@ class RingGroupController(Controller):
         before = capture_snapshot(await ring_groups_service.get(ring_group_id))
         fresh_obj = await ring_groups_service.update(item_id=ring_group_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = ring_groups_service.to_schema(fresh_obj, schema_type=RingGroup)
         await log_audit(
             audit_service,
             action="call_routing.ring_group.updated",
@@ -204,7 +206,7 @@ class RingGroupController(Controller):
             request=request,
         )
         request.app.emit(event_id="ring_group_updated", ring_group_id=ring_group_id)
-        return ring_groups_service.to_schema(fresh_obj, schema_type=RingGroup)
+        return result
 
     @delete(
         operation_id="DeleteRingGroup",
@@ -317,6 +319,7 @@ class RingGroupController(Controller):
         obj["ring_group_id"] = ring_group_id
         db_obj = await ring_group_members_service.create(obj)
         after = capture_snapshot(db_obj)
+        result = ring_group_members_service.to_schema(db_obj, schema_type=RingGroupMember)
         await log_audit(
             audit_service,
             action="call_routing.ring_group_member.created",
@@ -331,7 +334,7 @@ class RingGroupController(Controller):
             request=request,
         )
         request.app.emit(event_id="ring_group_member_created", member_id=db_obj.id)
-        return ring_group_members_service.to_schema(db_obj, schema_type=RingGroupMember)
+        return result
 
     @patch(
         operation_id="UpdateRingGroupMember",
@@ -367,11 +370,10 @@ class RingGroupController(Controller):
             RingGroupMember
         """
         await ring_groups_service.get(ring_group_id)
-        before = capture_snapshot(
-            await ring_group_members_service.get_one(id=member_id, ring_group_id=ring_group_id)
-        )
+        before = capture_snapshot(await ring_group_members_service.get_one(id=member_id, ring_group_id=ring_group_id))
         fresh_obj = await ring_group_members_service.update(item_id=member_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
+        result = ring_group_members_service.to_schema(fresh_obj, schema_type=RingGroupMember)
         await log_audit(
             audit_service,
             action="call_routing.ring_group_member.updated",
@@ -386,7 +388,7 @@ class RingGroupController(Controller):
             request=request,
         )
         request.app.emit(event_id="ring_group_member_updated", member_id=member_id)
-        return ring_group_members_service.to_schema(fresh_obj, schema_type=RingGroupMember)
+        return result
 
     @delete(
         operation_id="DeleteRingGroupMember",

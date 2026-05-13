@@ -48,7 +48,12 @@ class AdminVoiceController(Controller):
         "dnd_service": Provide(provide_dnd_service),
     }
 
-    @get(operation_id="AdminListPhoneNumbers", summary="List phone numbers (admin)", description="Returns a paginated list of all phone numbers with owner and team details. Supports search by number and label. Requires superuser access.", path="/phone-numbers")
+    @get(
+        operation_id="AdminListPhoneNumbers",
+        summary="List phone numbers (admin)",
+        description="Returns a paginated list of all phone numbers with owner and team details. Supports search by number and label. Requires superuser access.",
+        path="/phone-numbers",
+    )
     async def list_phone_numbers(
         self,
         phone_number_service: PhoneNumberService,
@@ -77,7 +82,12 @@ class AdminVoiceController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @get(operation_id="AdminListExtensions", summary="List extensions (admin)", description="Returns a paginated list of all extensions with owner and phone number details. Supports search by extension number and display name. Requires superuser access.", path="/extensions")
+    @get(
+        operation_id="AdminListExtensions",
+        summary="List extensions (admin)",
+        description="Returns a paginated list of all extensions with owner and phone number details. Supports search by extension number and display name. Requires superuser access.",
+        path="/extensions",
+    )
     async def list_extensions(
         self,
         extension_service: ExtensionService,
@@ -89,7 +99,9 @@ class AdminVoiceController(Controller):
             LimitOffset(limit=page_size, offset=(current_page - 1) * page_size),
         ]
         if search_string:
-            ext_filters.append(SearchFilter(field_name={"extension_number", "display_name"}, value=search_string, ignore_case=True))
+            ext_filters.append(
+                SearchFilter(field_name={"extension_number", "display_name"}, value=search_string, ignore_case=True)
+            )
         results, total = await extension_service.list_and_count(
             *ext_filters,
             load=[selectinload(m.Extension.user), selectinload(m.Extension.phone_number)],

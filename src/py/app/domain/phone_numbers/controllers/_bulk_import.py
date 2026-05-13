@@ -123,7 +123,11 @@ class AdminPhoneNumberBulkImportController(Controller):
                 break
 
             # Re-key with normalized headers
-            row = {normalized_fieldnames[i]: v for i, (_, v) in enumerate(raw_row.items()) if i < len(normalized_fieldnames)}
+            row = {
+                normalized_fieldnames[i]: v
+                for i, (_, v) in enumerate(raw_row.items())
+                if i < len(normalized_fieldnames)
+            }
 
             row_count += 1
             validated, errors = validate_phone_row(row, row_idx)
@@ -229,14 +233,16 @@ class AdminPhoneNumberBulkImportController(Controller):
                 continue
             numbers_seen.add(normalized)
 
-            to_create.append({
-                "number": normalized,
-                "user_id": row.user_id,
-                "label": row.label,
-                "number_type": row.number_type,
-                "caller_id_name": row.caller_id_name,
-                "team_id": row.team_id,
-            })
+            to_create.append(
+                {
+                    "number": normalized,
+                    "user_id": row.user_id,
+                    "label": row.label,
+                    "number_type": row.number_type,
+                    "caller_id_name": row.caller_id_name,
+                    "team_id": row.team_id,
+                }
+            )
 
         # Check for existing numbers in DB
         all_numbers = [item["number"] for item in to_create]

@@ -46,7 +46,12 @@ class AdminFaxController(Controller):
         "fax_message_service": Provide(provide_fax_messages_service),
     }
 
-    @get(operation_id="AdminListFaxNumbers", summary="List fax numbers (admin)", description="Returns a paginated list of all fax numbers with owner and team details. Supports search by number and label. Requires superuser access.", path="/numbers")
+    @get(
+        operation_id="AdminListFaxNumbers",
+        summary="List fax numbers (admin)",
+        description="Returns a paginated list of all fax numbers with owner and team details. Supports search by number and label. Requires superuser access.",
+        path="/numbers",
+    )
     async def list_fax_numbers(
         self,
         fax_number_service: FaxNumberService,
@@ -73,7 +78,12 @@ class AdminFaxController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @get(operation_id="AdminListFaxMessages", summary="List fax messages (admin)", description="Returns the 50 most recent fax messages ordered by received date, including direction, status, and error details. Requires superuser access.", path="/messages")
+    @get(
+        operation_id="AdminListFaxMessages",
+        summary="List fax messages (admin)",
+        description="Returns the 50 most recent fax messages ordered by received date, including direction, status, and error details. Requires superuser access.",
+        path="/messages",
+    )
     async def list_fax_messages(
         self,
         fax_message_service: FaxMessageService,

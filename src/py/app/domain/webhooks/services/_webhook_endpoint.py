@@ -62,7 +62,9 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                 raise ValidationException(_DUPLICATE_URL_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.WebhookEndpoint], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.WebhookEndpoint]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.WebhookEndpoint], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.WebhookEndpoint]:
         """Validate that no other webhook endpoint with the same URL already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data):
@@ -77,7 +79,9 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                     raise ValidationException(_DUPLICATE_URL_MSG)
         return data
 
-    async def to_model_on_upsert(self, data: service.ModelDictT[m.WebhookEndpoint]) -> service.ModelDictT[m.WebhookEndpoint]:
+    async def to_model_on_upsert(
+        self, data: service.ModelDictT[m.WebhookEndpoint]
+    ) -> service.ModelDictT[m.WebhookEndpoint]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             if "url" in data:
@@ -108,7 +112,9 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                 data["last_validated_at"] = datetime.now(UTC)
         return await super().create(data, **kwargs)
 
-    async def update(self, data: dict[str, Any] | m.WebhookEndpoint, item_id: Any | None = None, **kwargs: Any) -> m.WebhookEndpoint:
+    async def update(
+        self, data: dict[str, Any] | m.WebhookEndpoint, item_id: Any | None = None, **kwargs: Any
+    ) -> m.WebhookEndpoint:
         """Update a webhook endpoint, re-validating the URL if it changed.
 
         Args:
@@ -217,7 +223,4 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
             m.WebhookEndpoint.is_active.is_(True),
         )
         # Filter in Python since ARRAY contains operations vary by DB
-        return [
-            endpoint for endpoint in all_active
-            if event_type in endpoint.events
-        ]
+        return [endpoint for endpoint in all_active if event_type in endpoint.events]

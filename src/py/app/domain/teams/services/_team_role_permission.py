@@ -36,7 +36,9 @@ class TeamRolePermissionService(service.SQLAlchemyAsyncRepositoryService[m.TeamR
                 raise ValidationException(_DUPLICATE_ROLE_PERMISSION_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.TeamRolePermission], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.TeamRolePermission]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.TeamRolePermission], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.TeamRolePermission]:
         data = service.schema_dump(data)
         if service.is_dict(data) and ("team_id" in data or "role" in data or "feature_area" in data):
             existing = await self.repository.list(

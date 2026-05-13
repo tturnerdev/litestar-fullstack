@@ -79,6 +79,7 @@ class NotificationPreferenceController(Controller):
             user_id=current_user.id,
             data=data.to_dict(),
         )
+        result = notification_preference_service.to_schema(db_obj, schema_type=NotificationPreference)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -94,4 +95,4 @@ class NotificationPreferenceController(Controller):
             request=request,
         )
         request.app.emit(event_id="notification_preferences_updated", user_id=current_user.id)
-        return notification_preference_service.to_schema(db_obj, schema_type=NotificationPreference)
+        return result

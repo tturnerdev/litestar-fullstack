@@ -9,6 +9,7 @@ import { useFaxNumbers } from "@/lib/api/hooks/fax"
 import { useSchedules } from "@/lib/api/hooks/schedules"
 import { useTickets } from "@/lib/api/hooks/support"
 import { usePhoneNumbers } from "@/lib/api/hooks/voice"
+import { useAuthStore } from "@/lib/auth"
 import { listTags } from "@/lib/generated/api"
 
 interface FeatureArea {
@@ -114,7 +115,7 @@ const featureAreas: FeatureArea[] = [
   },
 ]
 
-function useFeatureAreaCounts() {
+function useFeatureAreaCounts(isSuperuser: boolean) {
   const connections = useConnections({ page: 1, pageSize: 1 })
   const devices = useDevices({ page: 1, pageSize: 1 })
   const phoneNumbers = usePhoneNumbers(1, 1)
@@ -130,7 +131,7 @@ function useFeatureAreaCounts() {
   })
 
   return {
-    connections: { total: connections.data?.total, isLoading: connections.isLoading },
+    connections: isSuperuser ? { total: connections.data?.total, isLoading: connections.isLoading } : { total: undefined, isLoading: false },
     devices: { total: devices.data?.total, isLoading: devices.isLoading },
     voice: { total: phoneNumbers.data?.total, isLoading: phoneNumbers.isLoading },
     fax: { total: faxNumbers.data?.total, isLoading: faxNumbers.isLoading },
@@ -142,11 +143,13 @@ function useFeatureAreaCounts() {
 }
 
 export function FeatureAreasGrid() {
-  const counts = useFeatureAreaCounts()
+  const isSuperuser = useAuthStore((state) => state.user?.isSuperuser) ?? false
+  const counts = useFeatureAreaCounts(isSuperuser)
+  const visibleAreas = isSuperuser ? featureAreas : featureAreas.filter((a) => a.key !== "connections")
 
   return (
     <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-      {featureAreas.map((area, index) => {
+      {visibleAreas.map((area, index) => {
         const count = counts[area.key]
         return (
           <Link key={area.key} to={area.to}>

@@ -20,7 +20,9 @@ if TYPE_CHECKING:
 
 
 @asynccontextmanager
-async def provide_task_context(ctx: Context, task_id: str) -> AsyncIterator[tuple[BackgroundTaskService, BackgroundTask]]:
+async def provide_task_context(
+    ctx: Context, task_id: str
+) -> AsyncIterator[tuple[BackgroundTaskService, BackgroundTask]]:
     """Provide a task service and task record for SAQ job functions.
 
     Opens a service session, retrieves the task by ID, and yields

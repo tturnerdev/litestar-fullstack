@@ -37,7 +37,7 @@ def setup_environment() -> None:
         self._prepare(ctx)
         return original_format_help(self, ctx, formatter)
 
-    setattr(LitestarExtensionGroup, "format_help", fixed_format_help)
+    LitestarExtensionGroup.format_help = fixed_format_help
 
 
 def run_cli() -> None:

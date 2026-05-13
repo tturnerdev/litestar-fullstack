@@ -17,11 +17,22 @@ function escapeCell(value: unknown): string {
     return ""
   }
   const str = String(value)
-  // Wrap in quotes if the value contains a comma, double-quote, or newline
   if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
     return `"${str.replace(/"/g, '""')}"`
   }
   return str
+}
+
+export function buildCsvString<T extends Record<string, unknown>>(data: T[], keys: string[]): string {
+  const headerRow = keys.join(",")
+  const bodyRows = data.map((row) => keys.map((k) => escapeCell(row[k])).join(","))
+  return [headerRow, ...bodyRows].join("\n")
+}
+
+export function buildCsvStringWithAccessors<T>(data: T[], columns: { header: string; accessor: (row: T) => unknown }[]): string {
+  const headerRow = columns.map((c) => escapeCell(c.header)).join(",")
+  const bodyRows = data.map((row) => columns.map((c) => escapeCell(c.accessor(row))).join(","))
+  return [headerRow, ...bodyRows].join("\n")
 }
 
 function todaySuffix(): string {
@@ -48,4 +59,11 @@ export function exportToCsv<T>(filename: string, headers: CsvHeader<T>[], items:
   anchor.click()
   document.body.removeChild(anchor)
   URL.revokeObjectURL(url)
+}
+
+export function exportToCSV<T extends Record<string, unknown>>(data: T[], filename: string): void {
+  if (data.length === 0) return
+  const keys = Object.keys(data[0])
+  const headers: CsvHeader<T> = keys.map((k) => ({ label: k, accessor: (row: T) => row[k] })) as unknown as CsvHeader<T>
+  exportToCsv(filename, headers as unknown as CsvHeader<T>[], data)
 }

@@ -35,7 +35,9 @@ class UserRoleService(service.SQLAlchemyAsyncRepositoryService[m.UserRole]):
                 raise ValidationException(_DUPLICATE_USER_ROLE_MSG)
         return data
 
-    async def to_model_on_update(self, data: ModelDictT[m.UserRole], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.UserRole]:
+    async def to_model_on_update(
+        self, data: ModelDictT[m.UserRole], item_id: Any | None = None, **kwargs: Any
+    ) -> ModelDictT[m.UserRole]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "user_id" in data and "role_id" in data:
             existing = await self.repository.list(
