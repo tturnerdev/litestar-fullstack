@@ -108,15 +108,15 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate({ to: "/profile" })}>
+              <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
                 <User />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate({ to: "/settings" })}>
+              <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
                 <Settings />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate({ to: "/notifications" })}>
+              <DropdownMenuItem onClick={() => navigate({ to: "/notifications" })}>
                 <Bell />
                 Notifications
               </DropdownMenuItem>
@@ -129,7 +129,7 @@ export function NavUser() {
               </Badge>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer" onClick={onLogout}>
+            <DropdownMenuItem onClick={onLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
