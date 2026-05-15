@@ -1,6 +1,7 @@
 """Admin domain controllers."""
 
 from app.domain.admin.controllers._admin_bulk_import import AdminBulkImportController
+from app.domain.admin.controllers._admin_default_permissions import AdminDefaultPermissionsController
 from app.domain.admin.controllers._admin_device_templates import AdminDeviceTemplatesController
 from app.domain.admin.controllers._admin_devices import AdminDevicesController
 from app.domain.admin.controllers._admin_fax import AdminFaxController
@@ -19,6 +20,7 @@ from app.domain.admin.controllers._users import AdminUsersController
 __all__ = (
     "AdminAttachmentsController",
     "AdminBulkImportController",
+    "AdminDefaultPermissionsController",
     "AdminDeviceTemplatesController",
     "AdminDevicesController",
     "AdminFaxController",

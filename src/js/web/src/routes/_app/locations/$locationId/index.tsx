@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Clock, Copy, Cpu, ExternalLink, Loader2, MapPin, MoreHorizontal, Pencil, RefreshCw, Shield, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,

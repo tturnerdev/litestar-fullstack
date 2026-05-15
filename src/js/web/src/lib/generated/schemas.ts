@@ -6,6 +6,8 @@ export * from "./api/types.gen"
 
 // Import specific operation types for mapping
 import type {
+  AccountAvatarClearData,
+  AccountAvatarClearResponses,
   AccountLogoutData,
   AccountLogoutResponses,
   AccountPasswordUpdateData,
@@ -36,6 +38,9 @@ import type {
   AdminGetVoiceStatsResponses,
   AdminListFaxMessagesData,
   AdminListFaxMessagesResponses,
+  CompleteUploadData,
+  CompleteUploadErrors,
+  CompleteUploadResponses,
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
@@ -134,6 +139,9 @@ import type {
   MarkAllNotificationsReadResponses,
   OAuthConfigData,
   OAuthConfigResponses,
+  PresignUploadData,
+  PresignUploadErrors,
+  PresignUploadResponses,
   RegenerateMfaBackupCodesData,
   RegenerateMfaBackupCodesErrors,
   RegenerateMfaBackupCodesResponses,
@@ -155,6 +163,9 @@ import type {
   UpdateAdminGatewaySettingsData,
   UpdateAdminGatewaySettingsErrors,
   UpdateAdminGatewaySettingsResponses,
+  UpdateDefaultPermissionsData,
+  UpdateDefaultPermissionsErrors,
+  UpdateDefaultPermissionsResponses,
   UpdateNotificationPreferencesData,
   UpdateNotificationPreferencesErrors,
   UpdateNotificationPreferencesResponses,
@@ -179,6 +190,8 @@ import type {
  * const op: OperationName = 'api:login'
  */
 export type OperationName =
+  | 'clear_avatar'
+  | 'complete_upload'
   | 'confirm_setup'
   | 'create_call_queue'
   | 'create_call_record'
@@ -207,6 +220,7 @@ export type OperationName =
   | 'disable_mfa'
   | 'execute_import'
   | 'forgot_password'
+  | 'get_default_permissions'
   | 'get_gateway_settings'
   | 'get_mfa_status'
   | 'get_organization'
@@ -252,16 +266,19 @@ export type OperationName =
   | 'list_webhooks'
   | 'logout'
   | 'mark_all_read'
+  | 'presign_upload'
   | 'regenerate_backup_codes'
   | 'remove_account'
   | 'request_verification'
   | 'reset_password_with_token'
   | 'revoke_all_sessions'
   | 'send_fax'
+  | 'set_avatar'
   | 'signup'
   | 'sync_extensions'
   | 'system:health'
   | 'system:oauth-config'
+  | 'update_default_permissions'
   | 'update_gateway_settings'
   | 'update_organization'
   | 'update_password'
@@ -275,6 +292,8 @@ export type OperationName =
  * Data types contain body, path, query, and url properties.
  */
 export interface OperationDataTypes {
+  'clear_avatar': AccountAvatarClearData
+  'complete_upload': CompleteUploadData
   'confirm_setup': ConfirmMfaSetupData
   'create_call_queue': CreateCallQueueData
   'create_call_record': CreateCallRecordData
@@ -303,6 +322,7 @@ export interface OperationDataTypes {
   'disable_mfa': DisableMfaData
   'execute_import': AdminExecutePhoneNumberBulkImportData
   'forgot_password': ForgotPasswordData
+  'get_default_permissions': UpdateDefaultPermissionsData
   'get_gateway_settings': UpdateAdminGatewaySettingsData
   'get_mfa_status': GetMfaStatusData
   'get_organization': UpdateOrganizationData
@@ -348,16 +368,19 @@ export interface OperationDataTypes {
   'list_webhooks': CreateWebhookData
   'logout': AccountLogoutData
   'mark_all_read': MarkAllNotificationsReadData
+  'presign_upload': PresignUploadData
   'regenerate_backup_codes': RegenerateMfaBackupCodesData
   'remove_account': AccountProfileUpdateData
   'request_verification': RequestEmailVerificationData
   'reset_password_with_token': ResetPasswordData
   'revoke_all_sessions': RevokeAllSessionsData
   'send_fax': SendFaxData
+  'set_avatar': AccountAvatarClearData
   'signup': AccountRegisterData
   'sync_extensions': SyncExtensionsData
   'system:health': SystemHealthData
   'system:oauth-config': OAuthConfigData
+  'update_default_permissions': UpdateDefaultPermissionsData
   'update_gateway_settings': UpdateAdminGatewaySettingsData
   'update_organization': UpdateOrganizationData
   'update_password': AccountPasswordUpdateData
@@ -372,6 +395,8 @@ export interface OperationDataTypes {
  * Responses types map status codes to response shapes.
  */
 export interface OperationResponseTypes {
+  'clear_avatar': AccountAvatarClearResponses
+  'complete_upload': CompleteUploadResponses
   'confirm_setup': ConfirmMfaSetupResponses
   'create_call_queue': CreateCallQueueResponses
   'create_call_record': CreateCallRecordResponses
@@ -400,6 +425,7 @@ export interface OperationResponseTypes {
   'disable_mfa': DisableMfaResponses
   'execute_import': AdminExecutePhoneNumberBulkImportResponses
   'forgot_password': ForgotPasswordResponses
+  'get_default_permissions': UpdateDefaultPermissionsResponses
   'get_gateway_settings': UpdateAdminGatewaySettingsResponses
   'get_mfa_status': GetMfaStatusResponses
   'get_organization': UpdateOrganizationResponses
@@ -445,16 +471,19 @@ export interface OperationResponseTypes {
   'list_webhooks': CreateWebhookResponses
   'logout': AccountLogoutResponses
   'mark_all_read': MarkAllNotificationsReadResponses
+  'presign_upload': PresignUploadResponses
   'regenerate_backup_codes': RegenerateMfaBackupCodesResponses
   'remove_account': AccountProfileUpdateResponses
   'request_verification': RequestEmailVerificationResponses
   'reset_password_with_token': ResetPasswordResponses
   'revoke_all_sessions': RevokeAllSessionsResponses
   'send_fax': SendFaxResponses
+  'set_avatar': AccountAvatarClearResponses
   'signup': AccountRegisterResponses
   'sync_extensions': SyncExtensionsResponses
   'system:health': SystemHealthResponses
   'system:oauth-config': OAuthConfigResponses
+  'update_default_permissions': UpdateDefaultPermissionsResponses
   'update_gateway_settings': UpdateAdminGatewaySettingsResponses
   'update_organization': UpdateOrganizationResponses
   'update_password': AccountPasswordUpdateResponses
@@ -469,6 +498,8 @@ export interface OperationResponseTypes {
  * Error types represent non-2xx responses.
  */
 export interface OperationErrorTypes {
+  'clear_avatar': never
+  'complete_upload': CompleteUploadErrors
   'confirm_setup': ConfirmMfaSetupErrors
   'create_call_queue': CreateCallQueueErrors
   'create_call_record': CreateCallRecordErrors
@@ -497,6 +528,7 @@ export interface OperationErrorTypes {
   'disable_mfa': DisableMfaErrors
   'execute_import': AdminExecutePhoneNumberBulkImportErrors
   'forgot_password': ForgotPasswordErrors
+  'get_default_permissions': UpdateDefaultPermissionsErrors
   'get_gateway_settings': UpdateAdminGatewaySettingsErrors
   'get_mfa_status': never
   'get_organization': UpdateOrganizationErrors
@@ -542,16 +574,19 @@ export interface OperationErrorTypes {
   'list_webhooks': CreateWebhookErrors
   'logout': never
   'mark_all_read': never
+  'presign_upload': PresignUploadErrors
   'regenerate_backup_codes': RegenerateMfaBackupCodesErrors
   'remove_account': AccountProfileUpdateErrors
   'request_verification': RequestEmailVerificationErrors
   'reset_password_with_token': ResetPasswordErrors
   'revoke_all_sessions': never
   'send_fax': SendFaxErrors
+  'set_avatar': never
   'signup': AccountRegisterErrors
   'sync_extensions': never
   'system:health': never
   'system:oauth-config': never
+  'update_default_permissions': UpdateDefaultPermissionsErrors
   'update_gateway_settings': UpdateAdminGatewaySettingsErrors
   'update_organization': UpdateOrganizationErrors
   'update_password': AccountPasswordUpdateErrors

@@ -1,5 +1,10 @@
 """Admin domain schemas."""
 
+from app.domain.admin.schemas._admin_default_permissions import (
+    DefaultPermissionEntry,
+    DefaultPermissionTemplate,
+    DefaultPermissionTemplateUpdate,
+)
 from app.domain.admin.schemas._admin_bulk_import import (
     BulkImportPreview,
     BulkImportPreviewRow,
@@ -45,6 +50,9 @@ from app.domain.admin.schemas._users import AdminUserDetail, AdminUserSummary, A
 __all__ = (
     "ActivityLogEntry",
     "AdminAttachment",
+    "DefaultPermissionEntry",
+    "DefaultPermissionTemplate",
+    "DefaultPermissionTemplateUpdate",
     "AdminDeviceStats",
     "AdminDeviceSummary",
     "AdminExtensionSummary",

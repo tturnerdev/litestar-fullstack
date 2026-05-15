@@ -1,7 +1,7 @@
 """add attachment table
 
 Revision ID: a1f3c2d4e5b6
-Revises: dc54b25d8b6c
+Revises: d42171b27bd7
 Create Date: 2026-05-13 00:00:00.000000
 
 """
@@ -34,7 +34,7 @@ sa.PasswordHash = PasswordHash  # pyright: ignore
 
 # revision identifiers, used by Alembic.
 revision = "a1f3c2d4e5b6"
-down_revision = "dc54b25d8b6c"
+down_revision = "d42171b27bd7"
 branch_labels = None
 depends_on = None
 

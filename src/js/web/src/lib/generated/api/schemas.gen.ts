@@ -159,6 +159,78 @@ export const ActivityLogEntrySchema = {
   type: "object",
 } as const;
 
+export const AdminAttachmentSchema = {
+  properties: {
+    checksumSha256: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    contentType: {
+      type: "string",
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    originalFilename: {
+      type: "string",
+    },
+    purpose: {
+      type: "string",
+    },
+    sizeBytes: {
+      type: "integer",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    uploadedById: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [
+    "contentType",
+    "createdAt",
+    "id",
+    "originalFilename",
+    "purpose",
+    "sizeBytes",
+    "updatedAt",
+  ],
+  title: "AdminAttachment",
+  type: "object",
+} as const;
+
 export const AdminDeviceStatsSchema = {
   properties: {
     active: {
@@ -1423,6 +1495,96 @@ export const AdminVoiceStatsSchema = {
   ],
   title: "AdminVoiceStats",
   type: "object",
+} as const;
+
+export const AttachmentSchema = {
+  properties: {
+    checksumSha256: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    contentType: {
+      type: "string",
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    downloadUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    originalFilename: {
+      type: "string",
+    },
+    purpose: {
+      type: "string",
+    },
+    sizeBytes: {
+      type: "integer",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    uploadedById: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [
+    "contentType",
+    "createdAt",
+    "id",
+    "originalFilename",
+    "purpose",
+    "sizeBytes",
+    "updatedAt",
+  ],
+  title: "Attachment",
+  type: "object",
+} as const;
+
+export const AttachmentPurposeSchema = {
+  default: "attachment",
+  description: "What an uploaded file is used for.",
+  enum: ["attachment", "avatar", "team_logo", "import", "other"],
+  title: "AttachmentPurpose",
+  type: "string",
 } as const;
 
 export const AuditLogEntrySchema = {
@@ -2941,6 +3103,39 @@ export const CallVolumePointSchema = {
   type: "object",
 } as const;
 
+export const CompleteUploadRequestSchema = {
+  properties: {
+    contentType: {
+      default: "application/octet-stream",
+      type: "string",
+    },
+    originalFilename: {
+      type: "string",
+    },
+    path: {
+      type: "string",
+    },
+    purpose: {
+      default: "attachment",
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["originalFilename", "path"],
+  title: "CompleteUploadRequest",
+  type: "object",
+} as const;
+
 export const ConnectionCreateSchema = {
   properties: {
     authType: {
@@ -3473,6 +3668,66 @@ export const DatabasePoolInfoSchema = {
   },
   required: [],
   title: "DatabasePoolInfo",
+  type: "object",
+} as const;
+
+export const DefaultPermissionEntrySchema = {
+  properties: {
+    canEdit: {
+      default: false,
+      type: "boolean",
+    },
+    canView: {
+      default: false,
+      type: "boolean",
+    },
+    featureArea: {
+      $ref: "#/components/schemas/FeatureArea",
+    },
+    role: {
+      $ref: "#/components/schemas/TeamRoles",
+    },
+  },
+  required: ["featureArea", "role"],
+  title: "DefaultPermissionEntry",
+  type: "object",
+} as const;
+
+export const DefaultPermissionTemplateSchema = {
+  properties: {
+    canEdit: {
+      type: "boolean",
+    },
+    canView: {
+      type: "boolean",
+    },
+    featureArea: {
+      $ref: "#/components/schemas/FeatureArea",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    role: {
+      $ref: "#/components/schemas/TeamRoles",
+    },
+  },
+  required: ["canEdit", "canView", "featureArea", "id", "role"],
+  title: "DefaultPermissionTemplate",
+  type: "object",
+} as const;
+
+export const DefaultPermissionTemplateUpdateSchema = {
+  properties: {
+    permissions: {
+      items: {
+        $ref: "#/components/schemas/DefaultPermissionEntry",
+      },
+      type: "array",
+    },
+  },
+  required: ["permissions"],
+  title: "DefaultPermissionTemplateUpdate",
   type: "object",
 } as const;
 
@@ -7930,6 +8185,53 @@ export const PhoneNumberUpdateSchema = {
   type: "object",
 } as const;
 
+export const PresignRequestSchema = {
+  properties: {
+    contentType: {
+      default: "application/octet-stream",
+      type: "string",
+    },
+    filename: {
+      type: "string",
+    },
+    purpose: {
+      default: "attachment",
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["filename"],
+  title: "PresignRequest",
+  type: "object",
+} as const;
+
+export const PresignResponseSchema = {
+  properties: {
+    expiresIn: {
+      type: "integer",
+    },
+    path: {
+      type: "string",
+    },
+    uploadUrl: {
+      type: "string",
+    },
+  },
+  required: ["expiresIn", "path", "uploadUrl"],
+  title: "PresignResponse",
+  type: "object",
+} as const;
+
 export const ProfileUpdateSchema = {
   properties: {
     name: {
@@ -9249,6 +9551,16 @@ export const TeamSchema = {
     isActive: {
       default: true,
       type: "boolean",
+    },
+    logoUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     members: {
       items: {

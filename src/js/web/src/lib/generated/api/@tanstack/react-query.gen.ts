@@ -9,6 +9,8 @@ import {
 import { client } from "../client.gen";
 import {
   acceptTeamInvitation,
+  accountAvatarClear,
+  accountAvatarSet,
   accountDelete,
   accountLogin,
   accountLogout,
@@ -20,6 +22,7 @@ import {
   adminCancelTask,
   adminCreateDeviceTemplate,
   adminCreateMusicOnHold,
+  adminDeleteAttachment,
   adminDeleteDeviceTemplate,
   adminDeleteMusicOnHold,
   adminDeleteTask,
@@ -40,6 +43,7 @@ import {
   adminGetVoiceStats,
   adminImportDevices,
   adminImportExtensions,
+  adminListAttachments,
   adminListAuditLogs,
   adminListDevices,
   adminListDeviceTemplates,
@@ -64,6 +68,7 @@ import {
   cancelTask,
   checkSchedule,
   closeTicket,
+  completeUpload,
   confirmMfaSetup,
   createCallQueue,
   createCallQueueMember,
@@ -123,6 +128,7 @@ import {
   deleteTicket,
   deleteTicketMessage,
   deleteTimeCondition,
+  deleteUpload,
   deleteUser,
   deleteVoicemailBox,
   deleteVoicemailMessage,
@@ -130,6 +136,7 @@ import {
   deleteWebhook,
   deleteWebhookEndpoint,
   disableMfa,
+  downloadUpload,
   exportCallRecords,
   forgotPassword,
   gatewayLookupDevice,
@@ -148,6 +155,7 @@ import {
   getConnection,
   getDashboardStats,
   getDashboardTrends,
+  getDefaultPermissions,
   getDevice,
   getDndSettings,
   getE911Registration,
@@ -172,6 +180,7 @@ import {
   getTicket,
   getTimeCondition,
   getUnreadNotificationCount,
+  getUpload,
   getUser,
   getVoicemailBox,
   getVoicemailBoxUnreadCount,
@@ -222,6 +231,7 @@ import {
   listTimeConditions,
   listUnregisteredE911PhoneNumbers,
   listUnregisteredPhoneNumbers,
+  listUploads,
   listUsers,
   listVoicemailBoxes,
   listVoicemailBoxMessages,
@@ -242,6 +252,7 @@ import {
   type Options,
   pasteImage,
   pauseCallQueueMember,
+  presignUpload,
   profileOAuthAccounts,
   profileOAuthLink,
   profileOAuthUnlink,
@@ -262,6 +273,7 @@ import {
   sendFax,
   setDeviceLines,
   setForwardingRules,
+  setTeamLogo,
   setTimeConditionOverride,
   submitFeedback,
   syncEntity,
@@ -276,6 +288,7 @@ import {
   updateCallQueue,
   updateCallQueueMember,
   updateConnection,
+  updateDefaultPermissions,
   updateDevice,
   updateDndSettings,
   updateE911Registration,
@@ -308,6 +321,7 @@ import {
   updateWebhook,
   updateWebhookEndpoint,
   uploadAttachment,
+  uploadFile,
   validateE911Registration,
   validateResetToken,
   verifyEmail,
@@ -317,6 +331,11 @@ import type {
   AcceptTeamInvitationData,
   AcceptTeamInvitationError,
   AcceptTeamInvitationResponse,
+  AccountAvatarClearData,
+  AccountAvatarClearResponse,
+  AccountAvatarSetData,
+  AccountAvatarSetError,
+  AccountAvatarSetResponse,
   AccountDeleteData,
   AccountDeleteResponse,
   AccountLoginData,
@@ -346,6 +365,9 @@ import type {
   AdminCreateMusicOnHoldData,
   AdminCreateMusicOnHoldError,
   AdminCreateMusicOnHoldResponse,
+  AdminDeleteAttachmentData,
+  AdminDeleteAttachmentError,
+  AdminDeleteAttachmentResponse,
   AdminDeleteDeviceTemplateData,
   AdminDeleteDeviceTemplateError,
   AdminDeleteDeviceTemplateResponse,
@@ -402,6 +424,9 @@ import type {
   AdminImportExtensionsData,
   AdminImportExtensionsError,
   AdminImportExtensionsResponse,
+  AdminListAttachmentsData,
+  AdminListAttachmentsError,
+  AdminListAttachmentsResponse,
   AdminListAuditLogsData,
   AdminListAuditLogsError,
   AdminListAuditLogsResponse,
@@ -473,6 +498,9 @@ import type {
   CloseTicketData,
   CloseTicketError,
   CloseTicketResponse,
+  CompleteUploadData,
+  CompleteUploadError,
+  CompleteUploadResponse,
   ConfirmMfaSetupData,
   ConfirmMfaSetupError,
   ConfirmMfaSetupResponse,
@@ -649,6 +677,9 @@ import type {
   DeleteTimeConditionData,
   DeleteTimeConditionError,
   DeleteTimeConditionResponse,
+  DeleteUploadData,
+  DeleteUploadError,
+  DeleteUploadResponse,
   DeleteUserData,
   DeleteUserError,
   DeleteUserResponse,
@@ -670,6 +701,9 @@ import type {
   DisableMfaData,
   DisableMfaError,
   DisableMfaResponse,
+  DownloadUploadData,
+  DownloadUploadError,
+  DownloadUploadResponse,
   ExportCallRecordsData,
   ExportCallRecordsError,
   ExportCallRecordsResponse,
@@ -719,6 +753,8 @@ import type {
   GetDashboardStatsResponse,
   GetDashboardTrendsData,
   GetDashboardTrendsResponse,
+  GetDefaultPermissionsData,
+  GetDefaultPermissionsResponse,
   GetDeviceData,
   GetDeviceError,
   GetDeviceResponse,
@@ -786,6 +822,9 @@ import type {
   GetTimeConditionResponse,
   GetUnreadNotificationCountData,
   GetUnreadNotificationCountResponse,
+  GetUploadData,
+  GetUploadError,
+  GetUploadResponse,
   GetUserData,
   GetUserError,
   GetUserResponse,
@@ -932,6 +971,9 @@ import type {
   ListUnregisteredPhoneNumbersData,
   ListUnregisteredPhoneNumbersError,
   ListUnregisteredPhoneNumbersResponse,
+  ListUploadsData,
+  ListUploadsError,
+  ListUploadsResponse,
   ListUsersData,
   ListUsersError,
   ListUsersResponse,
@@ -986,6 +1028,9 @@ import type {
   PauseCallQueueMemberData,
   PauseCallQueueMemberError,
   PauseCallQueueMemberResponse,
+  PresignUploadData,
+  PresignUploadError,
+  PresignUploadResponse,
   ProfileOAuthAccountsData,
   ProfileOAuthAccountsError,
   ProfileOAuthAccountsResponse,
@@ -1045,6 +1090,9 @@ import type {
   SetForwardingRulesData,
   SetForwardingRulesError,
   SetForwardingRulesResponse,
+  SetTeamLogoData,
+  SetTeamLogoError,
+  SetTeamLogoResponse,
   SetTimeConditionOverrideData,
   SetTimeConditionOverrideError,
   SetTimeConditionOverrideResponse,
@@ -1085,6 +1133,9 @@ import type {
   UpdateConnectionData,
   UpdateConnectionError,
   UpdateConnectionResponse,
+  UpdateDefaultPermissionsData,
+  UpdateDefaultPermissionsError,
+  UpdateDefaultPermissionsResponse,
   UpdateDeviceData,
   UpdateDeviceError,
   UpdateDeviceResponse,
@@ -1181,6 +1232,9 @@ import type {
   UploadAttachmentData,
   UploadAttachmentError,
   UploadAttachmentResponse,
+  UploadFileData,
+  UploadFileError,
+  UploadFileResponse,
   ValidateE911RegistrationData,
   ValidateE911RegistrationError,
   ValidateE911RegistrationResponse,
@@ -1517,6 +1571,61 @@ export const accountRegisterMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await accountRegister({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const adminListAttachmentsQueryKey = (
+  options?: Options<AdminListAttachmentsData>,
+) => createQueryKey("adminListAttachments", options);
+
+/**
+ * ListAttachments
+ */
+export const adminListAttachmentsOptions = (
+  options?: Options<AdminListAttachmentsData>,
+) =>
+  queryOptions<
+    AdminListAttachmentsResponse,
+    AdminListAttachmentsError,
+    AdminListAttachmentsResponse,
+    ReturnType<typeof adminListAttachmentsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListAttachments({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListAttachmentsQueryKey(options),
+  });
+
+/**
+ * DeleteAttachment
+ */
+export const adminDeleteAttachmentMutation = (
+  options?: Partial<Options<AdminDeleteAttachmentData>>,
+): UseMutationOptions<
+  AdminDeleteAttachmentResponse,
+  AdminDeleteAttachmentError,
+  Options<AdminDeleteAttachmentData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminDeleteAttachmentResponse,
+    AdminDeleteAttachmentError,
+    Options<AdminDeleteAttachmentData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminDeleteAttachment({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -1882,6 +1991,65 @@ export const getDashboardTrendsOptions = (
     },
     queryKey: getDashboardTrendsQueryKey(options),
   });
+
+export const getDefaultPermissionsQueryKey = (
+  options?: Options<GetDefaultPermissionsData>,
+) => createQueryKey("getDefaultPermissions", options);
+
+/**
+ * Get default permission template
+ *
+ * Returns the default permission template that is applied when new teams are created. If no custom defaults have been saved, returns an empty list (the system falls back to ADMIN=full, MEMBER=view-only).
+ */
+export const getDefaultPermissionsOptions = (
+  options?: Options<GetDefaultPermissionsData>,
+) =>
+  queryOptions<
+    GetDefaultPermissionsResponse,
+    DefaultError,
+    GetDefaultPermissionsResponse,
+    ReturnType<typeof getDefaultPermissionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getDefaultPermissions({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getDefaultPermissionsQueryKey(options),
+  });
+
+/**
+ * Update default permission template
+ *
+ * Replaces the entire default permission template. Deletes all existing entries and creates the new set atomically. This template is applied when new teams are created. Records an audit log entry.
+ */
+export const updateDefaultPermissionsMutation = (
+  options?: Partial<Options<UpdateDefaultPermissionsData>>,
+): UseMutationOptions<
+  UpdateDefaultPermissionsResponse,
+  UpdateDefaultPermissionsError,
+  Options<UpdateDefaultPermissionsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateDefaultPermissionsResponse,
+    UpdateDefaultPermissionsError,
+    Options<UpdateDefaultPermissionsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateDefaultPermissions({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const adminListDeviceTemplatesQueryKey = (
   options?: Options<AdminListDeviceTemplatesData>,
@@ -5153,6 +5321,60 @@ export const accountProfileUpdateMutation = (
 };
 
 /**
+ * ClearAvatar
+ */
+export const accountAvatarClearMutation = (
+  options?: Partial<Options<AccountAvatarClearData>>,
+): UseMutationOptions<
+  AccountAvatarClearResponse,
+  DefaultError,
+  Options<AccountAvatarClearData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AccountAvatarClearResponse,
+    DefaultError,
+    Options<AccountAvatarClearData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await accountAvatarClear({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * SetAvatar
+ */
+export const accountAvatarSetMutation = (
+  options?: Partial<Options<AccountAvatarSetData>>,
+): UseMutationOptions<
+  AccountAvatarSetResponse,
+  AccountAvatarSetError,
+  Options<AccountAvatarSetData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AccountAvatarSetResponse,
+    AccountAvatarSetError,
+    Options<AccountAvatarSetData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await accountAvatarSet({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
  * Update password
  *
  * Change the authenticated user's password after verifying the current password. Records the password change in the audit log.
@@ -7928,6 +8150,33 @@ export const updateLocationMutation = (
 };
 
 /**
+ * SetTeamLogo
+ */
+export const setTeamLogoMutation = (
+  options?: Partial<Options<SetTeamLogoData>>,
+): UseMutationOptions<
+  SetTeamLogoResponse,
+  SetTeamLogoError,
+  Options<SetTeamLogoData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SetTeamLogoResponse,
+    SetTeamLogoError,
+    Options<SetTeamLogoData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await setTeamLogo({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
  * Remove a team member
  *
  * Removes a user from a team by email address. The team owner cannot be removed; ownership must be transferred first. Emits a team_member_removed event, records an audit log entry, and sends a removal notification to the user.
@@ -8248,6 +8497,189 @@ export const setTimeConditionOverrideMutation = (
   };
   return mutationOptions;
 };
+
+export const listUploadsQueryKey = (options?: Options<ListUploadsData>) =>
+  createQueryKey("listUploads", options);
+
+/**
+ * ListUploads
+ */
+export const listUploadsOptions = (options?: Options<ListUploadsData>) =>
+  queryOptions<
+    ListUploadsResponse,
+    ListUploadsError,
+    ListUploadsResponse,
+    ReturnType<typeof listUploadsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listUploads({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listUploadsQueryKey(options),
+  });
+
+/**
+ * UploadFile
+ */
+export const uploadFileMutation = (
+  options?: Partial<Options<UploadFileData>>,
+): UseMutationOptions<
+  UploadFileResponse,
+  UploadFileError,
+  Options<UploadFileData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UploadFileResponse,
+    UploadFileError,
+    Options<UploadFileData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await uploadFile({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * CompleteUpload
+ */
+export const completeUploadMutation = (
+  options?: Partial<Options<CompleteUploadData>>,
+): UseMutationOptions<
+  CompleteUploadResponse,
+  CompleteUploadError,
+  Options<CompleteUploadData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CompleteUploadResponse,
+    CompleteUploadError,
+    Options<CompleteUploadData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await completeUpload({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * PresignUpload
+ */
+export const presignUploadMutation = (
+  options?: Partial<Options<PresignUploadData>>,
+): UseMutationOptions<
+  PresignUploadResponse,
+  PresignUploadError,
+  Options<PresignUploadData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    PresignUploadResponse,
+    PresignUploadError,
+    Options<PresignUploadData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await presignUpload({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteUpload
+ */
+export const deleteUploadMutation = (
+  options?: Partial<Options<DeleteUploadData>>,
+): UseMutationOptions<
+  DeleteUploadResponse,
+  DeleteUploadError,
+  Options<DeleteUploadData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteUploadResponse,
+    DeleteUploadError,
+    Options<DeleteUploadData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteUpload({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getUploadQueryKey = (options: Options<GetUploadData>) =>
+  createQueryKey("getUpload", options);
+
+/**
+ * GetUpload
+ */
+export const getUploadOptions = (options: Options<GetUploadData>) =>
+  queryOptions<
+    GetUploadResponse,
+    GetUploadError,
+    GetUploadResponse,
+    ReturnType<typeof getUploadQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getUpload({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getUploadQueryKey(options),
+  });
+
+export const downloadUploadQueryKey = (options: Options<DownloadUploadData>) =>
+  createQueryKey("downloadUpload", options);
+
+/**
+ * DownloadUpload
+ */
+export const downloadUploadOptions = (options: Options<DownloadUploadData>) =>
+  queryOptions<
+    DownloadUploadResponse,
+    DownloadUploadError,
+    DownloadUploadResponse,
+    ReturnType<typeof downloadUploadQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await downloadUpload({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: downloadUploadQueryKey(options),
+  });
 
 export const listUsersQueryKey = (options?: Options<ListUsersData>) =>
   createQueryKey("listUsers", options);

@@ -27,7 +27,6 @@ import {
   Wrench,
 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { DeleteButton, RebootButton, ReprovisionButton, ToggleActiveButton } from "@/components/devices/device-actions"
 import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"

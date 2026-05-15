@@ -149,10 +149,13 @@ export function useSessionTimeout(): SessionTimeoutState {
         const now = Date.now()
         const remaining = expiryMs - now
 
-        // Token already expired → force logout
+        // Token already expired → attempt silent refresh before logging out
         if (remaining <= 0) {
           setShowWarning(false)
-          await performLogout()
+          const refreshed = await performRefresh()
+          if (!refreshed) {
+            await performLogout()
+          }
           return
         }
 

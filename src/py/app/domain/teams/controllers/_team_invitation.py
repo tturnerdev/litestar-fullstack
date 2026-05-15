@@ -146,7 +146,7 @@ class TeamInvitationController(Controller):
                     title="Team Invitation",
                     message=f"You've been invited to join team '{team.name}'.",
                     category="team",
-                    action_url=f"/teams/{team_id}",
+                    action_url=f"/teams/{team_id}/invitations/{db_obj.id}/accept",
                 )
         except Exception:
             logger.warning("Failed to send team invitation notification", exc_info=True)

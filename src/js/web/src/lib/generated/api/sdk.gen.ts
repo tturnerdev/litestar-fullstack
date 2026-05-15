@@ -12,6 +12,11 @@ import type {
   AcceptTeamInvitationData,
   AcceptTeamInvitationErrors,
   AcceptTeamInvitationResponses,
+  AccountAvatarClearData,
+  AccountAvatarClearResponses,
+  AccountAvatarSetData,
+  AccountAvatarSetErrors,
+  AccountAvatarSetResponses,
   AccountDeleteData,
   AccountDeleteResponses,
   AccountLoginData,
@@ -42,6 +47,9 @@ import type {
   AdminCreateMusicOnHoldData,
   AdminCreateMusicOnHoldErrors,
   AdminCreateMusicOnHoldResponses,
+  AdminDeleteAttachmentData,
+  AdminDeleteAttachmentErrors,
+  AdminDeleteAttachmentResponses,
   AdminDeleteDeviceTemplateData,
   AdminDeleteDeviceTemplateErrors,
   AdminDeleteDeviceTemplateResponses,
@@ -98,6 +106,9 @@ import type {
   AdminImportExtensionsData,
   AdminImportExtensionsErrors,
   AdminImportExtensionsResponses,
+  AdminListAttachmentsData,
+  AdminListAttachmentsErrors,
+  AdminListAttachmentsResponses,
   AdminListAuditLogsData,
   AdminListAuditLogsErrors,
   AdminListAuditLogsResponses,
@@ -169,6 +180,9 @@ import type {
   CloseTicketData,
   CloseTicketErrors,
   CloseTicketResponses,
+  CompleteUploadData,
+  CompleteUploadErrors,
+  CompleteUploadResponses,
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
@@ -345,6 +359,9 @@ import type {
   DeleteTimeConditionData,
   DeleteTimeConditionErrors,
   DeleteTimeConditionResponses,
+  DeleteUploadData,
+  DeleteUploadErrors,
+  DeleteUploadResponses,
   DeleteUserData,
   DeleteUserErrors,
   DeleteUserResponses,
@@ -366,6 +383,9 @@ import type {
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
+  DownloadUploadData,
+  DownloadUploadErrors,
+  DownloadUploadResponses,
   ExportCallRecordsData,
   ExportCallRecordsErrors,
   ExportCallRecordsResponses,
@@ -415,6 +435,8 @@ import type {
   GetDashboardStatsResponses,
   GetDashboardTrendsData,
   GetDashboardTrendsResponses,
+  GetDefaultPermissionsData,
+  GetDefaultPermissionsResponses,
   GetDeviceData,
   GetDeviceErrors,
   GetDeviceResponses,
@@ -482,6 +504,9 @@ import type {
   GetTimeConditionResponses,
   GetUnreadNotificationCountData,
   GetUnreadNotificationCountResponses,
+  GetUploadData,
+  GetUploadErrors,
+  GetUploadResponses,
   GetUserData,
   GetUserErrors,
   GetUserResponses,
@@ -630,6 +655,9 @@ import type {
   ListUnregisteredPhoneNumbersData,
   ListUnregisteredPhoneNumbersErrors,
   ListUnregisteredPhoneNumbersResponses,
+  ListUploadsData,
+  ListUploadsErrors,
+  ListUploadsResponses,
   ListUsersData,
   ListUsersErrors,
   ListUsersResponses,
@@ -684,6 +712,9 @@ import type {
   PauseCallQueueMemberData,
   PauseCallQueueMemberErrors,
   PauseCallQueueMemberResponses,
+  PresignUploadData,
+  PresignUploadErrors,
+  PresignUploadResponses,
   ProfileOAuthAccountsData,
   ProfileOAuthAccountsErrors,
   ProfileOAuthAccountsResponses,
@@ -743,6 +774,9 @@ import type {
   SetForwardingRulesData,
   SetForwardingRulesErrors,
   SetForwardingRulesResponses,
+  SetTeamLogoData,
+  SetTeamLogoErrors,
+  SetTeamLogoResponses,
   SetTimeConditionOverrideData,
   SetTimeConditionOverrideErrors,
   SetTimeConditionOverrideResponses,
@@ -783,6 +817,9 @@ import type {
   UpdateConnectionData,
   UpdateConnectionErrors,
   UpdateConnectionResponses,
+  UpdateDefaultPermissionsData,
+  UpdateDefaultPermissionsErrors,
+  UpdateDefaultPermissionsResponses,
   UpdateDeviceData,
   UpdateDeviceErrors,
   UpdateDeviceResponses,
@@ -879,6 +916,9 @@ import type {
   UploadAttachmentData,
   UploadAttachmentErrors,
   UploadAttachmentResponses,
+  UploadFileData,
+  UploadFileErrors,
+  UploadFileResponses,
   ValidateE911RegistrationData,
   ValidateE911RegistrationErrors,
   ValidateE911RegistrationResponses,
@@ -1105,6 +1145,38 @@ export const accountRegister = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListAttachments
+ */
+export const adminListAttachments = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListAttachmentsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListAttachmentsResponses,
+    AdminListAttachmentsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/attachments",
+    ...options,
+  });
+
+/**
+ * DeleteAttachment
+ */
+export const adminDeleteAttachment = <ThrowOnError extends boolean = false>(
+  options: Options<AdminDeleteAttachmentData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    AdminDeleteAttachmentResponses,
+    AdminDeleteAttachmentErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/attachments/{attachment_id}",
+    ...options,
   });
 
 /**
@@ -1343,6 +1415,46 @@ export const getDashboardTrends = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/dashboard/trends",
     ...options,
+  });
+
+/**
+ * Get default permission template
+ *
+ * Returns the default permission template that is applied when new teams are created. If no custom defaults have been saved, returns an empty list (the system falls back to ADMIN=full, MEMBER=view-only).
+ */
+export const getDefaultPermissions = <ThrowOnError extends boolean = false>(
+  options?: Options<GetDefaultPermissionsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetDefaultPermissionsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/default-permissions",
+    ...options,
+  });
+
+/**
+ * Update default permission template
+ *
+ * Replaces the entire default permission template. Deletes all existing entries and creates the new set atomically. This template is applied when new teams are created. Records an audit log entry.
+ */
+export const updateDefaultPermissions = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateDefaultPermissionsData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    UpdateDefaultPermissionsResponses,
+    UpdateDefaultPermissionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/default-permissions",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -3523,6 +3635,43 @@ export const accountProfileUpdate = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ClearAvatar
+ */
+export const accountAvatarClear = <ThrowOnError extends boolean = false>(
+  options?: Options<AccountAvatarClearData, ThrowOnError>,
+) =>
+  (options?.client ?? client).delete<
+    AccountAvatarClearResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/me/avatar",
+    ...options,
+  });
+
+/**
+ * SetAvatar
+ */
+export const accountAvatarSet = <ThrowOnError extends boolean = false>(
+  options: Options<AccountAvatarSetData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    AccountAvatarSetResponses,
+    AccountAvatarSetErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/me/avatar",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  });
+
+/**
  * Update password
  *
  * Change the authenticated user's password after verifying the current password. Records the password change in the audit log.
@@ -5386,6 +5535,27 @@ export const updateLocation = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * SetTeamLogo
+ */
+export const setTeamLogo = <ThrowOnError extends boolean = false>(
+  options: Options<SetTeamLogoData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    SetTeamLogoResponses,
+    SetTeamLogoErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/logo",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  });
+
+/**
  * Remove a team member
  *
  * Removes a user from a team by email address. The team owner cannot be removed; ownership must be transferred first. Emits a team_member_removed event, records an audit log entry, and sends a removal notification to the user.
@@ -5609,6 +5779,131 @@ export const setTimeConditionOverride = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListUploads
+ */
+export const listUploads = <ThrowOnError extends boolean = false>(
+  options?: Options<ListUploadsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListUploadsResponses,
+    ListUploadsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads",
+    ...options,
+  });
+
+/**
+ * UploadFile
+ */
+export const uploadFile = <ThrowOnError extends boolean = false>(
+  options: Options<UploadFileData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    UploadFileResponses,
+    UploadFileErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  });
+
+/**
+ * CompleteUpload
+ */
+export const completeUpload = <ThrowOnError extends boolean = false>(
+  options: Options<CompleteUploadData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CompleteUploadResponses,
+    CompleteUploadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/complete",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * PresignUpload
+ */
+export const presignUpload = <ThrowOnError extends boolean = false>(
+  options: Options<PresignUploadData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    PresignUploadResponses,
+    PresignUploadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/presign",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteUpload
+ */
+export const deleteUpload = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteUploadData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteUploadResponses,
+    DeleteUploadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/{attachment_id}",
+    ...options,
+  });
+
+/**
+ * GetUpload
+ */
+export const getUpload = <ThrowOnError extends boolean = false>(
+  options: Options<GetUploadData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetUploadResponses,
+    GetUploadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/{attachment_id}",
+    ...options,
+  });
+
+/**
+ * DownloadUpload
+ */
+export const downloadUpload = <ThrowOnError extends boolean = false>(
+  options: Options<DownloadUploadData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    DownloadUploadResponses,
+    DownloadUploadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/{attachment_id}/content",
+    ...options,
   });
 
 /**

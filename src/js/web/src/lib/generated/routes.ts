@@ -28,7 +28,9 @@ export type RouteName =
   | 'cancel_task'
   | 'cancel_task_api_tasks_task_id:uuid_cancel'
   | 'check_schedule'
+  | 'clear_avatar'
   | 'close_ticket'
+  | 'complete_upload'
   | 'confirm_setup'
   | 'create_call_queue'
   | 'create_call_record'
@@ -63,6 +65,7 @@ export type RouteName =
   | 'create_voicemail_box'
   | 'create_webhook'
   | 'delete_attachment'
+  | 'delete_attachment_api_support_attachments_attachment_id:uuid'
   | 'delete_call_queue'
   | 'delete_connection'
   | 'delete_device'
@@ -97,6 +100,7 @@ export type RouteName =
   | 'delete_template'
   | 'delete_ticket'
   | 'delete_time_condition'
+  | 'delete_upload'
   | 'delete_user'
   | 'delete_user_api_users_user_id:uuid'
   | 'delete_voicemail_box'
@@ -104,6 +108,7 @@ export type RouteName =
   | 'delete_voicemail_message_api_voicemail_messages_message_id:uuid'
   | 'delete_webhook'
   | 'disable_mfa'
+  | 'download_upload'
   | 'events:stream'
   | 'execute_import'
   | 'export_call_records'
@@ -115,6 +120,7 @@ export type RouteName =
   | 'get_call_queue'
   | 'get_call_record'
   | 'get_connection'
+  | 'get_default_permissions'
   | 'get_device'
   | 'get_device_data'
   | 'get_device_screenshot'
@@ -161,6 +167,7 @@ export type RouteName =
   | 'get_trends'
   | 'get_unread_count'
   | 'get_unread_count_api_voicemail_boxes_box_id:uuid_unread'
+  | 'get_upload'
   | 'get_user'
   | 'get_user_api_users_user_id:uuid'
   | 'get_user_logs'
@@ -177,6 +184,7 @@ export type RouteName =
   | 'initiate_setup'
   | 'list_accounts'
   | 'list_active_tasks'
+  | 'list_attachments'
   | 'list_box_messages'
   | 'list_call_queues'
   | 'list_call_records'
@@ -226,6 +234,7 @@ export type RouteName =
   | 'list_time_conditions'
   | 'list_unregistered'
   | 'list_unregistered_e911'
+  | 'list_uploads'
   | 'list_users'
   | 'list_users_api_users'
   | 'list_voicemail_boxes'
@@ -244,6 +253,7 @@ export type RouteName =
   | 'openapi.json'
   | 'paste_image'
   | 'pause_member'
+  | 'presign_upload'
   | 'preview_device_import'
   | 'preview_extension_import'
   | 'preview_import'
@@ -265,9 +275,11 @@ export type RouteName =
   | 'saq'
   | 'send_device_action'
   | 'send_fax'
+  | 'set_avatar'
   | 'set_device_lines'
   | 'set_forwarding_rules'
   | 'set_override'
+  | 'set_team_logo'
   | 'signup'
   | 'start_link'
   | 'submit_feedback'
@@ -283,6 +295,7 @@ export type RouteName =
   | 'unlink'
   | 'update_call_queue'
   | 'update_connection'
+  | 'update_default_permissions'
   | 'update_device'
   | 'update_dnd_settings'
   | 'update_endpoint'
@@ -325,6 +338,7 @@ export type RouteName =
   | 'update_webhook'
   | 'upgrade_scopes'
   | 'upload_attachment'
+  | 'upload_file'
   | 'validate_registration'
   | 'validate_reset_token'
   | 'verify_challenge'
@@ -364,9 +378,11 @@ export interface RoutePathParams {
   'check_schedule': {
     schedule_id: UUID;
   };
+  'clear_avatar': Record<string, never>;
   'close_ticket': {
     ticket_id: UUID;
   };
+  'complete_upload': Record<string, never>;
   'confirm_setup': Record<string, never>;
   'create_call_queue': Record<string, never>;
   'create_call_record': Record<string, never>;
@@ -419,6 +435,9 @@ export interface RoutePathParams {
   'create_voicemail_box': Record<string, never>;
   'create_webhook': Record<string, never>;
   'delete_attachment': {
+    attachment_id: UUID;
+  };
+  'delete_attachment_api_support_attachments_attachment_id:uuid': {
     attachment_id: UUID;
   };
   'delete_call_queue': {
@@ -530,6 +549,9 @@ export interface RoutePathParams {
   'delete_time_condition': {
     time_condition_id: UUID;
   };
+  'delete_upload': {
+    attachment_id: UUID;
+  };
   'delete_user': {
     user_id: UUID;
   };
@@ -550,6 +572,9 @@ export interface RoutePathParams {
     webhook_id: UUID;
   };
   'disable_mfa': Record<string, never>;
+  'download_upload': {
+    attachment_id: UUID;
+  };
   'events:stream': Record<string, never>;
   'execute_import': Record<string, never>;
   'export_call_records': Record<string, never>;
@@ -569,6 +594,7 @@ export interface RoutePathParams {
   'get_connection': {
     connection_id: UUID;
   };
+  'get_default_permissions': Record<string, never>;
   'get_device': {
     device_id: UUID;
   };
@@ -675,6 +701,9 @@ export interface RoutePathParams {
   'get_unread_count_api_voicemail_boxes_box_id:uuid_unread': {
     box_id: UUID;
   };
+  'get_upload': {
+    attachment_id: UUID;
+  };
   'get_user': {
     user_id: UUID;
   };
@@ -712,6 +741,7 @@ export interface RoutePathParams {
   'initiate_setup': Record<string, never>;
   'list_accounts': Record<string, never>;
   'list_active_tasks': Record<string, never>;
+  'list_attachments': Record<string, never>;
   'list_box_messages': {
     box_id: UUID;
   };
@@ -789,6 +819,7 @@ export interface RoutePathParams {
   'list_time_conditions': Record<string, never>;
   'list_unregistered': Record<string, never>;
   'list_unregistered_e911': Record<string, never>;
+  'list_uploads': Record<string, never>;
   'list_users': Record<string, never>;
   'list_users_api_users': Record<string, never>;
   'list_voicemail_boxes': Record<string, never>;
@@ -816,6 +847,7 @@ export interface RoutePathParams {
     call_queue_id: UUID;
     member_id: UUID;
   };
+  'presign_upload': Record<string, never>;
   'preview_device_import': Record<string, never>;
   'preview_extension_import': Record<string, never>;
   'preview_import': Record<string, never>;
@@ -859,6 +891,7 @@ export interface RoutePathParams {
     device_id: UUID;
   };
   'send_fax': Record<string, never>;
+  'set_avatar': Record<string, never>;
   'set_device_lines': {
     device_id: UUID;
   };
@@ -867,6 +900,9 @@ export interface RoutePathParams {
   };
   'set_override': {
     time_condition_id: UUID;
+  };
+  'set_team_logo': {
+    team_id: UUID;
   };
   'signup': Record<string, never>;
   'start_link': {
@@ -903,6 +939,7 @@ export interface RoutePathParams {
   'update_connection': {
     connection_id: UUID;
   };
+  'update_default_permissions': Record<string, never>;
   'update_device': {
     device_id: UUID;
   };
@@ -1029,6 +1066,7 @@ export interface RoutePathParams {
   'upload_attachment': {
     ticket_id: UUID;
   };
+  'upload_file': Record<string, never>;
   'validate_registration': {
     registration_id: UUID;
   };
@@ -1082,7 +1120,9 @@ export interface RouteQueryParams {
   'check_schedule': {
     time?: DateTime;
   };
+  'clear_avatar': Record<string, never>;
   'close_ticket': Record<string, never>;
+  'complete_upload': Record<string, never>;
   'confirm_setup': Record<string, never>;
   'create_call_queue': Record<string, never>;
   'create_call_record': Record<string, never>;
@@ -1117,6 +1157,7 @@ export interface RouteQueryParams {
   'create_voicemail_box': Record<string, never>;
   'create_webhook': Record<string, never>;
   'delete_attachment': Record<string, never>;
+  'delete_attachment_api_support_attachments_attachment_id:uuid': Record<string, never>;
   'delete_call_queue': Record<string, never>;
   'delete_connection': Record<string, never>;
   'delete_device': Record<string, never>;
@@ -1151,6 +1192,7 @@ export interface RouteQueryParams {
   'delete_template': Record<string, never>;
   'delete_ticket': Record<string, never>;
   'delete_time_condition': Record<string, never>;
+  'delete_upload': Record<string, never>;
   'delete_user': Record<string, never>;
   'delete_user_api_users_user_id:uuid': Record<string, never>;
   'delete_voicemail_box': Record<string, never>;
@@ -1158,6 +1200,7 @@ export interface RouteQueryParams {
   'delete_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
   'delete_webhook': Record<string, never>;
   'disable_mfa': Record<string, never>;
+  'download_upload': Record<string, never>;
   'events:stream': Record<string, never>;
   'execute_import': Record<string, never>;
   'export_call_records': {
@@ -1198,6 +1241,7 @@ export interface RouteQueryParams {
   'get_call_queue': Record<string, never>;
   'get_call_record': Record<string, never>;
   'get_connection': Record<string, never>;
+  'get_default_permissions': Record<string, never>;
   'get_device': Record<string, never>;
   'get_device_data': {
     refresh?: boolean;
@@ -1277,6 +1321,7 @@ export interface RouteQueryParams {
   'get_trends': Record<string, never>;
   'get_unread_count': Record<string, never>;
   'get_unread_count_api_voicemail_boxes_box_id:uuid_unread': Record<string, never>;
+  'get_upload': Record<string, never>;
   'get_user': Record<string, never>;
   'get_user_api_users_user_id:uuid': Record<string, never>;
   'get_user_logs': {
@@ -1323,6 +1368,20 @@ export interface RouteQueryParams {
     sortOrder?: "asc" | "desc";
   };
   'list_active_tasks': Record<string, never>;
+  'list_attachments': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    purposeIn?: string[];
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    teamIdIn?: string[];
+    uploadedByIdIn?: string[];
+  };
   'list_box_messages': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1831,6 +1890,15 @@ export interface RouteQueryParams {
   'list_unregistered_e911': {
     teamId: UUID;
   };
+  'list_uploads': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+  };
   'list_users': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1937,6 +2005,7 @@ export interface RouteQueryParams {
   'openapi.json': Record<string, never>;
   'paste_image': Record<string, never>;
   'pause_member': Record<string, never>;
+  'presign_upload': Record<string, never>;
   'preview_device_import': Record<string, never>;
   'preview_extension_import': Record<string, never>;
   'preview_import': Record<string, never>;
@@ -1962,9 +2031,11 @@ export interface RouteQueryParams {
     key: string;
   };
   'send_fax': Record<string, never>;
+  'set_avatar': Record<string, never>;
   'set_device_lines': Record<string, never>;
   'set_forwarding_rules': Record<string, never>;
   'set_override': Record<string, never>;
+  'set_team_logo': Record<string, never>;
   'signup': Record<string, never>;
   'start_link': {
     redirect_url?: string;
@@ -1985,6 +2056,7 @@ export interface RouteQueryParams {
   'unlink': Record<string, never>;
   'update_call_queue': Record<string, never>;
   'update_connection': Record<string, never>;
+  'update_default_permissions': Record<string, never>;
   'update_device': Record<string, never>;
   'update_dnd_settings': Record<string, never>;
   'update_endpoint': Record<string, never>;
@@ -2029,6 +2101,9 @@ export interface RouteQueryParams {
     redirect_url?: string;
   };
   'upload_attachment': Record<string, never>;
+  'upload_file': {
+    purpose?: app_db_models__attachment_AttachmentPurpose;
+  };
   'validate_registration': Record<string, never>;
   'validate_reset_token': {
     token: string;
@@ -2107,11 +2182,25 @@ export const routeDefinitions = {
     pathParams: ['schedule_id'] as const,
     queryParams: ['time'] as const,
   },
+  'clear_avatar': {
+    path: '/api/me/avatar',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'close_ticket': {
     path: '/api/support/tickets/{ticket_id}/close',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'complete_upload': {
+    path: '/api/uploads/complete',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'confirm_setup': {
@@ -2346,6 +2435,13 @@ export const routeDefinitions = {
     queryParams: [] as const,
   },
   'delete_attachment': {
+    path: '/api/admin/attachments/{attachment_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['attachment_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_attachment_api_support_attachments_attachment_id:uuid': {
     path: '/api/support/attachments/{attachment_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
@@ -2590,6 +2686,13 @@ export const routeDefinitions = {
     pathParams: ['time_condition_id'] as const,
     queryParams: [] as const,
   },
+  'delete_upload': {
+    path: '/api/uploads/{attachment_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['attachment_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['DELETE'] as const,
@@ -2637,6 +2740,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'download_upload': {
+    path: '/api/uploads/{attachment_id}/content',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['attachment_id'] as const,
     queryParams: [] as const,
   },
   'events:stream': {
@@ -2714,6 +2824,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['connection_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_default_permissions': {
+    path: '/api/admin/default-permissions',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'get_device': {
@@ -3038,6 +3155,13 @@ export const routeDefinitions = {
     pathParams: ['box_id'] as const,
     queryParams: [] as const,
   },
+  'get_upload': {
+    path: '/api/uploads/{attachment_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['attachment_id'] as const,
+    queryParams: [] as const,
+  },
   'get_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['GET'] as const,
@@ -3149,6 +3273,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: [] as const,
+  },
+  'list_attachments': {
+    path: '/api/admin/attachments',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'purposeIn', 'searchIgnoreCase', 'searchString', 'sortOrder', 'teamIdIn', 'uploadedByIdIn'] as const,
   },
   'list_box_messages': {
     path: '/api/voicemail/boxes/{box_id}/messages',
@@ -3496,6 +3627,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['teamId'] as const,
   },
+  'list_uploads': {
+    path: '/api/uploads',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder'] as const,
+  },
   'list_users': {
     path: '/api/admin/users',
     methods: ['GET'] as const,
@@ -3620,6 +3758,13 @@ export const routeDefinitions = {
     methods: ['PUT'] as const,
     method: 'put',
     pathParams: ['call_queue_id', 'member_id'] as const,
+    queryParams: [] as const,
+  },
+  'presign_upload': {
+    path: '/api/uploads/presign',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'preview_device_import': {
@@ -3769,6 +3914,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'set_avatar': {
+    path: '/api/me/avatar',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'set_device_lines': {
     path: '/api/devices/{device_id}/lines',
     methods: ['PUT'] as const,
@@ -3788,6 +3940,13 @@ export const routeDefinitions = {
     methods: ['PUT'] as const,
     method: 'put',
     pathParams: ['time_condition_id'] as const,
+    queryParams: [] as const,
+  },
+  'set_team_logo': {
+    path: '/api/teams/{team_id}/logo',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['team_id'] as const,
     queryParams: [] as const,
   },
   'signup': {
@@ -3893,6 +4052,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['connection_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_default_permissions': {
+    path: '/api/admin/default-permissions',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'update_device': {
@@ -4188,6 +4354,13 @@ export const routeDefinitions = {
     method: 'post',
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
+  },
+  'upload_file': {
+    path: '/api/uploads',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: ['purpose'] as const,
   },
   'validate_registration': {
     path: '/api/e911/{registration_id}/validate',

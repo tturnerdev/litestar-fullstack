@@ -48,6 +48,22 @@ export type ActivityLogEntry = {
 };
 
 /**
+ * AdminAttachment
+ */
+export type AdminAttachment = {
+  checksumSha256?: string | null;
+  contentType: string;
+  createdAt: string;
+  id: string;
+  originalFilename: string;
+  purpose: string;
+  sizeBytes: number;
+  teamId?: string | null;
+  updatedAt: string;
+  uploadedById?: string | null;
+};
+
+/**
  * AdminDeviceStats
  */
 export type AdminDeviceStats = {
@@ -376,6 +392,35 @@ export type AdminVoiceStats = {
   totalExtensions: number;
   totalPhoneNumbers: number;
 };
+
+/**
+ * Attachment
+ */
+export type Attachment = {
+  checksumSha256?: string | null;
+  contentType: string;
+  createdAt: string;
+  downloadUrl?: string | null;
+  id: string;
+  originalFilename: string;
+  purpose: string;
+  sizeBytes: number;
+  teamId?: string | null;
+  updatedAt: string;
+  uploadedById?: string | null;
+};
+
+/**
+ * AttachmentPurpose
+ *
+ * What an uploaded file is used for.
+ */
+export type AttachmentPurpose =
+  | "attachment"
+  | "avatar"
+  | "team_logo"
+  | "import"
+  | "other";
 
 /**
  * AuditLogEntry
@@ -729,6 +774,17 @@ export type CallVolumePoint = {
 };
 
 /**
+ * CompleteUploadRequest
+ */
+export type CompleteUploadRequest = {
+  contentType?: string;
+  originalFilename: string;
+  path: string;
+  purpose?: string;
+  teamId?: string | null;
+};
+
+/**
  * ConnectionCreate
  */
 export type ConnectionCreate = {
@@ -844,6 +900,34 @@ export type DatabasePoolInfo = {
   maxOverflow?: number;
   overflow?: number;
   poolSize?: number;
+};
+
+/**
+ * DefaultPermissionEntry
+ */
+export type DefaultPermissionEntry = {
+  canEdit?: boolean;
+  canView?: boolean;
+  featureArea: FeatureArea;
+  role: TeamRoles;
+};
+
+/**
+ * DefaultPermissionTemplate
+ */
+export type DefaultPermissionTemplate = {
+  canEdit: boolean;
+  canView: boolean;
+  featureArea: FeatureArea;
+  id: string;
+  role: TeamRoles;
+};
+
+/**
+ * DefaultPermissionTemplateUpdate
+ */
+export type DefaultPermissionTemplateUpdate = {
+  permissions: Array<DefaultPermissionEntry>;
 };
 
 /**
@@ -1983,6 +2067,25 @@ export type PhoneNumberUpdate = {
 };
 
 /**
+ * PresignRequest
+ */
+export type PresignRequest = {
+  contentType?: string;
+  filename: string;
+  purpose?: string;
+  teamId?: string | null;
+};
+
+/**
+ * PresignResponse
+ */
+export type PresignResponse = {
+  expiresIn: number;
+  path: string;
+  uploadUrl: string;
+};
+
+/**
  * ProfileUpdate
  */
 export type ProfileUpdate = {
@@ -2357,6 +2460,7 @@ export type Team = {
   description?: string | null;
   id: string;
   isActive?: boolean;
+  logoUrl?: string | null;
   members?: Array<TeamMember>;
   name: string;
   slug: string;
@@ -3422,6 +3526,122 @@ export type AccountRegisterResponses = {
 export type AccountRegisterResponse =
   AccountRegisterResponses[keyof AccountRegisterResponses];
 
+export type AdminListAttachmentsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    uploadedByIdIn?: Array<string> | null;
+    purposeIn?: Array<string> | null;
+    teamIdIn?: Array<string> | null;
+  };
+  url: "/api/admin/attachments";
+};
+
+export type AdminListAttachmentsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListAttachmentsError =
+  AdminListAttachmentsErrors[keyof AdminListAttachmentsErrors];
+
+export type AdminListAttachmentsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<AdminAttachment>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListAttachmentsResponse =
+  AdminListAttachmentsResponses[keyof AdminListAttachmentsResponses];
+
+export type AdminDeleteAttachmentData = {
+  body?: never;
+  path: {
+    /**
+     * Attachment ID
+     */
+    attachment_id: string;
+  };
+  query?: never;
+  url: "/api/admin/attachments/{attachment_id}";
+};
+
+export type AdminDeleteAttachmentErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminDeleteAttachmentError =
+  AdminDeleteAttachmentErrors[keyof AdminDeleteAttachmentErrors];
+
+export type AdminDeleteAttachmentResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type AdminDeleteAttachmentResponse =
+  AdminDeleteAttachmentResponses[keyof AdminDeleteAttachmentResponses];
+
 export type AdminListAuditLogsData = {
   body?: never;
   path?: never;
@@ -3447,10 +3667,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3526,10 +3746,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3594,10 +3814,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3674,10 +3894,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3989,6 +4209,59 @@ export type GetDashboardTrendsResponses = {
 
 export type GetDashboardTrendsResponse =
   GetDashboardTrendsResponses[keyof GetDashboardTrendsResponses];
+
+export type GetDefaultPermissionsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/default-permissions";
+};
+
+export type GetDefaultPermissionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<DefaultPermissionTemplate>;
+};
+
+export type GetDefaultPermissionsResponse =
+  GetDefaultPermissionsResponses[keyof GetDefaultPermissionsResponses];
+
+export type UpdateDefaultPermissionsData = {
+  body: DefaultPermissionTemplateUpdate;
+  path?: never;
+  query?: never;
+  url: "/api/admin/default-permissions";
+};
+
+export type UpdateDefaultPermissionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateDefaultPermissionsError =
+  UpdateDefaultPermissionsErrors[keyof UpdateDefaultPermissionsErrors];
+
+export type UpdateDefaultPermissionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<DefaultPermissionTemplate>;
+};
+
+export type UpdateDefaultPermissionsResponse =
+  UpdateDefaultPermissionsResponses[keyof UpdateDefaultPermissionsResponses];
 
 export type AdminListDeviceTemplatesData = {
   body?: never;
@@ -9004,6 +9277,61 @@ export type AccountProfileUpdateResponses = {
 export type AccountProfileUpdateResponse =
   AccountProfileUpdateResponses[keyof AccountProfileUpdateResponses];
 
+export type AccountAvatarClearData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/me/avatar";
+};
+
+export type AccountAvatarClearResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: User;
+};
+
+export type AccountAvatarClearResponse =
+  AccountAvatarClearResponses[keyof AccountAvatarClearResponses];
+
+export type AccountAvatarSetData = {
+  body: {
+    file?: Blob | File;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/me/avatar";
+};
+
+export type AccountAvatarSetErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AccountAvatarSetError =
+  AccountAvatarSetErrors[keyof AccountAvatarSetErrors];
+
+export type AccountAvatarSetResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: User;
+};
+
+export type AccountAvatarSetResponse =
+  AccountAvatarSetResponses[keyof AccountAvatarSetResponses];
+
 export type AccountPasswordUpdateData = {
   body: PasswordUpdate;
   path?: never;
@@ -13224,6 +13552,50 @@ export type UpdateLocationResponses = {
 export type UpdateLocationResponse =
   UpdateLocationResponses[keyof UpdateLocationResponses];
 
+export type SetTeamLogoData = {
+  body: {
+    file?: Blob | File;
+  };
+  path: {
+    /**
+     * Team ID
+     *
+     * The team to set the logo for.
+     */
+    team_id: string;
+  };
+  query?: never;
+  url: "/api/teams/{team_id}/logo";
+};
+
+export type SetTeamLogoErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type SetTeamLogoError = SetTeamLogoErrors[keyof SetTeamLogoErrors];
+
+export type SetTeamLogoResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Team;
+};
+
+export type SetTeamLogoResponse =
+  SetTeamLogoResponses[keyof SetTeamLogoResponses];
+
 export type RemoveMemberFromTeamData = {
   body: TeamMemberModify;
   path: {
@@ -13726,6 +14098,307 @@ export type SetTimeConditionOverrideResponses = {
 
 export type SetTimeConditionOverrideResponse =
   SetTimeConditionOverrideResponses[keyof SetTimeConditionOverrideResponses];
+
+export type ListUploadsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/uploads";
+};
+
+export type ListUploadsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListUploadsError = ListUploadsErrors[keyof ListUploadsErrors];
+
+export type ListUploadsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<Attachment>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListUploadsResponse =
+  ListUploadsResponses[keyof ListUploadsResponses];
+
+export type UploadFileData = {
+  body: {
+    file?: Blob | File;
+  };
+  path?: never;
+  query?: {
+    /**
+     * What an uploaded file is used for.
+     */
+    purpose?: AttachmentPurpose;
+  };
+  url: "/api/uploads";
+};
+
+export type UploadFileErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UploadFileError = UploadFileErrors[keyof UploadFileErrors];
+
+export type UploadFileResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: Attachment;
+};
+
+export type UploadFileResponse = UploadFileResponses[keyof UploadFileResponses];
+
+export type CompleteUploadData = {
+  body: CompleteUploadRequest;
+  path?: never;
+  query?: never;
+  url: "/api/uploads/complete";
+};
+
+export type CompleteUploadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CompleteUploadError =
+  CompleteUploadErrors[keyof CompleteUploadErrors];
+
+export type CompleteUploadResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: Attachment;
+};
+
+export type CompleteUploadResponse =
+  CompleteUploadResponses[keyof CompleteUploadResponses];
+
+export type PresignUploadData = {
+  body: PresignRequest;
+  path?: never;
+  query?: never;
+  url: "/api/uploads/presign";
+};
+
+export type PresignUploadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type PresignUploadError = PresignUploadErrors[keyof PresignUploadErrors];
+
+export type PresignUploadResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: PresignResponse;
+};
+
+export type PresignUploadResponse =
+  PresignUploadResponses[keyof PresignUploadResponses];
+
+export type DeleteUploadData = {
+  body?: never;
+  path: {
+    /**
+     * Attachment ID
+     *
+     * The attachment to delete.
+     */
+    attachment_id: string;
+  };
+  query?: never;
+  url: "/api/uploads/{attachment_id}";
+};
+
+export type DeleteUploadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteUploadError = DeleteUploadErrors[keyof DeleteUploadErrors];
+
+export type DeleteUploadResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteUploadResponse =
+  DeleteUploadResponses[keyof DeleteUploadResponses];
+
+export type GetUploadData = {
+  body?: never;
+  path: {
+    /**
+     * Attachment ID
+     *
+     * The attachment to retrieve.
+     */
+    attachment_id: string;
+  };
+  query?: never;
+  url: "/api/uploads/{attachment_id}";
+};
+
+export type GetUploadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetUploadError = GetUploadErrors[keyof GetUploadErrors];
+
+export type GetUploadResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Attachment;
+};
+
+export type GetUploadResponse = GetUploadResponses[keyof GetUploadResponses];
+
+export type DownloadUploadData = {
+  body?: never;
+  path: {
+    /**
+     * Attachment ID
+     *
+     * The attachment to download.
+     */
+    attachment_id: string;
+  };
+  query?: never;
+  url: "/api/uploads/{attachment_id}/content";
+};
+
+export type DownloadUploadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DownloadUploadError =
+  DownloadUploadErrors[keyof DownloadUploadErrors];
+
+export type DownloadUploadResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Blob | File;
+};
+
+export type DownloadUploadResponse =
+  DownloadUploadResponses[keyof DownloadUploadResponses];
 
 export type ListUsersData = {
   body?: never;

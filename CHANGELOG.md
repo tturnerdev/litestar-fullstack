@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.556.0 (2026-05-15)
+
+### Added
+- **Editable default permissions template** — Super Admins can now configure the default permission matrix applied to newly created teams, replacing the static Permissions Reference table. Stored in a new `default_permission_template` database table with unique constraint on role + feature_area.
+
+### Fixed
+- **Session timeout premature logout** — Access token expiry no longer immediately revokes the refresh token. The session hook now attempts a silent token refresh before logging out, allowing long-lived idle sessions to persist across the 7-day refresh window.
+- **Team invitation notification link** — Clicking a team invitation notification now navigates to the accept/decline page instead of the team view (which returned 403 since the user hadn't joined yet).
+- **Unused toast imports** — Cleaned up leftover unused `toast` imports from the duplicate toast notification fix in v0.555.0.
+
 ## v0.555.0 (2026-05-14)
 
 ### Added

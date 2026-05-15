@@ -21,7 +21,6 @@ import {
   X,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"

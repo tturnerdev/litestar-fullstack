@@ -87,6 +87,7 @@ import { Route as AppAdminDevicesRouteImport } from './routes/_app/admin/devices
 import { Route as AppAdminDeviceTemplatesRouteImport } from './routes/_app/admin/device-templates'
 import { Route as AppAdminBulkImportRouteImport } from './routes/_app/admin/bulk-import'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
+import { Route as AppAdminAttachmentsRouteImport } from './routes/_app/admin/attachments'
 import { Route as AppVoicePhoneNumbersIndexRouteImport } from './routes/_app/voice/phone-numbers/index'
 import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
 import { Route as AppTeamsTeamIdIndexRouteImport } from './routes/_app/teams/$teamId/index'
@@ -99,7 +100,7 @@ import { Route as AppFaxNumbersIndexRouteImport } from './routes/_app/fax/number
 import { Route as AppFaxMessagesIndexRouteImport } from './routes/_app/fax/messages/index'
 import { Route as AppDevicesDeviceIdIndexRouteImport } from './routes/_app/devices/$deviceId/index'
 import { Route as AppConnectionsConnectionIdIndexRouteImport } from './routes/_app/connections/$connectionId/index'
-import { Route as AppAdminAttachmentsRouteImport } from './routes/_app/admin/attachments'import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
+import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
 import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/auth/github/callback'
@@ -515,6 +516,11 @@ const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminAttachmentsRoute = AppAdminAttachmentsRouteImport.update({
+  id: '/attachments',
+  path: '/attachments',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppVoicePhoneNumbersIndexRoute =
   AppVoicePhoneNumbersIndexRouteImport.update({
     id: '/',
@@ -579,11 +585,7 @@ const AppConnectionsConnectionIdIndexRoute =
     path: '/',
     getParentRoute: () => AppConnectionsConnectionIdRoute,
   } as any)
-const AppAdminAttachmentsRoute = AppAdminAttachmentsRouteImport.update({
-  id: '/attachments',
-  path: '/attachments',
-  getParentRoute: () => AppAdminRoute,
-} as any)const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
+const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
   getParentRoute: () => AppAdminRoute,
@@ -757,6 +759,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
+  '/admin/attachments': typeof AppAdminAttachmentsRoute
   '/admin/audit': typeof AppAdminAuditRoute
   '/admin/bulk-import': typeof AppAdminBulkImportRoute
   '/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
@@ -782,8 +785,7 @@ export interface FileRoutesByFullPath {
   '/schedules/new': typeof AppSchedulesNewRoute
   '/support/new': typeof AppSupportNewRoute
   '/tags/new': typeof AppTagsNewRoute
-  '/admin/attachments': typeof AppAdminAttachmentsRoute
-  '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren  '/teams/new': typeof AppTeamsNewRoute
+  '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
@@ -862,6 +864,7 @@ export interface FileRoutesByTo {
   '/signup': typeof PublicSignupRoute
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
+  '/admin/attachments': typeof AppAdminAttachmentsRoute
   '/admin/audit': typeof AppAdminAuditRoute
   '/admin/bulk-import': typeof AppAdminBulkImportRoute
   '/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
@@ -884,8 +887,7 @@ export interface FileRoutesByTo {
   '/schedules/new': typeof AppSchedulesNewRoute
   '/support/new': typeof AppSupportNewRoute
   '/tags/new': typeof AppTagsNewRoute
-  '/admin/attachments': typeof AppAdminAttachmentsRoute
-  '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren  '/teams/new': typeof AppTeamsNewRoute
+  '/teams/new': typeof AppTeamsNewRoute
   '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
   '/webhooks/new': typeof AppWebhooksNewRoute
@@ -978,6 +980,7 @@ export interface FileRoutesById {
   '/_public/signup': typeof PublicSignupRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/verify-email': typeof PublicVerifyEmailRoute
+  '/_app/admin/attachments': typeof AppAdminAttachmentsRoute
   '/_app/admin/audit': typeof AppAdminAuditRoute
   '/_app/admin/bulk-import': typeof AppAdminBulkImportRoute
   '/_app/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
@@ -1003,8 +1006,7 @@ export interface FileRoutesById {
   '/_app/schedules/new': typeof AppSchedulesNewRoute
   '/_app/support/new': typeof AppSupportNewRoute
   '/_app/tags/new': typeof AppTagsNewRoute
-  '/_app/admin/attachments': typeof AppAdminAttachmentsRoute
-  '/_app/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren  '/_app/teams/new': typeof AppTeamsNewRoute
+  '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/_app/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/_app/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
@@ -1097,6 +1099,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/verify-email'
+    | '/admin/attachments'
     | '/admin/audit'
     | '/admin/bulk-import'
     | '/admin/device-templates'
@@ -1122,8 +1125,7 @@ export interface FileRouteTypes {
     | '/schedules/new'
     | '/support/new'
     | '/tags/new'
-    | '/admin/attachments'
-    | '/teams/$teamId'    | '/teams/new'
+    | '/teams/new'
     | '/voice/phone-numbers'
     | '/voicemail/$boxId'
     | '/webhooks/$webhookId'
@@ -1202,6 +1204,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/verify-email'
+    | '/admin/attachments'
     | '/admin/audit'
     | '/admin/bulk-import'
     | '/admin/device-templates'
@@ -1224,8 +1227,7 @@ export interface FileRouteTypes {
     | '/schedules/new'
     | '/support/new'
     | '/tags/new'
-    | '/admin/attachments'
-    | '/teams/$teamId'    | '/teams/new'
+    | '/teams/new'
     | '/voicemail/$boxId'
     | '/webhooks/$webhookId'
     | '/webhooks/new'
@@ -1317,6 +1319,7 @@ export interface FileRouteTypes {
     | '/_public/signup'
     | '/_public/terms'
     | '/_public/verify-email'
+    | '/_app/admin/attachments'
     | '/_app/admin/audit'
     | '/_app/admin/bulk-import'
     | '/_app/admin/device-templates'
@@ -1342,8 +1345,7 @@ export interface FileRouteTypes {
     | '/_app/schedules/new'
     | '/_app/support/new'
     | '/_app/tags/new'
-    | '/_app/admin/attachments'
-    | '/_app/teams/$teamId'    | '/_app/teams/new'
+    | '/_app/teams/new'
     | '/_app/voice/phone-numbers'
     | '/_app/voicemail/$boxId'
     | '/_app/webhooks/$webhookId'
@@ -1963,6 +1965,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAuditRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/attachments': {
+      id: '/_app/admin/attachments'
+      path: '/attachments'
+      fullPath: '/admin/attachments'
+      preLoaderRoute: typeof AppAdminAttachmentsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/voice/phone-numbers/': {
       id: '/_app/voice/phone-numbers/'
       path: '/'
@@ -2046,12 +2055,7 @@ declare module '@tanstack/react-router' {
       fullPath: '/connections/$connectionId/'
       preLoaderRoute: typeof AppConnectionsConnectionIdIndexRouteImport
       parentRoute: typeof AppConnectionsConnectionIdRoute
-    '/_app/admin/attachments': {
-      id: '/_app/admin/attachments'
-      path: '/attachments'
-      fullPath: '/admin/attachments'
-      preLoaderRoute: typeof AppAdminAttachmentsRouteImport
-      parentRoute: typeof AppAdminRoute    }
+    }
     '/_app/admin/users/': {
       id: '/_app/admin/users/'
       path: '/users'
@@ -2238,6 +2242,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAdminRouteChildren {
+  AppAdminAttachmentsRoute: typeof AppAdminAttachmentsRoute
   AppAdminAuditRoute: typeof AppAdminAuditRoute
   AppAdminBulkImportRoute: typeof AppAdminBulkImportRoute
   AppAdminDeviceTemplatesRoute: typeof AppAdminDeviceTemplatesRoute
@@ -2250,7 +2255,7 @@ interface AppAdminRouteChildren {
   AppAdminSystemRoute: typeof AppAdminSystemRoute
   AppAdminTasksRoute: typeof AppAdminTasksRoute
   AppAdminVoiceRoute: typeof AppAdminVoiceRoute
-  AppAdminAttachmentsRoute: typeof AppAdminAttachmentsRoute  AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppAdminTeamsTeamIdRoute: typeof AppAdminTeamsTeamIdRoute
   AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
   AppAdminTeamsIndexRoute: typeof AppAdminTeamsIndexRoute
@@ -2258,6 +2263,7 @@ interface AppAdminRouteChildren {
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminAttachmentsRoute: AppAdminAttachmentsRoute,
   AppAdminAuditRoute: AppAdminAuditRoute,
   AppAdminBulkImportRoute: AppAdminBulkImportRoute,
   AppAdminDeviceTemplatesRoute: AppAdminDeviceTemplatesRoute,
@@ -2270,7 +2276,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminSystemRoute: AppAdminSystemRoute,
   AppAdminTasksRoute: AppAdminTasksRoute,
   AppAdminVoiceRoute: AppAdminVoiceRoute,
-  AppAdminAttachmentsRoute: AppAdminAttachmentsRoute,  AppAdminIndexRoute: AppAdminIndexRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
   AppAdminTeamsTeamIdRoute: AppAdminTeamsTeamIdRoute,
   AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
   AppAdminTeamsIndexRoute: AppAdminTeamsIndexRoute,

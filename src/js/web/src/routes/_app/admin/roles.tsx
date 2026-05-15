@@ -42,9 +42,9 @@ import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useAdminTeams, useTeamPermissions, useUpdateTeamPermissions } from "@/lib/api/hooks/admin"
+import { useAdminTeams, useDefaultPermissions, useTeamPermissions, useUpdateDefaultPermissions, useUpdateTeamPermissions } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
-import type { FeatureArea, TeamRolePermission, TeamRolePermissionEntry, TeamRoles } from "@/lib/generated/api"
+import type { DefaultPermissionEntry, DefaultPermissionTemplate, FeatureArea, TeamRolePermission, TeamRolePermissionEntry, TeamRoles } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/roles")({
   component: AdminRolesPage,
@@ -136,21 +136,6 @@ const csvHeaders: CsvHeader<PermissionExportRow>[] = [
   { label: "Can Edit", accessor: (r) => r.canEdit },
 ]
 
-const permissionMatrix = [
-  { permission: "View Dashboard", superuser: true, admin: true, member: true },
-  { permission: "Manage Team Members", superuser: true, admin: true, member: false },
-  { permission: "Create/Edit Devices", superuser: true, admin: true, member: false },
-  { permission: "View Analytics", superuser: true, admin: true, member: true },
-  { permission: "Manage Connections", superuser: true, admin: false, member: false },
-  { permission: "Admin Settings", superuser: true, admin: false, member: false },
-  { permission: "Bulk Import/Export", superuser: true, admin: true, member: false },
-  { permission: "Manage Webhooks", superuser: true, admin: true, member: false },
-  { permission: "View Audit Logs", superuser: true, admin: true, member: false },
-  { permission: "System Configuration", superuser: true, admin: false, member: false },
-  { permission: "User Management", superuser: true, admin: false, member: false },
-  { permission: "Gateway Configuration", superuser: true, admin: false, member: false },
-] as const
-
 // -- Helpers -----------------------------------------------------------------
 
 function buildDefaultPermissions(): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
@@ -183,6 +168,37 @@ function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Reco
 
 function matrixToEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): TeamRolePermissionEntry[] {
   const entries: TeamRolePermissionEntry[] = []
+  for (const role of ROLES) {
+    for (const key of ALL_FEATURE_KEYS) {
+      const perm = matrix[role]?.[key]
+      if (perm) {
+        entries.push({
+          role: role as TeamRoles,
+          featureArea: key,
+          canView: perm.canView,
+          canEdit: perm.canEdit,
+        })
+      }
+    }
+  }
+  return entries
+}
+
+function mergeDefaultTemplatePermissions(rows: DefaultPermissionTemplate[]): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
+  const matrix = buildDefaultPermissions()
+  for (const row of rows) {
+    if (matrix[row.role] && matrix[row.role][row.featureArea]) {
+      matrix[row.role][row.featureArea] = {
+        canView: row.canView,
+        canEdit: row.canEdit,
+      }
+    }
+  }
+  return matrix
+}
+
+function matrixToDefaultEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): DefaultPermissionEntry[] {
+  const entries: DefaultPermissionEntry[] = []
   for (const role of ROLES) {
     for (const key of ALL_FEATURE_KEYS) {
       const perm = matrix[role]?.[key]
@@ -329,54 +345,10 @@ function AdminRolesPage() {
         )}
       </PageSection>
 
-      {/* Permissions reference matrix */}
+      {/* Default permissions template */}
       <PageSection delay={0.2}>
-        <SectionErrorBoundary name="Permissions Reference">
-          <Card>
-            <CardHeader>
-              <CardTitle>Permissions Reference</CardTitle>
-              <CardDescription>
-                A quick-reference guide showing the default capabilities for each system role. Superusers have full access and bypass all permission checks. Team-level overrides
-                configured above take precedence for Admin and Member roles.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto rounded-md border">
-                <Table aria-label="Permissions reference matrix">
-                  <TableHeader className="sticky top-0 z-10 bg-background">
-                    <TableRow>
-                      <TableHead className="min-w-[200px]">Capability</TableHead>
-                      <TableHead className="w-[120px] text-center">
-                        <span className="font-semibold">Superuser</span>
-                      </TableHead>
-                      <TableHead className="w-[120px] text-center">
-                        <span className="font-semibold">Admin</span>
-                      </TableHead>
-                      <TableHead className="w-[120px] text-center">
-                        <span className="font-semibold">Member</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {permissionMatrix.map((row, idx) => (
-                      <TableRow key={row.permission} className={idx % 2 === 0 ? "bg-muted/30" : ""}>
-                        <TableCell className="text-sm font-medium">{row.permission}</TableCell>
-                        <TableCell className="text-center">
-                          <PermissionIndicator allowed={row.superuser} />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <PermissionIndicator allowed={row.admin} />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <PermissionIndicator allowed={row.member} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+        <SectionErrorBoundary name="Default Permissions Template">
+          <DefaultPermissionsCard />
         </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
@@ -462,7 +434,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
         setIsEditing(false)
       },
     })
-  }, [editMatrix, updatePermissions, teamName])
+  }, [editMatrix, updatePermissions])
 
   const handleCancel = useCallback(() => {
     setEditMatrix(serverMatrix)
@@ -713,6 +685,378 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
                                       checked={perm.canEdit}
                                       onChange={() => togglePermission(role, child.key, "canEdit")}
                                       disabled={updatePermissions.isPending}
+                                      aria-label={`${role} can edit ${child.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={perm.canEdit} />
+                                )}
+                              </TableCell>
+                            </Fragment>
+                          )
+                        })}
+                      </TableRow>
+                    ))}
+                  </Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// -- Default permissions template card ----------------------------------------
+
+function DefaultPermissionsCard() {
+  const [isEditing, setIsEditing] = useState(false)
+
+  const { data: serverDefaults, isLoading, isRefetching } = useDefaultPermissions()
+
+  const hasCustomDefaults = (serverDefaults?.length ?? 0) > 0
+
+  const serverMatrix = useMemo(() => {
+    if (!serverDefaults || serverDefaults.length === 0) return buildDefaultPermissions()
+    return mergeDefaultTemplatePermissions(serverDefaults)
+  }, [serverDefaults])
+
+  const [editMatrix, setEditMatrix] = useState(serverMatrix)
+  const [initialized, setInitialized] = useState(false)
+
+  // Seed edit state from server when loaded
+  useEffect(() => {
+    if (serverDefaults && !initialized) {
+      setEditMatrix(hasCustomDefaults ? mergeDefaultTemplatePermissions(serverDefaults) : buildDefaultPermissions())
+      setInitialized(true)
+    }
+  }, [serverDefaults, initialized, hasCustomDefaults])
+
+  // Re-sync when server data changes and not editing
+  useEffect(() => {
+    if (!isEditing && serverDefaults) {
+      setEditMatrix(hasCustomDefaults ? mergeDefaultTemplatePermissions(serverDefaults) : buildDefaultPermissions())
+    }
+  }, [serverDefaults, isEditing, hasCustomDefaults])
+
+  const currentMatrix = isEditing ? editMatrix : serverMatrix
+
+  const togglePermission = useCallback((role: string, featureArea: string, field: "canView" | "canEdit") => {
+    setEditMatrix((prev) => {
+      const next = { ...prev }
+      next[role] = { ...next[role] }
+      next[role][featureArea] = { ...next[role][featureArea] }
+      const current = next[role][featureArea][field]
+      next[role][featureArea][field] = !current
+      if (field === "canView" && current) {
+        next[role][featureArea].canEdit = false
+      }
+      if (field === "canEdit" && !current) {
+        next[role][featureArea].canView = true
+      }
+      return next
+    })
+  }, [])
+
+  const toggleParent = useCallback((role: string, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
+    setEditMatrix((prev) => {
+      const next = { ...prev }
+      next[role] = { ...next[role] }
+      const allSet = children.every((c) => next[role][c.key]?.[field])
+      const newValue = !allSet
+      for (const child of children) {
+        next[role][child.key] = { ...next[role][child.key] }
+        next[role][child.key][field] = newValue
+        if (field === "canView" && !newValue) {
+          next[role][child.key].canEdit = false
+        }
+        if (field === "canEdit" && newValue) {
+          next[role][child.key].canView = true
+        }
+      }
+      return next
+    })
+  }, [])
+
+  const updateDefaults = useUpdateDefaultPermissions()
+
+  const handleSave = useCallback(() => {
+    const entries = matrixToDefaultEntries(editMatrix)
+    updateDefaults.mutate(entries, {
+      onSuccess: () => {
+        setIsEditing(false)
+      },
+    })
+  }, [editMatrix, updateDefaults])
+
+  const handleCancel = useCallback(() => {
+    setEditMatrix(serverMatrix)
+    setIsEditing(false)
+  }, [serverMatrix])
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Default Permissions Template</CardTitle>
+              <CardDescription>
+                {hasCustomDefaults
+                  ? "Custom default permissions are applied when new teams are created."
+                  : "Using system defaults (Admin=full access, Member=view only). Edit to customize."}
+              </CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateDefaults.isPending}>
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleSave} disabled={updateDefaults.isPending}>
+                  {updateDefaults.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  Save
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="overflow-x-auto rounded-md border">
+            <Table aria-label="Loading default permissions">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <Skeleton className="h-4 w-24" />
+                  </TableHead>
+                  <TableHead className="w-[100px] text-center">
+                    <Skeleton className="mx-auto h-4 w-14" />
+                  </TableHead>
+                  {ROLES.map((role) => (
+                    <Fragment key={`skel-hdr-${role}`}>
+                      <TableHead className="w-[100px] text-center">
+                        <Skeleton className="mx-auto h-4 w-14" />
+                      </TableHead>
+                      <TableHead className="w-[100px] text-center">
+                        <Skeleton className="mx-auto h-4 w-14" />
+                      </TableHead>
+                    </Fragment>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                  <TableRow key={`skel-row-default-${i}`}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Skeleton className="mx-auto h-4 w-4 rounded" />
+                    </TableCell>
+                    {ROLES.map((role) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders with stable role key
+                      <Fragment key={`skel-cell-default-${role}-${i}`}>
+                        <TableCell className="text-center">
+                          <Skeleton className="mx-auto h-4 w-4 rounded" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="mx-auto h-4 w-4 rounded" />
+                        </TableCell>
+                      </Fragment>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-md border">
+            <Table aria-label="Default permissions template" aria-busy={isLoading || isRefetching}>
+              <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableRow>
+                  <TableHead>Feature Area</TableHead>
+                  <TableHead className="w-[100px] text-center">
+                    <div className="text-xs leading-tight">
+                      <div className="font-semibold">SUPERUSER</div>
+                      <div className="font-normal text-muted-foreground">Full Access</div>
+                    </div>
+                  </TableHead>
+                  {ROLES.map((role) => (
+                    <Fragment key={role}>
+                      <TableHead className="w-[100px] text-center">
+                        <div className="text-xs leading-tight">
+                          <div className="font-semibold">{role}</div>
+                          <div className="flex items-center justify-center gap-1 font-normal text-muted-foreground">
+                            View
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 shrink-0 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>Allows reading and listing resources in this category</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[100px] text-center">
+                        <div className="text-xs leading-tight">
+                          <div className="font-semibold">{role}</div>
+                          <div className="flex items-center justify-center gap-1 font-normal text-muted-foreground">
+                            Edit
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 shrink-0 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>Allows creating, updating, and deleting. Automatically includes View access</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </TableHead>
+                    </Fragment>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {FEATURE_AREAS.map((area) => (
+                  <Fragment key={area.key}>
+                    <TableRow className={`hover:bg-muted/50 ${area.children ? "bg-muted/20" : ""}`}>
+                      <TableCell className="text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <area.icon className="h-4 w-4 text-muted-foreground" />
+                          {area.label}
+                        </div>
+                      </TableCell>
+                      {/* Superuser column - always full access */}
+                      <TableCell className="text-center">
+                        <PermissionIndicator allowed={true} />
+                      </TableCell>
+                      {ROLES.map((role) => {
+                        if (area.children) {
+                          const allView = area.children.every((c) => currentMatrix[role]?.[c.key]?.canView)
+                          const noneView = area.children.every((c) => !currentMatrix[role]?.[c.key]?.canView)
+                          const allEdit = area.children.every((c) => currentMatrix[role]?.[c.key]?.canEdit)
+                          const noneEdit = area.children.every((c) => !currentMatrix[role]?.[c.key]?.canEdit)
+                          return (
+                            <Fragment key={role}>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={allView}
+                                      indeterminate={!allView && !noneView}
+                                      onChange={() => toggleParent(role, area.children!, "canView")}
+                                      disabled={updateDefaults.isPending}
+                                      aria-label={`${role} can view all ${area.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={allView} />
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={allEdit}
+                                      indeterminate={!allEdit && !noneEdit}
+                                      onChange={() => toggleParent(role, area.children!, "canEdit")}
+                                      disabled={updateDefaults.isPending}
+                                      aria-label={`${role} can edit all ${area.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={allEdit} />
+                                )}
+                              </TableCell>
+                            </Fragment>
+                          )
+                        }
+                        const perm = currentMatrix[role]?.[area.key] ?? { canView: false, canEdit: false }
+                        return (
+                          <Fragment key={role}>
+                            <TableCell className="text-center">
+                              {isEditing ? (
+                                <div className="flex justify-center">
+                                  <Checkbox
+                                    checked={perm.canView}
+                                    onChange={() => togglePermission(role, area.key, "canView")}
+                                    disabled={updateDefaults.isPending}
+                                    aria-label={`${role} can view ${area.label}`}
+                                  />
+                                </div>
+                              ) : (
+                                <PermissionIndicator allowed={perm.canView} />
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {isEditing ? (
+                                <div className="flex justify-center">
+                                  <Checkbox
+                                    checked={perm.canEdit}
+                                    onChange={() => togglePermission(role, area.key, "canEdit")}
+                                    disabled={updateDefaults.isPending}
+                                    aria-label={`${role} can edit ${area.label}`}
+                                  />
+                                </div>
+                              ) : (
+                                <PermissionIndicator allowed={perm.canEdit} />
+                              )}
+                            </TableCell>
+                          </Fragment>
+                        )
+                      })}
+                    </TableRow>
+                    {area.children?.map((child) => (
+                      <TableRow key={child.key} className="hover:bg-muted/50">
+                        <TableCell className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 pl-6">
+                            <child.icon className="h-3.5 w-3.5" />
+                            {child.label}
+                          </div>
+                        </TableCell>
+                        {/* Superuser column - always full access */}
+                        <TableCell className="text-center">
+                          <PermissionIndicator allowed={true} />
+                        </TableCell>
+                        {ROLES.map((role) => {
+                          const perm = currentMatrix[role]?.[child.key] ?? { canView: false, canEdit: false }
+                          return (
+                            <Fragment key={role}>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={perm.canView}
+                                      onChange={() => togglePermission(role, child.key, "canView")}
+                                      disabled={updateDefaults.isPending}
+                                      aria-label={`${role} can view ${child.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={perm.canView} />
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={perm.canEdit}
+                                      onChange={() => togglePermission(role, child.key, "canEdit")}
+                                      disabled={updateDefaults.isPending}
                                       aria-label={`${role} can edit ${child.label}`}
                                     />
                                   </div>

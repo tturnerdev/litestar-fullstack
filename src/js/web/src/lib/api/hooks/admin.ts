@@ -52,9 +52,13 @@ import {
   adminUpdateUser,
   assignRole,
   type DashboardStats,
+  type DefaultPermissionEntry,
+  type DefaultPermissionTemplate,
+  type DefaultPermissionTemplateUpdate,
   getAdminSystemStatus,
   getDashboardStats,
   getDashboardTrends,
+  getDefaultPermissions,
   getRecentActivity,
   type ListRolesData,
   type ListTeamInvitationsData,
@@ -71,6 +75,7 @@ import {
   type TeamRolePermissionEntry,
   type TeamRolePermissionUpdate,
   type TeamRoles,
+  updateDefaultPermissions,
   updateTeamMember,
   updateTeamPermissions,
 } from "@/lib/generated/api"
@@ -778,6 +783,41 @@ export function useUpdateTeamPermissions(teamId: string) {
     },
     onError: (error) => {
       toast.error("Failed to update permissions", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Default Permission Template
+// ---------------------------------------------------------------------------
+
+export function useDefaultPermissions() {
+  return useQuery({
+    queryKey: ["admin", "default-permissions"],
+    queryFn: async () => {
+      const response = await getDefaultPermissions()
+      return response.data as DefaultPermissionTemplate[]
+    },
+  })
+}
+
+export function useUpdateDefaultPermissions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (permissions: DefaultPermissionEntry[]) => {
+      const response = await updateDefaultPermissions({
+        body: { permissions } as DefaultPermissionTemplateUpdate,
+      })
+      return response.data as DefaultPermissionTemplate[]
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "default-permissions"] })
+      toast.success("Default permissions updated")
+    },
+    onError: (error) => {
+      toast.error("Failed to update default permissions", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

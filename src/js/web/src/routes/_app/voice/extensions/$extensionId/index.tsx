@@ -26,7 +26,6 @@ import {
   Voicemail,
 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { toast } from "sonner"
 import { z } from "zod"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"

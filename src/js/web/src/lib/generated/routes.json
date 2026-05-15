@@ -94,6 +94,13 @@
       },
       "uri": "/api/schedules/{schedule_id}/check"
     },
+    "clear_avatar": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "uri": "/api/me/avatar"
+    },
     "close_ticket": {
       "method": "post",
       "methods": [
@@ -106,6 +113,13 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/close"
+    },
+    "complete_upload": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/uploads/complete"
     },
     "confirm_setup": {
       "method": "post",
@@ -393,6 +407,19 @@
       "uri": "/api/webhooks"
     },
     "delete_attachment": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "attachment_id": "UUID"
+      },
+      "parameters": [
+        "attachment_id"
+      ],
+      "uri": "/api/admin/attachments/{attachment_id}"
+    },
+    "delete_attachment_api_support_attachments_attachment_id:uuid": {
       "method": "delete",
       "methods": [
         "DELETE"
@@ -859,6 +886,19 @@
       ],
       "uri": "/api/time-conditions/{time_condition_id}"
     },
+    "delete_upload": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "attachment_id": "UUID"
+      },
+      "parameters": [
+        "attachment_id"
+      ],
+      "uri": "/api/uploads/{attachment_id}"
+    },
     "delete_user": {
       "method": "delete",
       "methods": [
@@ -945,6 +985,19 @@
         "DELETE"
       ],
       "uri": "/api/mfa/disable"
+    },
+    "download_upload": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "attachment_id": "UUID"
+      },
+      "parameters": [
+        "attachment_id"
+      ],
+      "uri": "/api/uploads/{attachment_id}/content"
     },
     "events:stream": {
       "method": "get",
@@ -1079,6 +1132,13 @@
         "connection_id"
       ],
       "uri": "/api/connections/{connection_id}"
+    },
+    "get_default_permissions": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/default-permissions"
     },
     "get_device": {
       "method": "get",
@@ -1619,6 +1679,19 @@
       ],
       "uri": "/api/voicemail/boxes/{box_id}/unread"
     },
+    "get_upload": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "attachment_id": "UUID"
+      },
+      "parameters": [
+        "attachment_id"
+      ],
+      "uri": "/api/uploads/{attachment_id}"
+    },
     "get_user": {
       "method": "get",
       "methods": [
@@ -1825,6 +1898,27 @@
         "GET"
       ],
       "uri": "/api/tasks/active"
+    },
+    "list_attachments": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "purposeIn": "string[] | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "teamIdIn": "string[] | undefined",
+        "uploadedByIdIn": "string[] | undefined"
+      },
+      "uri": "/api/admin/attachments"
     },
     "list_box_messages": {
       "method": "get",
@@ -2754,6 +2848,22 @@
       },
       "uri": "/api/voice/phone-numbers/unregistered-e911"
     },
+    "list_uploads": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined"
+      },
+      "uri": "/api/uploads"
+    },
     "list_users": {
       "method": "get",
       "methods": [
@@ -3005,6 +3115,13 @@
       ],
       "uri": "/api/call-queues/{call_queue_id}/members/{member_id}/pause"
     },
+    "presign_upload": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/uploads/presign"
+    },
     "preview_device_import": {
       "method": "post",
       "methods": [
@@ -3222,6 +3339,13 @@
       ],
       "uri": "/api/fax/send"
     },
+    "set_avatar": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "uri": "/api/me/avatar"
+    },
     "set_device_lines": {
       "method": "put",
       "methods": [
@@ -3260,6 +3384,19 @@
         "time_condition_id"
       ],
       "uri": "/api/time-conditions/{time_condition_id}/override"
+    },
+    "set_team_logo": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "parameterTypes": {
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/logo"
     },
     "signup": {
       "method": "post",
@@ -3430,6 +3567,13 @@
         "connection_id"
       ],
       "uri": "/api/connections/{connection_id}"
+    },
+    "update_default_permissions": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "uri": "/api/admin/default-permissions"
     },
     "update_device": {
       "method": "patch",
@@ -3969,6 +4113,16 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/attachments"
+    },
+    "upload_file": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "queryParameters": {
+        "purpose": "app_db_models__attachment_AttachmentPurpose | undefined"
+      },
+      "uri": "/api/uploads"
     },
     "validate_registration": {
       "method": "post",

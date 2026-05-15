@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Download, Eye, FileText, Home, Loader2, MoreVertical, Search, Send, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import {
   AlertDialog,

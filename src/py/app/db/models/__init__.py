@@ -8,6 +8,7 @@ from app.db.models._call_record import CallRecord
 from app.db.models._call_record_enums import CallDirection, CallDisposition
 from app.db.models._call_routing_enums import IvrGreetingType, OverrideMode, QueueStrategy, RingGroupStrategy
 from app.db.models._connection import Connection
+from app.db.models._default_permission_template import DefaultPermissionTemplate
 from app.db.models._connection_enums import ConnectionAuthType, ConnectionStatus, ConnectionType
 from app.db.models._device import Device
 from app.db.models._device_line_assignment import DeviceLineAssignment
@@ -85,6 +86,7 @@ __all__ = (
     "ConnectionAuthType",
     "ConnectionStatus",
     "ConnectionType",
+    "DefaultPermissionTemplate",
     "Device",
     "DeviceLineAssignment",
     "DeviceLineType",
