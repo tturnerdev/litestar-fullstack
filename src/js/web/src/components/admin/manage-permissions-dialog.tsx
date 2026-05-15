@@ -1,13 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  CheckCircle2,
-  Info,
-  Loader2,
-  Lock,
-  Save,
-  Users,
-  XCircle,
-} from "lucide-react"
+import { CheckCircle2, Info, Loader2, Lock, Save, Users, XCircle } from "lucide-react"
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -414,12 +406,16 @@ function TeamPermissionEditor({ teamId, teamName, onBack, onSaved }: { teamId: s
     })
   }, [])
 
-  const toggleParent = useCallback((role: string, _parentKey: string, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
+  const toggleParent = useCallback((role: string, parentKey: string, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
     setMatrix((prev) => {
       const next = { ...prev }
       next[role] = { ...next[role] }
       const allSet = children.every((c) => next[role][c.key]?.[field])
       const newValue = !allSet
+      next[role][parentKey] = { ...next[role][parentKey] }
+      next[role][parentKey][field] = newValue
+      if (field === "canView" && !newValue) next[role][parentKey].canEdit = false
+      if (field === "canEdit" && newValue) next[role][parentKey].canView = true
       for (const child of children) {
         next[role][child.key] = { ...next[role][child.key] }
         next[role][child.key][field] = newValue

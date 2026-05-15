@@ -1,15 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import {
-  AlertCircle,
-  CheckCircle2,
-  Download,
-  Info,
-  Loader2,
-  Save,
-  Shield,
-  XCircle,
-} from "lucide-react"
+import { AlertCircle, CheckCircle2, Download, Info, Loader2, Save, Shield, XCircle } from "lucide-react"
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -274,12 +265,16 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
     })
   }, [])
 
-  const toggleParent = useCallback((role: string, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
+  const toggleParent = useCallback((role: string, parentKey: FeatureArea, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
     setEditMatrix((prev) => {
       const next = { ...prev }
       next[role] = { ...next[role] }
       const allSet = children.every((c) => next[role][c.key]?.[field])
       const newValue = !allSet
+      next[role][parentKey] = { ...next[role][parentKey] }
+      next[role][parentKey][field] = newValue
+      if (field === "canView" && !newValue) next[role][parentKey].canEdit = false
+      if (field === "canEdit" && newValue) next[role][parentKey].canView = true
       for (const child of children) {
         next[role][child.key] = { ...next[role][child.key] }
         next[role][child.key][field] = newValue
@@ -459,7 +454,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
                                     <Checkbox
                                       checked={allView}
                                       indeterminate={!allView && !noneView}
-                                      onChange={() => toggleParent(role, area.children!, "canView")}
+                                      onChange={() => toggleParent(role, area.key, area.children!, "canView")}
                                       disabled={updatePermissions.isPending}
                                       aria-label={`${role} can view all ${area.label}`}
                                     />
@@ -474,7 +469,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
                                     <Checkbox
                                       checked={allEdit}
                                       indeterminate={!allEdit && !noneEdit}
-                                      onChange={() => toggleParent(role, area.children!, "canEdit")}
+                                      onChange={() => toggleParent(role, area.key, area.children!, "canEdit")}
                                       disabled={updatePermissions.isPending}
                                       aria-label={`${role} can edit all ${area.label}`}
                                     />
@@ -628,12 +623,16 @@ function DefaultPermissionsCard() {
     })
   }, [])
 
-  const toggleParent = useCallback((role: string, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
+  const toggleParent = useCallback((role: string, parentKey: FeatureArea, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
     setEditMatrix((prev) => {
       const next = { ...prev }
       next[role] = { ...next[role] }
       const allSet = children.every((c) => next[role][c.key]?.[field])
       const newValue = !allSet
+      next[role][parentKey] = { ...next[role][parentKey] }
+      next[role][parentKey][field] = newValue
+      if (field === "canView" && !newValue) next[role][parentKey].canEdit = false
+      if (field === "canEdit" && newValue) next[role][parentKey].canView = true
       for (const child of children) {
         next[role][child.key] = { ...next[role][child.key] }
         next[role][child.key][field] = newValue
@@ -827,7 +826,7 @@ function DefaultPermissionsCard() {
                                     <Checkbox
                                       checked={allView}
                                       indeterminate={!allView && !noneView}
-                                      onChange={() => toggleParent(role, area.children!, "canView")}
+                                      onChange={() => toggleParent(role, area.key, area.children!, "canView")}
                                       disabled={updateDefaults.isPending}
                                       aria-label={`${role} can view all ${area.label}`}
                                     />
@@ -842,7 +841,7 @@ function DefaultPermissionsCard() {
                                     <Checkbox
                                       checked={allEdit}
                                       indeterminate={!allEdit && !noneEdit}
-                                      onChange={() => toggleParent(role, area.children!, "canEdit")}
+                                      onChange={() => toggleParent(role, area.key, area.children!, "canEdit")}
                                       disabled={updateDefaults.isPending}
                                       aria-label={`${role} can edit all ${area.label}`}
                                     />

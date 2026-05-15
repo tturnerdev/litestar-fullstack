@@ -264,6 +264,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         })
         return filtered.length === item.items.length ? item : { ...item, items: filtered }
       })
+      .filter((item) => {
+        if (!item.items) return true
+        return item.items.length > 0
+      })
   }, [user?.isSuperuser, badges.teams, canView, canEdit])
 
   const unreadCount = unreadData?.count || null
