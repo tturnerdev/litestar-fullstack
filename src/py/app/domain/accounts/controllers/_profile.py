@@ -2,18 +2,26 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import structlog
-from litestar import Controller, Request, delete, get, patch
+from litestar import Controller, Request, delete, get, patch, put
+from litestar.datastructures import (
+    UploadFile,  # noqa: TC002  (resolved at runtime by Litestar for the request signature)
+)
 from litestar.di import Provide
+from litestar.enums import RequestEncodingType
+from litestar.params import Body
 from litestar.status_codes import HTTP_204_NO_CONTENT
 
+from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.guards import requires_active_user
 from app.domain.accounts.schemas import PasswordUpdate, ProfileUpdate, SecurityActivityEntry, User
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.attachments.services import AttachmentService
 from app.lib.audit import capture_snapshot, log_audit
+from app.lib.deps import create_service_provider
 from app.lib.schema import Message
 
 if TYPE_CHECKING:
@@ -33,6 +41,7 @@ class ProfileController(Controller):
     guards = [requires_active_user]
     dependencies = {
         "users_service": Provide(provide_users_service),
+        "attachments_service": create_service_provider(AttachmentService),
         "audit_service": Provide(provide_audit_log_service),
     }
 
@@ -235,6 +244,88 @@ class ProfileController(Controller):
         )
 
         return Message(message="Your password was successfully modified.")
+
+    @put(operation_id="AccountAvatarSet", path="/api/me/avatar")
+    async def set_avatar(
+        self,
+        current_user: m.User,
+        users_service: UserService,
+        attachments_service: AttachmentService,
+        audit_service: AuditLogService,
+        data: Annotated[UploadFile, Body(media_type=RequestEncodingType.MULTI_PART)],
+    ) -> User:
+        """Upload and set the current user's avatar.
+
+        Args:
+            current_user: The current user.
+            users_service: The users service.
+            attachments_service: The attachments service.
+            audit_service: The audit log service.
+            data: The uploaded image.
+
+        Returns:
+            The updated user profile.
+        """
+        previous_avatar_id = current_user.avatar_id
+        attachment = await attachments_service.create_from_upload(
+            data,
+            uploaded_by_id=current_user.id,
+            purpose=m.AttachmentPurpose.AVATAR,
+            excluding_attachment_id=previous_avatar_id,
+        )
+        db_obj = await users_service.update(
+            {"avatar_id": attachment.id, "avatar_url": f"/api/uploads/{attachment.id}/content"},
+            item_id=current_user.id,
+        )
+        if previous_avatar_id and previous_avatar_id != attachment.id:
+            previous = await attachments_service.get_one_or_none(id=previous_avatar_id)
+            if previous is not None:
+                await attachments_service.delete_with_object(previous)
+        await audit_service.log_action(
+            "user.avatar.set",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="user",
+            target_id=str(current_user.id),
+            target_label=current_user.email,
+            details={"attachment_id": str(attachment.id), "size_bytes": attachment.size_bytes},
+        )
+        return users_service.to_schema(db_obj, schema_type=User)
+
+    @delete(operation_id="AccountAvatarClear", path="/api/me/avatar", status_code=200)
+    async def clear_avatar(
+        self,
+        current_user: m.User,
+        users_service: UserService,
+        attachments_service: AttachmentService,
+        audit_service: AuditLogService,
+    ) -> User:
+        """Remove the current user's avatar.
+
+        Args:
+            current_user: The current user.
+            users_service: The users service.
+            attachments_service: The attachments service.
+            audit_service: The audit log service.
+
+        Returns:
+            The updated user profile.
+        """
+        previous_avatar_id = current_user.avatar_id
+        db_obj = await users_service.update({"avatar_id": None, "avatar_url": None}, item_id=current_user.id)
+        if previous_avatar_id:
+            previous = await attachments_service.get_one_or_none(id=previous_avatar_id)
+            if previous is not None:
+                await attachments_service.delete_with_object(previous)
+        await audit_service.log_action(
+            "user.avatar.cleared",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="user",
+            target_id=str(current_user.id),
+            target_label=current_user.email,
+        )
+        return users_service.to_schema(db_obj, schema_type=User)
 
     @delete(
         operation_id="AccountDelete",

@@ -28,6 +28,7 @@ from app.lib.exceptions import (
 )
 from app.lib.middleware import SecurityHeadersMiddleware
 from app.lib.settings import AppSettings, get_settings, provide_app_settings
+from app.lib.storage import register_storage_backends
 from app.lib.validation import ValidationError
 from app.server import plugins
 
@@ -57,6 +58,7 @@ class ApplicationCore(InitPluginProtocol, CLIPluginProtocol):
 
         settings = get_settings()
         self.app_slug = settings.app.slug
+        register_storage_backends()
         cli.add_command(user_management_group)
 
     def on_app_init(self, app_config: AppConfig) -> AppConfig:
@@ -70,6 +72,7 @@ class ApplicationCore(InitPluginProtocol, CLIPluginProtocol):
         """
         settings = get_settings()
         self.app_slug = settings.app.slug
+        register_storage_backends()
         app_config.debug = settings.app.DEBUG
         app_config.openapi_config = OpenAPIConfig(
             title=settings.app.NAME,

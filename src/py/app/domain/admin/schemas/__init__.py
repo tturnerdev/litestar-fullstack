@@ -30,6 +30,7 @@ from app.domain.admin.schemas._admin_system import (
 )
 from app.domain.admin.schemas._admin_tasks import AdminTaskStats, AdminTaskSummary
 from app.domain.admin.schemas._admin_voice import AdminExtensionSummary, AdminPhoneNumberSummary, AdminVoiceStats
+from app.domain.admin.schemas._attachments import AdminAttachment
 from app.domain.admin.schemas._audit import AuditLogEntry
 from app.domain.admin.schemas._dashboard import (
     ActivityLogEntry,
@@ -43,6 +44,7 @@ from app.domain.admin.schemas._users import AdminUserDetail, AdminUserSummary, A
 
 __all__ = (
     "ActivityLogEntry",
+    "AdminAttachment",
     "AdminDeviceStats",
     "AdminDeviceSummary",
     "AdminExtensionSummary",

@@ -10,12 +10,14 @@ from app.domain.admin.controllers._admin_support import AdminSupportController
 from app.domain.admin.controllers._admin_system import AdminSystemController
 from app.domain.admin.controllers._admin_tasks import AdminTasksController
 from app.domain.admin.controllers._admin_voice import AdminVoiceController
+from app.domain.admin.controllers._attachments import AdminAttachmentsController
 from app.domain.admin.controllers._audit import AuditController
 from app.domain.admin.controllers._dashboard import DashboardController
 from app.domain.admin.controllers._teams import AdminTeamsController
 from app.domain.admin.controllers._users import AdminUsersController
 
 __all__ = (
+    "AdminAttachmentsController",
     "AdminBulkImportController",
     "AdminDeviceTemplatesController",
     "AdminDevicesController",

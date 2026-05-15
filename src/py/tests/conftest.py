@@ -17,6 +17,7 @@ os.environ.update(
         "VITE_DEV_MODE": "True",
         "EMAIL_BACKEND": "memory",
         "LITESTAR_DEBUG": "False",
+        "STORAGE_BACKEND": "memory",
     }
 )
 

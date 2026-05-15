@@ -1,3 +1,4 @@
+from app.db.models._attachment import Attachment, AttachmentPurpose
 from app.db.models._audit_log import AuditLog
 from app.db.models._background_task import BackgroundTask
 from app.db.models._background_task_status import BackgroundTaskStatus
@@ -70,6 +71,8 @@ from app.db.models._webhook_delivery import WebhookDelivery
 from app.db.models._webhook_endpoint import WebhookEndpoint
 
 __all__ = (
+    "Attachment",
+    "AttachmentPurpose",
     "AuditLog",
     "BackgroundTask",
     "BackgroundTaskStatus",

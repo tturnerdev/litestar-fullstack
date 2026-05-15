@@ -15,6 +15,7 @@ const navItems = [
   { label: "Bulk Import", to: "/admin/bulk-import" },
   { label: "Tasks", to: "/admin/tasks" },
   { label: "Roles & Permissions", to: "/admin/roles" },
+  { label: "Attachments", to: "/admin/attachments" },
   { label: "Audit log", to: "/admin/audit" },
   { label: "System", to: "/admin/system" },
 ] as const

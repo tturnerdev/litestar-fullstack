@@ -26,6 +26,7 @@ class Team(CamelizedBaseStruct):
     name: str
     slug: str
     description: str | None = None
+    logo_url: str | None = None
     is_active: bool = True
     members: list[TeamMember] = []
     tags: list[TeamTag] = []

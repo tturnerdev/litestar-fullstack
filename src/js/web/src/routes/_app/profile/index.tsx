@@ -51,6 +51,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { AvatarUploader } from "@/components/uploads/avatar-uploader"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useMfaStatus } from "@/lib/api/hooks/auth"
 import { useProfile } from "@/lib/api/hooks/profile"
@@ -821,6 +822,7 @@ function ProfilePage() {
         <SectionErrorBoundary name="Profile Hero">
           <ProfileHero user={user} />
         </SectionErrorBoundary>
+        <AvatarUploader />
       </PageSection>
 
       {/* Account overview cards */}
