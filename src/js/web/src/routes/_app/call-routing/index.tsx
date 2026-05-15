@@ -1810,9 +1810,24 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
 
 function CallRoutingPage() {
   useDocumentTitle("Call Routing")
-  const { canEdit } = usePermissions()
+  const { canEdit, canView } = usePermissions()
 
-  const { tab = "time-conditions", q: searchParam } = Route.useSearch()
+  const canViewTC = canView("CALL_ROUTING_TIME_CONDITIONS")
+  const canViewIVR = canView("CALL_ROUTING_IVR_MENUS")
+  const canViewCQ = canView("CALL_ROUTING_QUEUES")
+  const canViewRG = canView("CALL_ROUTING_RING_GROUPS")
+
+  const visibleTabs = useMemo(() => {
+    const tabs: string[] = []
+    if (canViewTC) tabs.push("time-conditions")
+    if (canViewIVR) tabs.push("ivr-menus")
+    if (canViewCQ) tabs.push("call-queues")
+    if (canViewRG) tabs.push("ring-groups")
+    return tabs
+  }, [canViewTC, canViewIVR, canViewCQ, canViewRG])
+
+  const { tab: urlTab = "time-conditions", q: searchParam } = Route.useSearch()
+  const tab = visibleTabs.includes(urlTab) ? urlTab : (visibleTabs[0] ?? "time-conditions")
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -1913,90 +1928,123 @@ function CallRoutingPage() {
       <PageSection>
         <SectionErrorBoundary name="Call Routing Summary">
           <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Time Conditions" value={tcData?.total} icon={Clock} iconClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400" isLoading={tcLoading} index={0} />
-            <StatCard label="IVR Menus" value={ivrData?.total} icon={Menu} iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400" isLoading={ivrLoading} index={1} />
-            <StatCard label="Call Queues" value={cqData?.total} icon={Phone} iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400" isLoading={cqLoading} index={2} />
-            <StatCard
-              label="Ring Groups"
-              value={rgData?.total}
-              icon={Users}
-              iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-              isLoading={rgLoading}
-              index={3}
-            />
+            {canViewTC && (
+              <StatCard label="Time Conditions" value={tcData?.total} icon={Clock} iconClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400" isLoading={tcLoading} index={0} />
+            )}
+            {canViewIVR && (
+              <StatCard
+                label="IVR Menus"
+                value={ivrData?.total}
+                icon={Menu}
+                iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
+                isLoading={ivrLoading}
+                index={1}
+              />
+            )}
+            {canViewCQ && (
+              <StatCard label="Call Queues" value={cqData?.total} icon={Phone} iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400" isLoading={cqLoading} index={2} />
+            )}
+            {canViewRG && (
+              <StatCard
+                label="Ring Groups"
+                value={rgData?.total}
+                icon={Users}
+                iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                isLoading={rgLoading}
+                index={3}
+              />
+            )}
           </div>
         </SectionErrorBoundary>
       </PageSection>
 
       <PageSection>
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value="time-conditions">
-              <Clock className="mr-2 h-4 w-4" />
-              Time Conditions
-            </TabsTrigger>
-            <TabsTrigger value="ivr-menus">
-              <Menu className="mr-2 h-4 w-4" />
-              IVR Menus
-            </TabsTrigger>
-            <TabsTrigger value="call-queues">
-              <Phone className="mr-2 h-4 w-4" />
-              Call Queues
-            </TabsTrigger>
-            <TabsTrigger value="ring-groups">
-              <Users className="mr-2 h-4 w-4" />
-              Ring Groups
-            </TabsTrigger>
-          </TabsList>
+          {visibleTabs.length > 1 && (
+            <TabsList>
+              {canViewTC && (
+                <TabsTrigger value="time-conditions">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Time Conditions
+                </TabsTrigger>
+              )}
+              {canViewIVR && (
+                <TabsTrigger value="ivr-menus">
+                  <Menu className="mr-2 h-4 w-4" />
+                  IVR Menus
+                </TabsTrigger>
+              )}
+              {canViewCQ && (
+                <TabsTrigger value="call-queues">
+                  <Phone className="mr-2 h-4 w-4" />
+                  Call Queues
+                </TabsTrigger>
+              )}
+              {canViewRG && (
+                <TabsTrigger value="ring-groups">
+                  <Users className="mr-2 h-4 w-4" />
+                  Ring Groups
+                </TabsTrigger>
+              )}
+            </TabsList>
+          )}
 
-          <TabsContent value="time-conditions" className="mt-6">
-            <SectionErrorBoundary name="Time Conditions">
-              <TimeConditionsTab
-                search={searchInput}
-                onSearchChange={setSearchInput}
-                debouncedSearch={debouncedSearch}
-                onFreshnessChange={freshnessCallbacks["time-conditions"]}
-                searchInputRef={searchInputRef}
-                canEdit={canEdit("CALL_ROUTING_TIME_CONDITIONS")}
-              />
-            </SectionErrorBoundary>
-          </TabsContent>
-          <TabsContent value="ivr-menus" className="mt-6">
-            <SectionErrorBoundary name="IVR Menus">
-              <IvrMenusTab
-                search={searchInput}
-                onSearchChange={setSearchInput}
-                debouncedSearch={debouncedSearch}
-                onFreshnessChange={freshnessCallbacks["ivr-menus"]}
-                searchInputRef={searchInputRef}
-                canEdit={canEdit("CALL_ROUTING_IVR_MENUS")}
-              />
-            </SectionErrorBoundary>
-          </TabsContent>
-          <TabsContent value="call-queues" className="mt-6">
-            <SectionErrorBoundary name="Call Queues">
-              <CallQueuesTab
-                search={searchInput}
-                onSearchChange={setSearchInput}
-                debouncedSearch={debouncedSearch}
-                onFreshnessChange={freshnessCallbacks["call-queues"]}
-                searchInputRef={searchInputRef}
-                canEdit={canEdit("CALL_ROUTING_QUEUES")}
-              />
-            </SectionErrorBoundary>
-          </TabsContent>
-          <TabsContent value="ring-groups" className="mt-6">
-            <SectionErrorBoundary name="Ring Groups">
-              <RingGroupsTab
-                search={searchInput}
-                onSearchChange={setSearchInput}
-                debouncedSearch={debouncedSearch}
-                onFreshnessChange={freshnessCallbacks["ring-groups"]}
-                searchInputRef={searchInputRef}
-                canEdit={canEdit("CALL_ROUTING_RING_GROUPS")}
-              />
-            </SectionErrorBoundary>
-          </TabsContent>
+          {canViewTC && (
+            <TabsContent value="time-conditions" className="mt-6">
+              <SectionErrorBoundary name="Time Conditions">
+                <TimeConditionsTab
+                  search={searchInput}
+                  onSearchChange={setSearchInput}
+                  debouncedSearch={debouncedSearch}
+                  onFreshnessChange={freshnessCallbacks["time-conditions"]}
+                  searchInputRef={searchInputRef}
+                  canEdit={canEdit("CALL_ROUTING_TIME_CONDITIONS")}
+                />
+              </SectionErrorBoundary>
+            </TabsContent>
+          )}
+          {canViewIVR && (
+            <TabsContent value="ivr-menus" className="mt-6">
+              <SectionErrorBoundary name="IVR Menus">
+                <IvrMenusTab
+                  search={searchInput}
+                  onSearchChange={setSearchInput}
+                  debouncedSearch={debouncedSearch}
+                  onFreshnessChange={freshnessCallbacks["ivr-menus"]}
+                  searchInputRef={searchInputRef}
+                  canEdit={canEdit("CALL_ROUTING_IVR_MENUS")}
+                />
+              </SectionErrorBoundary>
+            </TabsContent>
+          )}
+          {canViewCQ && (
+            <TabsContent value="call-queues" className="mt-6">
+              <SectionErrorBoundary name="Call Queues">
+                <CallQueuesTab
+                  search={searchInput}
+                  onSearchChange={setSearchInput}
+                  debouncedSearch={debouncedSearch}
+                  onFreshnessChange={freshnessCallbacks["call-queues"]}
+                  searchInputRef={searchInputRef}
+                  canEdit={canEdit("CALL_ROUTING_QUEUES")}
+                />
+              </SectionErrorBoundary>
+            </TabsContent>
+          )}
+          {canViewRG && (
+            <TabsContent value="ring-groups" className="mt-6">
+              <SectionErrorBoundary name="Ring Groups">
+                <RingGroupsTab
+                  search={searchInput}
+                  onSearchChange={setSearchInput}
+                  debouncedSearch={debouncedSearch}
+                  onFreshnessChange={freshnessCallbacks["ring-groups"]}
+                  searchInputRef={searchInputRef}
+                  canEdit={canEdit("CALL_ROUTING_RING_GROUPS")}
+                />
+              </SectionErrorBoundary>
+            </TabsContent>
+          )}
         </Tabs>
       </PageSection>
     </PageContainer>

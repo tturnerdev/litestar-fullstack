@@ -3,6 +3,8 @@ import { Bell, ChevronRight, Headset, type LucideIcon, Monitor, Plus, Settings, 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { usePermissions } from "@/hooks/use-permissions"
+import type { FeatureArea } from "@/lib/generated/api"
 
 interface QuickAction {
   key: string
@@ -14,6 +16,8 @@ interface QuickAction {
   iconTextClassName: string
   shortcut?: string
   isNew?: boolean
+  editArea?: FeatureArea
+  viewArea?: FeatureArea
 }
 
 const defaultActions: QuickAction[] = [
@@ -26,6 +30,7 @@ const defaultActions: QuickAction[] = [
     iconBgClassName: "bg-primary/10 group-hover:bg-primary",
     iconTextClassName: "text-primary group-hover:text-primary-foreground",
     shortcut: "T",
+    editArea: "TEAMS",
   },
   {
     key: "manage-devices",
@@ -35,6 +40,7 @@ const defaultActions: QuickAction[] = [
     icon: Monitor,
     iconBgClassName: "bg-blue-500/10 group-hover:bg-blue-500",
     iconTextClassName: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
+    viewArea: "DEVICES",
   },
   {
     key: "submit-ticket",
@@ -44,6 +50,7 @@ const defaultActions: QuickAction[] = [
     icon: Headset,
     iconBgClassName: "bg-amber-500/10 group-hover:bg-amber-500",
     iconTextClassName: "text-amber-600 dark:text-amber-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "SUPPORT_TICKETS",
   },
   {
     key: "view-notifications",
@@ -63,6 +70,7 @@ const defaultActions: QuickAction[] = [
     iconBgClassName: "bg-cyan-500/10 group-hover:bg-cyan-500",
     iconTextClassName: "text-cyan-600 dark:text-cyan-400 group-hover:text-white dark:group-hover:text-white",
     shortcut: "D",
+    viewArea: "TEAMS",
   },
   {
     key: "manage-tags",
@@ -104,7 +112,13 @@ interface QuickActionsCardProps {
 }
 
 export function QuickActionsCard({ isSuperuser, teamCount }: QuickActionsCardProps) {
-  const actions = isSuperuser ? [...defaultActions, ...adminActions] : defaultActions
+  const { canEdit, canView } = usePermissions()
+  const all = isSuperuser ? [...defaultActions, ...adminActions] : defaultActions
+  const actions = all.filter((a) => {
+    if (a.editArea && !canEdit(a.editArea)) return false
+    if (a.viewArea && !canView(a.viewArea)) return false
+    return true
+  })
 
   return (
     <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">

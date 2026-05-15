@@ -115,11 +115,22 @@ const csvHeaders: CsvHeader<VoicemailMessage>[] = [
 
 function VoicemailInboxPage() {
   useDocumentTitle("Voicemail")
-  const { tab = "messages" } = Route.useSearch()
+  const { tab: urlTab = "messages" } = Route.useSearch()
   const navigate = Route.useNavigate()
-  const { canEdit } = usePermissions()
+  const { canEdit, canView } = usePermissions()
   const canEditMessages = canEdit("VOICE_VOICEMAIL")
   const canEditBoxes = canEdit("VOICE_VOICEMAIL_BOXES")
+  const canViewMessages = canView("VOICE_VOICEMAIL")
+  const canViewBoxes = canView("VOICE_VOICEMAIL_BOXES")
+
+  const visibleTabs = useMemo(() => {
+    const tabs: string[] = []
+    if (canViewMessages) tabs.push("messages")
+    if (canViewBoxes) tabs.push("boxes")
+    return tabs
+  }, [canViewMessages, canViewBoxes])
+
+  const tab = visibleTabs.includes(urlTab) ? urlTab : (visibleTabs[0] ?? "messages")
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -148,22 +159,28 @@ function VoicemailInboxPage() {
 
       <PageSection>
         <Tabs value={tab} onValueChange={(value) => navigate({ search: { tab: value }, replace: true })}>
-          <TabsList>
-            <TabsTrigger value="messages">All Messages</TabsTrigger>
-            <TabsTrigger value="boxes">Voicemail Boxes</TabsTrigger>
-          </TabsList>
+          {visibleTabs.length > 1 && (
+            <TabsList>
+              {canViewMessages && <TabsTrigger value="messages">All Messages</TabsTrigger>}
+              {canViewBoxes && <TabsTrigger value="boxes">Voicemail Boxes</TabsTrigger>}
+            </TabsList>
+          )}
 
-          <TabsContent value="messages" className="mt-6">
-            <SectionErrorBoundary name="Voicemail Messages">
-              <MessagesTab canEdit={canEditMessages} />
-            </SectionErrorBoundary>
-          </TabsContent>
+          {canViewMessages && (
+            <TabsContent value="messages" className="mt-6">
+              <SectionErrorBoundary name="Voicemail Messages">
+                <MessagesTab canEdit={canEditMessages} />
+              </SectionErrorBoundary>
+            </TabsContent>
+          )}
 
-          <TabsContent value="boxes" className="mt-6">
-            <SectionErrorBoundary name="Voicemail Boxes">
-              <BoxesTab canEdit={canEditBoxes} />
-            </SectionErrorBoundary>
-          </TabsContent>
+          {canViewBoxes && (
+            <TabsContent value="boxes" className="mt-6">
+              <SectionErrorBoundary name="Voicemail Boxes">
+                <BoxesTab canEdit={canEditBoxes} />
+              </SectionErrorBoundary>
+            </TabsContent>
+          )}
         </Tabs>
       </PageSection>
     </PageContainer>

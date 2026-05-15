@@ -8,6 +8,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { formatDateTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
@@ -62,6 +63,7 @@ export const Route = createFileRoute("/_app/fax/")({
 
 function FaxOverviewPage() {
   useDocumentTitle("Fax")
+  const { canView, canEdit } = usePermissions()
   const { data: numbers, isLoading: numbersLoading } = useFaxNumbers(1, 100)
   const { data: messages, isLoading: messagesLoading } = useFaxMessages({
     page: 1,
@@ -189,18 +191,26 @@ function FaxOverviewPage() {
       <PageSection delay={0.12}>
         <SectionErrorBoundary name="Quick Actions">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {faxShortcuts.map((shortcut) => (
-              <Link key={shortcut.key} to={shortcut.to}>
-                <Card className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
-                  <CardContent className="flex flex-col items-center gap-2.5 px-3 py-4">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}>
-                      <shortcut.icon className="h-5 w-5" />
-                    </div>
-                    <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">{shortcut.label}</span>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {faxShortcuts
+              .filter((s) => {
+                if (s.key === "send-fax") return canEdit("FAX_MESSAGES")
+                if (s.key === "manage-numbers") return canView("FAX_NUMBERS")
+                if (s.key === "view-messages") return canView("FAX_MESSAGES")
+                if (s.key === "email-routes") return canView("FAX_EMAIL_ROUTES")
+                return true
+              })
+              .map((shortcut) => (
+                <Link key={shortcut.key} to={shortcut.to}>
+                  <Card className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
+                    <CardContent className="flex flex-col items-center gap-2.5 px-3 py-4">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}>
+                        <shortcut.icon className="h-5 w-5" />
+                      </div>
+                      <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">{shortcut.label}</span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
           </div>
         </SectionErrorBoundary>
       </PageSection>

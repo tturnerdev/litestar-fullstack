@@ -11,6 +11,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
 import { useDndSettings, useExtensions, usePhoneNumbers, useVoicemailMessages, useVoicemailSettings } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
@@ -489,7 +490,9 @@ function StatusOverview() {
 // ---------------------------------------------------------------------------
 
 function QuickLinks() {
-  const links = [
+  const { canView } = usePermissions()
+
+  const allLinks = [
     {
       label: "Phone Numbers",
       description: "View and manage your assigned phone numbers, labels, and caller ID settings.",
@@ -497,6 +500,7 @@ function QuickLinks() {
       icon: Phone,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
+      visible: canView("VOICE_PHONE_NUMBERS"),
     },
     {
       label: "Extensions",
@@ -505,8 +509,12 @@ function QuickLinks() {
       icon: PhoneForwarded,
       color: "text-green-500",
       bg: "bg-green-500/10",
+      visible: canView("VOICE_EXTENSIONS"),
     },
   ]
+
+  const links = allLinks.filter((l) => l.visible)
+  if (links.length === 0) return null
 
   return (
     <div className="grid gap-4 md:grid-cols-2">

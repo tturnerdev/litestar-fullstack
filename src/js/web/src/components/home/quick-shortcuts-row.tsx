@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { BarChart3, Calendar, FileUp, Laptop, type LucideIcon, PhoneForwarded, TicketPlus, Users } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { usePermissions } from "@/hooks/use-permissions"
+import type { FeatureArea } from "@/lib/generated/api"
 
 interface QuickShortcut {
   key: string
@@ -10,6 +12,7 @@ interface QuickShortcut {
   icon: LucideIcon
   iconBg: string
   iconText: string
+  editArea?: FeatureArea
 }
 
 const shortcuts: QuickShortcut[] = [
@@ -21,6 +24,7 @@ const shortcuts: QuickShortcut[] = [
     icon: TicketPlus,
     iconBg: "bg-amber-500/10 group-hover:bg-amber-500",
     iconText: "text-amber-600 dark:text-amber-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "SUPPORT_TICKETS",
   },
   {
     key: "add-device",
@@ -30,6 +34,7 @@ const shortcuts: QuickShortcut[] = [
     icon: Laptop,
     iconBg: "bg-blue-500/10 group-hover:bg-blue-500",
     iconText: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "DEVICES",
   },
   {
     key: "new-extension",
@@ -39,6 +44,7 @@ const shortcuts: QuickShortcut[] = [
     icon: PhoneForwarded,
     iconBg: "bg-green-500/10 group-hover:bg-green-500",
     iconText: "text-green-600 dark:text-green-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "VOICE_EXTENSIONS",
   },
   {
     key: "create-team",
@@ -48,6 +54,7 @@ const shortcuts: QuickShortcut[] = [
     icon: Users,
     iconBg: "bg-cyan-500/10 group-hover:bg-cyan-500",
     iconText: "text-cyan-600 dark:text-cyan-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "TEAMS",
   },
   {
     key: "create-schedule",
@@ -57,6 +64,7 @@ const shortcuts: QuickShortcut[] = [
     icon: Calendar,
     iconBg: "bg-teal-500/10 group-hover:bg-teal-500",
     iconText: "text-teal-600 dark:text-teal-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "SCHEDULES",
   },
   {
     key: "send-fax",
@@ -66,6 +74,7 @@ const shortcuts: QuickShortcut[] = [
     icon: FileUp,
     iconBg: "bg-orange-500/10 group-hover:bg-orange-500",
     iconText: "text-orange-600 dark:text-orange-400 group-hover:text-white dark:group-hover:text-white",
+    editArea: "FAX_MESSAGES",
   },
   {
     key: "view-analytics",
@@ -79,9 +88,12 @@ const shortcuts: QuickShortcut[] = [
 ]
 
 export function QuickShortcutsRow() {
+  const { canEdit } = usePermissions()
+  const visible = shortcuts.filter((s) => !s.editArea || canEdit(s.editArea))
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {shortcuts.map((shortcut, index) => (
+      {visible.map((shortcut, index) => (
         <Link key={shortcut.key} to={shortcut.to}>
           <Card
             className="animate-in fade-in slide-in-from-bottom-1 group h-full cursor-pointer fill-mode-both transition-all duration-200 hover:scale-[1.02] hover:shadow-md"

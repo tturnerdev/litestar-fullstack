@@ -87,7 +87,7 @@ function ExtensionDetailPage() {
   const { tab = "details", edit } = Route.useSearch()
   const router = useRouter()
   const navigate = Route.useNavigate()
-  const { canEdit } = usePermissions()
+  const { canEdit, canView } = usePermissions()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useExtension(extensionId)
   useDocumentTitle(data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension")
   const updateExtension = useUpdateExtension(extensionId)
@@ -296,7 +296,7 @@ function ExtensionDetailPage() {
         <Tabs value={tab} onValueChange={(value) => navigate({ search: { tab: value }, replace: true })}>
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="voicemail">Voicemail</TabsTrigger>
+            {canView("VOICE_VOICEMAIL") && <TabsTrigger value="voicemail">Voicemail</TabsTrigger>}
             <TabsTrigger value="external">External Data</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
@@ -340,7 +340,11 @@ function ExtensionDetailPage() {
                       <p className="text-muted-foreground">Active</p>
                       <div className="mt-0.5 flex items-center gap-2">
                         <p>{data.isActive ? "Yes" : "No"}</p>
-                        <Switch checked={data.isActive} onCheckedChange={(checked) => updateExtension.mutate({ isActive: checked })} disabled={updateExtension.isPending || !hasEditPermission} />
+                        <Switch
+                          checked={data.isActive}
+                          onCheckedChange={(checked) => updateExtension.mutate({ isActive: checked })}
+                          disabled={updateExtension.isPending || !hasEditPermission}
+                        />
                       </div>
                     </div>
                     <div>
@@ -442,9 +446,11 @@ function ExtensionDetailPage() {
             </SectionErrorBoundary>
           </TabsContent>
 
-          <TabsContent value="voicemail" className="mt-6 space-y-6">
-            <ExtensionVoicemailTab extensionId={extensionId} />
-          </TabsContent>
+          {canView("VOICE_VOICEMAIL") && (
+            <TabsContent value="voicemail" className="mt-6 space-y-6">
+              <ExtensionVoicemailTab extensionId={extensionId} />
+            </TabsContent>
+          )}
 
           <TabsContent value="external" className="mt-6">
             <ExternalDataTab

@@ -30,9 +30,10 @@ import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarSeparator } from "@/components/ui/sidebar"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useUnreadCount } from "@/lib/api/hooks/notifications"
 import { useAuthStore } from "@/lib/auth"
-import { adminListUsers, listTeams, type Team } from "@/lib/generated/api"
+import { adminListUsers, type FeatureArea, listTeams, type Team } from "@/lib/generated/api"
 
 const BADGE_STALE_TIME = 60_000
 
@@ -67,6 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { teams, currentTeam, setTeams, setCurrentTeam, user, isAuthenticated } = useAuthStore()
   const badges = useNavBadges(isAuthenticated, user?.isSuperuser ?? false)
   const { data: unreadData } = useUnreadCount()
+  const { canView, canEdit } = usePermissions()
 
   const {
     data: teamsData = [],
@@ -95,6 +97,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [isError, isLoading, setTeams, storeIds, teamIds, safeTeamsData])
 
   const navMain = useMemo(() => {
+    const topLevelAreas: Record<string, FeatureArea> = {
+      Teams: "TEAMS",
+      Locations: "LOCATIONS",
+      Devices: "DEVICES",
+      Voice: "VOICE",
+      Voicemail: "VOICE_VOICEMAIL",
+      Fax: "FAX",
+      Schedules: "SCHEDULES",
+      E911: "E911",
+      "Call Routing": "CALL_ROUTING",
+      Support: "SUPPORT",
+    }
+
+    const subItemAreas: Record<string, FeatureArea> = {
+      "Phone Numbers": "VOICE_PHONE_NUMBERS",
+      Extensions: "VOICE_EXTENSIONS",
+      "Voicemail Boxes": "VOICE_VOICEMAIL_BOXES",
+      "Fax Numbers": "FAX_NUMBERS",
+      Messages: "FAX_MESSAGES",
+      "Email Routes": "FAX_EMAIL_ROUTES",
+      "Time Conditions": "CALL_ROUTING_TIME_CONDITIONS",
+      "IVR Menus": "CALL_ROUTING_IVR_MENUS",
+      "Call Queues": "CALL_ROUTING_QUEUES",
+      "Ring Groups": "CALL_ROUTING_RING_GROUPS",
+      Tickets: "SUPPORT_TICKETS",
+    }
+
+    const subItemEditAreas: Record<string, FeatureArea> = {
+      "Send Fax": "FAX_MESSAGES",
+    }
+
     const items: NavMainItem[] = [
       {
         title: "Home",
@@ -217,7 +250,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
 
     return items
-  }, [user?.isSuperuser, badges.teams])
+      .filter((item) => {
+        const area = topLevelAreas[item.title]
+        return !area || canView(area)
+      })
+      .map((item) => {
+        if (!item.items) return item
+        const filtered = item.items.filter((sub) => {
+          const editArea = subItemEditAreas[sub.title]
+          if (editArea) return canEdit(editArea)
+          const viewArea = subItemAreas[sub.title]
+          return !viewArea || canView(viewArea)
+        })
+        return filtered.length === item.items.length ? item : { ...item, items: filtered }
+      })
+  }, [user?.isSuperuser, badges.teams, canView, canEdit])
 
   const unreadCount = unreadData?.count || null
   const navSecondary = useMemo<NavMainItem[]>(
