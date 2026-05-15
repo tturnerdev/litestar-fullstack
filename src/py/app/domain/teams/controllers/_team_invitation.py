@@ -75,7 +75,7 @@ class TeamInvitationController(Controller):
     @post(
         operation_id="CreateTeamInvitation",
         summary="Create a team invitation",
-        description="Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.",
+        description="Sends a team invitation to the specified email address. Validates the invitee is not already a member, sends the invitation email, emits a team_invitation_created event, records an audit log entry, and notifies the invitee if they have an account.",
         path="",
         status_code=HTTP_201_CREATED,
         guards=[requires_team_admin],
@@ -121,7 +121,17 @@ class TeamInvitationController(Controller):
         payload["invited_by"] = current_user
         db_obj = await team_invitations_service.create(payload)
         after = capture_snapshot(db_obj)
-        request.app.emit(event_id="team_invitation_created", invitation_id=db_obj.id, mailer=app_mailer)
+        request.app.emit(event_id="team_invitation_created", invitation_id=db_obj.id)
+
+        try:
+            await app_mailer.send_team_invitation_email(
+                invitee_email=db_obj.email,
+                inviter_name=current_user.name or current_user.email,
+                team_name=team.name,
+                invitation_url=f"{app_mailer.base_url}/teams/{team.id}/invitations/{db_obj.id}/accept",
+            )
+        except Exception:
+            logger.warning("Failed to send team invitation email", exc_info=True)
 
         result = team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
         await log_audit(
@@ -152,6 +162,55 @@ class TeamInvitationController(Controller):
             logger.warning("Failed to send team invitation notification", exc_info=True)
 
         return result
+
+    @post(
+        operation_id="ResendTeamInvitation",
+        summary="Resend a team invitation email",
+        description="Resends the invitation email for a pending team invitation. Only team admins can resend invitations.",
+        path="/{invitation_id:uuid}/resend",
+        guards=[requires_team_admin],
+    )
+    async def resend_team_invitation(
+        self,
+        current_user: m.User,
+        team_invitations_service: TeamInvitationService,
+        teams_service: TeamService,
+        app_mailer: AppEmailService,
+        team_id: UUID,
+        invitation_id: UUID,
+    ) -> Message:
+        """Resend a team invitation email.
+
+        Args:
+            current_user: The current user resending the invitation.
+            team_invitations_service: The team invitation service.
+            teams_service: The teams service.
+            app_mailer: Email service for sending notifications.
+            team_id: The team id.
+            invitation_id: The invitation id.
+
+        Raises:
+            ClientException: If the invitation does not belong to this team or is already accepted.
+
+        Returns:
+            A message indicating that the invitation was resent.
+        """
+        invitation = await team_invitations_service.get(invitation_id)
+        if invitation.team_id != team_id:
+            raise ClientException(detail="Invitation does not belong to this team")
+        if invitation.is_accepted:
+            raise ClientException(detail="Invitation has already been accepted")
+
+        team = await teams_service.get(team_id)
+
+        await app_mailer.send_team_invitation_email(
+            invitee_email=invitation.email,
+            inviter_name=current_user.name or current_user.email,
+            team_name=team.name,
+            invitation_url=f"{app_mailer.base_url}/teams/{team.id}/invitations/{invitation.id}/accept",
+        )
+
+        return Message(message="Invitation email resent")
 
     @get(
         operation_id="ListTeamInvitations",

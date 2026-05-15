@@ -751,6 +751,9 @@ import type {
   RequestEmailVerificationData,
   RequestEmailVerificationErrors,
   RequestEmailVerificationResponses,
+  ResendTeamInvitationData,
+  ResendTeamInvitationErrors,
+  ResendTeamInvitationResponses,
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
@@ -5363,7 +5366,7 @@ export const listTeamInvitations = <ThrowOnError extends boolean = false>(
 /**
  * Create a team invitation
  *
- * Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.
+ * Sends a team invitation to the specified email address. Validates the invitee is not already a member, sends the invitation email, emits a team_invitation_created event, records an audit log entry, and notifies the invitee if they have an account.
  */
 export const createTeamInvitation = <ThrowOnError extends boolean = false>(
   options: Options<CreateTeamInvitationData, ThrowOnError>,
@@ -5433,6 +5436,24 @@ export const rejectTeamInvitation = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/teams/{team_id}/invitations/{invitation_id}/reject",
+    ...options,
+  });
+
+/**
+ * Resend a team invitation email
+ *
+ * Resends the invitation email for a pending team invitation. Only team admins can resend invitations.
+ */
+export const resendTeamInvitation = <ThrowOnError extends boolean = false>(
+  options: Options<ResendTeamInvitationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ResendTeamInvitationResponses,
+    ResendTeamInvitationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/invitations/{invitation_id}/resend",
     ...options,
   });
 

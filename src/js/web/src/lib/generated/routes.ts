@@ -267,6 +267,7 @@ export type RouteName =
   | 'reopen_ticket'
   | 'reprovision_device'
   | 'request_verification'
+  | 'resend_team_invitation'
   | 'reset_password_with_token'
   | 'revoke_all_sessions'
   | 'revoke_role'
@@ -875,6 +876,10 @@ export interface RoutePathParams {
     device_id: UUID;
   };
   'request_verification': Record<string, never>;
+  'resend_team_invitation': {
+    invitation_id: UUID;
+    team_id: UUID;
+  };
   'reset_password_with_token': Record<string, never>;
   'revoke_all_sessions': Record<string, never>;
   'revoke_role': {
@@ -2019,6 +2024,7 @@ export interface RouteQueryParams {
   'reopen_ticket': Record<string, never>;
   'reprovision_device': Record<string, never>;
   'request_verification': Record<string, never>;
+  'resend_team_invitation': Record<string, never>;
   'reset_password_with_token': Record<string, never>;
   'revoke_all_sessions': Record<string, never>;
   'revoke_role': Record<string, never>;
@@ -3856,6 +3862,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'resend_team_invitation': {
+    path: '/api/teams/{team_id}/invitations/{invitation_id}/resend',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['invitation_id', 'team_id'] as const,
     queryParams: [] as const,
   },
   'reset_password_with_token': {

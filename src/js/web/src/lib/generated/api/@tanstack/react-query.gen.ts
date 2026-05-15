@@ -265,6 +265,7 @@ import {
   reopenTicket,
   reprovisionDevice,
   requestEmailVerification,
+  resendTeamInvitation,
   resetPassword,
   revokeAllSessions,
   revokeRole,
@@ -1067,6 +1068,9 @@ import type {
   RequestEmailVerificationData,
   RequestEmailVerificationError,
   RequestEmailVerificationResponse,
+  ResendTeamInvitationData,
+  ResendTeamInvitationError,
+  ResendTeamInvitationResponse,
   ResetPasswordData,
   ResetPasswordError,
   ResetPasswordResponse,
@@ -7895,7 +7899,7 @@ export const listTeamInvitationsOptions = (
 /**
  * Create a team invitation
  *
- * Sends a team invitation to the specified email address. Validates the invitee is not already a member, emits a team_invitation_created event that triggers the invitation email, records an audit log entry, and notifies the invitee if they have an account.
+ * Sends a team invitation to the specified email address. Validates the invitee is not already a member, sends the invitation email, emits a team_invitation_created event, records an audit log entry, and notifies the invitee if they have an account.
  */
 export const createTeamInvitationMutation = (
   options?: Partial<Options<CreateTeamInvitationData>>,
@@ -7998,6 +8002,35 @@ export const rejectTeamInvitationMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await rejectTeamInvitation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Resend a team invitation email
+ *
+ * Resends the invitation email for a pending team invitation. Only team admins can resend invitations.
+ */
+export const resendTeamInvitationMutation = (
+  options?: Partial<Options<ResendTeamInvitationData>>,
+): UseMutationOptions<
+  ResendTeamInvitationResponse,
+  ResendTeamInvitationError,
+  Options<ResendTeamInvitationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ResendTeamInvitationResponse,
+    ResendTeamInvitationError,
+    Options<ResendTeamInvitationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await resendTeamInvitation({
         ...options,
         ...fnOptions,
         throwOnError: true,

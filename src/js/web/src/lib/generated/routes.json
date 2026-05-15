@@ -3253,6 +3253,21 @@
       ],
       "uri": "/api/email-verification/request"
     },
+    "resend_team_invitation": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "invitation_id": "UUID",
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "invitation_id",
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/invitations/{invitation_id}/resend"
+    },
     "reset_password_with_token": {
       "method": "post",
       "methods": [

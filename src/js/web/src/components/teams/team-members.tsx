@@ -28,6 +28,7 @@ import {
   deleteTeamInvitation,
   listTeamInvitations,
   removeMemberFromTeam,
+  resendTeamInvitation,
   type Team,
   type TeamInvitation,
   type TeamMember,
@@ -298,6 +299,29 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
     },
   })
 
+  const resendInvitationMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      const response = await resendTeamInvitation({
+        path: { team_id: teamId, invitation_id: invitationId },
+      })
+      if (response.error) {
+        throw new Error(response.error.detail || "Failed to resend invitation")
+      }
+      return response.data
+    },
+    onSuccess: (_data, invitationId) => {
+      const invitation = pendingInvitations.find((inv) => inv.id === invitationId)
+      toast.success("Invitation resent", {
+        description: `A new invitation email has been sent to ${invitation?.email ?? "the invitee"}.`,
+      })
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to resend invitation", {
+        description: error.message,
+      })
+    },
+  })
+
   const cancelInvitationMutation = useMutation({
     mutationFn: async (invitationId: string) => {
       const response = await deleteTeamInvitation({
@@ -519,13 +543,10 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
                       variant="ghost"
                       size="sm"
                       className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
-                      onClick={() => {
-                        toast.info("Invitation resent", {
-                          description: `A new invitation has been sent to ${invitation.email}.`,
-                        })
-                      }}
+                      onClick={() => resendInvitationMutation.mutate(invitation.id)}
+                      disabled={resendInvitationMutation.isPending}
                     >
-                      <RotateCw className="h-3.5 w-3.5" />
+                      {resendInvitationMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCw className="h-3.5 w-3.5" />}
                       Resend
                     </Button>
                     <Button

@@ -3551,9 +3551,9 @@ export type AdminListAttachmentsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    uploadedByIdIn?: Array<string> | null;
-    purposeIn?: Array<string> | null;
     teamIdIn?: Array<string> | null;
+    purposeIn?: Array<string> | null;
+    uploadedByIdIn?: Array<string> | null;
   };
   url: "/api/admin/attachments";
 };
@@ -3667,10 +3667,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3746,10 +3746,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3814,10 +3814,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3894,10 +3894,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -13276,6 +13276,45 @@ export type RejectTeamInvitationResponses = {
 
 export type RejectTeamInvitationResponse =
   RejectTeamInvitationResponses[keyof RejectTeamInvitationResponses];
+
+export type ResendTeamInvitationData = {
+  body?: never;
+  path: {
+    team_id: string;
+    invitation_id: string;
+  };
+  query?: never;
+  url: "/api/teams/{team_id}/invitations/{invitation_id}/resend";
+};
+
+export type ResendTeamInvitationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ResendTeamInvitationError =
+  ResendTeamInvitationErrors[keyof ResendTeamInvitationErrors];
+
+export type ResendTeamInvitationResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: Message;
+};
+
+export type ResendTeamInvitationResponse =
+  ResendTeamInvitationResponses[keyof ResendTeamInvitationResponses];
 
 export type ListLocationsData = {
   body?: never;
