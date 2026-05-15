@@ -56,6 +56,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import {
   useDeleteVoicemailBox,
   useDeleteVoicemailMessage,
@@ -99,6 +100,8 @@ function formatRetention(days: number): string {
 function VoicemailBoxDetailPage() {
   const { boxId } = Route.useParams()
   const navigate = useNavigate()
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("VOICE_VOICEMAIL_BOXES")
   const { data: box, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useVoicemailBox(boxId)
   const deleteBoxMutation = useDeleteVoicemailBox()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -217,11 +220,15 @@ function VoicemailBoxDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Box ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -231,7 +238,7 @@ function VoicemailBoxDetailPage() {
       {/* Box Settings */}
       <PageSection>
         <SectionErrorBoundary name="Box Settings">
-          <BoxSettingsForm boxId={boxId} />
+          <BoxSettingsForm boxId={boxId} readOnly={!hasEditPermission} />
         </SectionErrorBoundary>
       </PageSection>
 
@@ -250,31 +257,33 @@ function VoicemailBoxDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.3}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30 bg-card/80 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-              <CardDescription>Irreversible and destructive actions for this voicemail box.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                <div>
-                  <p className="font-medium text-sm">Delete this voicemail box</p>
-                  <p className="text-xs text-muted-foreground">Once deleted, this voicemail box and all messages cannot be recovered.</p>
+      {hasEditPermission && (
+        <PageSection delay={0.3}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30 bg-card/80 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+                <CardDescription>Irreversible and destructive actions for this voicemail box.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                  <div>
+                    <p className="font-medium text-sm">Delete this voicemail box</p>
+                    <p className="text-xs text-muted-foreground">Once deleted, this voicemail box and all messages cannot be recovered.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       {/* Delete box confirmation */}
       <AlertDialog
@@ -347,7 +356,7 @@ const GREETING_LABELS: Record<string, string> = {
   name_only: "Name only",
 }
 
-function BoxSettingsForm({ boxId }: { boxId: string }) {
+function BoxSettingsForm({ boxId, readOnly = false }: { boxId: string; readOnly?: boolean }) {
   const { data, isLoading, isError, refetch: refetchSettings } = useVoicemailBox(boxId)
   const updateMutation = useUpdateVoicemailBox(boxId)
 
@@ -496,9 +505,11 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
                   </Button>
                 </>
               ) : (
-                <Button size="sm" onClick={() => setEditing(true)}>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit
-                </Button>
+                !readOnly && (
+                  <Button size="sm" onClick={() => setEditing(true)}>
+                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                  </Button>
+                )
               )}
             </div>
           </div>

@@ -41,7 +41,7 @@ function formatRetention(days: number): string {
   return `≈ ${months} month${months !== 1 ? "s" : ""}`
 }
 
-export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) {
+export function VoicemailSettingsForm({ extensionId, readOnly = false }: { extensionId: string; readOnly?: boolean }) {
   const { user } = useAuthStore()
   const isAdminOrSuper = user?.isSuperuser || user?.roles?.some((r) => r.roleSlug === "admin")
   const { data, isLoading, isError, refetch } = useVoicemailSettings(extensionId)
@@ -227,10 +227,12 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
             <div className="flex items-center gap-3">
               {data.greetingFilePath ? <Badge variant="secondary">Greeting uploaded</Badge> : <span className="text-sm text-muted-foreground">No custom greeting uploaded.</span>}
               <input ref={fileInputRef} type="file" accept="audio/*" className="hidden" onChange={handleGreetingUpload} />
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadMutation.isPending}>
-                {uploadMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Upload className="mr-1 h-4 w-4" />}
-                {uploadMutation.isPending ? "Uploading..." : "Upload greeting"}
-              </Button>
+              {!readOnly && (
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadMutation.isPending}>
+                  {uploadMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Upload className="mr-1 h-4 w-4" />}
+                  {uploadMutation.isPending ? "Uploading..." : "Upload greeting"}
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -383,29 +385,31 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
         <Separator />
 
         {/* ── Actions ──────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={handleSave}
-            disabled={(!dirty && !showSaveSuccess) || updateMutation.isPending || !!pinError || !!emailRequired}
-            variant={showSaveSuccess ? "outline" : "default"}
-            className={showSaveSuccess ? "border-green-500/50 text-green-600 dark:text-green-400" : ""}
-          >
-            {showSaveSuccess ? (
-              <>
-                <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                Saved
-              </>
-            ) : updateMutation.isPending ? (
-              "Saving..."
-            ) : (
-              "Save changes"
-            )}
-          </Button>
-          <Button variant="outline" onClick={handleResetToDefaults}>
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Reset to defaults
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleSave}
+              disabled={(!dirty && !showSaveSuccess) || updateMutation.isPending || !!pinError || !!emailRequired}
+              variant={showSaveSuccess ? "outline" : "default"}
+              className={showSaveSuccess ? "border-green-500/50 text-green-600 dark:text-green-400" : ""}
+            >
+              {showSaveSuccess ? (
+                <>
+                  <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                  Saved
+                </>
+              ) : updateMutation.isPending ? (
+                "Saving..."
+              ) : (
+                "Save changes"
+              )}
+            </Button>
+            <Button variant="outline" onClick={handleResetToDefaults}>
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+              Reset to defaults
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

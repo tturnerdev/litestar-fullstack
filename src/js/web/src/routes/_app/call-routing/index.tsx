@@ -32,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import {
   type CallQueue,
   type IvrMenu,
@@ -428,9 +429,10 @@ interface TabSearchProps {
   debouncedSearch: string
   onFreshnessChange?: (state: TabFreshnessState) => void
   searchInputRef?: React.RefObject<HTMLInputElement | null>
+  canEdit?: boolean
 }
 
-function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
+function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef, canEdit: canEditProp = true }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -557,9 +559,11 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New
-          </Button>
+          {canEditProp && (
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New
+            </Button>
+          )}
         </div>
       </div>
 
@@ -591,11 +595,11 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
               <Button variant="outline" size="sm" onClick={() => onSearchChange("")}>
                 Clear search
               </Button>
-            ) : (
+            ) : canEditProp ? (
               <Button size="sm" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Create time condition
               </Button>
-            )
+            ) : undefined
           }
         />
       ) : (
@@ -615,9 +619,11 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
             <Table aria-label="Time Conditions" aria-busy={isLoading || isRefetching}>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-10">
-                    <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all time conditions" />
-                  </TableHead>
+                  {canEditProp && (
+                    <TableHead className="w-10">
+                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all time conditions" />
+                    </TableHead>
+                  )}
                   <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                   <SortableHeader
                     label="Match Destination"
@@ -655,16 +661,18 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
                       if (e.key === "Enter") navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })
                     }}
                   >
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedIds.has(tc.id)}
-                        onChange={(e) => {
-                          e.stopPropagation()
-                          toggleOne(tc.id)
-                        }}
-                        aria-label={`Select ${tc.name}`}
-                      />
-                    </TableCell>
+                    {canEditProp && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(tc.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            toggleOne(tc.id)
+                          }}
+                          aria-label={`Select ${tc.name}`}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Link
                         to="/call-routing/time-conditions/$timeConditionId"
@@ -697,15 +705,19 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
                           <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })}>
                             <Eye className="mr-2 h-4 w-4" /> View details
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id }, search: { edit: true } })}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setTimeConditionToDelete({ id: tc.id, name: tc.name })}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
+                          {canEditProp && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id }, search: { edit: true } })}
+                              >
+                                <Pencil className="mr-2 h-4 w-4" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setTimeConditionToDelete({ id: tc.id, name: tc.name })}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -1774,6 +1786,7 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
 
 function CallRoutingPage() {
   useDocumentTitle("Call Routing")
+  const { canEdit } = usePermissions()
 
   const { tab = "time-conditions", q: searchParam } = Route.useSearch()
   const navigate = Route.useNavigate()
@@ -1920,6 +1933,7 @@ function CallRoutingPage() {
                 debouncedSearch={debouncedSearch}
                 onFreshnessChange={freshnessCallbacks["time-conditions"]}
                 searchInputRef={searchInputRef}
+                canEdit={canEdit("CALL_ROUTING_TIME_CONDITIONS")}
               />
             </SectionErrorBoundary>
           </TabsContent>
@@ -1931,6 +1945,7 @@ function CallRoutingPage() {
                 debouncedSearch={debouncedSearch}
                 onFreshnessChange={freshnessCallbacks["ivr-menus"]}
                 searchInputRef={searchInputRef}
+                canEdit={canEdit("CALL_ROUTING_IVR_MENUS")}
               />
             </SectionErrorBoundary>
           </TabsContent>
@@ -1942,6 +1957,7 @@ function CallRoutingPage() {
                 debouncedSearch={debouncedSearch}
                 onFreshnessChange={freshnessCallbacks["call-queues"]}
                 searchInputRef={searchInputRef}
+                canEdit={canEdit("CALL_ROUTING_QUEUES")}
               />
             </SectionErrorBoundary>
           </TabsContent>
@@ -1953,6 +1969,7 @@ function CallRoutingPage() {
                 debouncedSearch={debouncedSearch}
                 onFreshnessChange={freshnessCallbacks["ring-groups"]}
                 searchInputRef={searchInputRef}
+                canEdit={canEdit("CALL_ROUTING_RING_GROUPS")}
               />
             </SectionErrorBoundary>
           </TabsContent>

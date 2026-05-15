@@ -26,6 +26,7 @@ import {
   Voicemail,
 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 import { z } from "zod"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -50,6 +51,7 @@ import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialo
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
 import { useDevicesByExtension } from "@/lib/api/hooks/devices"
 import { useE911Registration } from "@/lib/api/hooks/e911"
@@ -86,9 +88,11 @@ function ExtensionDetailPage() {
   const { tab = "details", edit } = Route.useSearch()
   const router = useRouter()
   const navigate = Route.useNavigate()
+  const { canEdit } = usePermissions()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useExtension(extensionId)
   useDocumentTitle(data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension")
   const updateExtension = useUpdateExtension(extensionId)
+  const hasEditPermission = canEdit("VOICE_EXTENSIONS")
   const gatewayQuery = useGatewayLookupExtension(data?.extensionNumber ?? "", tab === "external")
   const phoneNumberQuery = usePhoneNumber(data?.phoneNumberId ?? "")
   const [showEditDialog, setShowEditDialog] = useState(false)
@@ -253,9 +257,11 @@ function ExtensionDetailPage() {
                 Disabled
               </Badge>
             )}
-            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit
-            </Button>
+            {hasEditPermission && (
+              <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -272,11 +278,15 @@ function ExtensionDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Extension Number
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Extension
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Extension
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -465,31 +475,33 @@ function ExtensionDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.25}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this extension</p>
-                  <p className="text-sm text-muted-foreground">
-                    This action cannot be undone. All forwarding rules, voicemail settings, and DND configuration will be permanently removed.
-                  </p>
+      {hasEditPermission && (
+        <PageSection delay={0.25}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this extension</p>
+                    <p className="text-sm text-muted-foreground">
+                      This action cannot be undone. All forwarding rules, voicemail settings, and DND configuration will be permanently removed.
+                    </p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       {/* Edit extension dialog */}
       <EditExtensionDialog extension={data} open={showEditDialog} onOpenChange={setShowEditDialog} />

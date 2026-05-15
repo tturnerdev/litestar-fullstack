@@ -10,6 +10,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDndSettings, useExtension, useToggleDnd } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/dnd")({
@@ -61,6 +62,8 @@ function formatScheduleDays(days: number[] | null): string {
 function DndPage() {
   useDocumentTitle("Do Not Disturb")
   const { extensionId } = Route.useParams()
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("VOICE_EXTENSIONS")
   const { data: extension, isLoading: extLoading } = useExtension(extensionId)
   const { data: dnd, isLoading: dndLoading, isError, refetch } = useDndSettings(extensionId)
   const toggleMutation = useToggleDnd(extensionId)
@@ -223,7 +226,7 @@ function DndPage() {
                     role="switch"
                     aria-checked={isEnabled}
                     aria-label="Toggle Do Not Disturb"
-                    disabled={toggleMutation.isPending}
+                    disabled={toggleMutation.isPending || !hasEditPermission}
                     onClick={() => toggleMutation.mutate()}
                   >
                     <span
@@ -322,7 +325,7 @@ function DndPage() {
       {/* Settings Form */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="DND Settings">
-          <DndSettingsForm extensionId={extensionId} />
+          <DndSettingsForm extensionId={extensionId} readOnly={!hasEditPermission} />
         </SectionErrorBoundary>
       </PageSection>
     </PageContainer>

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Loader2, ShieldAlert } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useCreateExtension, usePhoneNumbers } from "@/lib/api/hooks/voice"
 import type { ExtensionCreate } from "@/lib/generated/api"
 import { extensionNumberRegex } from "@/lib/validation"
@@ -52,8 +53,27 @@ type CreateExtensionFormData = z.infer<typeof createExtensionSchema>
 function NewExtensionPage() {
   useDocumentTitle("New Extension")
   const router = useRouter()
+  const { canEdit } = usePermissions()
   const createExtension = useCreateExtension()
   const { data: phoneNumbers } = usePhoneNumbers(1, 100)
+
+  if (!canEdit("VOICE_EXTENSIONS")) {
+    return (
+      <PageContainer className="flex-1">
+        <PageHeader eyebrow="Voice" title="New Extension" description="Create a new internal extension for call routing." />
+        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+          <ShieldAlert className="h-12 w-12 text-muted-foreground" />
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">Permission Denied</h2>
+            <p className="text-sm text-muted-foreground">You do not have permission to create extensions.</p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link to="/voice/extensions">Back to Extensions</Link>
+          </Button>
+        </div>
+      </PageContainer>
+    )
+  }
 
   const form = useForm<CreateExtensionFormData>({
     resolver: zodResolver(createExtensionSchema),

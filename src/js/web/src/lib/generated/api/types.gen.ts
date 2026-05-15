@@ -3551,9 +3551,9 @@ export type AdminListAttachmentsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    teamIdIn?: Array<string> | null;
-    purposeIn?: Array<string> | null;
     uploadedByIdIn?: Array<string> | null;
+    purposeIn?: Array<string> | null;
+    teamIdIn?: Array<string> | null;
   };
   url: "/api/admin/attachments";
 };
@@ -3667,10 +3667,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3746,10 +3746,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3814,10 +3814,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3894,10 +3894,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

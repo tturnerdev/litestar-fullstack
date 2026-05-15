@@ -42,6 +42,7 @@ import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useE911Registration } from "@/lib/api/hooks/e911"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { useTeam } from "@/lib/api/hooks/teams"
@@ -80,9 +81,11 @@ function PhoneNumberDetailPage() {
   const navigate = useNavigate()
   const routeNavigate = Route.useNavigate()
 
+  const { canEdit } = usePermissions()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
   const updatePhoneNumber = useUpdatePhoneNumber(phoneNumberId)
+  const hasEditPermission = canEdit("VOICE_PHONE_NUMBERS")
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
   const extensionsQuery = useExtensionsByPhoneNumber(phoneNumberId)
   const teamQuery = useTeam(data?.teamId ?? "")
@@ -236,14 +239,16 @@ function PhoneNumberDetailPage() {
           <div className="flex items-center gap-3">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Badge variant={data.isActive ? "default" : "secondary"}>{data.isActive ? "Active" : "Inactive"}</Badge>
-            {!editing && (
+            {hasEditPermission && !editing && (
               <Button variant="outline" size="sm" onClick={startEditing}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
             )}
-            <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteOpen(true)}>
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </Button>
+            {hasEditPermission && (
+              <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/voice/phone-numbers">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -275,11 +280,15 @@ function PhoneNumberDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Number
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -656,29 +665,31 @@ function PhoneNumberDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.3}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this phone number</p>
-                  <p className="text-sm text-muted-foreground">This action cannot be undone. Any associated extensions and forwarding rules will also be removed.</p>
+      {hasEditPermission && (
+        <PageSection delay={0.3}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this phone number</p>
+                    <p className="text-sm text-muted-foreground">This action cannot be undone. Any associated extensions and forwarding rules will also be removed.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       <PhoneNumberEditSheet phoneNumber={data} open={editOpen} onOpenChange={setEditOpen} />
 

@@ -1,28 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { LucideIcon } from "lucide-react"
 import {
   CheckCircle2,
-  Clock,
-  GitBranch,
-  Headset,
-  Inbox,
   Info,
-  LifeBuoy,
-  List,
   Loader2,
   Lock,
-  Mail,
-  MailPlus,
-  MapPin,
-  Monitor,
-  Phone,
-  PhoneForwarded,
-  Printer,
   Save,
-  ShieldAlert,
-  TicketCheck,
   Users,
-  Voicemail,
   XCircle,
 } from "lucide-react"
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
@@ -34,129 +17,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUser } from "@/lib/api/hooks/admin"
-import { type FeatureArea, listTeamPermissions, type TeamRolePermission, type TeamRolePermissionEntry, type TeamRoles, updateTeamPermissions } from "@/lib/generated/api"
+import { type FeatureArea, listTeamPermissions, type TeamRolePermission, updateTeamPermissions } from "@/lib/generated/api"
+import { buildDefaultPermissions, FEATURE_AREAS, type FeatureAreaNode, matrixToEntries, mergeServerPermissions, type PermissionMatrix, ROLES } from "@/lib/permissions"
 
 interface ManagePermissionsDialogProps {
   userId: string
   open: boolean
   onOpenChange: (open: boolean) => void
-}
-
-interface FeatureAreaNode {
-  key: FeatureArea
-  label: string
-  icon: LucideIcon
-  children?: { key: FeatureArea; label: string; icon: LucideIcon }[]
-}
-
-const FEATURE_AREAS: readonly FeatureAreaNode[] = [
-  { key: "DEVICES", label: "Devices", icon: Monitor },
-  {
-    key: "VOICE",
-    label: "Voice",
-    icon: Phone,
-    children: [
-      { key: "VOICE_PHONE_NUMBERS", label: "Phone Numbers", icon: Phone },
-      { key: "VOICE_EXTENSIONS", label: "Extensions", icon: PhoneForwarded },
-      { key: "VOICE_VOICEMAIL", label: "Voicemail", icon: Voicemail },
-      { key: "VOICE_VOICEMAIL_BOXES", label: "Voicemail Boxes", icon: Inbox },
-    ],
-  },
-  {
-    key: "FAX",
-    label: "Fax",
-    icon: Printer,
-    children: [
-      { key: "FAX_NUMBERS", label: "Fax Numbers", icon: Printer },
-      { key: "FAX_MESSAGES", label: "Fax Messages", icon: Mail },
-      { key: "FAX_EMAIL_ROUTES", label: "Email Routes", icon: MailPlus },
-    ],
-  },
-  {
-    key: "SUPPORT",
-    label: "Support",
-    icon: LifeBuoy,
-    children: [{ key: "SUPPORT_TICKETS", label: "Tickets", icon: TicketCheck }],
-  },
-  {
-    key: "CALL_ROUTING",
-    label: "Call Routing",
-    icon: GitBranch,
-    children: [
-      { key: "CALL_ROUTING_QUEUES", label: "Call Queues", icon: Headset },
-      { key: "CALL_ROUTING_RING_GROUPS", label: "Ring Groups", icon: Users },
-      { key: "CALL_ROUTING_IVR_MENUS", label: "IVR Menus", icon: List },
-      { key: "CALL_ROUTING_TIME_CONDITIONS", label: "Time Conditions", icon: Clock },
-    ],
-  },
-  { key: "E911", label: "E911", icon: ShieldAlert },
-  { key: "LOCATIONS", label: "Locations", icon: MapPin },
-  { key: "SCHEDULES", label: "Schedules", icon: Clock },
-  { key: "TEAMS", label: "Teams", icon: Users },
-]
-
-function allFeatureKeys(): FeatureArea[] {
-  const keys: FeatureArea[] = []
-  for (const area of FEATURE_AREAS) {
-    keys.push(area.key)
-    if (area.children) {
-      for (const child of area.children) keys.push(child.key)
-    }
-  }
-  return keys
-}
-
-const ALL_FEATURE_KEYS = allFeatureKeys()
-
-const ROLES: TeamRoles[] = ["ADMIN", "MEMBER"]
-
-/** Build the default permission matrix (ADMIN=full, MEMBER=view-only). */
-function buildDefaultPermissions(): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
-  const result: Record<string, Record<string, { canView: boolean; canEdit: boolean }>> = {}
-  for (const role of ROLES) {
-    result[role] = {}
-    for (const key of ALL_FEATURE_KEYS) {
-      if (role === "ADMIN") {
-        result[role][key] = { canView: true, canEdit: true }
-      } else {
-        result[role][key] = { canView: true, canEdit: false }
-      }
-    }
-  }
-  return result
-}
-
-/** Merge server permission rows onto the default matrix. */
-function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
-  const matrix = buildDefaultPermissions()
-  for (const row of rows) {
-    if (matrix[row.role] && matrix[row.role][row.featureArea]) {
-      matrix[row.role][row.featureArea] = {
-        canView: row.canView,
-        canEdit: row.canEdit,
-      }
-    }
-  }
-  return matrix
-}
-
-/** Flatten the matrix back to an array of permission entries for the PUT body. */
-function matrixToEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): TeamRolePermissionEntry[] {
-  const entries: TeamRolePermissionEntry[] = []
-  for (const role of ROLES) {
-    for (const key of ALL_FEATURE_KEYS) {
-      const perm = matrix[role]?.[key]
-      if (perm) {
-        entries.push({
-          role: role as TeamRoles,
-          featureArea: key,
-          canView: perm.canView,
-          canEdit: perm.canEdit,
-        })
-      }
-    }
-  }
-  return entries
 }
 
 export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePermissionsDialogProps) {
@@ -250,7 +117,7 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
 function renderPermissionRows(areas: readonly FeatureAreaNode[], rolePerms: Record<string, { canView: boolean; canEdit: boolean }>, mode: "view"): React.ReactNode
 function renderPermissionRows(
   areas: readonly FeatureAreaNode[],
-  matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>,
+  matrix: PermissionMatrix,
   mode: "edit",
   opts: {
     togglePermission: (role: string, featureArea: string, field: "canView" | "canEdit") => void
@@ -260,7 +127,7 @@ function renderPermissionRows(
 ): React.ReactNode
 function renderPermissionRows(
   areas: readonly FeatureAreaNode[],
-  matrixOrPerms: Record<string, Record<string, { canView: boolean; canEdit: boolean }>> | Record<string, { canView: boolean; canEdit: boolean }>,
+  matrixOrPerms: PermissionMatrix | Record<string, { canView: boolean; canEdit: boolean }>,
   mode: "view" | "edit",
   opts?: {
     togglePermission: (role: string, featureArea: string, field: "canView" | "canEdit") => void
@@ -312,7 +179,7 @@ function renderPermissionRows(
         }
       }
     } else {
-      const matrix = matrixOrPerms as Record<string, Record<string, { canView: boolean; canEdit: boolean }>>
+      const matrix = matrixOrPerms as PermissionMatrix
       rows.push(
         <TableRow key={area.key} className="hover:bg-muted/50 bg-muted/20">
           <TableCell className="text-sm font-medium">
@@ -515,7 +382,7 @@ function TeamPermissionEditor({ teamId, teamName, onBack, onSaved }: { teamId: s
     },
   })
 
-  const [matrix, setMatrix] = useState<Record<string, Record<string, { canView: boolean; canEdit: boolean }>>>(() => buildDefaultPermissions())
+  const [matrix, setMatrix] = useState<PermissionMatrix>(() => buildDefaultPermissions())
   const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {

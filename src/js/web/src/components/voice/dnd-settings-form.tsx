@@ -37,7 +37,7 @@ const MODE_OPTIONS = [
   },
 ] as const
 
-export function DndSettingsForm({ extensionId }: { extensionId: string }) {
+export function DndSettingsForm({ extensionId, readOnly = false }: { extensionId: string; readOnly?: boolean }) {
   const { data, isLoading, isError, refetch } = useDndSettings(extensionId)
   const updateMutation = useUpdateDndSettings(extensionId)
   const toggleMutation = useToggleDnd(extensionId)
@@ -262,10 +262,12 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
 
         <Separator />
 
-        <Button onClick={handleSave} disabled={!dirty || updateMutation.isPending}>
-          {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {updateMutation.isPending ? "Saving..." : "Save changes"}
-        </Button>
+        {!readOnly && (
+          <Button onClick={handleSave} disabled={!dirty || updateMutation.isPending}>
+            {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {updateMutation.isPending ? "Saving..." : "Save changes"}
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertTriangle, Flag, Globe, Hash, Info, Loader2, MapPin, Phone, Shield, Tag, User } from "lucide-react"
+import { AlertTriangle, Flag, Globe, Hash, Info, Loader2, MapPin, Phone, Shield, ShieldAlert, Tag, User } from "lucide-react"
 import { useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useCreatePhoneNumber } from "@/lib/api/hooks/voice"
 import type { PhoneNumberType } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
@@ -73,8 +75,27 @@ const tips = [
 function NewPhoneNumberPage() {
   useDocumentTitle("New Phone Number")
   const router = useRouter()
+  const { canEdit } = usePermissions()
   const createMutation = useCreatePhoneNumber()
   const justSubmittedRef = useRef(false)
+
+  if (!canEdit("VOICE_PHONE_NUMBERS")) {
+    return (
+      <PageContainer className="flex-1">
+        <PageHeader eyebrow="Voice" title="New Phone Number" description="Add a DID phone number to your system for call routing and assignment." />
+        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+          <ShieldAlert className="h-12 w-12 text-muted-foreground" />
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">Permission Denied</h2>
+            <p className="text-sm text-muted-foreground">You do not have permission to create phone numbers.</p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link to="/voice/phone-numbers">Back to Phone Numbers</Link>
+          </Button>
+        </div>
+      </PageContainer>
+    )
+  }
 
   // Form state
   const [number, setNumber] = useState("")

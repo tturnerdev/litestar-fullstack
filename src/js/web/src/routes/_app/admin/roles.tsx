@@ -1,31 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import type { LucideIcon } from "lucide-react"
 import {
   AlertCircle,
   CheckCircle2,
-  Clock,
   Download,
-  GitBranch,
-  Headset,
-  Inbox,
   Info,
-  LifeBuoy,
-  List,
   Loader2,
-  Mail,
-  MailPlus,
-  MapPin,
-  Monitor,
-  Phone,
-  PhoneForwarded,
-  Printer,
   Save,
   Shield,
-  ShieldAlert,
-  TicketCheck,
-  Users,
-  Voicemail,
   XCircle,
 } from "lucide-react"
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
@@ -44,81 +26,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminTeams, useDefaultPermissions, useTeamPermissions, useUpdateDefaultPermissions, useUpdateTeamPermissions } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
-import type { DefaultPermissionEntry, DefaultPermissionTemplate, FeatureArea, TeamRolePermission, TeamRolePermissionEntry, TeamRoles } from "@/lib/generated/api"
+import type { DefaultPermissionEntry, DefaultPermissionTemplate, FeatureArea, TeamRolePermission, TeamRoles } from "@/lib/generated/api"
+import { ALL_FEATURE_KEYS, buildDefaultPermissions, FEATURE_AREAS, matrixToEntries, mergeServerPermissions, type PermissionMatrix, ROLES } from "@/lib/permissions"
 
 export const Route = createFileRoute("/_app/admin/roles")({
   component: AdminRolesPage,
 })
 
 // -- Constants ---------------------------------------------------------------
-
-interface FeatureAreaNode {
-  key: FeatureArea
-  label: string
-  icon: LucideIcon
-  children?: { key: FeatureArea; label: string; icon: LucideIcon }[]
-}
-
-const FEATURE_AREAS: readonly FeatureAreaNode[] = [
-  { key: "DEVICES", label: "Devices", icon: Monitor },
-  {
-    key: "VOICE",
-    label: "Voice",
-    icon: Phone,
-    children: [
-      { key: "VOICE_PHONE_NUMBERS", label: "Phone Numbers", icon: Phone },
-      { key: "VOICE_EXTENSIONS", label: "Extensions", icon: PhoneForwarded },
-      { key: "VOICE_VOICEMAIL", label: "Voicemail", icon: Voicemail },
-      { key: "VOICE_VOICEMAIL_BOXES", label: "Voicemail Boxes", icon: Inbox },
-    ],
-  },
-  {
-    key: "FAX",
-    label: "Fax",
-    icon: Printer,
-    children: [
-      { key: "FAX_NUMBERS", label: "Fax Numbers", icon: Printer },
-      { key: "FAX_MESSAGES", label: "Fax Messages", icon: Mail },
-      { key: "FAX_EMAIL_ROUTES", label: "Email Routes", icon: MailPlus },
-    ],
-  },
-  {
-    key: "SUPPORT",
-    label: "Support",
-    icon: LifeBuoy,
-    children: [{ key: "SUPPORT_TICKETS", label: "Tickets", icon: TicketCheck }],
-  },
-  {
-    key: "CALL_ROUTING",
-    label: "Call Routing",
-    icon: GitBranch,
-    children: [
-      { key: "CALL_ROUTING_QUEUES", label: "Call Queues", icon: Headset },
-      { key: "CALL_ROUTING_RING_GROUPS", label: "Ring Groups", icon: Users },
-      { key: "CALL_ROUTING_IVR_MENUS", label: "IVR Menus", icon: List },
-      { key: "CALL_ROUTING_TIME_CONDITIONS", label: "Time Conditions", icon: Clock },
-    ],
-  },
-  { key: "E911", label: "E911", icon: ShieldAlert },
-  { key: "LOCATIONS", label: "Locations", icon: MapPin },
-  { key: "SCHEDULES", label: "Schedules", icon: Clock },
-  { key: "TEAMS", label: "Teams", icon: Users },
-]
-
-function allFeatureKeys(): FeatureArea[] {
-  const keys: FeatureArea[] = []
-  for (const area of FEATURE_AREAS) {
-    keys.push(area.key)
-    if (area.children) {
-      for (const child of area.children) keys.push(child.key)
-    }
-  }
-  return keys
-}
-
-const ALL_FEATURE_KEYS = allFeatureKeys()
-
-const ROLES: TeamRoles[] = ["ADMIN", "MEMBER"]
 
 interface PermissionExportRow {
   teamName: string
@@ -138,22 +53,7 @@ const csvHeaders: CsvHeader<PermissionExportRow>[] = [
 
 // -- Helpers -----------------------------------------------------------------
 
-function buildDefaultPermissions(): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
-  const result: Record<string, Record<string, { canView: boolean; canEdit: boolean }>> = {}
-  for (const role of ROLES) {
-    result[role] = {}
-    for (const key of ALL_FEATURE_KEYS) {
-      if (role === "ADMIN") {
-        result[role][key] = { canView: true, canEdit: true }
-      } else {
-        result[role][key] = { canView: true, canEdit: false }
-      }
-    }
-  }
-  return result
-}
-
-function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
+function mergeDefaultTemplatePermissions(rows: DefaultPermissionTemplate[]): PermissionMatrix {
   const matrix = buildDefaultPermissions()
   for (const row of rows) {
     if (matrix[row.role] && matrix[row.role][row.featureArea]) {
@@ -166,38 +66,7 @@ function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Reco
   return matrix
 }
 
-function matrixToEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): TeamRolePermissionEntry[] {
-  const entries: TeamRolePermissionEntry[] = []
-  for (const role of ROLES) {
-    for (const key of ALL_FEATURE_KEYS) {
-      const perm = matrix[role]?.[key]
-      if (perm) {
-        entries.push({
-          role: role as TeamRoles,
-          featureArea: key,
-          canView: perm.canView,
-          canEdit: perm.canEdit,
-        })
-      }
-    }
-  }
-  return entries
-}
-
-function mergeDefaultTemplatePermissions(rows: DefaultPermissionTemplate[]): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
-  const matrix = buildDefaultPermissions()
-  for (const row of rows) {
-    if (matrix[row.role] && matrix[row.role][row.featureArea]) {
-      matrix[row.role][row.featureArea] = {
-        canView: row.canView,
-        canEdit: row.canEdit,
-      }
-    }
-  }
-  return matrix
-}
-
-function matrixToDefaultEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): DefaultPermissionEntry[] {
+function matrixToDefaultEntries(matrix: PermissionMatrix): DefaultPermissionEntry[] {
   const entries: DefaultPermissionEntry[] = []
   for (const role of ROLES) {
     for (const key of ALL_FEATURE_KEYS) {
@@ -215,7 +84,7 @@ function matrixToDefaultEntries(matrix: Record<string, Record<string, { canView:
   return entries
 }
 
-function countPermissions(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): { allowed: number; total: number } {
+function countPermissions(matrix: PermissionMatrix): { allowed: number; total: number } {
   let allowed = 0
   let total = 0
   for (const role of ROLES) {

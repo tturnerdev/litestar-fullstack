@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VoicemailMessageList } from "@/components/voice/voicemail-message-list"
 import { VoicemailSettingsForm } from "@/components/voice/voicemail-settings-form"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useExtension, useVoicemailMessages, useVoicemailSettings } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/voicemail")({
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/voicem
 function VoicemailPage() {
   useDocumentTitle("Voicemail Settings")
   const { extensionId } = Route.useParams()
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("VOICE_VOICEMAIL")
   const { data: extension, isLoading: extLoading } = useExtension(extensionId)
   const { data: vmMessages, isLoading: msgsLoading } = useVoicemailMessages(extensionId, 1, 100)
   const { data: vmSettings, isLoading: settingsLoading } = useVoicemailSettings(extensionId)
@@ -114,7 +117,7 @@ function VoicemailPage() {
             </TabsContent>
 
             <TabsContent value="settings" className="mt-6">
-              <VoicemailSettingsForm extensionId={extensionId} />
+              <VoicemailSettingsForm extensionId={extensionId} readOnly={!hasEditPermission} />
             </TabsContent>
           </Tabs>
         </SectionErrorBoundary>

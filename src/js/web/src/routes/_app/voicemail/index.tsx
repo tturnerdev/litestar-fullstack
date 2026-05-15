@@ -51,6 +51,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import {
   useBulkDeleteVoicemailMessages,
   useBulkMarkVoicemailRead,
@@ -116,6 +117,9 @@ function VoicemailInboxPage() {
   useDocumentTitle("Voicemail")
   const { tab = "messages" } = Route.useSearch()
   const navigate = Route.useNavigate()
+  const { canEdit } = usePermissions()
+  const canEditMessages = canEdit("VOICE_VOICEMAIL")
+  const canEditBoxes = canEdit("VOICE_VOICEMAIL_BOXES")
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -151,13 +155,13 @@ function VoicemailInboxPage() {
 
           <TabsContent value="messages" className="mt-6">
             <SectionErrorBoundary name="Voicemail Messages">
-              <MessagesTab />
+              <MessagesTab canEdit={canEditMessages} />
             </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="boxes" className="mt-6">
             <SectionErrorBoundary name="Voicemail Boxes">
-              <BoxesTab />
+              <BoxesTab canEdit={canEditBoxes} />
             </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
@@ -168,7 +172,7 @@ function VoicemailInboxPage() {
 
 // -- Messages Tab -------------------------------------------------------------
 
-function MessagesTab() {
+function MessagesTab({ canEdit }: { canEdit: boolean }) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
@@ -472,10 +476,12 @@ function MessagesTab() {
             {bulkMarkReadMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <MailOpen className="mr-1 h-4 w-4" />}
             {bulkMarkReadMutation.isPending ? "Marking..." : "Mark read"}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={bulkDeleteMutation.isPending}>
-            {bulkDeleteMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
-            Delete
-          </Button>
+          {canEdit && (
+            <Button variant="outline" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={bulkDeleteMutation.isPending}>
+              {bulkDeleteMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
+              Delete
+            </Button>
+          )}
         </div>
       )}
 
@@ -630,11 +636,15 @@ function MessagesTab() {
                               </>
                             )}
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem variant="destructive" onClick={() => setSingleDeleteId(msg.id)}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
+                          {canEdit && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem variant="destructive" onClick={() => setSingleDeleteId(msg.id)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -693,6 +703,7 @@ function MessagesTab() {
             setSingleDeleteId(detailMessage.id)
           }
         }}
+        canEdit={canEdit}
       />
 
       {/* Bulk delete confirmation */}
@@ -784,12 +795,14 @@ function MessageDetailDialog({
   onOpenChange,
   onMarkRead,
   onDelete,
+  canEdit = true,
 }: {
   message: VoicemailMessage | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onMarkRead: (isRead: boolean) => void
   onDelete: () => void
+  canEdit?: boolean
 }) {
   if (!message) return null
 
@@ -845,18 +858,20 @@ function MessageDetailDialog({
                 </>
               )}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-              onClick={() => {
-                onOpenChange(false)
-                onDelete()
-              }}
-            >
-              <Trash2 className="mr-1.5 h-4 w-4" />
-              Delete
-            </Button>
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                onClick={() => {
+                  onOpenChange(false)
+                  onDelete()
+                }}
+              >
+                <Trash2 className="mr-1.5 h-4 w-4" />
+                Delete
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
@@ -866,7 +881,7 @@ function MessageDetailDialog({
 
 // -- Boxes Tab ----------------------------------------------------------------
 
-function BoxesTab() {
+function BoxesTab({ canEdit }: { canEdit: boolean }) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
@@ -1089,7 +1104,7 @@ function BoxesTab() {
               </TableHeader>
               <TableBody>
                 {items.map((box) => (
-                  <BoxRow key={box.id} box={box} />
+                  <BoxRow key={box.id} box={box} canEdit={canEdit} />
                 ))}
               </TableBody>
             </Table>
@@ -1130,7 +1145,7 @@ function BoxesTab() {
   )
 }
 
-function BoxRow({ box }: { box: VoicemailBox }) {
+function BoxRow({ box, canEdit }: { box: VoicemailBox; canEdit: boolean }) {
   const navigate = useNavigate()
   const deleteBoxMutation = useDeleteVoicemailBox()
   const updateBoxMutation = useUpdateVoicemailBox(box.id)
@@ -1198,15 +1213,19 @@ function BoxRow({ box }: { box: VoicemailBox }) {
                   View details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={updateBoxMutation.isPending} onClick={() => updateBoxMutation.mutate({ isEnabled: !box.isEnabled })}>
-                <Power className="mr-2 h-4 w-4" />
-                {box.isEnabled ? "Disable" : "Enable"}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem disabled={updateBoxMutation.isPending} onClick={() => updateBoxMutation.mutate({ isEnabled: !box.isEnabled })}>
+                    <Power className="mr-2 h-4 w-4" />
+                    {box.isEnabled ? "Disable" : "Enable"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

@@ -27,6 +27,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type ForwardingRule, useCreateForwardingRule, useDeleteForwardingRule, useExtension, useForwardingRules, useUpdateForwardingRule } from "@/lib/api/hooks/voice"
 import type { ForwardingDestinationType, ForwardingRuleType } from "@/lib/generated/api"
 
@@ -107,6 +108,8 @@ function FieldError({ message }: { message?: string }) {
 function ForwardingPage() {
   useDocumentTitle("Call Forwarding")
   const { extensionId } = Route.useParams()
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("VOICE_EXTENSIONS")
   const { data: extension, isLoading: extLoading, isError: extError } = useExtension(extensionId)
   const { data: rulesData, isLoading: rulesLoading, isError: rulesError, refetch } = useForwardingRules(extensionId)
 
@@ -204,9 +207,11 @@ function ForwardingPage() {
                 {activeCount} of {ruleCount} rules active
               </Badge>
             )}
-            <Button size="sm" onClick={() => setShowAddDialog(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Rule
-            </Button>
+            {hasEditPermission && (
+              <Button size="sm" onClick={() => setShowAddDialog(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Add Rule
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/voice/extensions/$extensionId" params={{ extensionId }}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Extension
@@ -224,9 +229,11 @@ function ForwardingPage() {
               title="No forwarding rules"
               description="Forwarding rules let you redirect calls to other extensions, external numbers, or voicemail based on conditions like busy, no answer, or unreachable."
               action={
-                <Button onClick={() => setShowAddDialog(true)}>
-                  <Plus className="mr-2 h-4 w-4" /> Add your first rule
-                </Button>
+                hasEditPermission ? (
+                  <Button onClick={() => setShowAddDialog(true)}>
+                    <Plus className="mr-2 h-4 w-4" /> Add your first rule
+                  </Button>
+                ) : undefined
               }
             />
           ) : (
@@ -239,7 +246,7 @@ function ForwardingPage() {
                 <p className="text-sm text-muted-foreground">Rules are evaluated in priority order. Lower numbers run first.</p>
               </CardHeader>
               <CardContent>
-                <RulesTable rules={rules} extensionId={extensionId} onDelete={setDeleteTarget} />
+                <RulesTable rules={rules} extensionId={extensionId} onDelete={setDeleteTarget} canEdit={hasEditPermission} />
               </CardContent>
             </Card>
           )}
@@ -265,7 +272,7 @@ function ForwardingPage() {
 // Rules table
 // ---------------------------------------------------------------------------
 
-function RulesTable({ rules, extensionId, onDelete }: { rules: ForwardingRule[]; extensionId: string; onDelete: (rule: ForwardingRule) => void }) {
+function RulesTable({ rules, extensionId, onDelete, canEdit: canEditProp = true }: { rules: ForwardingRule[]; extensionId: string; onDelete: (rule: ForwardingRule) => void; canEdit?: boolean }) {
   const updateMutation = useUpdateForwardingRule(extensionId)
 
   function handleToggleActive(rule: ForwardingRule) {
@@ -286,7 +293,7 @@ function RulesTable({ rules, extensionId, onDelete }: { rules: ForwardingRule[];
             <TableHead>Target</TableHead>
             <TableHead className="w-24">Timeout</TableHead>
             <TableHead className="w-24">Enabled</TableHead>
-            <TableHead className="w-16 text-right">Actions</TableHead>
+            {canEditProp && <TableHead className="w-16 text-right">Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -305,13 +312,15 @@ function RulesTable({ rules, extensionId, onDelete }: { rules: ForwardingRule[];
               <TableCell className="font-mono text-sm">{rule.destinationValue}</TableCell>
               <TableCell className="text-sm text-muted-foreground">{rule.ringTimeoutSeconds != null ? `${rule.ringTimeoutSeconds}s` : "--"}</TableCell>
               <TableCell>
-                <Switch checked={rule.isActive} onCheckedChange={() => handleToggleActive(rule)} disabled={updateMutation.isPending} />
+                <Switch checked={rule.isActive} onCheckedChange={() => handleToggleActive(rule)} disabled={updateMutation.isPending || !canEditProp} />
               </TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onDelete(rule)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
+              {canEditProp && (
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onDelete(rule)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
