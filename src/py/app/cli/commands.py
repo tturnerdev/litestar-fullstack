@@ -144,6 +144,36 @@ def promote_to_superuser(email: str) -> None:
     anyio.run(_promote_to_superuser, email)
 
 
+@user_management_group.command(name="ensure-admin", help="Ensure an admin superuser exists (idempotent, for first deploy).")
+@click.option("--email", envvar="INIT_ADMIN_EMAIL", default="", help="Admin email (or INIT_ADMIN_EMAIL env var).")
+@click.option("--password", envvar="INIT_ADMIN_PASSWORD", default="", help="Admin password (or INIT_ADMIN_PASSWORD env var).")
+@click.option("--name", envvar="INIT_ADMIN_NAME", default="Admin", help="Admin display name.")
+def ensure_admin(email: str, password: str, name: str) -> None:
+    """Create the initial admin superuser if it does not already exist.
+
+    Exits successfully with no action if email or password are not provided,
+    so this command is safe to run unconditionally in a one-shot init container.
+    """
+    console = get_console()
+    if not email or not password:
+        console.print("INIT_ADMIN_EMAIL or INIT_ADMIN_PASSWORD not set — skipping admin init.")
+        return
+
+    async def _ensure_admin() -> None:
+        await load_database_fixtures()
+        async with provide_services(provide_users_service) as (users_service,):
+            existing = await users_service.get_one_or_none(email=email)
+            if existing:
+                console.print(f"Admin user already exists: {email}")
+                return
+            obj_in = UserCreate(email=email, name=name, password=password, is_superuser=True)
+            user = await users_service.create(data=obj_in.to_dict(), auto_commit=True)
+            console.print(f"Created admin superuser: {user.email}")
+
+    console.rule("Ensure admin superuser.")
+    anyio.run(_ensure_admin)
+
+
 @user_management_group.command(name="create-roles", help="Create pre-configured application roles and assign to users.")
 def create_default_roles() -> None:
     """Create the default Roles for the system"""

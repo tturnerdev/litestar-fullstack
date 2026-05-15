@@ -21,6 +21,7 @@
 #   db        PostgreSQL                  (stateful — backed up by `backup`)
 #   cache     Valkey (Redis-compatible)   (queue + cache; AOF persisted)
 #   migrator  one-shot `database upgrade`; runs before app/worker, then exits
+#   init      one-shot admin user creation (idempotent; skips if user exists)
 #   app       Litestar ASGI application   (HTTP — behind your reverse proxy)
 #   worker    SAQ background worker + scheduled cron jobs
 #             (hourly auth-token cleanup, OAuth-token refresh every 15m)
@@ -28,8 +29,8 @@
 #   storage   rustfs — S3-compatible object storage for file uploads
 #   storage-init  one-shot job that creates the uploads bucket, then exits
 #
-# In Portainer, `migrator` and `storage-init` will show as "exited (0)" after a
-# successful deploy — that is expected, they are one-shot jobs.
+# In Portainer, `migrator`, `init`, and `storage-init` will show as "exited (0)"
+# after a successful deploy — that is expected, they are one-shot jobs.
 # =============================================================================
 
 x-app-service: &app-service
@@ -47,6 +48,8 @@ x-app-service: &app-service
     cache:
       condition: service_healthy
     migrator:
+      condition: service_completed_successfully
+    init:
       condition: service_completed_successfully
     storage-init:
       condition: service_completed_successfully
@@ -147,6 +150,29 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  init:
+    # One-shot: create the initial admin superuser (idempotent — skips if the
+    # user already exists). Only needed on the very first deploy; harmless on
+    # subsequent deploys. Set INIT_ADMIN_EMAIL and INIT_ADMIN_PASSWORD in the
+    # stack's environment variables to activate; if both are blank the
+    # container exits immediately with success. Shows as `exited (0)` in
+    # Portainer — that is normal.
+    <<: *app-service
+    restart: "no"
+    command: ["litestar", "users", "ensure-admin"]
+    environment:
+      <<: *app-env
+      INIT_ADMIN_EMAIL: ${INIT_ADMIN_EMAIL:-}
+      INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD:-}
+      INIT_ADMIN_NAME: ${INIT_ADMIN_NAME:-Admin}
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   app:
     <<: *app-service

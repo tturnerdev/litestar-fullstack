@@ -23,12 +23,15 @@ these containers:
 | `migrator` | `ghcr.io/tturnerdev/litestar-fullstack`             | One-shot `litestar database upgrade --no-prompt`. Runs **before** `app`/`worker`, then exits. Shows as `exited (0)` in Portainer — that is normal. |
 | `app`      | `ghcr.io/tturnerdev/litestar-fullstack`             | Litestar ASGI application (HTTP). Sits behind your **external** reverse proxy, which terminates TLS. |
 | `worker`   | `ghcr.io/tturnerdev/litestar-fullstack`             | SAQ background worker. Also runs the scheduled cron jobs (hourly auth-token cleanup; OAuth-token refresh every 15 min). |
+| `init`     | `ghcr.io/tturnerdev/litestar-fullstack`             | One-shot: creates the initial admin superuser from `INIT_ADMIN_EMAIL` / `INIT_ADMIN_PASSWORD`. Idempotent — skips if the user exists. Safe to leave configured; exits immediately on subsequent deploys. |
 | `backup`   | `prodrigestivill/postgres-backup-local`             | Scheduled `pg_dump` (gzipped) with daily/weekly/monthly retention into the `db-backups` volume. |
 | `storage`  | `rustfs/rustfs`                                      | S3-compatible object storage for file uploads. Reached by `app`/`worker` at `http://storage:9000` on the internal network; web console not published by default. **Stateful** — data lives in the `storage-data` volume; back it up. |
 | `storage-init` | `minio/mc`                                       | One-shot job that creates the uploads bucket, then exits (`exited (0)` in Portainer — expected). Idempotent. |
 
-`app`, `worker`, and `migrator` all use the **same image**, differing only by
-command and a few environment variables.
+`app`, `worker`, `migrator`, and `init` all use the **same image**, differing
+only by command and a few environment variables. In Portainer, `migrator`,
+`init`, and `storage-init` will show as "exited (0)" after a successful
+deploy — that is expected, they are one-shot jobs.
 
 TLS / HTTPS is **not** handled here — an external reverse proxy already does TLS
 termination. The stack only publishes the app's plain-HTTP port (`APP_PORT`,
@@ -115,6 +118,11 @@ be set:
   object store (the app reuses them as its `AWS_ACCESS_KEY_ID` /
   `AWS_SECRET_ACCESS_KEY`)
 
+For the **first deploy**, also set `INIT_ADMIN_EMAIL` and
+`INIT_ADMIN_PASSWORD` (and optionally `INIT_ADMIN_NAME`) to create the initial
+superuser. The `init` service is idempotent — it skips creation if the user
+already exists, so these variables are safe to leave configured.
+
 Set `ALLOWED_CORS_ORIGINS` to your real origin, and configure email
 (`EMAIL_BACKEND=smtp` + `EMAIL_SMTP_*`, or `EMAIL_BACKEND=resend` +
 `RESEND_API_KEY`) if the app sends mail. The `STORAGE_BUCKET` (default
@@ -123,7 +131,8 @@ Set `ALLOWED_CORS_ORIGINS` to your real origin, and configure email
 ### 3.4 Deploy
 
 Deploy the stack. Order of operations: `db`, `cache`, and `storage` become
-healthy → `migrator` runs the migrations and `storage-init` creates the bucket
+healthy → `migrator` runs the migrations, `init` creates the admin user, and
+`storage-init` creates the bucket
 (both exit 0) → `app` and `worker` start. The `app` container has an HTTP health
 check on `/health`. Then verify through your reverse proxy that the site
 responds.
