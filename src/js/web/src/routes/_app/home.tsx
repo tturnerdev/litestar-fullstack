@@ -210,12 +210,13 @@ function formatTaskType(taskType: string): string {
 
 function MyAssignmentsCard() {
   const user = useAuthStore((state) => state.user)
+  const hasFeatureAccess = user?.isSuperuser || (user?.teams?.some((t) => t.role === "ADMIN") ?? false)
 
   // Fetch recent non-closed tickets (enough to find user's assignments)
   const { data: ticketsData, isLoading: ticketsLoading } = useTickets(1, 50, {
     orderBy: "updated_at",
     sortOrder: "desc",
-  })
+  }, undefined, { enabled: hasFeatureAccess })
 
   // Fetch recent non-completed tasks
   const { data: tasksData, isLoading: tasksLoading } = useTasks({
@@ -485,11 +486,13 @@ interface OverviewMetric {
 }
 
 function SystemOverviewCard() {
-  const isSuperuser = useAuthStore((state) => state.user?.isSuperuser) ?? false
-  const { data: phoneNumbersData, isLoading: phoneNumbersLoading } = usePhoneNumbers(1, 1)
-  const { data: extensionsData, isLoading: extensionsLoading } = useExtensions(1, 1)
-  const { data: schedulesData, isLoading: schedulesLoading } = useSchedules({ page: 1, pageSize: 1 })
-  const { data: connectionsData, isLoading: connectionsLoading } = useConnections({ page: 1, pageSize: 1 })
+  const user = useAuthStore((state) => state.user)
+  const isSuperuser = user?.isSuperuser ?? false
+  const hasFeatureAccess = isSuperuser || (user?.teams?.some((t) => t.role === "ADMIN") ?? false)
+  const { data: phoneNumbersData, isLoading: phoneNumbersLoading } = usePhoneNumbers(1, 1, { enabled: hasFeatureAccess })
+  const { data: extensionsData, isLoading: extensionsLoading } = useExtensions(1, 1, undefined, { enabled: hasFeatureAccess })
+  const { data: schedulesData, isLoading: schedulesLoading } = useSchedules({ page: 1, pageSize: 1, enabled: hasFeatureAccess })
+  const { data: connectionsData, isLoading: connectionsLoading } = useConnections({ page: 1, pageSize: 1, enabled: hasFeatureAccess })
 
   const metrics: OverviewMetric[] = [
     {
@@ -558,6 +561,7 @@ function HomePage() {
   useDocumentTitle("Dashboard")
   const user = useAuthStore((state) => state.user)
   const isSuperuser = user?.isSuperuser ?? false
+  const hasFeatureAccess = isSuperuser || (user?.teams?.some((t) => t.role === "ADMIN") ?? false)
   const greeting = useGreeting()
 
   const { data: teamsRaw, isLoading: teamsLoading, isError: teamsError, dataUpdatedAt: teamsUpdatedAt, isRefetching: teamsRefetching, refetch: refetchTeams } = useTeams()
@@ -593,14 +597,14 @@ function HomePage() {
   }, [chartActivityData])
 
   // Operational stats
-  const { data: devicesData, isLoading: devicesLoading } = useDevices({ page: 1, pageSize: 1 })
-  const { data: openTicketsData, isLoading: ticketsLoading } = useTickets(1, 1, { status: "open" })
+  const { data: devicesData, isLoading: devicesLoading } = useDevices({ page: 1, pageSize: 1, enabled: hasFeatureAccess })
+  const { data: openTicketsData, isLoading: ticketsLoading } = useTickets(1, 1, { status: "open" }, undefined, { enabled: hasFeatureAccess })
   const { data: unreadData, isLoading: unreadLoading } = useUnreadCount()
   const { data: activeTasksData, isLoading: activeTasksLoading } = useActiveTasks()
 
   // Recent activity feed data
-  const { data: recentTicketsData, isLoading: recentTicketsLoading } = useTickets(1, 5, { orderBy: "created_at", sortOrder: "desc" })
-  const { data: recentDevicesData, isLoading: recentDevicesLoading } = useDevices({ page: 1, pageSize: 5, orderBy: "created_at", sortOrder: "desc" })
+  const { data: recentTicketsData, isLoading: recentTicketsLoading } = useTickets(1, 5, { orderBy: "created_at", sortOrder: "desc" }, undefined, { enabled: hasFeatureAccess })
+  const { data: recentDevicesData, isLoading: recentDevicesLoading } = useDevices({ page: 1, pageSize: 5, orderBy: "created_at", sortOrder: "desc", enabled: hasFeatureAccess })
 
   const teams = teamsRaw?.items ?? []
   const recentTeams = useMemo(() => {
@@ -650,6 +654,11 @@ function HomePage() {
           </div>
         }
       />
+
+      {/* Getting Started Checklist */}
+      <PageSection delay={0.02}>
+        <GettingStarted />
+      </PageSection>
 
       {/* Quick Shortcuts */}
       <PageSection delay={0.03}>
@@ -768,11 +777,6 @@ function HomePage() {
           <h2 className="text-lg font-semibold tracking-tight">Feature Areas</h2>
           <FeatureAreasGrid />
         </div>
-      </PageSection>
-
-      {/* Getting Started Checklist */}
-      <PageSection delay={0.1}>
-        <GettingStarted />
       </PageSection>
 
       {/* Main Content Grid */}

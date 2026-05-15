@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertTriangle, Loader2 } from "lucide-react"
 import { useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,7 +90,6 @@ function NewFaxNumberPage() {
 
     createFaxNumber.mutate(payload, {
       onSuccess: () => {
-        toast.success("Fax number created successfully")
         router.navigate({ to: "/fax/numbers" })
       },
       onSettled: () => {

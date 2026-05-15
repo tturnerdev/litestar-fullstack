@@ -1374,19 +1374,36 @@ export type FaxStatus =
  * FeatureArea
  *
  * Feature areas available for team role permissions.
+ *
+ * Sub-features use a ``PARENT_CHILD`` naming convention.  The guard
+ * checks the sub-feature first, then falls back to the parent if no
+ * explicit permission row exists.
+ *
  */
 export type FeatureArea =
+  | "VOICE"
+  | "VOICE_PHONE_NUMBERS"
+  | "VOICE_EXTENSIONS"
+  | "VOICE_VOICEMAIL"
+  | "VOICE_VOICEMAIL_BOXES"
+  | "FAX"
+  | "FAX_NUMBERS"
+  | "FAX_MESSAGES"
+  | "FAX_EMAIL_ROUTES"
   | "CALL_ROUTING"
+  | "CALL_ROUTING_QUEUES"
+  | "CALL_ROUTING_RING_GROUPS"
+  | "CALL_ROUTING_IVR_MENUS"
+  | "CALL_ROUTING_TIME_CONDITIONS"
+  | "SUPPORT"
+  | "SUPPORT_TICKETS"
   | "CONNECTIONS"
   | "DEVICES"
   | "E911"
-  | "FAX"
   | "LOCATIONS"
   | "ORGANIZATION"
   | "SCHEDULES"
-  | "SUPPORT"
-  | "TEAMS"
-  | "VOICE";
+  | "TEAMS";
 
 /**
  * ForgotPasswordRequest
@@ -2784,6 +2801,7 @@ export type VoicemailSettings = {
   id: string;
   isEnabled?: boolean;
   maxMessageLengthSeconds?: number;
+  pinSet?: boolean;
   transcriptionEnabled?: boolean;
   updatedAt?: string | null;
 };
@@ -3430,9 +3448,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3509,9 +3527,9 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3577,9 +3595,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3657,9 +3675,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

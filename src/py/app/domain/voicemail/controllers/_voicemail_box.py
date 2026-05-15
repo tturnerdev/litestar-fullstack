@@ -16,6 +16,7 @@ from sqlalchemy.orm import selectinload
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.notifications.deps import provide_notifications_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voicemail.guards import requires_voicemail_access
 from app.domain.voicemail.schemas import VoicemailBox, VoicemailBoxCreate, VoicemailBoxUpdate, VoicemailUnreadCount
 from app.domain.voicemail.services import VoicemailBoxService
@@ -62,7 +63,7 @@ class VoicemailBoxController(Controller):
         summary="List voicemail boxes",
         description="Returns a paginated list of voicemail boxes. Superusers see all boxes; regular users see only boxes associated with their own extensions.",
         path="/api/voicemail/boxes",
-        guards=[requires_voicemail_access],
+        guards=[requires_feature_permission("voice_voicemail_boxes", "view"), requires_voicemail_access],
     )
     async def list_voicemail_boxes(
         self,
@@ -98,7 +99,7 @@ class VoicemailBoxController(Controller):
         description="Creates a new voicemail box, emits a voicemail_box_created event, logs the action to the audit trail, and sends a notification to the current user.",
         path="/api/voicemail/boxes",
         status_code=HTTP_201_CREATED,
-        guards=[requires_voicemail_access],
+        guards=[requires_feature_permission("voice_voicemail_boxes", "edit"), requires_voicemail_access],
     )
     async def create_voicemail_box(
         self,
@@ -157,7 +158,7 @@ class VoicemailBoxController(Controller):
         summary="Get voicemail box details",
         description="Retrieves the full details of a single voicemail box by its ID, including its associated extension.",
         path="/api/voicemail/boxes/{box_id:uuid}",
-        guards=[requires_voicemail_access],
+        guards=[requires_feature_permission("voice_voicemail_boxes", "view"), requires_voicemail_access],
     )
     async def get_voicemail_box(
         self,
@@ -181,7 +182,7 @@ class VoicemailBoxController(Controller):
         summary="Update a voicemail box",
         description="Partially updates a voicemail box's settings, emits a voicemail_box_updated event, and logs before/after snapshots to the audit trail.",
         path="/api/voicemail/boxes/{box_id:uuid}",
-        guards=[requires_voicemail_access],
+        guards=[requires_feature_permission("voice_voicemail_boxes", "edit"), requires_voicemail_access],
     )
     async def update_voicemail_box(
         self,
@@ -230,7 +231,7 @@ class VoicemailBoxController(Controller):
         summary="Delete a voicemail box",
         description="Permanently deletes a voicemail box and all its messages. Emits a voicemail_box_deleted event, logs the deletion to the audit trail, and sends a notification to the current user.",
         path="/api/voicemail/boxes/{box_id:uuid}",
-        guards=[requires_voicemail_access],
+        guards=[requires_feature_permission("voice_voicemail_boxes", "edit"), requires_voicemail_access],
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
     )

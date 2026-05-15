@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -237,7 +236,6 @@ function EditLocationPage() {
     justSubmittedRef.current = true
     updateLocation.mutate(payload, {
       onSuccess: () => {
-        toast.success("Location updated")
         router.navigate({ to: "/locations/$locationId", params: { locationId } })
       },
       onError: () => {

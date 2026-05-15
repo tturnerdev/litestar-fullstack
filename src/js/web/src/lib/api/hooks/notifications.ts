@@ -100,12 +100,6 @@ export function useDeleteNotification() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
-      toast.success("Notification deleted")
-    },
-    onError: (error) => {
-      toast.error("Failed to delete notification", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
     },
   })
 }

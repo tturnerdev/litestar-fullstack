@@ -43,7 +43,7 @@ class TicketAttachmentController(Controller):
         summary="Upload a ticket attachment",
         description="Uploads one or more files as attachments to a ticket. This is a placeholder endpoint; full multipart upload support will be available in Phase 3.",
         path="/api/support/tickets/{ticket_id:uuid}/attachments",
-        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
+        guards=[requires_feature_permission("support_tickets", "edit"), requires_ticket_access],
         status_code=HTTP_201_CREATED,
     )
     async def upload_attachment(
@@ -68,7 +68,7 @@ class TicketAttachmentController(Controller):
         summary="Get attachment details",
         description="Retrieves metadata for a single ticket attachment by ID, including file name, size, and content type.",
         path="/api/support/attachments/{attachment_id:uuid}",
-        guards=[requires_feature_permission("support", "view")],
+        guards=[requires_feature_permission("support_tickets", "view")],
     )
     async def get_attachment(
         self,
@@ -84,7 +84,7 @@ class TicketAttachmentController(Controller):
         summary="Delete an attachment",
         description="Permanently deletes a ticket attachment. Emits a ticket_attachment_deleted event and records an audit log entry with the file name.",
         path="/api/support/attachments/{attachment_id:uuid}",
-        guards=[requires_feature_permission("support", "edit")],
+        guards=[requires_feature_permission("support_tickets", "edit")],
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
     )
@@ -121,7 +121,7 @@ class TicketAttachmentController(Controller):
         summary="Upload a pasted image",
         description="Uploads an image pasted from the clipboard as a ticket attachment. This is a placeholder endpoint; full paste-image handling will be available in Phase 3.",
         path="/api/support/tickets/{ticket_id:uuid}/paste-image",
-        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
+        guards=[requires_feature_permission("support_tickets", "edit"), requires_ticket_access],
         status_code=HTTP_201_CREATED,
     )
     async def paste_image(

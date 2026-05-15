@@ -440,7 +440,7 @@ function AdminTaskRow({
             {isActive && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" disabled={cancelMutation.isPending} onClick={() => cancelMutation.mutate(task.id)}>
+                <DropdownMenuItem variant="destructive" disabled={cancelMutation.isPending} onClick={() => cancelMutation.mutate(task.id, { onSuccess: () => toast.success("Task cancelled") })}>
                   <XCircle className="mr-2 h-4 w-4" />
                   Cancel task
                 </DropdownMenuItem>
@@ -471,7 +471,6 @@ function AdminTaskRow({
                 onClick={() => {
                   deleteMutation.mutate(task.id, {
                     onSuccess: () => {
-                      toast.success("Task deleted")
                       setShowDeleteDialog(false)
                     },
                   })

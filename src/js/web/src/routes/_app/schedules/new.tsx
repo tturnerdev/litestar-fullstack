@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { Calendar, ChevronRight, Clock, Globe, Loader2, SlidersHorizontal, Star } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -193,7 +192,6 @@ function NewSchedulePage() {
 
     createSchedule.mutate(payload, {
       onSuccess: (data) => {
-        toast.success("Schedule created successfully")
         router.navigate({ to: "/schedules/$scheduleId", params: { scheduleId: data.id } })
       },
       onSettled: () => {

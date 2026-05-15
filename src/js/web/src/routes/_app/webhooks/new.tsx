@@ -215,7 +215,6 @@ function NewWebhookPage() {
 
     createWebhook.mutate(payload, {
       onSuccess: (data) => {
-        toast.success("Webhook created successfully")
         if (data.validationStatus === "unreachable") {
           toast.warning("Webhook created but URL appears unreachable", {
             description: "The endpoint could not be reached during validation. Please verify the URL is correct and accessible.",

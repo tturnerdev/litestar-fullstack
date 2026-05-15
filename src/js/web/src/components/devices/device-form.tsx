@@ -3,7 +3,6 @@ import { Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, Cable, Headset, Info, Loader2, type LucideIcon, MapPin, MoreHorizontal, Network, Phone, Users } from "lucide-react"
 import { useCallback, useRef } from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "sonner"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -152,7 +151,6 @@ export function CreateDeviceForm() {
         locationId: data.locationId || undefined,
         connectionId: data.connectionId || undefined,
       })
-      toast.success("Device created successfully")
       router.invalidate()
       router.navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })
     } catch (_error) {

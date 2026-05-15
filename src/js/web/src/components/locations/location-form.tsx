@@ -3,7 +3,6 @@ import { Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Info, Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "sonner"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -150,9 +149,7 @@ export function CreateLocationForm() {
         postalCode: isAddressed ? data.postalCode || undefined : undefined,
         country: isAddressed ? data.country || undefined : undefined,
       })
-      // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
-      toast.success("Location created successfully")
       router.invalidate()
       router.navigate({ to: "/locations/$locationId", params: { locationId: location.id } })
     } catch (_error) {

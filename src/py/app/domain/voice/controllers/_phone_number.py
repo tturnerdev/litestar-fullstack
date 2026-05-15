@@ -56,7 +56,7 @@ class PhoneNumberController(Controller):
         operation_id="ListPhoneNumbers",
         summary="List phone numbers",
         description="Retrieve a paginated list of the current user's phone numbers with E911 registration status. Supports search by number or label.",
-        guards=[requires_feature_permission("voice", "view")],
+        guards=[requires_feature_permission("voice_phone_numbers", "view")],
     )
     async def list_phone_numbers(
         self,
@@ -75,7 +75,7 @@ class PhoneNumberController(Controller):
         operation_id="CreatePhoneNumber",
         summary="Create a phone number",
         description="Register a new phone number for the current user. Logs an audit entry and emits a creation event.",
-        guards=[requires_feature_permission("voice", "edit")],
+        guards=[requires_feature_permission("voice_phone_numbers", "edit")],
         status_code=HTTP_201_CREATED,
     )
     async def create_phone_number(
@@ -113,7 +113,7 @@ class PhoneNumberController(Controller):
         summary="List phone numbers without E911",
         description="List active phone numbers within a team that lack an E911 registration. The caller must be a superuser or a member of the specified team.",
         path="/unregistered-e911",
-        guards=[requires_feature_permission("voice", "view")],
+        guards=[requires_feature_permission("voice_phone_numbers", "view")],
     )
     async def list_unregistered_e911(
         self,
@@ -136,7 +136,7 @@ class PhoneNumberController(Controller):
         summary="Get phone number details",
         description="Retrieve a single phone number by ID with E911 registration status. The caller must own the phone number.",
         path="/{phone_number_id:uuid}",
-        guards=[requires_feature_permission("voice", "view"), requires_phone_number_access],
+        guards=[requires_feature_permission("voice_phone_numbers", "view"), requires_phone_number_access],
     )
     async def get_phone_number(
         self,
@@ -155,7 +155,7 @@ class PhoneNumberController(Controller):
         summary="Update a phone number",
         description="Update a phone number's label or caller ID settings. Logs an audit entry and emits an update event. The caller must own the phone number.",
         path="/{phone_number_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
+        guards=[requires_feature_permission("voice_phone_numbers", "edit"), requires_phone_number_access],
     )
     async def update_phone_number(
         self,
@@ -193,7 +193,7 @@ class PhoneNumberController(Controller):
         summary="Delete a phone number",
         description="Delete a phone number record. Logs an audit entry and emits a deletion event. The caller must own the phone number.",
         path="/{phone_number_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
+        guards=[requires_feature_permission("voice_phone_numbers", "edit"), requires_phone_number_access],
         return_dto=None,
         status_code=HTTP_204_NO_CONTENT,
     )

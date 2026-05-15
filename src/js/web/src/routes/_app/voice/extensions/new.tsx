@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { toast } from "sonner"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -87,7 +86,6 @@ function NewExtensionPage() {
       await createExtension.mutateAsync(payload)
       // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
-      toast.success("Extension created successfully")
       router.navigate({ to: "/voice/extensions" })
     } catch (error) {
       form.setError("root", {

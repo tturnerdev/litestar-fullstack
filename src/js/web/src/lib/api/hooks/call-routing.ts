@@ -95,6 +95,7 @@ export interface UseListOptions {
   search?: string
   orderBy?: string
   sortOrder?: "asc" | "desc"
+  enabled?: boolean
 }
 
 // ===========================================================================
@@ -114,6 +115,7 @@ export function useTimeConditions(opts: UseListOptions = {}) {
           sortOrder: opts.sortOrder,
         },
       }).then(unwrap),
+    enabled: opts.enabled,
   })
 }
 
@@ -212,6 +214,7 @@ export function useIvrMenus(opts: UseListOptions = {}) {
           sortOrder: opts.sortOrder,
         },
       }).then(unwrap),
+    enabled: opts.enabled,
   })
 }
 
@@ -350,6 +353,7 @@ export function useCallQueues(opts: UseListOptions = {}) {
           sortOrder: opts.sortOrder,
         },
       }).then(unwrap),
+    enabled: opts.enabled,
   })
 }
 
@@ -508,6 +512,7 @@ export function useRingGroups(opts: UseListOptions = {}) {
           sortOrder: opts.sortOrder,
         },
       }).then(unwrap),
+    enabled: opts.enabled,
   })
 }
 

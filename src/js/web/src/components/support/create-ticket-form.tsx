@@ -18,7 +18,6 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "sonner"
 import { z } from "zod"
 import { AttachmentUpload, type PendingFile } from "@/components/support/attachment-upload"
 import { MarkdownEditor } from "@/components/support/markdown-editor"
@@ -171,8 +170,6 @@ export function CreateTicketForm() {
         priority: data.priority,
         category: data.category,
       })
-      // Reset dirty state before navigating so blocker doesn't fire
-      toast.success("Ticket created successfully")
       form.reset(data)
       setAttachments([])
       router.navigate({

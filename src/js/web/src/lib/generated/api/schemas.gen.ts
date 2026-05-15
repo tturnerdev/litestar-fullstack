@@ -5664,19 +5664,32 @@ export const FaxStatusSchema = {
 } as const;
 
 export const FeatureAreaSchema = {
-  description: "Feature areas available for team role permissions.",
+  description:
+    "Feature areas available for team role permissions.\n\nSub-features use a ``PARENT_CHILD`` naming convention.  The guard\nchecks the sub-feature first, then falls back to the parent if no\nexplicit permission row exists.\n",
   enum: [
+    "VOICE",
+    "VOICE_PHONE_NUMBERS",
+    "VOICE_EXTENSIONS",
+    "VOICE_VOICEMAIL",
+    "VOICE_VOICEMAIL_BOXES",
+    "FAX",
+    "FAX_NUMBERS",
+    "FAX_MESSAGES",
+    "FAX_EMAIL_ROUTES",
     "CALL_ROUTING",
+    "CALL_ROUTING_QUEUES",
+    "CALL_ROUTING_RING_GROUPS",
+    "CALL_ROUTING_IVR_MENUS",
+    "CALL_ROUTING_TIME_CONDITIONS",
+    "SUPPORT",
+    "SUPPORT_TICKETS",
     "CONNECTIONS",
     "DEVICES",
     "E911",
-    "FAX",
     "LOCATIONS",
     "ORGANIZATION",
     "SCHEDULES",
-    "SUPPORT",
     "TEAMS",
-    "VOICE",
   ],
   title: "FeatureArea",
   type: "string",
@@ -10863,6 +10876,10 @@ export const VoicemailSettingsSchema = {
     maxMessageLengthSeconds: {
       default: 120,
       type: "integer",
+    },
+    pinSet: {
+      default: false,
+      type: "boolean",
     },
     transcriptionEnabled: {
       default: false,

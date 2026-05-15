@@ -86,6 +86,9 @@ def requires_feature_permission(
     permission (``can_view`` or ``can_edit``) for *feature_area* in at least
     one of their team memberships.
 
+    Sub-features (e.g. ``VOICE_PHONE_NUMBERS``) fall back to their parent
+    feature (``VOICE``) when no explicit sub-feature permission row exists.
+
     If no ``TeamRolePermission`` row exists for a membership, the default
     behaviour is:
         - ADMIN  -> allowed
@@ -94,14 +97,16 @@ def requires_feature_permission(
     Superusers always bypass the check.
 
     Args:
-        feature_area: The FeatureArea value (e.g. ``"DEVICES"``, ``"VOICE"``).
+        feature_area: The FeatureArea value (e.g. ``"DEVICES"``, ``"VOICE_EXTENSIONS"``).
         action: ``"view"`` or ``"edit"``.
 
     Returns:
         An async guard function compatible with Litestar's ``guards`` parameter.
     """
-    # Normalise to uppercase to match FeatureArea enum values stored in the DB.
+    from app.db.models._feature_area import FEATURE_PARENT_MAP
+
     feature_area_upper = feature_area.upper()
+    parent_area = FEATURE_PARENT_MAP.get(feature_area_upper)
 
     async def _guard(
         connection: ASGIConnection[Any, m.User, Token, Any],
@@ -109,49 +114,46 @@ def requires_feature_permission(
     ) -> None:
         user: m.User = connection.user
 
-        # Superusers bypass all permission checks.
         if has_superuser_access(connection):
             return
 
-        # No team memberships -> deny.
         if not user.teams:
             raise PermissionDeniedException(
                 detail=f"No team membership found. Access to {feature_area} requires a team role."
             )
 
-        # Obtain a database session from the connection to query permission rows.
         from app.config import alchemy
 
-        session = alchemy.provide_session(connection.app.state, connection.scope)
-
-        # Gather team_id -> role from the user's memberships.
         membership_map: dict[Any, m.TeamRoles] = {membership.team_id: membership.role for membership in user.teams}
 
-        # Query permission entries for the user's teams and the requested feature area.
+        areas_to_check = [feature_area_upper]
+        if parent_area:
+            areas_to_check.append(parent_area)
+
         stmt = select(m.TeamRolePermission).where(
             m.TeamRolePermission.team_id.in_(membership_map.keys()),
-            m.TeamRolePermission.feature_area == feature_area_upper,
+            m.TeamRolePermission.feature_area.in_(areas_to_check),
         )
-        result = await session.execute(stmt)
-        permission_rows = result.scalars().all()
+        async with alchemy.get_session() as session:
+            result = await session.execute(stmt)
+            permission_rows = result.scalars().all()
 
-        # Build a lookup: (team_id, role) -> permission row
-        perm_lookup: dict[tuple[Any, str], m.TeamRolePermission] = {
-            (row.team_id, row.role): row for row in permission_rows
+        perm_lookup: dict[tuple[Any, str, str], m.TeamRolePermission] = {
+            (row.team_id, row.role, row.feature_area): row for row in permission_rows
         }
 
-        # Check each membership: if ANY team grants the permission, allow.
         for team_id, role in membership_map.items():
-            perm = perm_lookup.get((team_id, role))
+            # Check sub-feature first, then parent.
+            perm = perm_lookup.get((team_id, role, feature_area_upper))
+            if perm is None and parent_area:
+                perm = perm_lookup.get((team_id, role, parent_area))
+
             if perm is not None:
-                # Explicit permission entry exists — check the column.
                 allowed = perm.can_edit if action == "edit" else perm.can_view
                 if allowed:
                     return
-            # No entry exists — apply default: ADMIN=allow, MEMBER=deny.
             elif role == m.TeamRoles.ADMIN:
                 return
-                # MEMBER without explicit entry -> denied for this team, continue checking.
 
         raise PermissionDeniedException(detail=f"You do not have {action} permission for {feature_area}.")
 

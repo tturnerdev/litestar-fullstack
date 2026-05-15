@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
 import {
   type BackgroundTaskDetail,
   type BackgroundTaskList,
@@ -145,16 +144,6 @@ export function useRetryTask() {
     onSuccess: (_data, taskId) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
       queryClient.invalidateQueries({ queryKey: taskKeys.detail(taskId) })
-      toast.success("Task queued for retry")
-    },
-    onError: (error) => {
-      if (error instanceof Error && error.message === "NOT_IMPLEMENTED") {
-        toast.info("Task retry is not yet available")
-        return
-      }
-      toast.error("Unable to retry task", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
     },
   })
 }
@@ -175,12 +164,6 @@ export function useCancelTask() {
     onSuccess: (_data, taskId) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
       queryClient.invalidateQueries({ queryKey: taskKeys.detail(taskId) })
-      toast.success("Task cancelled")
-    },
-    onError: (error) => {
-      toast.error("Unable to cancel task", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
     },
   })
 }
@@ -200,12 +183,6 @@ export function useDeleteTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all })
-      toast.success("Task deleted")
-    },
-    onError: (error) => {
-      toast.error("Unable to delete task", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
     },
   })
 }

@@ -35,11 +35,12 @@ export interface UseSchedulesOptions {
   search?: string
   orderBy?: string
   sortOrder?: "asc" | "desc"
+  enabled?: boolean
 }
 
 export function useSchedules(pageOrOptions: number | UseSchedulesOptions = 1, pageSizeArg = 20) {
   const opts: UseSchedulesOptions = typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
-  const { page = 1, pageSize = 20, search, orderBy, sortOrder } = opts
+  const { page = 1, pageSize = 20, search, orderBy, sortOrder, enabled } = opts
 
   return useQuery({
     queryKey: ["schedules", page, pageSize, search, orderBy, sortOrder],
@@ -56,6 +57,7 @@ export function useSchedules(pageOrOptions: number | UseSchedulesOptions = 1, pa
       })
       return response.data as { items: ScheduleList[]; total: number }
     },
+    enabled,
   })
 }
 

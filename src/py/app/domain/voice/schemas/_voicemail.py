@@ -18,6 +18,7 @@ class VoicemailSettings(CamelizedBaseStruct):
     id: UUID
     extension_id: UUID
     is_enabled: bool = True
+    pin_set: bool = False
     greeting_type: GreetingType = GreetingType.DEFAULT
     greeting_file_path: str | None = None
     max_message_length_seconds: int = 120

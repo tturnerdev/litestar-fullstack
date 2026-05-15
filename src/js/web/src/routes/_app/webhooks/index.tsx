@@ -23,7 +23,6 @@ import {
   XCircle,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -421,13 +420,7 @@ function WebhookFormDialog({ open, onOpenChange, editWebhook }: { open: boolean;
       }
       updateWebhook.mutate(payload, {
         onSuccess: () => {
-          toast.success("Webhook updated")
           handleOpenChange(false)
-        },
-        onError: (err) => {
-          toast.error("Failed to update webhook", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       })
     } else {
@@ -442,20 +435,13 @@ function WebhookFormDialog({ open, onOpenChange, editWebhook }: { open: boolean;
       }
       createWebhook.mutate(payload, {
         onSuccess: () => {
-          toast.success("Webhook created")
           handleOpenChange(false)
-          // Restore focus to the search input after dialog closes
           setTimeout(() => {
             const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
             if (searchInput) {
               searchInput.focus()
             }
           }, 0)
-        },
-        onError: (err) => {
-          toast.error("Failed to create webhook", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       })
     }
@@ -1085,11 +1071,7 @@ function WebhooksPage() {
                 if (deleteTarget) {
                   deleteWebhook.mutate(deleteTarget.id, {
                     onSuccess: () => {
-                      toast.success("Webhook deleted")
                       setDeleteTarget(null)
-                    },
-                    onError: (err) => {
-                      toast.error("Failed to delete webhook", { description: err instanceof Error ? err.message : undefined })
                     },
                   })
                 }
@@ -1243,16 +1225,7 @@ function WebhookRow({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
-                    testWebhookMutation.mutate(webhook.id, {
-                      onSuccess: () => {
-                        toast.success("Test delivery sent")
-                      },
-                      onError: (err) => {
-                        toast.error("Failed to send test delivery", {
-                          description: err instanceof Error ? err.message : undefined,
-                        })
-                      },
-                    })
+                    testWebhookMutation.mutate(webhook.id)
                   }
                   disabled={testWebhookMutation.isPending}
                 >

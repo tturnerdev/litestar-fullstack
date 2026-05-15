@@ -561,12 +561,6 @@ export function useAdminCancelTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "tasks"] })
-      toast.success("Task cancelled")
-    },
-    onError: (error) => {
-      toast.error("Unable to cancel task", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
     },
   })
 }
@@ -593,12 +587,6 @@ export function useAdminDeleteTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "tasks"] })
-      toast.success("Task deleted")
-    },
-    onError: (error) => {
-      toast.error("Unable to delete task", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
     },
   })
 }

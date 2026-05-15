@@ -70,14 +70,17 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set({ user: null, currentTeam: null, isAuthenticated: false })
-          toast.error(response.error?.detail || "Login failed")
+          toast.error("Login failed", { description: "Invalid email or password. Please try again." })
           return { mfaRequired: false }
-        } catch (error) {
+        } catch (error: unknown) {
           setAccessToken(null)
           set({ user: null, currentTeam: null, isAuthenticated: false })
-          toast.error("An error occurred", {
-            description: error instanceof Error ? error.message : "Unknown error",
-          })
+          const status = (error as { status?: number })?.status
+          const detail =
+            status === 429
+              ? "Too many login attempts. Please try again later."
+              : "Invalid email or password. Please try again."
+          toast.error("Login failed", { description: detail })
           return { mfaRequired: false }
         } finally {
           set({ isLoading: false })

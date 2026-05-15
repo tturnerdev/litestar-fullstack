@@ -732,9 +732,7 @@ function FaxMessagesPage() {
                         onToggle={() => toggleOne(msg.id)}
                         onRowClick={() => handleRowClick(msg.id)}
                         onDelete={() =>
-                          deleteMessage.mutate(msg.id, {
-                            onSuccess: () => toast.success("Fax message deleted"),
-                          })
+                          deleteMessage.mutate(msg.id)
                         }
                         isDeleting={deleteMessage.isPending}
                         cellClass={cellClass}

@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.555.0 (2026-05-14)
+
+### Added
+- **Granular sub-area permissions** — Voice, Fax, Call Routing, and Support now have configurable sub-feature permissions (e.g., Phone Numbers, Extensions, Voicemail, Voicemail Boxes, Fax Numbers, Fax Messages, Email Routes, Tickets, Call Queues, Ring Groups, IVR Menus, Time Conditions). Sub-features fall back to parent permission when no explicit override exists.
+- **Roles & Permissions hierarchy** — Admin Roles & Permissions page and per-user dialog now display parent/child permission tree with aggregate checkboxes and indeterminate state.
+- **Member Getting Started checklist** — Members see a tailored onboarding checklist (profile, team, extension display name, voicemail PIN). Superusers never see Getting Started. Moved Getting Started to top of home page.
+- **Voicemail PIN status** — `pin_set` field added to voicemail settings response for frontend onboarding checks.
+- **Feature permission guards on voicemail controllers** — All voicemail box and voicemail message endpoints now enforce `requires_feature_permission` guards with view/edit distinction.
+
+### Fixed
+- **Login error message security** — All login failures (invalid email, wrong password, malformed input) now show the identical message "Invalid email or password" to prevent email enumeration. Only 429 rate limiting shows a different message.
+- **Login form email validation** — Added client-side email format validation to prevent malformed emails from hitting the server.
+- **Dashboard 403 errors for Members** — Getting Started and Feature Areas Grid queries now guard API calls behind role checks, preventing 403s for users without admin access.
+- **Duplicate toast notifications** — Eliminated double toast notifications across 20+ callsites (tasks, call routing, webhooks, e911, devices, support, locations, organization, notifications) by establishing a single-source pattern: hooks handle cache invalidation, callsites handle user feedback.
+- **Sidebar nav default state** — All sidebar nav groups now load collapsed by default, with auto-expand for the group matching the current route.
+- **Fax email routes permission key** — Email routes now use their own `fax_email_routes` permission key instead of sharing `fax_numbers`.
+
+### Changed
+- **Removed Connections and Organization from Roles & Permissions** — These are superuser-only features and no longer appear in the team permission matrix.
+
 ## v0.554.0 (2026-05-13)
 
 ### Fixed

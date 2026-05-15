@@ -5,9 +5,10 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/lib/auth"
-import { listDevices, listExtensions, listTeams } from "@/lib/generated/api"
+import { getVoicemailSettings, listDevices, listExtensions, listTeams } from "@/lib/generated/api"
 
-const DISMISSED_KEY = "getting-started-dismissed"
+const ADMIN_DISMISSED_KEY = "getting-started-admin-dismissed"
+const MEMBER_DISMISSED_KEY = "getting-started-member-dismissed"
 
 interface ChecklistItem {
   id: string
@@ -20,13 +21,22 @@ interface ChecklistItem {
 export function GettingStarted() {
   const user = useAuthStore((state) => state.user)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
+  const isSuperuser = user?.isSuperuser ?? false
+  const isAdmin = user?.teams?.some((t) => t.role === "ADMIN") ?? false
+  const isMember = !isSuperuser && !isAdmin
+
+  const dismissedKey = isMember ? MEMBER_DISMISSED_KEY : ADMIN_DISMISSED_KEY
+
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
-      return localStorage.getItem(DISMISSED_KEY) === "true"
+      return localStorage.getItem(dismissedKey) === "true"
     } catch {
       return false
     }
   })
+
+  // ---------- Shared queries ----------
 
   const { data: teams = [], isLoading: teamsLoading } = useQuery({
     queryKey: ["teams"],
@@ -34,8 +44,12 @@ export function GettingStarted() {
       const response = await listTeams()
       return response.data?.items ?? []
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isSuperuser,
   })
+
+  // ---------- Admin-only queries ----------
+
+  const hasFeatureAccess = isSuperuser || isAdmin
 
   const { data: deviceCount = 0, isLoading: devicesLoading } = useQuery({
     queryKey: ["getting-started", "devices"],
@@ -43,28 +57,82 @@ export function GettingStarted() {
       const response = await listDevices({ query: { pageSize: 1 } })
       return (response.data as { total?: number } | undefined)?.total ?? 0
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && hasFeatureAccess && !isSuperuser,
     staleTime: 60_000,
   })
 
-  const { data: extensionCount = 0, isLoading: extensionsLoading } = useQuery({
-    queryKey: ["getting-started", "extensions"],
+  const { data: adminExtensionCount = 0, isLoading: adminExtensionsLoading } = useQuery({
+    queryKey: ["getting-started", "admin-extensions"],
     queryFn: async () => {
       const response = await listExtensions({ query: { pageSize: 1 } })
       return (response.data as { total?: number } | undefined)?.total ?? 0
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && hasFeatureAccess && !isSuperuser,
     staleTime: 60_000,
   })
 
-  const isLoading = teamsLoading || devicesLoading || extensionsLoading
+  // ---------- Member-only queries ----------
+
+  const { data: memberExtensions, isLoading: memberExtensionsLoading, isError: extensionsError } = useQuery({
+    queryKey: ["getting-started", "member-extensions"],
+    queryFn: async () => {
+      const response = await listExtensions({ query: { pageSize: 200 } })
+      return response.data?.items ?? []
+    },
+    enabled: isAuthenticated && !isSuperuser && isMember,
+    staleTime: 60_000,
+    retry: false,
+  })
+
+  const userExtension = useMemo(() => {
+    if (!memberExtensions || !user?.id) return undefined
+    return memberExtensions.find((ext) => ext.userId === user.id)
+  }, [memberExtensions, user?.id])
+
+  const userExtensionId = userExtension?.id ?? ""
+
+  const { data: voicemailSettings } = useQuery({
+    queryKey: ["getting-started", "voicemail-settings", userExtensionId],
+    queryFn: async () => {
+      const response = await getVoicemailSettings({ path: { ext_id: userExtensionId } })
+      return response.data
+    },
+    enabled: !!userExtensionId,
+    staleTime: 60_000,
+  })
+
+  // ---------- Superuser: never show ----------
+
+  if (isSuperuser) {
+    return null
+  }
+
+  // ---------- Loading state ----------
+
+  const hasVoiceAccess = isMember && !extensionsError && !memberExtensionsLoading
+
+  const isLoading = isMember
+    ? teamsLoading || memberExtensionsLoading
+    : teamsLoading || devicesLoading || adminExtensionsLoading
+
+  // ---------- Completion checks ----------
 
   const hasProfile = !!(user?.name && user.name.trim().length > 0)
-  const hasTeam = teams.length > 0
-  const hasDevice = deviceCount > 0
-  const hasVoice = extensionCount > 0
+  const hasTeam = isMember ? (user?.teams?.length ?? 0) > 0 : teams.length > 0
 
-  const items: ChecklistItem[] = useMemo(
+  // Admin checks
+  const hasDevice = deviceCount > 0
+  const hasVoice = adminExtensionCount > 0
+
+  // Member checks
+  const hasExtensionSetUp = !!userExtension && !!(userExtension.displayName && userExtension.displayName.trim().length > 0)
+  const hasVoicemailConfigured = !!(voicemailSettings?.isEnabled && voicemailSettings?.pinSet)
+
+  // ---------- Checklist items ----------
+
+  const voicemailLink = userExtension ? `/voice/extensions/${userExtension.id}/voicemail` : "/voice/extensions"
+
+  const adminItems: ChecklistItem[] = useMemo(
     () => [
       {
         id: "profile",
@@ -98,13 +166,53 @@ export function GettingStarted() {
     [hasProfile, hasTeam, hasDevice, hasVoice],
   )
 
+  const memberItems: ChecklistItem[] = useMemo(() => {
+    const items: ChecklistItem[] = [
+      {
+        id: "profile",
+        label: "Complete your profile",
+        description: "Add your name and contact details",
+        completed: hasProfile,
+        to: "/profile",
+      },
+      {
+        id: "team",
+        label: "Join a team",
+        description: "Teams help you collaborate with your organization",
+        completed: hasTeam,
+        to: "/teams",
+      },
+    ]
+    if (hasVoiceAccess) {
+      items.push(
+        {
+          id: "extension",
+          label: "Set up your extension",
+          description: "Configure your phone extension with a display name",
+          completed: hasExtensionSetUp,
+          to: "/voice/extensions",
+        },
+        {
+          id: "voicemail",
+          label: "Configure your voicemail",
+          description: "Enable voicemail and set a PIN for your extension",
+          completed: hasVoicemailConfigured,
+          to: voicemailLink,
+        },
+      )
+    }
+    return items
+  }, [hasProfile, hasTeam, hasVoiceAccess, hasExtensionSetUp, hasVoicemailConfigured, voicemailLink])
+
+  const items = isMember ? memberItems : adminItems
+
   const completedCount = items.filter((item) => item.completed).length
   const allComplete = completedCount === items.length
   const firstIncompleteId = items.find((item) => !item.completed)?.id
 
   const handleDismiss = () => {
     try {
-      localStorage.setItem(DISMISSED_KEY, "true")
+      localStorage.setItem(dismissedKey, "true")
     } catch {
       // ignore storage errors
     }

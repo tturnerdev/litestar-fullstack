@@ -481,10 +481,9 @@ function ConnectionDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteConnection.mutateAsync(connectionId)
-      toast.success("Connection deleted")
       router.navigate({ to: "/connections" })
-    } catch (err) {
-      toast.error("Failed to delete connection", { description: err instanceof Error ? err.message : undefined })
+    } catch {
+      // Error toast handled by the hook
     }
   }
 

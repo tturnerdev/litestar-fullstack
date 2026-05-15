@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,7 +80,6 @@ function EditTagPage() {
     justSubmittedRef.current = true
     updateTag.mutate(payload, {
       onSuccess: () => {
-        toast.success("Tag updated")
         router.navigate({ to: "/tags" })
       },
       onError: () => {

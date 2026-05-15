@@ -1,8 +1,8 @@
 "use client"
 
-import { Link } from "@tanstack/react-router"
+import { Link, useRouterState } from "@tanstack/react-router"
 import { ChevronRight, type LucideIcon } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
@@ -61,13 +61,40 @@ function formatBadge(value: number | string | null | undefined): string | null {
   return String(value)
 }
 
+/** Check whether the current pathname falls under a nav group */
+function isNavGroupActive(item: NavMainItem, pathname: string): boolean {
+  // Strip query strings from the item's `to` path for prefix matching
+  const baseTo = item.to.split("?")[0]
+  if (pathname === baseTo || pathname.startsWith(`${baseTo}/`)) return true
+  // Also check sub-items
+  if (item.items) {
+    for (const sub of item.items) {
+      const subBase = sub.to.split("?")[0]
+      if (pathname === subBase || pathname.startsWith(`${subBase}/`)) return true
+    }
+  }
+  return false
+}
+
 export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; label?: string }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+
+  const activeGroupTitles = useMemo(() => {
+    const titles = new Set<string>()
+    for (const item of items) {
+      if (item.items && item.items.length > 0 && isNavGroupActive(item, pathname)) {
+        titles.add(item.title)
+      }
+    }
+    return titles
+  }, [items, pathname])
+
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
     const stored = readExpandedState()
     const initial: Record<string, boolean> = {}
     for (const item of items) {
       if (item.items && item.items.length > 0) {
-        initial[item.title] = stored[item.title] ?? true
+        initial[item.title] = stored[item.title] ?? false
       }
     }
     return initial
@@ -117,7 +144,7 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
 
           const collapsibleVariant = item.badgeVariant ?? "muted"
           return (
-            <Collapsible key={item.title} asChild open={expandedSections[item.title] ?? true} onOpenChange={(open) => handleToggle(item.title, open)} className="group/collapsible">
+            <Collapsible key={item.title} asChild open={expandedSections[item.title] ?? activeGroupTitles.has(item.title)} onOpenChange={(open) => handleToggle(item.title, open)} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={item.title}>

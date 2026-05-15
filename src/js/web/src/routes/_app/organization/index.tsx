@@ -449,12 +449,9 @@ function OrganizationSettingsPage() {
 
     try {
       await updateOrg.mutateAsync(payload)
-      toast.success("Organization settings saved")
       setIsEditing(false)
-    } catch (err) {
-      toast.error("Failed to save organization settings", {
-        description: err instanceof Error ? err.message : undefined,
-      })
+    } catch {
+      // Hook handles error toast
     }
   }
 

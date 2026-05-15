@@ -648,7 +648,6 @@ function FaxNumberSettingsCard({
 
     updateMutation.mutate(payload, {
       onSuccess: () => {
-        toast.success("Fax number updated successfully")
         setEditing(false)
         setFieldErrors({})
         touchedRef.current = {}

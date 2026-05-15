@@ -81,7 +81,7 @@ class FaxMessageController(Controller):
         summary="List fax messages",
         description="Retrieve a paginated list of fax messages scoped to fax numbers the current user owns or has team access to. Supports searching by remote number and name, and sorting by received date.",
         path="/api/fax/messages",
-        guards=[requires_feature_permission("fax", "view")],
+        guards=[requires_feature_permission("fax_messages", "view")],
     )
     async def list_fax_messages(
         self,
@@ -122,7 +122,7 @@ class FaxMessageController(Controller):
         summary="Get fax message details",
         description="Retrieve details for a single fax message. Access is restricted to users who own or have team membership on the associated fax number.",
         path="/api/fax/messages/{message_id:uuid}",
-        guards=[requires_feature_permission("fax", "view"), requires_fax_message_access],
+        guards=[requires_feature_permission("fax_messages", "view"), requires_fax_message_access],
     )
     async def get_fax_message(
         self,
@@ -153,7 +153,7 @@ class FaxMessageController(Controller):
         summary="Delete a fax message",
         description="Delete a fax message record. The user must have access to the associated fax number. An audit log entry is recorded and a fax_message_deleted event is emitted.",
         path="/api/fax/messages/{message_id:uuid}",
-        guards=[requires_feature_permission("fax", "edit"), requires_fax_message_access],
+        guards=[requires_feature_permission("fax_messages", "edit"), requires_fax_message_access],
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
     )
@@ -203,7 +203,7 @@ class FaxMessageController(Controller):
         description="Queue an outbound fax for delivery as a tracked background task. Creates a fax message record in QUEUED status and enqueues a SAQ job to send via the configured provider. Returns HTTP 202 with the background task details.",
         path="/api/fax/send",
         status_code=HTTP_202_ACCEPTED,
-        guards=[requires_feature_permission("fax", "edit")],
+        guards=[requires_feature_permission("fax_messages", "edit")],
     )
     async def send_fax(
         self,

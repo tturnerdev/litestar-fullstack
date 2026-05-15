@@ -3,27 +3,32 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import type { LucideIcon } from "lucide-react"
 import {
   AlertCircle,
-  BarChart3,
-  Cable,
   CheckCircle2,
   Clock,
-  CreditCard,
   Download,
   GitBranch,
+  Headset,
+  Inbox,
   Info,
   LifeBuoy,
+  List,
   Loader2,
+  Mail,
+  MailPlus,
   MapPin,
   Monitor,
   Phone,
+  PhoneForwarded,
   Printer,
   Save,
   Shield,
   ShieldAlert,
+  TicketCheck,
+  Users,
+  Voicemail,
   XCircle,
 } from "lucide-react"
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
@@ -47,19 +52,71 @@ export const Route = createFileRoute("/_app/admin/roles")({
 
 // -- Constants ---------------------------------------------------------------
 
-const FEATURE_AREAS: readonly { key: FeatureArea; label: string; icon: LucideIcon }[] = [
+interface FeatureAreaNode {
+  key: FeatureArea
+  label: string
+  icon: LucideIcon
+  children?: { key: FeatureArea; label: string; icon: LucideIcon }[]
+}
+
+const FEATURE_AREAS: readonly FeatureAreaNode[] = [
   { key: "DEVICES", label: "Devices", icon: Monitor },
-  { key: "VOICE", label: "Voice", icon: Phone },
-  { key: "FAX", label: "Fax", icon: Printer },
-  { key: "SUPPORT", label: "Support", icon: LifeBuoy },
-  { key: "CALL_ROUTING", label: "Call Routing", icon: GitBranch },
-  { key: "CONNECTIONS", label: "Connections", icon: Cable },
+  {
+    key: "VOICE",
+    label: "Voice",
+    icon: Phone,
+    children: [
+      { key: "VOICE_PHONE_NUMBERS", label: "Phone Numbers", icon: Phone },
+      { key: "VOICE_EXTENSIONS", label: "Extensions", icon: PhoneForwarded },
+      { key: "VOICE_VOICEMAIL", label: "Voicemail", icon: Voicemail },
+      { key: "VOICE_VOICEMAIL_BOXES", label: "Voicemail Boxes", icon: Inbox },
+    ],
+  },
+  {
+    key: "FAX",
+    label: "Fax",
+    icon: Printer,
+    children: [
+      { key: "FAX_NUMBERS", label: "Fax Numbers", icon: Printer },
+      { key: "FAX_MESSAGES", label: "Fax Messages", icon: Mail },
+      { key: "FAX_EMAIL_ROUTES", label: "Email Routes", icon: MailPlus },
+    ],
+  },
+  {
+    key: "SUPPORT",
+    label: "Support",
+    icon: LifeBuoy,
+    children: [{ key: "SUPPORT_TICKETS", label: "Tickets", icon: TicketCheck }],
+  },
+  {
+    key: "CALL_ROUTING",
+    label: "Call Routing",
+    icon: GitBranch,
+    children: [
+      { key: "CALL_ROUTING_QUEUES", label: "Call Queues", icon: Headset },
+      { key: "CALL_ROUTING_RING_GROUPS", label: "Ring Groups", icon: Users },
+      { key: "CALL_ROUTING_IVR_MENUS", label: "IVR Menus", icon: List },
+      { key: "CALL_ROUTING_TIME_CONDITIONS", label: "Time Conditions", icon: Clock },
+    ],
+  },
   { key: "E911", label: "E911", icon: ShieldAlert },
   { key: "LOCATIONS", label: "Locations", icon: MapPin },
   { key: "SCHEDULES", label: "Schedules", icon: Clock },
-  { key: "ORGANIZATION", label: "Organization", icon: CreditCard },
-  { key: "TEAMS", label: "Teams", icon: BarChart3 },
+  { key: "TEAMS", label: "Teams", icon: Users },
 ]
+
+function allFeatureKeys(): FeatureArea[] {
+  const keys: FeatureArea[] = []
+  for (const area of FEATURE_AREAS) {
+    keys.push(area.key)
+    if (area.children) {
+      for (const child of area.children) keys.push(child.key)
+    }
+  }
+  return keys
+}
+
+const ALL_FEATURE_KEYS = allFeatureKeys()
 
 const ROLES: TeamRoles[] = ["ADMIN", "MEMBER"]
 
@@ -100,11 +157,11 @@ function buildDefaultPermissions(): Record<string, Record<string, { canView: boo
   const result: Record<string, Record<string, { canView: boolean; canEdit: boolean }>> = {}
   for (const role of ROLES) {
     result[role] = {}
-    for (const area of FEATURE_AREAS) {
+    for (const key of ALL_FEATURE_KEYS) {
       if (role === "ADMIN") {
-        result[role][area.key] = { canView: true, canEdit: true }
+        result[role][key] = { canView: true, canEdit: true }
       } else {
-        result[role][area.key] = { canView: true, canEdit: false }
+        result[role][key] = { canView: true, canEdit: false }
       }
     }
   }
@@ -127,12 +184,12 @@ function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Reco
 function matrixToEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): TeamRolePermissionEntry[] {
   const entries: TeamRolePermissionEntry[] = []
   for (const role of ROLES) {
-    for (const area of FEATURE_AREAS) {
-      const perm = matrix[role]?.[area.key]
+    for (const key of ALL_FEATURE_KEYS) {
+      const perm = matrix[role]?.[key]
       if (perm) {
         entries.push({
           role: role as TeamRoles,
-          featureArea: area.key,
+          featureArea: key,
           canView: perm.canView,
           canEdit: perm.canEdit,
         })
@@ -146,8 +203,8 @@ function countPermissions(matrix: Record<string, Record<string, { canView: boole
   let allowed = 0
   let total = 0
   for (const role of ROLES) {
-    for (const area of FEATURE_AREAS) {
-      const perm = matrix[role]?.[area.key]
+    for (const key of ALL_FEATURE_KEYS) {
+      const perm = matrix[role]?.[key]
       if (perm) {
         if (perm.canView) allowed++
         if (perm.canEdit) allowed++
@@ -179,14 +236,27 @@ function AdminRolesPage() {
       const matrix = cached ? mergeServerPermissions(cached) : buildDefaultPermissions()
       for (const role of ROLES) {
         for (const area of FEATURE_AREAS) {
-          const perm = matrix[role]?.[area.key] ?? { canView: false, canEdit: false }
-          rows.push({
-            teamName: team.name,
-            role,
-            featureArea: area.label,
-            canView: perm.canView ? "Yes" : "No",
-            canEdit: perm.canEdit ? "Yes" : "No",
-          })
+          if (area.children) {
+            for (const child of area.children) {
+              const perm = matrix[role]?.[child.key] ?? { canView: false, canEdit: false }
+              rows.push({
+                teamName: team.name,
+                role,
+                featureArea: `${area.label} > ${child.label}`,
+                canView: perm.canView ? "Yes" : "No",
+                canEdit: perm.canEdit ? "Yes" : "No",
+              })
+            }
+          } else {
+            const perm = matrix[role]?.[area.key] ?? { canView: false, canEdit: false }
+            rows.push({
+              teamName: team.name,
+              role,
+              featureArea: area.label,
+              canView: perm.canView ? "Yes" : "No",
+              canEdit: perm.canEdit ? "Yes" : "No",
+            })
+          }
         }
       }
     }
@@ -353,13 +423,31 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
       next[role][featureArea] = { ...next[role][featureArea] }
       const current = next[role][featureArea][field]
       next[role][featureArea][field] = !current
-      // Disabling view also disables edit
       if (field === "canView" && current) {
         next[role][featureArea].canEdit = false
       }
-      // Enabling edit also enables view
       if (field === "canEdit" && !current) {
         next[role][featureArea].canView = true
+      }
+      return next
+    })
+  }, [])
+
+  const toggleParent = useCallback((role: string, children: { key: FeatureArea }[], field: "canView" | "canEdit") => {
+    setEditMatrix((prev) => {
+      const next = { ...prev }
+      next[role] = { ...next[role] }
+      const allSet = children.every((c) => next[role][c.key]?.[field])
+      const newValue = !allSet
+      for (const child of children) {
+        next[role][child.key] = { ...next[role][child.key] }
+        next[role][child.key][field] = newValue
+        if (field === "canView" && !newValue) {
+          next[role][child.key].canEdit = false
+        }
+        if (field === "canEdit" && newValue) {
+          next[role][child.key].canView = true
+        }
       }
       return next
     })
@@ -371,7 +459,6 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
     const entries = matrixToEntries(editMatrix)
     updatePermissions.mutate(entries, {
       onSuccess: () => {
-        toast.success(`Permissions updated for ${teamName}`)
         setIsEditing(false)
       },
     })
@@ -509,49 +596,136 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
               </TableHeader>
               <TableBody>
                 {FEATURE_AREAS.map((area) => (
-                  <TableRow key={area.key} className="hover:bg-muted/50">
-                    <TableCell className="text-sm">
-                      <div className="flex items-center gap-2">
-                        <area.icon className="h-4 w-4 text-muted-foreground" />
-                        {area.label}
-                      </div>
-                    </TableCell>
-                    {ROLES.map((role) => {
-                      const perm = currentMatrix[role]?.[area.key] ?? { canView: false, canEdit: false }
-                      return (
-                        <Fragment key={role}>
-                          <TableCell className="text-center">
-                            {isEditing ? (
-                              <div className="flex justify-center">
-                                <Checkbox
-                                  checked={perm.canView}
-                                  onChange={() => togglePermission(role, area.key, "canView")}
-                                  disabled={updatePermissions.isPending}
-                                  aria-label={`${role} can view ${area.label}`}
-                                />
-                              </div>
-                            ) : (
-                              <PermissionIndicator allowed={perm.canView} />
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {isEditing ? (
-                              <div className="flex justify-center">
-                                <Checkbox
-                                  checked={perm.canEdit}
-                                  onChange={() => togglePermission(role, area.key, "canEdit")}
-                                  disabled={updatePermissions.isPending}
-                                  aria-label={`${role} can edit ${area.label}`}
-                                />
-                              </div>
-                            ) : (
-                              <PermissionIndicator allowed={perm.canEdit} />
-                            )}
-                          </TableCell>
-                        </Fragment>
-                      )
-                    })}
-                  </TableRow>
+                  <Fragment key={area.key}>
+                    <TableRow className={`hover:bg-muted/50 ${area.children ? "bg-muted/20" : ""}`}>
+                      <TableCell className="text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <area.icon className="h-4 w-4 text-muted-foreground" />
+                          {area.label}
+                        </div>
+                      </TableCell>
+                      {ROLES.map((role) => {
+                        if (area.children) {
+                          const allView = area.children.every((c) => currentMatrix[role]?.[c.key]?.canView)
+                          const noneView = area.children.every((c) => !currentMatrix[role]?.[c.key]?.canView)
+                          const allEdit = area.children.every((c) => currentMatrix[role]?.[c.key]?.canEdit)
+                          const noneEdit = area.children.every((c) => !currentMatrix[role]?.[c.key]?.canEdit)
+                          return (
+                            <Fragment key={role}>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={allView}
+                                      indeterminate={!allView && !noneView}
+                                      onChange={() => toggleParent(role, area.children!, "canView")}
+                                      disabled={updatePermissions.isPending}
+                                      aria-label={`${role} can view all ${area.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={allView} />
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={allEdit}
+                                      indeterminate={!allEdit && !noneEdit}
+                                      onChange={() => toggleParent(role, area.children!, "canEdit")}
+                                      disabled={updatePermissions.isPending}
+                                      aria-label={`${role} can edit all ${area.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={allEdit} />
+                                )}
+                              </TableCell>
+                            </Fragment>
+                          )
+                        }
+                        const perm = currentMatrix[role]?.[area.key] ?? { canView: false, canEdit: false }
+                        return (
+                          <Fragment key={role}>
+                            <TableCell className="text-center">
+                              {isEditing ? (
+                                <div className="flex justify-center">
+                                  <Checkbox
+                                    checked={perm.canView}
+                                    onChange={() => togglePermission(role, area.key, "canView")}
+                                    disabled={updatePermissions.isPending}
+                                    aria-label={`${role} can view ${area.label}`}
+                                  />
+                                </div>
+                              ) : (
+                                <PermissionIndicator allowed={perm.canView} />
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {isEditing ? (
+                                <div className="flex justify-center">
+                                  <Checkbox
+                                    checked={perm.canEdit}
+                                    onChange={() => togglePermission(role, area.key, "canEdit")}
+                                    disabled={updatePermissions.isPending}
+                                    aria-label={`${role} can edit ${area.label}`}
+                                  />
+                                </div>
+                              ) : (
+                                <PermissionIndicator allowed={perm.canEdit} />
+                              )}
+                            </TableCell>
+                          </Fragment>
+                        )
+                      })}
+                    </TableRow>
+                    {area.children?.map((child) => (
+                      <TableRow key={child.key} className="hover:bg-muted/50">
+                        <TableCell className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 pl-6">
+                            <child.icon className="h-3.5 w-3.5" />
+                            {child.label}
+                          </div>
+                        </TableCell>
+                        {ROLES.map((role) => {
+                          const perm = currentMatrix[role]?.[child.key] ?? { canView: false, canEdit: false }
+                          return (
+                            <Fragment key={role}>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={perm.canView}
+                                      onChange={() => togglePermission(role, child.key, "canView")}
+                                      disabled={updatePermissions.isPending}
+                                      aria-label={`${role} can view ${child.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={perm.canView} />
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {isEditing ? (
+                                  <div className="flex justify-center">
+                                    <Checkbox
+                                      checked={perm.canEdit}
+                                      onChange={() => togglePermission(role, child.key, "canEdit")}
+                                      disabled={updatePermissions.isPending}
+                                      aria-label={`${role} can edit ${child.label}`}
+                                    />
+                                  </div>
+                                ) : (
+                                  <PermissionIndicator allowed={perm.canEdit} />
+                                )}
+                              </TableCell>
+                            </Fragment>
+                          )
+                        })}
+                      </TableRow>
+                    ))}
+                  </Fragment>
                 ))}
               </TableBody>
             </Table>

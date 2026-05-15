@@ -311,7 +311,6 @@ function ConnectionsPage() {
     if (itemToDelete) {
       deleteConnection.mutate(itemToDelete.id, {
         onSuccess: () => {
-          toast.success("Connection deleted")
           setTimeout(() => {
             const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
             if (searchInput) {

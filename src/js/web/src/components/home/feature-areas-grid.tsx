@@ -115,23 +115,24 @@ const featureAreas: FeatureArea[] = [
   },
 ]
 
-function useFeatureAreaCounts(isSuperuser: boolean) {
-  const connections = useConnections({ page: 1, pageSize: 1 })
-  const devices = useDevices({ page: 1, pageSize: 1 })
-  const phoneNumbers = usePhoneNumbers(1, 1)
-  const faxNumbers = useFaxNumbers(1, 1)
-  const tickets = useTickets(1, 1)
-  const schedules = useSchedules({ page: 1, pageSize: 1 })
+function useFeatureAreaCounts(hasFeatureAccess: boolean) {
+  const connections = useConnections({ page: 1, pageSize: 1, enabled: hasFeatureAccess })
+  const devices = useDevices({ page: 1, pageSize: 1, enabled: hasFeatureAccess })
+  const phoneNumbers = usePhoneNumbers(1, 1, { enabled: hasFeatureAccess })
+  const faxNumbers = useFaxNumbers(1, 1, { enabled: hasFeatureAccess })
+  const tickets = useTickets(1, 1, undefined, undefined, { enabled: hasFeatureAccess })
+  const schedules = useSchedules({ page: 1, pageSize: 1, enabled: hasFeatureAccess })
   const tags = useQuery({
     queryKey: ["home", "feature-tags-count"],
     queryFn: async () => {
       const response = await listTags({ query: { currentPage: 1, pageSize: 1 } })
       return response.data as { total?: number } | undefined
     },
+    enabled: hasFeatureAccess,
   })
 
   return {
-    connections: isSuperuser ? { total: connections.data?.total, isLoading: connections.isLoading } : { total: undefined, isLoading: false },
+    connections: hasFeatureAccess ? { total: connections.data?.total, isLoading: connections.isLoading } : { total: undefined, isLoading: false },
     devices: { total: devices.data?.total, isLoading: devices.isLoading },
     voice: { total: phoneNumbers.data?.total, isLoading: phoneNumbers.isLoading },
     fax: { total: faxNumbers.data?.total, isLoading: faxNumbers.isLoading },
@@ -143,8 +144,10 @@ function useFeatureAreaCounts(isSuperuser: boolean) {
 }
 
 export function FeatureAreasGrid() {
-  const isSuperuser = useAuthStore((state) => state.user?.isSuperuser) ?? false
-  const counts = useFeatureAreaCounts(isSuperuser)
+  const user = useAuthStore((state) => state.user)
+  const isSuperuser = user?.isSuperuser ?? false
+  const hasFeatureAccess = isSuperuser || (user?.teams?.some((t) => t.role === "ADMIN") ?? false)
+  const counts = useFeatureAreaCounts(hasFeatureAccess)
   const visibleAreas = isSuperuser ? featureAreas : featureAreas.filter((a) => a.key !== "connections")
 
   return (

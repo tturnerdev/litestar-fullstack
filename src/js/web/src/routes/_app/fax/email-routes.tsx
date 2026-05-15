@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Loader2, Mail, MailPlus, MoreVertical, Pencil, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -142,14 +141,8 @@ function CreateEmailRouteDialog({ open, onOpenChange }: { open: boolean; onOpenC
       { emailAddress: trimmed, isActive, notifyOnFailure },
       {
         onSuccess: () => {
-          toast.success("Email route created")
           resetForm()
           onOpenChange(false)
-        },
-        onError: (err) => {
-          toast.error("Failed to create email route", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       },
     )
@@ -282,13 +275,7 @@ function EditEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteWit
 
     updateMutation.mutate(payload, {
       onSuccess: () => {
-        toast.success("Email route updated")
         onOpenChange(false)
-      },
-      onError: (err) => {
-        toast.error("Failed to update email route", {
-          description: err instanceof Error ? err.message : undefined,
-        })
       },
     })
   }
@@ -389,13 +376,7 @@ function DeleteEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteW
               if (!route) return
               deleteMutation.mutate(route.id, {
                 onSuccess: () => {
-                  toast.success("Email route deleted")
                   onOpenChange(false)
-                },
-                onError: (err) => {
-                  toast.error("Failed to delete email route", {
-                    description: err instanceof Error ? err.message : undefined,
-                  })
                 },
               })
             }}

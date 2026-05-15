@@ -18,7 +18,6 @@ import {
   XCircle,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -277,13 +276,7 @@ function E911Row({
               <DropdownMenuItem
                 disabled={validateMutation.isPending}
                 onClick={() =>
-                  validateMutation.mutate(undefined, {
-                    onSuccess: () => toast.success("E911 registration validated"),
-                    onError: (err) =>
-                      toast.error("Failed to validate E911 registration", {
-                        description: err instanceof Error ? err.message : undefined,
-                      }),
-                  })
+                  validateMutation.mutate()
                 }
               >
                 {validateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
@@ -932,13 +925,7 @@ function E911Page() {
                 if (!registrationToDelete) return
                 deleteMutation.mutate(registrationToDelete.id, {
                   onSuccess: () => {
-                    toast.success("E911 registration deleted")
                     setRegistrationToDelete(null)
-                  },
-                  onError: (err) => {
-                    toast.error("Failed to delete E911 registration", {
-                      description: err instanceof Error ? err.message : undefined,
-                    })
                   },
                 })
               }}

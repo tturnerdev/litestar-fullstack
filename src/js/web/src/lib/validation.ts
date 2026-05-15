@@ -95,7 +95,7 @@ export const recoveryCodeSchema = z
  * Login form schema.
  */
 export const loginFormSchema = z.object({
-  username: z.string().min(1, "Email or username is required"),
+  username: z.string().min(1, "Email is required").email("Please enter a valid email address"),
   password: passwordLoginSchema,
 })
 

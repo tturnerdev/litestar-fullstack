@@ -74,7 +74,7 @@ class ExtensionController(Controller):
         operation_id="ListExtensions",
         summary="List extensions",
         description="Retrieve a paginated list of the current user's extensions with E911 status enrichment. Supports search by extension number or display name.",
-        guards=[requires_feature_permission("voice", "view")],
+        guards=[requires_feature_permission("voice_extensions", "view")],
     )
     async def list_extensions(
         self,
@@ -93,7 +93,7 @@ class ExtensionController(Controller):
         operation_id="CreateExtension",
         summary="Create an extension",
         description="Create a new voice extension for the current user. Checks the PBX for conflicts, logs an audit entry, emits an event, and enqueues a background task to sync the extension to the PBX.",
-        guards=[requires_feature_permission("voice", "edit")],
+        guards=[requires_feature_permission("voice_extensions", "edit")],
         status_code=HTTP_201_CREATED,
     )
     async def create_extension(
@@ -174,7 +174,7 @@ class ExtensionController(Controller):
         summary="Get extension details",
         description="Retrieve a single extension by ID with E911 status enrichment. The caller must own the extension.",
         path="/{ext_id:uuid}",
-        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "view"), requires_extension_ownership],
     )
     async def get_extension(
         self,
@@ -191,7 +191,7 @@ class ExtensionController(Controller):
         summary="List devices for an extension",
         description="List all devices that have this extension assigned to a line. The caller must own the extension.",
         path="/{ext_id:uuid}/devices",
-        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "view"), requires_extension_ownership],
     )
     async def list_extension_devices(
         self,
@@ -209,7 +209,7 @@ class ExtensionController(Controller):
         summary="Update an extension",
         description="Update an extension's display name or settings. Logs an audit entry, emits an event, and enqueues a background task to sync changes to the PBX. The caller must own the extension.",
         path="/{ext_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "edit"), requires_extension_ownership],
     )
     async def update_extension(
         self,
@@ -262,7 +262,7 @@ class ExtensionController(Controller):
         summary="Delete an extension",
         description="Delete an extension and enqueue a background task to remove it from the PBX. Logs an audit entry and emits a deletion event. The caller must own the extension.",
         path="/{ext_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "edit"), requires_extension_ownership],
         return_dto=None,
         status_code=HTTP_204_NO_CONTENT,
     )
@@ -314,7 +314,7 @@ class ExtensionController(Controller):
         summary="Sync extensions from PBX",
         description="Import extensions from the first enabled FreePBX connection. Creates portal records for new PBX extensions and updates existing ones to match PBX data (display name, DND, forwarding). Logs an audit entry with sync results.",
         path="/sync",
-        guards=[requires_feature_permission("voice", "edit")],
+        guards=[requires_feature_permission("voice_extensions", "edit")],
     )
     async def sync_extensions(
         self,

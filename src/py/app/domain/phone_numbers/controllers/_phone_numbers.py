@@ -38,7 +38,7 @@ class PhoneNumberController(Controller):
 
     tags = ["Phone Numbers"]
     path = "/api/phone-numbers"
-    guards = [requires_feature_permission("voice", "view")]
+    guards = [requires_feature_permission("voice_phone_numbers", "view")]
     dependencies = create_service_dependencies(
         PhoneNumberService,
         key="phone_number_service",
@@ -112,7 +112,7 @@ class PhoneNumberController(Controller):
         description="Create a new phone number record. Emits a phone_number_created event and logs an audit entry.",
         path="/",
         status_code=HTTP_201_CREATED,
-        guards=[requires_feature_permission("voice", "edit")],
+        guards=[requires_feature_permission("voice_phone_numbers", "edit")],
     )
     async def create_phone_number(
         self,
@@ -157,7 +157,7 @@ class PhoneNumberController(Controller):
         summary="Update a phone number",
         description="Partially update a phone number's fields. Only provided fields are changed. Emits a phone_number_updated event and logs an audit entry with before/after snapshots.",
         path="/{phone_number_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit")],
+        guards=[requires_feature_permission("voice_phone_numbers", "edit")],
     )
     async def update_phone_number(
         self,
@@ -214,7 +214,7 @@ class PhoneNumberController(Controller):
         path="/{phone_number_id:uuid}",
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
-        guards=[requires_feature_permission("voice", "edit")],
+        guards=[requires_feature_permission("voice_phone_numbers", "edit")],
     )
     async def delete_phone_number(
         self,

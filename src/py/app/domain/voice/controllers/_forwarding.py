@@ -58,7 +58,7 @@ class ForwardingController(Controller):
         summary="List forwarding rules",
         description="Retrieve a paginated list of forwarding rules for an extension, sorted by priority. Supports search by destination value. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
-        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "view"), requires_extension_ownership],
     )
     async def list_forwarding_rules(
         self,
@@ -81,7 +81,7 @@ class ForwardingController(Controller):
         summary="Create a forwarding rule",
         description="Add a new forwarding rule to an extension. Logs an audit entry and emits forwarding-changed and creation events. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "edit"), requires_extension_ownership],
         status_code=HTTP_201_CREATED,
     )
     async def create_forwarding_rule(
@@ -123,7 +123,7 @@ class ForwardingController(Controller):
         summary="Replace all forwarding rules",
         description="Bulk-replace all forwarding rules for an extension. Deletes existing rules and creates new ones from the request body. Logs a before/after audit entry. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "edit"), requires_extension_ownership],
     )
     async def set_forwarding_rules(
         self,
@@ -176,7 +176,7 @@ class ForwardingController(Controller):
         summary="Update a forwarding rule",
         description="Update fields on a single forwarding rule. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "edit"), requires_extension_ownership],
     )
     async def update_forwarding_rule(
         self,
@@ -219,7 +219,7 @@ class ForwardingController(Controller):
         description="Remove a single forwarding rule from an extension. Logs an audit entry and emits a forwarding-changed event. The caller must own the parent extension.",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         return_dto=None,
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_extensions", "edit"), requires_extension_ownership],
         status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_forwarding_rule(

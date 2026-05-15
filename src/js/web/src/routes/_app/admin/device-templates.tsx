@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Check, Cpu, Download, Loader2, Plus, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import {
@@ -217,25 +216,13 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
     if (mode === "create") {
       createMutation.mutate(payload as DeviceTemplateCreate, {
         onSuccess: () => {
-          toast.success("Device template created")
           handleOpenChange(false)
-        },
-        onError: (err) => {
-          toast.error("Failed to create device template", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       })
     } else {
       updateMutation.mutate(payload as DeviceTemplateUpdate, {
         onSuccess: () => {
-          toast.success("Device template updated")
           handleOpenChange(false)
-        },
-        onError: (err) => {
-          toast.error("Failed to update device template", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       })
     }
@@ -657,16 +644,7 @@ function AdminDeviceTemplatesPage() {
                                       className={buttonVariants({ variant: "destructive" })}
                                       disabled={deleteMutation.isPending}
                                       onClick={() => {
-                                        deleteMutation.mutate(tmpl.id, {
-                                          onSuccess: () => {
-                                            toast.success("Device template deleted")
-                                          },
-                                          onError: (err) => {
-                                            toast.error("Failed to delete device template", {
-                                              description: err instanceof Error ? err.message : undefined,
-                                            })
-                                          },
-                                        })
+                                        deleteMutation.mutate(tmpl.id)
                                       }}
                                     >
                                       {deleteMutation.isPending ? "Deleting..." : "Delete Template"}

@@ -123,7 +123,6 @@ function NewPhoneNumberPage() {
       },
       {
         onSuccess: (data) => {
-          toast.success("Phone number created successfully")
           if (data) {
             router.navigate({
               to: "/voice/phone-numbers/$phoneNumberId",

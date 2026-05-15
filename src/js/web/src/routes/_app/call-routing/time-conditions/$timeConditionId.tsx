@@ -139,12 +139,6 @@ function TimeConditionDetailPage() {
     updateMutation.mutate(payload, {
       onSuccess: () => {
         setEditing(false)
-        toast.success("Time condition updated")
-      },
-      onError: (err) => {
-        toast.error("Failed to update time condition", {
-          description: err instanceof Error ? err.message : undefined,
-        })
       },
     })
   }
@@ -152,12 +146,9 @@ function TimeConditionDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(timeConditionId)
-      toast.success("Time condition deleted")
       router.navigate({ to: "/call-routing", search: { tab: "time-conditions" } })
-    } catch (err) {
-      toast.error("Failed to delete time condition", {
-        description: err instanceof Error ? err.message : undefined,
-      })
+    } catch {
+      // Hook handles error toast
     }
   }
 
@@ -396,16 +387,7 @@ function TimeConditionDetailPage() {
                         variant={data.overrideMode === mode ? "default" : "outline"}
                         size="sm"
                         onClick={() =>
-                          overrideMutation.mutate(mode, {
-                            onSuccess: () => {
-                              toast.success("Override mode updated")
-                            },
-                            onError: (err) => {
-                              toast.error("Failed to update override mode", {
-                                description: err instanceof Error ? err.message : undefined,
-                              })
-                            },
-                          })
+                          overrideMutation.mutate(mode)
                         }
                         disabled={overrideMutation.isPending || data.overrideMode === mode}
                       >

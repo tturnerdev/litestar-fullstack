@@ -56,10 +56,11 @@ export type {
 // Phone Numbers
 // ---------------------------------------------------------------------------
 
-export function usePhoneNumbers(page = 1, pageSize = 25) {
+export function usePhoneNumbers(page = 1, pageSize = 25, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["voice", "phone-numbers", page, pageSize],
     queryFn: () => listPhoneNumbers({ query: { currentPage: page, pageSize } }).then((r) => r.data),
+    enabled: options?.enabled,
   })
 }
 
@@ -133,11 +134,12 @@ export function useUnregisteredE911Numbers(teamId: string) {
 // Extensions
 // ---------------------------------------------------------------------------
 
-export function useExtensions(page = 1, pageSize = 25, refetchInterval?: number | false) {
+export function useExtensions(page = 1, pageSize = 25, refetchInterval?: number | false, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["voice", "extensions", page, pageSize],
     queryFn: () => listExtensions({ query: { currentPage: page, pageSize } }).then((r) => r.data),
     refetchInterval,
+    enabled: options?.enabled,
   })
 }
 

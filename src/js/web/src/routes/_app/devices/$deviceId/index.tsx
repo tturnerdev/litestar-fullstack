@@ -227,7 +227,6 @@ function DeviceDetailPage() {
     if (editConnectionId !== (data?.connectionId ?? null)) payload.connectionId = editConnectionId || null
     updateDevice.mutate(payload, {
       onSuccess: () => {
-        toast.success("Device updated successfully")
         setEditing(false)
       },
     })
@@ -1089,7 +1088,6 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
 
     updateDevice.mutate(payload, {
       onSuccess: () => {
-        toast.success("Device settings saved successfully")
         setDirty(false)
       },
     })

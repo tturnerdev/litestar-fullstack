@@ -86,7 +86,7 @@ class VoicemailController(Controller):
         summary="Get voicemail settings",
         description="Retrieve the voicemail box configuration for an extension, creating a default box if one does not exist. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail",
-        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_voicemail", "view"), requires_extension_ownership],
     )
     async def get_voicemail_settings(
         self,
@@ -98,14 +98,16 @@ class VoicemailController(Controller):
         """Get voicemail box config."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         db_obj = await voicemail_boxes_service.get_or_create_for_extension(ext_id)
-        return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
+        result = voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
+        result.pin_set = db_obj.pin is not None
+        return result
 
     @patch(
         operation_id="UpdateVoicemailSettings",
         summary="Update voicemail settings",
         description="Update voicemail box settings such as PIN, email address, or attachment preferences. If PBX-related fields change and a FreePBX connection exists, the voicemail configuration is synced to the PBX. Logs an audit entry.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_voicemail", "edit"), requires_extension_ownership],
     )
     async def update_voicemail_settings(
         self,
@@ -125,6 +127,7 @@ class VoicemailController(Controller):
         db_obj = await voicemail_boxes_service.update(item_id=db_obj.id, data=data.to_dict())
         after = capture_snapshot(db_obj)
         result = voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
+        result.pin_set = db_obj.pin is not None
         await log_audit(
             audit_service,
             action="voice.voicemail.updated",
@@ -177,7 +180,7 @@ class VoicemailController(Controller):
         summary="List voicemail messages",
         description="Retrieve a paginated list of voicemail messages for an extension's mailbox. Supports search by caller number, caller name, or transcription text. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages",
-        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_voicemail", "view"), requires_extension_ownership],
     )
     async def list_voicemail_messages(
         self,
@@ -202,7 +205,7 @@ class VoicemailController(Controller):
         summary="Get a voicemail message",
         description="Retrieve a single voicemail message by ID. Verifies the message belongs to the extension's voicemail box. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
-        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_voicemail", "view"), requires_extension_ownership],
     )
     async def get_voicemail_message(
         self,
@@ -224,7 +227,7 @@ class VoicemailController(Controller):
         summary="Update a voicemail message",
         description="Update a voicemail message's metadata such as read/unread status. Logs an audit entry and emits an update event. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_voicemail", "edit"), requires_extension_ownership],
     )
     async def update_voicemail_message(
         self,
@@ -268,7 +271,7 @@ class VoicemailController(Controller):
         description="Permanently delete a voicemail message from the extension's mailbox. Logs an audit entry and emits a deletion event. The caller must own the extension.",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         return_dto=None,
-        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+        guards=[requires_feature_permission("voice_voicemail", "edit"), requires_extension_ownership],
         status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_voicemail_message(

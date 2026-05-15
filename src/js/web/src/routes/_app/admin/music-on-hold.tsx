@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Check, Download, Loader2, Music, Plus, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import {
@@ -176,25 +175,13 @@ function MohFormDialog({ mode, mohId, open, onOpenChange }: { mode: "create" | "
     if (mode === "create") {
       createMutation.mutate(payload as MusicOnHoldCreate, {
         onSuccess: () => {
-          toast.success("Music on hold created")
           handleOpenChange(false)
-        },
-        onError: (err) => {
-          toast.error("Failed to create music on hold", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       })
     } else {
       updateMutation.mutate(payload as MusicOnHoldUpdate, {
         onSuccess: () => {
-          toast.success("Music on hold updated")
           handleOpenChange(false)
-        },
-        onError: (err) => {
-          toast.error("Failed to update music on hold", {
-            description: err instanceof Error ? err.message : undefined,
-          })
         },
       })
     }
@@ -589,16 +576,7 @@ function AdminMusicOnHoldPage() {
                                       className={buttonVariants({ variant: "destructive" })}
                                       disabled={deleteMutation.isPending}
                                       onClick={() => {
-                                        deleteMutation.mutate(moh.id, {
-                                          onSuccess: () => {
-                                            toast.success("Music on hold deleted")
-                                          },
-                                          onError: (err) => {
-                                            toast.error("Failed to delete music on hold", {
-                                              description: err instanceof Error ? err.message : undefined,
-                                            })
-                                          },
-                                        })
+                                        deleteMutation.mutate(moh.id)
                                       }}
                                     >
                                       {deleteMutation.isPending ? "Deleting..." : "Delete Class"}

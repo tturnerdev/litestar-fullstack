@@ -24,7 +24,6 @@ import {
   XCircle,
 } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { EventTypeSelector } from "@/components/shared/event-type-selector"
 import {
@@ -396,7 +395,6 @@ function WebhookDetailPage() {
     updateWebhook.mutate(payload, {
       onSuccess: () => {
         setEditing(false)
-        toast.success("Webhook updated successfully")
       },
       onSettled: () => {
         justSavedRef.current = false

@@ -56,7 +56,7 @@ class TicketMessageController(Controller):
         summary="List ticket messages",
         description="Returns a paginated list of messages for a ticket, sorted by creation date ascending. Internal notes are hidden from non-superusers. Supports search by message body and date range filtering.",
         path="/api/support/tickets/{ticket_id:uuid}/messages",
-        guards=[requires_feature_permission("support", "view"), requires_ticket_access],
+        guards=[requires_feature_permission("support_tickets", "view"), requires_ticket_access],
     )
     async def list_messages(
         self,
@@ -85,7 +85,7 @@ class TicketMessageController(Controller):
         summary="Create a ticket message",
         description="Adds a new reply to a ticket thread. Emits a ticket_message_created event and records an audit log entry with the message snapshot.",
         path="/api/support/tickets/{ticket_id:uuid}/messages",
-        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
+        guards=[requires_feature_permission("support_tickets", "edit"), requires_ticket_access],
         status_code=HTTP_201_CREATED,
     )
     async def create_message(
@@ -125,7 +125,7 @@ class TicketMessageController(Controller):
         summary="Update a ticket message",
         description="Edits an existing ticket message. Only the original author may edit, and the edit window is enforced by the requires_ticket_message_edit guard. Emits a ticket_message_updated event and records an audit log entry.",
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
-        guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
+        guards=[requires_feature_permission("support_tickets", "edit"), requires_ticket_access, requires_ticket_message_edit],
     )
     async def update_message(
         self,
@@ -166,7 +166,7 @@ class TicketMessageController(Controller):
         summary="Delete a ticket message",
         description="Permanently deletes a ticket message. Only the original author may delete within the allowed edit window. Emits a ticket_message_deleted event and records an audit log entry.",
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
-        guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
+        guards=[requires_feature_permission("support_tickets", "edit"), requires_ticket_access, requires_ticket_message_edit],
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
     )

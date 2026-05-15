@@ -666,10 +666,9 @@ function ScheduleDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteSchedule.mutateAsync(scheduleId)
-      toast.success("Schedule deleted")
       router.navigate({ to: "/schedules" })
-    } catch (err) {
-      toast.error("Failed to delete schedule", { description: err instanceof Error ? err.message : undefined })
+    } catch {
+      // Error toast handled by the hook
     }
   }
 

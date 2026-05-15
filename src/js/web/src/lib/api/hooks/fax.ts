@@ -65,13 +65,14 @@ export function useCreateFaxNumber() {
   })
 }
 
-export function useFaxNumbers(page = 1, pageSize = 25) {
+export function useFaxNumbers(page = 1, pageSize = 25, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["fax", "numbers", page, pageSize],
     queryFn: async () => {
       const response = await listFaxNumbers({ query: { currentPage: page, pageSize } })
       return response.data
     },
+    enabled: options?.enabled,
   })
 }
 

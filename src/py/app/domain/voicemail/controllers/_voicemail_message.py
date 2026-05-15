@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voicemail.guards import requires_voicemail_message_access
 from app.domain.voicemail.schemas import VoicemailMessage, VoicemailReadToggle
 from app.domain.voicemail.services import VoicemailBoxService, VoicemailMessageService
@@ -63,7 +64,7 @@ class VoicemailMessageController(Controller):
         summary="List all voicemail messages",
         description="Returns a paginated list of voicemail messages across all boxes with optional filtering by read status and urgency. Superusers see all messages; regular users see only messages for their extensions' voicemail boxes.",
         path="/api/voicemail/messages",
-        guards=[requires_voicemail_message_access],
+        guards=[requires_feature_permission("voice_voicemail", "view"), requires_voicemail_message_access],
     )
     async def list_voicemail_messages(
         self,
@@ -115,7 +116,7 @@ class VoicemailMessageController(Controller):
         summary="List voicemail box messages",
         description="Returns a paginated list of voicemail messages for a specific voicemail box with optional filtering by read status and urgency. Validates that the box exists before querying messages.",
         path="/api/voicemail/boxes/{box_id:uuid}/messages",
-        guards=[requires_voicemail_message_access],
+        guards=[requires_feature_permission("voice_voicemail", "view"), requires_voicemail_message_access],
     )
     async def list_box_messages(
         self,
@@ -154,7 +155,7 @@ class VoicemailMessageController(Controller):
         summary="Get voicemail message details",
         description="Retrieves the full details of a single voicemail message by its ID, including caller information and the associated voicemail box.",
         path="/api/voicemail/messages/{message_id:uuid}",
-        guards=[requires_voicemail_message_access],
+        guards=[requires_feature_permission("voice_voicemail", "view"), requires_voicemail_message_access],
     )
     async def get_voicemail_message(
         self,
@@ -178,7 +179,7 @@ class VoicemailMessageController(Controller):
         summary="Toggle voicemail message read status",
         description="Marks a voicemail message as read or unread based on the request payload and emits a voicemail_message_updated event.",
         path="/api/voicemail/messages/{message_id:uuid}/read",
-        guards=[requires_voicemail_message_access],
+        guards=[requires_feature_permission("voice_voicemail", "edit"), requires_voicemail_message_access],
     )
     async def toggle_read_status(
         self,
@@ -210,7 +211,7 @@ class VoicemailMessageController(Controller):
         summary="Delete a voicemail message",
         description="Permanently deletes a voicemail message, emits a voicemail_message_deleted event, and logs the deletion with a before snapshot to the audit trail.",
         path="/api/voicemail/messages/{message_id:uuid}",
-        guards=[requires_voicemail_message_access],
+        guards=[requires_feature_permission("voice_voicemail", "edit"), requires_voicemail_message_access],
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
     )

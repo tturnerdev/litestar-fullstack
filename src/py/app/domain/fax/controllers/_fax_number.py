@@ -79,7 +79,7 @@ class FaxNumberController(Controller):
         summary="List fax numbers",
         description="Retrieve a paginated list of fax numbers the current user owns or has team access to. Supports searching by number and label.",
         path="/api/fax/numbers",
-        guards=[requires_feature_permission("fax", "view")],
+        guards=[requires_feature_permission("fax_numbers", "view")],
     )
     async def list_fax_numbers(
         self,
@@ -109,7 +109,7 @@ class FaxNumberController(Controller):
         summary="Create a fax number",
         description="Provision a new fax number assigned to the current user. Optionally associates the number with a team. Records an audit log entry, emits a fax_number_created event, and sends a notification to the user.",
         path="/api/fax/numbers",
-        guards=[requires_feature_permission("fax", "edit")],
+        guards=[requires_feature_permission("fax_numbers", "edit")],
         status_code=HTTP_201_CREATED,
     )
     async def create_fax_number(
@@ -163,7 +163,7 @@ class FaxNumberController(Controller):
         summary="Get fax number details",
         description="Retrieve details for a single fax number, including its email routes. Access is restricted to the number's owner, team members, and superusers.",
         path="/api/fax/numbers/{fax_number_id:uuid}",
-        guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
+        guards=[requires_feature_permission("fax_numbers", "view"), requires_fax_number_access],
     )
     async def get_fax_number(
         self,
@@ -194,7 +194,7 @@ class FaxNumberController(Controller):
         summary="Update a fax number",
         description="Update a fax number's label, active status, or team assignment. Records an audit log entry and emits a fax_number_updated event.",
         path="/api/fax/numbers/{fax_number_id:uuid}",
-        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+        guards=[requires_feature_permission("fax_numbers", "edit"), requires_fax_number_access],
     )
     async def update_fax_number(
         self,
@@ -249,7 +249,7 @@ class FaxNumberController(Controller):
         summary="Delete a fax number",
         description="Delete a fax number and its associated email routes. Records an audit log entry and sends a notification to the number's owner.",
         path="/api/fax/numbers/{fax_number_id:uuid}",
-        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+        guards=[requires_feature_permission("fax_numbers", "edit"), requires_fax_number_access],
         status_code=HTTP_204_NO_CONTENT,
         return_dto=None,
     )

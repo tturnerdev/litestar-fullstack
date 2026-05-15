@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertTriangle, ChevronRight, Globe, Headphones, Info, KeyRound, Loader2, Lock, Network, Phone, Plug, ShieldCheck } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -493,7 +492,6 @@ function NewConnectionPage() {
     justSubmittedRef.current = true
     createConnection.mutate(payload, {
       onSuccess: () => {
-        toast.success("Connection created successfully")
         router.navigate({ to: "/connections" })
       },
       onError: () => {

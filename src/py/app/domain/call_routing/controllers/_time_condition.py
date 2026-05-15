@@ -59,7 +59,7 @@ class TimeConditionController(Controller):
         summary="List time conditions",
         description="Returns a paginated list of time conditions. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         path="/api/time-conditions",
-        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_time_conditions", "view"), requires_call_routing_access],
     )
     async def list_time_conditions(
         self,
@@ -85,7 +85,7 @@ class TimeConditionController(Controller):
         summary="Create a time condition",
         description="Creates a new time condition and assigns it to the current user's team. Logs an audit entry and emits a time_condition_created event.",
         path="/api/time-conditions",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_time_conditions", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
     )
     async def create_time_condition(
@@ -134,7 +134,7 @@ class TimeConditionController(Controller):
         summary="Get time condition details",
         description="Retrieves a single time condition by ID, including its current override mode status.",
         path="/api/time-conditions/{time_condition_id:uuid}",
-        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_time_conditions", "view"), requires_call_routing_access],
     )
     async def get_time_condition(
         self,
@@ -160,7 +160,7 @@ class TimeConditionController(Controller):
         summary="Update a time condition",
         description="Partially updates a time condition's configuration. Captures before/after snapshots for audit logging and emits a time_condition_updated event.",
         path="/api/time-conditions/{time_condition_id:uuid}",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_time_conditions", "edit"), requires_call_routing_access],
     )
     async def update_time_condition(
         self,
@@ -212,7 +212,7 @@ class TimeConditionController(Controller):
         description="Permanently deletes a time condition. Emits a time_condition_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/time-conditions/{time_condition_id:uuid}",
         return_dto=None,
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_time_conditions", "edit"), requires_call_routing_access],
         status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_time_condition(
@@ -258,7 +258,7 @@ class TimeConditionController(Controller):
         summary="Set time condition override",
         description="Sets or clears the override mode on a time condition, bypassing normal schedule-based routing. Logs an audit entry and emits both time_condition_updated and time_condition_override_changed events.",
         path="/api/time-conditions/{time_condition_id:uuid}/override",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_time_conditions", "edit"), requires_call_routing_access],
     )
     async def set_override(
         self,

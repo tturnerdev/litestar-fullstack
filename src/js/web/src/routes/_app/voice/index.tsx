@@ -13,6 +13,12 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
 import { useDndSettings, useExtensions, usePhoneNumbers, useVoicemailMessages, useVoicemailSettings } from "@/lib/api/hooks/voice"
+import { useAuthStore } from "@/lib/auth"
+
+function useHasFeatureAccess() {
+  const user = useAuthStore((state) => state.user)
+  return user?.isSuperuser || (user?.teams?.some((t) => t.role === "ADMIN") ?? false)
+}
 
 export const Route = createFileRoute("/_app/voice/")({
   component: VoiceOverviewPage,
@@ -90,8 +96,9 @@ function VoiceBreadcrumbs() {
 // ---------------------------------------------------------------------------
 
 function SummaryCards() {
-  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100)
-  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100)
+  const hasAccess = useHasFeatureAccess()
+  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100, { enabled: hasAccess })
+  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100, undefined, { enabled: hasAccess })
 
   if (phonesLoading || extsLoading) {
     return (
@@ -248,10 +255,11 @@ const PIE_COLORS = [
 ]
 
 function VoiceResourceCharts() {
-  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100)
-  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100)
-  const { data: queueData, isLoading: queuesLoading } = useCallQueues({ page: 1, pageSize: 100 })
-  const { data: ringGroupData, isLoading: ringsLoading } = useRingGroups({ page: 1, pageSize: 100 })
+  const hasAccess = useHasFeatureAccess()
+  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100, { enabled: hasAccess })
+  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100, undefined, { enabled: hasAccess })
+  const { data: queueData, isLoading: queuesLoading } = useCallQueues({ page: 1, pageSize: 100, enabled: hasAccess })
+  const { data: ringGroupData, isLoading: ringsLoading } = useRingGroups({ page: 1, pageSize: 100, enabled: hasAccess })
 
   const isLoading = phonesLoading || extsLoading || queuesLoading || ringsLoading
 
@@ -395,8 +403,9 @@ function VoiceResourceCharts() {
 // ---------------------------------------------------------------------------
 
 function StatusOverview() {
-  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100)
-  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100)
+  const hasAccess = useHasFeatureAccess()
+  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100, { enabled: hasAccess })
+  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100, undefined, { enabled: hasAccess })
 
   if (phonesLoading || extsLoading) {
     return null
@@ -530,7 +539,8 @@ function QuickLinks() {
 // ---------------------------------------------------------------------------
 
 function RecentExtensions() {
-  const { data, isLoading } = useExtensions(1, 5)
+  const hasAccess = useHasFeatureAccess()
+  const { data, isLoading } = useExtensions(1, 5, undefined, { enabled: hasAccess })
 
   if (isLoading) {
     return (

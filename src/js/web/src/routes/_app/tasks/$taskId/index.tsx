@@ -233,7 +233,8 @@ function TaskDetailPage() {
                 variant="outline"
                 onClick={() =>
                   retryMutation.mutate(taskId, {
-                    onSuccess: () => toast.success("Task retry initiated successfully"),
+                    onSuccess: () => toast.success("Task queued for retry"),
+                    onError: (error) => toast.error("Unable to retry task", { description: error instanceof Error ? error.message : "Try again later" }),
                   })
                 }
                 disabled={retryMutation.isPending}
@@ -451,7 +452,8 @@ function TaskDetailPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() =>
                 cancelMutation.mutate(taskId, {
-                  onSuccess: () => toast.success("Task cancelled successfully"),
+                  onSuccess: () => toast.success("Task cancelled"),
+                  onError: (error) => toast.error("Unable to cancel task", { description: error instanceof Error ? error.message : "Try again later" }),
                 })
               }
               disabled={cancelMutation.isPending}
@@ -480,6 +482,7 @@ function TaskDetailPage() {
                     toast.success("Task deleted")
                     navigate({ to: "/tasks" })
                   },
+                  onError: (error) => toast.error("Unable to delete task", { description: error instanceof Error ? error.message : "Try again later" }),
                 })
               }
               disabled={deleteMutation.isPending}

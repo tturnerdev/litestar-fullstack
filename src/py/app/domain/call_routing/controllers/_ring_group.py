@@ -65,7 +65,7 @@ class RingGroupController(Controller):
         summary="List ring groups",
         description="Returns a paginated list of ring groups with their members. Supports searching by name, sorting, and filtering by creation/update timestamps.",
         path="/api/ring-groups",
-        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "view"), requires_call_routing_access],
     )
     async def list_ring_groups(
         self,
@@ -91,7 +91,7 @@ class RingGroupController(Controller):
         summary="Create a ring group",
         description="Creates a new ring group and assigns it to the current user's team. Logs an audit entry and emits a ring_group_created event.",
         path="/api/ring-groups",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
     )
     async def create_ring_group(
@@ -140,7 +140,7 @@ class RingGroupController(Controller):
         summary="Get ring group details",
         description="Retrieves a single ring group by ID, including its current list of members.",
         path="/api/ring-groups/{ring_group_id:uuid}",
-        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "view"), requires_call_routing_access],
     )
     async def get_ring_group(
         self,
@@ -164,7 +164,7 @@ class RingGroupController(Controller):
         summary="Update a ring group",
         description="Partially updates a ring group's configuration. Captures before/after snapshots for audit logging and emits a ring_group_updated event.",
         path="/api/ring-groups/{ring_group_id:uuid}",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "edit"), requires_call_routing_access],
     )
     async def update_ring_group(
         self,
@@ -214,7 +214,7 @@ class RingGroupController(Controller):
         description="Permanently deletes a ring group and all its member associations. Emits a ring_group_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/ring-groups/{ring_group_id:uuid}",
         return_dto=None,
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "edit"), requires_call_routing_access],
         status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_ring_group(
@@ -260,7 +260,7 @@ class RingGroupController(Controller):
         summary="List ring group members",
         description="Returns all members belonging to the specified ring group. Validates that the parent ring group exists before listing.",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
-        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "view"), requires_call_routing_access],
     )
     async def list_members(
         self,
@@ -287,7 +287,7 @@ class RingGroupController(Controller):
         summary="Add a ring group member",
         description="Adds a new member to the specified ring group. Logs an audit entry and emits a ring_group_member_created event.",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "edit"), requires_call_routing_access],
         status_code=HTTP_201_CREATED,
     )
     async def create_member(
@@ -341,7 +341,7 @@ class RingGroupController(Controller):
         summary="Update a ring group member",
         description="Partially updates a member's settings within a ring group. Captures before/after snapshots for audit logging and emits a ring_group_member_updated event.",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "edit"), requires_call_routing_access],
     )
     async def update_member(
         self,
@@ -396,7 +396,7 @@ class RingGroupController(Controller):
         description="Removes a member from the specified ring group. Emits a ring_group_member_deleted event and logs an audit entry with the pre-deletion snapshot.",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
-        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+        guards=[requires_feature_permission("call_routing_ring_groups", "edit"), requires_call_routing_access],
         status_code=HTTP_204_NO_CONTENT,
     )
     async def delete_member(

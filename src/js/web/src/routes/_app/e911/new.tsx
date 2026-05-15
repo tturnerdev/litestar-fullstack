@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertTriangle, Building2, ChevronRight, Loader2, MapPin, Phone, Shield } from "lucide-react"
 import { useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -154,7 +153,6 @@ function NewE911RegistrationPage() {
 
     createMutation.mutate(payload, {
       onSuccess: (data) => {
-        toast.success("E911 registration created successfully")
         router.navigate({ to: "/e911/$registrationId", params: { registrationId: data.id } })
       },
       onSettled: () => {

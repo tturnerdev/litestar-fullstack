@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle, Clock, Database, Info, Loader2, Network, Save } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
@@ -124,7 +123,6 @@ function AdminGatewayPage() {
         onSuccess: (newData) => {
           setTimeout(String(newData.defaultTimeout))
           setCacheTtl(String(newData.defaultCacheTtl))
-          toast.success("Gateway settings updated")
         },
       },
     )

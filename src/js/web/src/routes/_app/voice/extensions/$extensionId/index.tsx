@@ -600,7 +600,6 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
     }
     updateExtension.mutate(patch, {
       onSuccess: () => {
-        toast.success("Extension updated successfully")
         setIsEditing(false)
       },
     })
