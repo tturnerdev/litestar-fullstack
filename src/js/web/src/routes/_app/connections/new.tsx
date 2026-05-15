@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertTriangle, ChevronRight, Globe, Headphones, Info, KeyRound, Loader2, Lock, Network, Phone, Plug, ShieldCheck } from "lucide-react"
+import { AlertTriangle, ChevronRight, Globe, Headphones, Info, KeyRound, Loader2, Lock, Network, Phone, Plug, ShieldAlert, ShieldCheck } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
@@ -16,13 +16,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type ConnectionCreate, useCreateConnection } from "@/lib/api/hooks/connections"
 import { cn } from "@/lib/utils"
 
@@ -240,6 +241,7 @@ function NewConnectionPage() {
   useDocumentTitle("New Connection")
   const router = useRouter()
   const { currentTeam } = useAuth()
+  const { canEdit } = usePermissions()
   const createConnection = useCreateConnection()
 
   // Form state
@@ -504,6 +506,21 @@ function NewConnectionPage() {
   const isValid = name.trim().length >= 2 && provider.trim() !== "" && !hasValidationErrors && !!currentTeam
 
   // Get the icon for the currently selected connection type
+
+  if (!canEdit("CONNECTIONS")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Connections" title="Add Connection" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   return (
     <>

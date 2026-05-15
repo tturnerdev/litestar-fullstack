@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertTriangle, Loader2 } from "lucide-react"
+import { AlertTriangle, Loader2, ShieldAlert } from "lucide-react"
 import { useRef, useState } from "react"
 import {
   AlertDialog,
@@ -16,11 +16,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/hooks/use-auth"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useCreateFaxNumber } from "@/lib/api/hooks/fax"
 import { cn } from "@/lib/utils"
 
@@ -32,6 +33,7 @@ const LABEL_MAX = 100
 
 function NewFaxNumberPage() {
   useDocumentTitle("New Fax Number")
+  const { canEdit } = usePermissions()
   const router = useRouter()
   const { currentTeam } = useAuth()
   const createFaxNumber = useCreateFaxNumber()
@@ -99,6 +101,21 @@ function NewFaxNumberPage() {
   }
 
   const isValid = number.trim() !== ""
+
+  if (!canEdit("FAX_NUMBERS")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Fax" title="New Number" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   return (
     <>

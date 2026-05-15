@@ -59,6 +59,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -159,6 +160,8 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 
 function FaxNumbersPage() {
   useDocumentTitle("Fax Numbers")
+  const { canEdit } = usePermissions()
+  const canEditFaxNumbers = canEdit("FAX_NUMBERS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -349,15 +352,19 @@ function FaxNumbersPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        (id) => deleteFaxNumber.mutateAsync(id),
-        () => {
-          setSelectedIds(new Set())
-        },
-      ),
+      ...(canEditFaxNumbers
+        ? [
+            createBulkDeleteAction(
+              (id) => deleteFaxNumber.mutateAsync(id),
+              () => {
+                setSelectedIds(new Set())
+              },
+            ),
+          ]
+        : []),
       createExportAction<FaxNumber>("fax-numbers-selected", csvHeaders, (ids) => filteredItems.filter((n) => ids.includes(n.id))),
     ],
-    [filteredItems, deleteFaxNumber],
+    [filteredItems, deleteFaxNumber, canEditFaxNumbers],
   )
 
   // Export all visible
@@ -390,7 +397,7 @@ function FaxNumbersPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && canEditFaxNumbers) {
         e.preventDefault()
         navigate({ to: "/fax/numbers/new" })
       }
@@ -462,12 +469,14 @@ function FaxNumbersPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/fax/numbers/new">
-                <Plus className="mr-2 h-4 w-4" /> New Number
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {canEditFaxNumbers && (
+              <Button size="sm" asChild>
+                <Link to="/fax/numbers/new">
+                  <Plus className="mr-2 h-4 w-4" /> New Number
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
             <div className="flex gap-1 rounded-lg border border-border/60 p-0.5">
               <Button variant={viewMode === "table" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("table")} className="h-8 px-2">
                 <List className="h-4 w-4" />
@@ -619,11 +628,13 @@ function FaxNumbersPage() {
               title="No fax numbers yet"
               description="Add your first fax number to start sending and receiving faxes. You can configure email delivery routes after adding a number."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/fax/numbers/new">
-                    <Plus className="mr-2 h-4 w-4" /> New Number
-                  </Link>
-                </Button>
+                canEditFaxNumbers ? (
+                  <Button size="sm" asChild>
+                    <Link to="/fax/numbers/new">
+                      <Plus className="mr-2 h-4 w-4" /> New Number
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -677,9 +688,11 @@ function FaxNumbersPage() {
                 <Table aria-label="Fax numbers" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all fax numbers" />
-                      </TableHead>
+                      {canEditFaxNumbers && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all fax numbers" />
+                        </TableHead>
+                      )}
                       <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("label") && <SortableHeader label="Label" sortKey="label" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                       {isColumnVisible("status") && <SortableHeader label="Status" sortKey="is_active" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
@@ -700,6 +713,7 @@ function FaxNumbersPage() {
                         onDelete={() => setNumberToDelete({ id: faxNumber.id, number: faxNumber.number })}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={canEditFaxNumbers}
                       />
                     ))}
                   </TableBody>
@@ -861,6 +875,7 @@ function FaxNumberRow({
   onDelete,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   faxNumber: FaxNumber
   index: number
@@ -870,6 +885,7 @@ function FaxNumberRow({
   onDelete: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const [editOpen, setEditOpen] = useState(false)
 
@@ -885,16 +901,18 @@ function FaxNumberRow({
         onRowClick()
       }}
     >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${faxNumber.number}`}
-        />
-      </TableCell>
+      {canEdit && (
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${faxNumber.number}`}
+          />
+        </TableCell>
+      )}
       <TableCell className={cellClass}>
         <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-mono font-medium group-hover:underline">{formatPhoneNumber(faxNumber.number)}</span>
@@ -943,22 +961,30 @@ function FaxNumberRow({
                 View details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {canEdit && (
+              <>
+                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem asChild>
               <Link to="/fax/messages" search={{ number: faxNumber.number }}>
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Messages
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
+            {canEdit && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         <FaxNumberEditDialog faxNumber={faxNumber} open={editOpen} onOpenChange={setEditOpen} />

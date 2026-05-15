@@ -87,6 +87,7 @@ export function LocationList({
   onSearchInputChange,
   onFreshnessChange,
   onLocationsChange,
+  canEdit = true,
 }: {
   searchParams: LocationSearchParams
   navigate: NavigateFn
@@ -95,6 +96,7 @@ export function LocationList({
   onSearchInputChange?: (value: string) => void
   onFreshnessChange?: (state: LocationFreshnessState) => void
   onLocationsChange?: (locations: Location[]) => void
+  canEdit?: boolean
 }) {
   const { currentTeam } = useAuthStore()
 
@@ -221,17 +223,21 @@ export function LocationList({
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        (id) => bulk.deleteOne(id),
-        () => {
-          bulk.invalidate()
-          setSelectedIds(new Set())
-        },
-        { label: "Delete Selected" },
-      ),
+      ...(canEdit
+        ? [
+            createBulkDeleteAction(
+              (id) => bulk.deleteOne(id),
+              () => {
+                bulk.invalidate()
+                setSelectedIds(new Set())
+              },
+              { label: "Delete Selected" },
+            ),
+          ]
+        : []),
       createExportAction<Location>("locations-selected", csvHeaders, (ids) => locations.filter((loc) => ids.includes(loc.id))),
     ],
-    [bulk, locations],
+    [bulk, locations, canEdit],
   )
 
   // Row click handler
@@ -301,9 +307,11 @@ export function LocationList({
         title="No locations yet"
         description="Locations help you track where devices and extensions are physically placed. Start by creating an addressed location like an office or branch."
         action={
-          <Button size="sm" asChild>
-            <Link to="/locations/new">Create location</Link>
-          </Button>
+          canEdit ? (
+            <Button size="sm" asChild>
+              <Link to="/locations/new">Create location</Link>
+            </Button>
+          ) : undefined
         }
       />
     )
@@ -365,9 +373,11 @@ export function LocationList({
               <Table aria-label="Locations" aria-busy={isLoading || isRefetching}>
                 <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all locations" />
-                    </TableHead>
+                    {canEdit && (
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all locations" />
+                      </TableHead>
+                    )}
                     <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                     {isColumnVisible("type") && <SortableHeader label="Type" sortKey="location_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                     {isColumnVisible("address") && <TableHead>Address</TableHead>}
@@ -391,6 +401,7 @@ export function LocationList({
                       teamId={teamId}
                       cellClass={cellClass}
                       isColumnVisible={isColumnVisible}
+                      canEdit={canEdit}
                     />
                   ))}
                 </TableBody>
@@ -501,6 +512,7 @@ function LocationRow({
   teamId,
   cellClass = "",
   isColumnVisible = () => true,
+  canEdit = true,
 }: {
   location: Location
   index: number
@@ -510,6 +522,7 @@ function LocationRow({
   teamId: string
   cellClass?: string
   isColumnVisible?: (col: string) => boolean
+  canEdit?: boolean
 }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const deleteMutation = useDeleteLocation(teamId)
@@ -546,16 +559,18 @@ function LocationRow({
           onRowClick()
         }}
       >
-        <TableCell className={cellClass}>
-          <Checkbox
-            checked={selected}
-            onChange={(e) => {
-              e.stopPropagation()
-              onToggle()
-            }}
-            aria-label={`Select ${location.name}`}
-          />
-        </TableCell>
+        {canEdit && (
+          <TableCell className={cellClass}>
+            <Checkbox
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation()
+                onToggle()
+              }}
+              aria-label={`Select ${location.name}`}
+            />
+          </TableCell>
+        )}
         <TableCell className={cellClass}>
           <Link to="/locations/$locationId" params={{ locationId: location.id }} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
             {location.name}
@@ -651,17 +666,21 @@ function LocationRow({
                   View details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/locations/$locationId" params={{ locationId: location.id }} search={{ edit: true }}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/locations/$locationId" params={{ locationId: location.id }} search={{ edit: true }}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

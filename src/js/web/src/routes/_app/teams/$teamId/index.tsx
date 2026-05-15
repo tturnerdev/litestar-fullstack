@@ -53,6 +53,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDevicesByTeam } from "@/lib/api/hooks/devices"
 import { useDeleteTeam, useTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByTeam } from "@/lib/api/hooks/voice"
@@ -193,6 +194,8 @@ function TeamDetail() {
   const { data: teamDevices, isLoading: devicesLoading } = useDevicesByTeam(teamId)
   const memberUserIds = useMemo(() => members.map((m) => m.userId), [members])
   const { data: teamExtensions, isLoading: extensionsLoading } = useExtensionsByTeam(memberUserIds)
+  const { canEdit: canEditFn } = usePermissions()
+  const canEditTeams = canEditFn("TEAMS")
 
   if (isTeamLoading) {
     return (
@@ -274,7 +277,7 @@ function TeamDetail() {
   const ownerId = owner?.userId
   const isOwner = ownerId === user?.id
   const isAdmin = members.some((member) => member.userId === user?.id && member.role === "ADMIN")
-  const canManageMembers = isOwner || user?.isSuperuser || isAdmin
+  const canManageMembers = (isOwner || user?.isSuperuser || isAdmin) && canEditTeams
   const tags = team.tags ?? []
 
   const userMembership = members.find((m: TeamMember) => m.userId === user?.id)
@@ -333,20 +336,22 @@ function TeamDetail() {
                 {userRole}
               </Badge>
             )}
-            {editing ? (
-              <>
-                <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateTeamMutation.isPending}>
-                  <X className="mr-2 h-4 w-4" /> Cancel
+            {canEditTeams && (
+              editing ? (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateTeamMutation.isPending}>
+                    <X className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSaveEditing} disabled={updateTeamMutation.isPending || !editName.trim()}>
+                    {updateTeamMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {updateTeamMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
                 </Button>
-                <Button size="sm" onClick={handleSaveEditing} disabled={updateTeamMutation.isPending || !editName.trim()}>
-                  {updateTeamMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                  {updateTeamMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" size="sm" onClick={handleStartEditing}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
+              )
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/teams">
@@ -365,11 +370,15 @@ function TeamDetail() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Team ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Team
-                </DropdownMenuItem>
+                {canEditTeams && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Team
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -672,31 +681,33 @@ function TeamDetail() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.4}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30 bg-card/80 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-              <CardDescription>Irreversible and destructive actions for this team.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                <div>
-                  <p className="font-medium text-sm">Delete this team</p>
-                  <p className="text-xs text-muted-foreground">Once deleted, this team and all member associations cannot be recovered.</p>
+      {canEditTeams && (
+        <PageSection delay={0.4}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30 bg-card/80 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+                <CardDescription>Irreversible and destructive actions for this team.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                  <div>
+                    <p className="font-medium text-sm">Delete this team</p>
+                    <p className="text-xs text-muted-foreground">Once deleted, this team and all member associations cannot be recovered.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

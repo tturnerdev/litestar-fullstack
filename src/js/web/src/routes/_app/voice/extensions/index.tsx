@@ -32,6 +32,7 @@ import { CreateExtensionDialog } from "@/components/voice/create-extension-dialo
 import { ExtensionRowActions } from "@/components/voice/extension-row-actions"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type Extension, useDeleteExtension, useExtensions, usePhoneNumbers, useSyncExtensions, useUpdateAnyExtension } from "@/lib/api/hooks/voice"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -184,6 +185,8 @@ function FeatureIndicators({ ext }: { ext: Extension }) {
 
 function ExtensionsPage() {
   useDocumentTitle("Extensions")
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("VOICE_EXTENSIONS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -420,17 +423,21 @@ function ExtensionsPage() {
 
   const bulkActions = useMemo(
     () => [
-      bulkEnableAction,
-      bulkDisableAction,
-      createBulkDeleteAction(
-        (id) => deleteExtension.mutateAsync(id),
-        () => {
-          setSelectedIds(new Set())
-        },
-      ),
+      ...(hasEditPermission
+        ? [
+            bulkEnableAction,
+            bulkDisableAction,
+            createBulkDeleteAction(
+              (id) => deleteExtension.mutateAsync(id),
+              () => {
+                setSelectedIds(new Set())
+              },
+            ),
+          ]
+        : []),
       createExportAction<Extension>("extensions-selected", csvHeaders, (ids) => filteredItems.filter((e) => ids.includes(e.id))),
     ],
-    [bulkEnableAction, bulkDisableAction, deleteExtension, filteredItems],
+    [bulkEnableAction, bulkDisableAction, deleteExtension, filteredItems, hasEditPermission],
   )
 
   // Export all visible
@@ -547,18 +554,22 @@ function ExtensionsPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowSyncDialog(true)} disabled={syncExtensions.isPending}>
-              {syncExtensions.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-              Sync from PBX
-            </Button>
-            <CreateExtensionDialog
-              trigger={
-                <Button size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Extension
-                </Button>
-              }
-            />
+            {hasEditPermission && (
+              <Button variant="outline" size="sm" onClick={() => setShowSyncDialog(true)} disabled={syncExtensions.isPending}>
+                {syncExtensions.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                Sync from PBX
+              </Button>
+            )}
+            {hasEditPermission && (
+              <CreateExtensionDialog
+                trigger={
+                  <Button size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Extension
+                  </Button>
+                }
+              />
+            )}
           </div>
         }
       />
@@ -699,14 +710,16 @@ function ExtensionsPage() {
               title="No extensions yet"
               description="Create your first extension to get started with voice management. Extensions allow you to assign phone numbers and configure call forwarding, voicemail, and more."
               action={
-                <CreateExtensionDialog
-                  trigger={
-                    <Button size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Extension
-                    </Button>
-                  }
-                />
+                hasEditPermission ? (
+                  <CreateExtensionDialog
+                    trigger={
+                      <Button size="sm">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Extension
+                      </Button>
+                    }
+                  />
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -751,9 +764,11 @@ function ExtensionsPage() {
                 <Table aria-label="Extensions" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all extensions" />
-                      </TableHead>
+                      {hasEditPermission && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all extensions" />
+                        </TableHead>
+                      )}
                       <SortableHeader label="Extension" sortKey="extension_number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("phoneNumber") && (
                         <SortableHeader
@@ -798,6 +813,7 @@ function ExtensionsPage() {
                         }
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={hasEditPermission}
                       />
                     ))}
                   </TableBody>
@@ -915,6 +931,7 @@ function ExtensionRow({
   onNavigate,
   cellClass,
   isColumnVisible,
+  canEdit = true,
 }: {
   ext: Extension
   phoneNumber: string | undefined
@@ -923,6 +940,7 @@ function ExtensionRow({
   onNavigate: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit?: boolean
 }) {
   return (
     <TableRow
@@ -936,17 +954,19 @@ function ExtensionRow({
         onNavigate()
       }}
     >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          onClick={(e) => e.stopPropagation()}
-          aria-label={`Select extension ${ext.extensionNumber}`}
-        />
-      </TableCell>
+      {canEdit && (
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Select extension ${ext.extensionNumber}`}
+          />
+        </TableCell>
+      )}
       <TableCell className={cellClass}>
         <Link to="/voice/extensions/$extensionId" params={{ extensionId: ext.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-mono font-medium group-hover:underline">{ext.extensionNumber}</span>
@@ -982,7 +1002,7 @@ function ExtensionRow({
         {/** biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger */}
         {/** biome-ignore lint/a11y/useKeyWithClickEvents: SVG tooltip trigger */}
         <div onClick={(e) => e.stopPropagation()}>
-          <ExtensionRowActions extension={ext} />
+          <ExtensionRowActions extension={ext} canEdit={canEdit} />
         </div>
       </TableCell>
     </TableRow>

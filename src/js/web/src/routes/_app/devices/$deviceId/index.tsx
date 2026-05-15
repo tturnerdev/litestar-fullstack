@@ -53,6 +53,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useConnections } from "@/lib/api/hooks/connections"
 import { useDeleteDevice, useDevice, useDeviceLines, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
@@ -167,6 +168,8 @@ function DeviceDetailPage() {
   const navigate = Route.useNavigate()
   const router = useRouter()
   const { currentTeam } = useAuthStore()
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("DEVICES")
   const teamId = currentTeam?.id ?? ""
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useDevice(deviceId)
   useDocumentTitle(data?.name ?? "Device Details")
@@ -379,13 +382,17 @@ function DeviceDetailPage() {
                 Disabled
               </Badge>
             )}
-            {!editing && (
+            {hasEditPermission && !editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
             )}
-            <RebootButton onReboot={() => rebootDevice.mutate()} isPending={rebootDevice.isPending} size="sm" />
-            <ReprovisionButton onReprovision={() => reprovisionDevice.mutate()} isPending={reprovisionDevice.isPending} size="sm" />
+            {hasEditPermission && (
+              <>
+                <RebootButton onReboot={() => rebootDevice.mutate()} isPending={rebootDevice.isPending} size="sm" />
+                <ReprovisionButton onReprovision={() => reprovisionDevice.mutate()} isPending={reprovisionDevice.isPending} size="sm" />
+              </>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -404,11 +411,15 @@ function DeviceDetailPage() {
                     Copy MAC Address
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete()}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Device
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete()}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Device
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -593,12 +604,14 @@ function DeviceDetailPage() {
                         <p className="text-muted-foreground">Active</p>
                         <div className="mt-0.5 flex items-center gap-2">
                           <p>{data.isActive ? "Yes" : "No"}</p>
-                          <ToggleActiveButton
-                            isActive={data.isActive ?? true}
-                            onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
-                            isPending={updateDevice.isPending}
-                            size="sm"
-                          />
+                          {hasEditPermission && (
+                            <ToggleActiveButton
+                              isActive={data.isActive ?? true}
+                              onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
+                              isPending={updateDevice.isPending}
+                              size="sm"
+                            />
+                          )}
                         </div>
                       </div>
                       <div>
@@ -1008,27 +1021,29 @@ function DeviceDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.25}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this device</p>
-                  <p className="text-sm text-muted-foreground">This action cannot be undone. All line assignments and configuration will be permanently removed.</p>
+      {hasEditPermission && (
+        <PageSection delay={0.25}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this device</p>
+                    <p className="text-sm text-muted-foreground">This action cannot be undone. All line assignments and configuration will be permanently removed.</p>
+                  </div>
+                  <DeleteButton deviceName={data.name} onDelete={handleDelete} isPending={deleteDevice.isPending} size="sm" />
                 </div>
-                <DeleteButton deviceName={data.name} onDelete={handleDelete} isPending={deleteDevice.isPending} size="sm" />
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
     </PageContainer>
   )
 }

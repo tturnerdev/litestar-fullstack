@@ -52,6 +52,7 @@ import { Switch } from "@/components/ui/switch"
 import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDeleteFaxNumber, useFaxMessages, useFaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
@@ -104,6 +105,8 @@ function FieldError({ message }: { message?: string }) {
 function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const navigate = useNavigate()
+  const { canEdit } = usePermissions()
+  const canEditFaxNumbers = canEdit("FAX_NUMBERS")
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxNumber(faxNumberId)
   useDocumentTitle(data?.number ? `${formatPhoneNumber(data.number)} - Fax Number` : "Fax Number")
   const deleteFaxNumber = useDeleteFaxNumber()
@@ -287,16 +290,20 @@ function FaxNumberDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Phone Number
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setEditing(true)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Fax Number
-                </DropdownMenuItem>
+                {canEditFaxNumbers && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setEditing(true)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Fax Number
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -340,7 +347,7 @@ function FaxNumberDetailPage() {
       {/* Number Info (inline editing) */}
       <PageSection>
         <SectionErrorBoundary name="Number Info">
-          <FaxNumberSettingsCard faxNumberId={faxNumberId} messageCounts={messageCounts} editing={editing} setEditing={setEditing} />
+          <FaxNumberSettingsCard faxNumberId={faxNumberId} messageCounts={messageCounts} editing={editing} setEditing={setEditing} canEdit={canEditFaxNumbers} />
         </SectionErrorBoundary>
       </PageSection>
 
@@ -489,26 +496,28 @@ function FaxNumberDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.3}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this fax number</p>
-                  <p className="text-sm text-muted-foreground">This action cannot be undone. All email routes and message associations will be permanently removed.</p>
+      {canEditFaxNumbers && (
+        <PageSection delay={0.3}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this fax number</p>
+                    <p className="text-sm text-muted-foreground">This action cannot be undone. All email routes and message associations will be permanently removed.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
     </PageContainer>
   )
 }
@@ -525,11 +534,13 @@ function FaxNumberSettingsCard({
   messageCounts,
   editing,
   setEditing,
+  canEdit,
 }: {
   faxNumberId: string
   messageCounts: { sent: number; received: number; total: number }
   editing: boolean
   setEditing: (editing: boolean) => void
+  canEdit: boolean
 }) {
   const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
   const updateMutation = useUpdateFaxNumber(faxNumberId)
@@ -703,11 +714,11 @@ function FaxNumberSettingsCard({
                     {updateMutation.isPending ? "Saving..." : "Save changes"}
                   </Button>
                 </>
-              ) : (
+              ) : canEdit ? (
                 <Button size="sm" onClick={() => setEditing(true)}>
                   <Pencil className="mr-2 h-4 w-4" /> Edit
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
         </CardHeader>

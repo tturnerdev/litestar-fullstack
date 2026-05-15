@@ -65,6 +65,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 import type { TicketMessage as TicketMessageType, Ticket as TicketType, TicketUpdate } from "@/lib/api/hooks/support"
 import { useCloseTicket, useDeleteTicket, useReopenTicket, useTicket, useTicketMessages, useUpdateTicket } from "@/lib/api/hooks/support"
@@ -108,7 +109,7 @@ interface TicketTag {
   slug: string
 }
 
-function TicketTagManager({ ticketId, initialTags }: { ticketId: string; initialTags: TicketTag[] }) {
+function TicketTagManager({ ticketId, initialTags, readOnly = false }: { ticketId: string; initialTags: TicketTag[]; readOnly?: boolean }) {
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
   const [tagSearch, setTagSearch] = useState("")
   const [assignedTags, setAssignedTags] = useState<TicketTag[]>(initialTags)
@@ -171,38 +172,40 @@ function TicketTagManager({ ticketId, initialTags }: { ticketId: string; initial
           </div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tags</p>
         </div>
-        <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" aria-label="Add tag">
-              <Plus className="h-3.5 w-3.5" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-0" align="end">
-            <Command shouldFilter={false}>
-              <CommandInput placeholder="Search tags..." value={tagSearch} onValueChange={setTagSearch} />
-              <CommandList>
-                <CommandEmpty>No tags found.</CommandEmpty>
-                <CommandGroup>
-                  {availableTags.map((tag) => {
-                    const isSelected = assignedIds.has(tag.id)
-                    return (
-                      <CommandItem key={tag.id} value={tag.id} onSelect={() => handleToggleTag(tag)}>
-                        <div
-                          className={`mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
-                            isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30"
-                          }`}
-                        >
-                          {isSelected && <Check className="h-3 w-3" />}
-                        </div>
-                        <span className="truncate text-sm">{tag.name}</span>
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        {!readOnly && (
+          <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" aria-label="Add tag">
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-0" align="end">
+              <Command shouldFilter={false}>
+                <CommandInput placeholder="Search tags..." value={tagSearch} onValueChange={setTagSearch} />
+                <CommandList>
+                  <CommandEmpty>No tags found.</CommandEmpty>
+                  <CommandGroup>
+                    {availableTags.map((tag) => {
+                      const isSelected = assignedIds.has(tag.id)
+                      return (
+                        <CommandItem key={tag.id} value={tag.id} onSelect={() => handleToggleTag(tag)}>
+                          <div
+                            className={`mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
+                              isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30"
+                            }`}
+                          >
+                            {isSelected && <Check className="h-3 w-3" />}
+                          </div>
+                          <span className="truncate text-sm">{tag.name}</span>
+                        </CommandItem>
+                      )
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
 
       {assignedTags.length > 0 ? (
@@ -210,9 +213,11 @@ function TicketTagManager({ ticketId, initialTags }: { ticketId: string; initial
           {assignedTags.map((tag) => (
             <Badge key={tag.id} variant="secondary" className="gap-1 px-2 py-0.5 text-[10px]">
               {tag.name}
-              <button type="button" className="ml-0.5 rounded-full p-0 hover:bg-muted-foreground/20" onClick={() => handleRemoveTag(tag.id)} aria-label={`Remove tag ${tag.name}`}>
-                <X className="h-3 w-3" />
-              </button>
+              {!readOnly && (
+                <button type="button" className="ml-0.5 rounded-full p-0 hover:bg-muted-foreground/20" onClick={() => handleRemoveTag(tag.id)} aria-label={`Remove tag ${tag.name}`}>
+                  <X className="h-3 w-3" />
+                </button>
+              )}
             </Badge>
           ))}
         </div>
@@ -656,6 +661,8 @@ function TicketDetailPage() {
   const router = useRouter()
   const { data: ticket, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTicket(ticketId)
   useDocumentTitle(ticket?.subject ?? "Ticket Details")
+  const { canEdit } = usePermissions()
+  const canEditTickets = canEdit("SUPPORT_TICKETS")
   const closeTicket = useCloseTicket(ticketId)
   const reopenTicket = useReopenTicket(ticketId)
   const updateTicket = useUpdateTicket(ticketId)
@@ -799,33 +806,35 @@ function TicketDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
-            {editing ? (
-              <>
-                <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateTicket.isPending}>
-                  <X className="mr-2 h-4 w-4" /> Cancel
-                </Button>
-                <Button size="sm" onClick={handleSaveEditing} disabled={!editDirty || updateTicket.isPending}>
-                  {updateTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                  Save
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" onClick={handleStartEditing}>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit
-                </Button>
-                {isClosed ? (
-                  <Button variant="outline" size="sm" onClick={() => setShowReopenDialog(true)} disabled={reopenTicket.isPending}>
-                    {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
-                    Reopen
+            {canEditTickets && (
+              editing ? (
+                <>
+                  <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateTicket.isPending}>
+                    <X className="mr-2 h-4 w-4" /> Cancel
                   </Button>
-                ) : (
-                  <Button variant="outline" size="sm" onClick={() => setShowCloseDialog(true)} disabled={closeTicket.isPending}>
-                    {closeTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
-                    Close
+                  <Button size="sm" onClick={handleSaveEditing} disabled={!editDirty || updateTicket.isPending}>
+                    {updateTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                    Save
                   </Button>
-                )}
-              </>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                  </Button>
+                  {isClosed ? (
+                    <Button variant="outline" size="sm" onClick={() => setShowReopenDialog(true)} disabled={reopenTicket.isPending}>
+                      {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
+                      Reopen
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setShowCloseDialog(true)} disabled={closeTicket.isPending}>
+                      {closeTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                      Close
+                    </Button>
+                  )}
+                </>
+              )
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/support">
@@ -849,11 +858,15 @@ function TicketDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Ticket ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Ticket
-                </DropdownMenuItem>
+                {canEditTickets && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Ticket
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -885,10 +898,12 @@ function TicketDetailPage() {
                       <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-6 text-center">
                         <p className="text-sm font-medium text-muted-foreground">This ticket is {ticket.status}.</p>
                         <p className="mt-1 text-xs text-muted-foreground/70">Reopen it to continue the conversation.</p>
-                        <Button size="sm" variant="outline" className="mt-3" onClick={() => setShowReopenDialog(true)} disabled={reopenTicket.isPending}>
-                          {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
-                          Reopen Ticket
-                        </Button>
+                        {canEditTickets && (
+                          <Button size="sm" variant="outline" className="mt-3" onClick={() => setShowReopenDialog(true)} disabled={reopenTicket.isPending}>
+                            {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
+                            Reopen Ticket
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -911,35 +926,39 @@ function TicketDetailPage() {
                   {/* Status */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Status</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button type="button" className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50">
-                          <TicketStatusBadge status={ticket.status} />
-                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {statuses.map((s) => (
-                          <DropdownMenuItem
-                            key={s.value}
-                            disabled={ticket.status === s.value}
-                            onClick={() => {
-                              if (s.value === "closed") {
-                                setShowCloseDialog(true)
-                              } else if ((ticket.status === "closed" || ticket.status === "resolved") && s.value === "open") {
-                                setShowReopenDialog(true)
-                              } else {
-                                updateTicket.mutate({ status: s.value })
-                              }
-                            }}
-                          >
-                            <TicketStatusBadge status={s.value} />
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {canEditTickets ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button type="button" className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50">
+                            <TicketStatusBadge status={ticket.status} />
+                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {statuses.map((s) => (
+                            <DropdownMenuItem
+                              key={s.value}
+                              disabled={ticket.status === s.value}
+                              onClick={() => {
+                                if (s.value === "closed") {
+                                  setShowCloseDialog(true)
+                                } else if ((ticket.status === "closed" || ticket.status === "resolved") && s.value === "open") {
+                                  setShowReopenDialog(true)
+                                } else {
+                                  updateTicket.mutate({ status: s.value })
+                                }
+                              }}
+                            >
+                              <TicketStatusBadge status={s.value} />
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <TicketStatusBadge status={ticket.status} />
+                    )}
                   </div>
 
                   <Separator />
@@ -947,23 +966,27 @@ function TicketDetailPage() {
                   {/* Priority */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Priority</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button type="button" className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50">
-                          <TicketPriorityBadge priority={ticket.priority} />
-                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Change Priority</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {priorities.map((p) => (
-                          <DropdownMenuItem key={p} disabled={ticket.priority === p} onClick={() => updateTicket.mutate({ priority: p })}>
-                            <TicketPriorityBadge priority={p} />
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {canEditTickets ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button type="button" className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50">
+                            <TicketPriorityBadge priority={ticket.priority} />
+                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Change Priority</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {priorities.map((p) => (
+                            <DropdownMenuItem key={p} disabled={ticket.priority === p} onClick={() => updateTicket.mutate({ priority: p })}>
+                              <TicketPriorityBadge priority={p} />
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <TicketPriorityBadge priority={ticket.priority} />
+                    )}
                   </div>
 
                   <Separator />
@@ -1089,7 +1112,7 @@ function TicketDetailPage() {
                   <Separator />
 
                   {/* Tags */}
-                  <TicketTagManager ticketId={ticketId} initialTags={[]} />
+                  <TicketTagManager ticketId={ticketId} initialTags={[]} readOnly={!canEditTickets} />
                 </CardContent>
               </Card>
             </SectionErrorBoundary>
@@ -1191,23 +1214,25 @@ function TicketDetailPage() {
           </PageSection>
 
           {/* Danger zone */}
-          <PageSection delay={0.27}>
-            <SectionErrorBoundary name="Danger Zone">
-              <Card className="border-destructive/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-destructive">Danger Zone</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Permanently delete this ticket and all of its messages. This action cannot be undone.</p>
-                    <Button variant="destructive" size="sm" className="w-full" onClick={() => setShowDeleteDialog(true)}>
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete Ticket
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </SectionErrorBoundary>
-          </PageSection>
+          {canEditTickets && (
+            <PageSection delay={0.27}>
+              <SectionErrorBoundary name="Danger Zone">
+                <Card className="border-destructive/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-destructive">Danger Zone</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Permanently delete this ticket and all of its messages. This action cannot be undone.</p>
+                      <Button variant="destructive" size="sm" className="w-full" onClick={() => setShowDeleteDialog(true)}>
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete Ticket
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </SectionErrorBoundary>
+            </PageSection>
+          )}
         </div>
       </div>
 

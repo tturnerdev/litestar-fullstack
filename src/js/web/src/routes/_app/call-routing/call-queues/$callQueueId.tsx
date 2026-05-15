@@ -33,6 +33,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import {
   type CallQueue,
   type CallQueueMember,
@@ -638,6 +639,8 @@ function InfoField({ label, value }: { label: string; value?: string | number | 
 function CallQueueDetailPage() {
   const { callQueueId } = Route.useParams()
   const router = useRouter()
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("CALL_ROUTING_QUEUES")
 
   const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useCallQueue(callQueueId)
   const { data: extensionsData } = useExtensions(1, 200)
@@ -803,9 +806,11 @@ function CallQueueDetailPage() {
             <Badge variant="outline">
               {members.length} member{members.length === 1 ? "" : "s"}
             </Badge>
-            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit
-            </Button>
+            {hasEditPermission && (
+              <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/call-routing" search={{ tab: "call-queues" }}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -828,11 +833,15 @@ function CallQueueDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Queue ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteAlert(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Queue
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteAlert(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Queue
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -913,31 +922,33 @@ function CallQueueDetailPage() {
                   ) : (
                     <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
                   )}
-                  <AddMemberRow queueId={callQueueId} extensions={allExtensions} />
+                  {hasEditPermission && <AddMemberRow queueId={callQueueId} extensions={allExtensions} />}
                 </CardContent>
               </Card>
             </SectionErrorBoundary>
 
             {/* Danger Zone */}
-            <SectionErrorBoundary name="Danger Zone">
-              <Card className="border-destructive/30 bg-card/80 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="h-4 w-4" /> Danger Zone
-                  </CardTitle>
-                  <CardDescription>Irreversible and destructive actions.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                    <div>
-                      <p className="font-medium text-sm">Delete this call queue</p>
-                      <p className="text-xs text-muted-foreground">Once deleted, this call queue and all member assignments cannot be recovered.</p>
+            {hasEditPermission && (
+              <SectionErrorBoundary name="Danger Zone">
+                <Card className="border-destructive/30 bg-card/80 shadow-md">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" /> Danger Zone
+                    </CardTitle>
+                    <CardDescription>Irreversible and destructive actions.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                      <div>
+                        <p className="font-medium text-sm">Delete this call queue</p>
+                        <p className="text-xs text-muted-foreground">Once deleted, this call queue and all member assignments cannot be recovered.</p>
+                      </div>
+                      <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
                     </div>
-                    <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
-                  </div>
-                </CardContent>
-              </Card>
-            </SectionErrorBoundary>
+                  </CardContent>
+                </Card>
+              </SectionErrorBoundary>
+            )}
           </div>
 
           {/* Sidebar */}

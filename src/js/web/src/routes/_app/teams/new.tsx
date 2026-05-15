@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ChevronRight, Shield, Tag, UserPlus, Users } from "lucide-react"
+import { ChevronRight, Shield, ShieldAlert, Tag, UserPlus, Users } from "lucide-react"
 import { CreateTeamForm } from "@/components/teams/create-team-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 
 export const Route = createFileRoute("/_app/teams/new")({
   component: NewTeamPage,
@@ -36,6 +37,23 @@ const tips = [
 
 function NewTeamPage() {
   useDocumentTitle("New Team")
+  const { canEdit } = usePermissions()
+
+  if (!canEdit("TEAMS")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Teams" title="Create New Team" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader

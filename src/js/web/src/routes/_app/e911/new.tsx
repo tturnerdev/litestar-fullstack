@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertTriangle, Building2, ChevronRight, Loader2, MapPin, Phone, Shield } from "lucide-react"
+import { AlertTriangle, Building2, ChevronRight, Loader2, MapPin, Phone, Shield, ShieldAlert } from "lucide-react"
 import { useRef, useState } from "react"
 import {
   AlertDialog,
@@ -16,11 +16,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/hooks/use-auth"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type E911RegistrationCreate, type UnregisteredPhoneNumber, useCreateE911Registration, useUnregisteredPhoneNumbers } from "@/lib/api/hooks/e911"
 import { type Location, useLocations } from "@/lib/api/hooks/locations"
 import { cn } from "@/lib/utils"
@@ -54,6 +55,7 @@ const tips = [
 
 function NewE911RegistrationPage() {
   useDocumentTitle("New E911 Registration")
+  const { canEdit } = usePermissions()
   const router = useRouter()
   const { currentTeam } = useAuth()
   const teamId = currentTeam?.id ?? ""
@@ -92,6 +94,21 @@ function NewE911RegistrationPage() {
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
+
+  if (!canEdit("E911")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Compliance" title="New E911 Registration" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   // Field helpers
   function handleBlur(field: string) {

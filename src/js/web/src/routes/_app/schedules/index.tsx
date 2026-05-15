@@ -57,6 +57,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type Schedule, useCheckSchedule, useDeleteSchedule, useSchedules } from "@/lib/api/hooks/schedules"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
@@ -190,6 +191,8 @@ function ScheduleStatusBadge({ scheduleId }: { scheduleId: string }) {
 
 function SchedulesPage() {
   useDocumentTitle("Schedules")
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("SCHEDULES")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
@@ -277,7 +280,7 @@ function SchedulesPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && hasEditPermission) {
         e.preventDefault()
         navigate({ to: "/schedules/new" })
       }
@@ -292,7 +295,7 @@ function SchedulesPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate, page, totalPages])
+  }, [navigate, page, totalPages, hasEditPermission])
 
   useEffect(() => {
     if (!isLoading && page > totalPages) {
@@ -365,14 +368,18 @@ function SchedulesPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        (id) => deleteSchedule.mutateAsync(id),
-        () => refetch(),
-        { label: "Delete Selected" },
-      ),
+      ...(hasEditPermission
+        ? [
+            createBulkDeleteAction(
+              (id) => deleteSchedule.mutateAsync(id),
+              () => refetch(),
+              { label: "Delete Selected" },
+            ),
+          ]
+        : []),
       createExportAction<Schedule>("schedules-selected", csvHeaders, (ids) => filteredItems.filter((s) => ids.includes(s.id))),
     ],
-    [deleteSchedule, refetch, filteredItems],
+    [deleteSchedule, refetch, filteredItems, hasEditPermission],
   )
 
   // Export all visible
@@ -433,12 +440,14 @@ function SchedulesPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/schedules/new">
-                <Plus className="mr-2 h-4 w-4" /> New schedule
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {hasEditPermission && (
+              <Button size="sm" asChild>
+                <Link to="/schedules/new">
+                  <Plus className="mr-2 h-4 w-4" /> New schedule
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -533,11 +542,13 @@ function SchedulesPage() {
               title="No schedules yet"
               description="Create your first schedule to define business hours, holidays, or custom operating windows."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/schedules/new">
-                    <Plus className="mr-2 h-4 w-4" /> New schedule
-                  </Link>
-                </Button>
+                hasEditPermission ? (
+                  <Button size="sm" asChild>
+                    <Link to="/schedules/new">
+                      <Plus className="mr-2 h-4 w-4" /> New schedule
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : schedules.length === 0 ? (
@@ -586,9 +597,11 @@ function SchedulesPage() {
                 <Table aria-label="Schedules" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all schedules" />
-                      </TableHead>
+                      {hasEditPermission && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all schedules" />
+                        </TableHead>
+                      )}
                       <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("type") && <TableHead className="hidden md:table-cell">Type</TableHead>}
                       {isColumnVisible("timezone") && (
@@ -610,6 +623,7 @@ function SchedulesPage() {
                         onRowClick={() => handleRowClick(schedule.id)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={hasEditPermission}
                       />
                     ))}
                   </TableBody>
@@ -691,6 +705,7 @@ function ScheduleRow({
   onRowClick,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   schedule: Schedule
   index: number
@@ -699,6 +714,7 @@ function ScheduleRow({
   onRowClick: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const deleteSchedule = useDeleteSchedule()
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null)
@@ -729,16 +745,18 @@ function ScheduleRow({
         onRowClick()
       }}
     >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${schedule.name}`}
-        />
-      </TableCell>
+      {canEdit && (
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${schedule.name}`}
+          />
+        </TableCell>
+      )}
       <TableCell className={cellClass}>
         <Link to="/schedules/$scheduleId" params={{ scheduleId: schedule.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           {(() => {
@@ -804,12 +822,14 @@ function ScheduleRow({
                 View details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/schedules/$scheduleId" params={{ scheduleId: schedule.id }} search={{ edit: true }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
+            {canEdit && (
+              <DropdownMenuItem asChild>
+                <Link to="/schedules/$scheduleId" params={{ scheduleId: schedule.id }} search={{ edit: true }}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={() => {
                 navigator.clipboard.writeText(schedule.id)
@@ -819,11 +839,15 @@ function ScheduleRow({
               <Copy className="mr-2 h-4 w-4" />
               Copy Schedule ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setItemToDelete({ id: schedule.id, name: schedule.name })}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
+            {canEdit && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setItemToDelete({ id: schedule.id, name: schedule.name })}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

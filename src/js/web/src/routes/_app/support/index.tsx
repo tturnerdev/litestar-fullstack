@@ -69,6 +69,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type Ticket, useDeleteTicket, useTickets } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
@@ -276,6 +277,8 @@ function loadColumnVisibility(): ColumnVisibility {
 
 function SupportPage() {
   useDocumentTitle("Support Tickets")
+  const { canEdit } = usePermissions()
+  const canEditTickets = canEdit("SUPPORT_TICKETS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -800,7 +803,7 @@ function SupportPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && canEditTickets) {
         e.preventDefault()
         navigate({ to: "/support/new" })
       }
@@ -815,7 +818,7 @@ function SupportPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages, updateSearch, navigate])
+  }, [page, totalPages, updateSearch, navigate, canEditTickets])
 
   useEffect(() => {
     if (!isLoading && page > totalPages) {
@@ -876,12 +879,14 @@ function SupportPage() {
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/support/new">
-                <Plus className="mr-2 h-4 w-4" /> New Ticket
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {canEditTickets && (
+              <Button size="sm" asChild>
+                <Link to="/support/new">
+                  <Plus className="mr-2 h-4 w-4" /> New Ticket
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -1107,11 +1112,13 @@ function SupportPage() {
               title="No tickets yet"
               description="Create your first support ticket to get help from our team. We're here to assist you with any questions or issues."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/support/new">
-                    <Plus className="mr-2 h-4 w-4" /> Create your first ticket
-                  </Link>
-                </Button>
+                canEditTickets ? (
+                  <Button size="sm" asChild>
+                    <Link to="/support/new">
+                      <Plus className="mr-2 h-4 w-4" /> Create your first ticket
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -1148,7 +1155,7 @@ function SupportPage() {
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tickets" />
+                        {canEditTickets && <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tickets" />}
                       </TableHead>
                       <TableHead className="w-[100px]">Ticket</TableHead>
                       <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
@@ -1191,6 +1198,7 @@ function SupportPage() {
                         onRowClick={() => handleRowClick(ticket.id)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={canEditTickets}
                       />
                     ))}
                   </TableBody>
@@ -1253,7 +1261,9 @@ function SupportPage() {
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+      {canEditTickets && (
+        <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+      )}
     </PageContainer>
   )
 }
@@ -1268,6 +1278,7 @@ function TicketRow({
   onRowClick,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   ticket: Ticket
   index: number
@@ -1276,6 +1287,7 @@ function TicketRow({
   onRowClick: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const deleteTicketMutation = useDeleteTicket(ticket.id)
@@ -1299,14 +1311,16 @@ function TicketRow({
         }}
       >
         <TableCell className={cellClass}>
-          <Checkbox
-            checked={selected}
-            onChange={(e) => {
-              e.stopPropagation()
-              onToggle()
-            }}
-            aria-label={`Select ticket ${ticket.ticketNumber}`}
-          />
+          {canEdit && (
+            <Checkbox
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation()
+                onToggle()
+              }}
+              aria-label={`Select ticket ${ticket.ticketNumber}`}
+            />
+          )}
         </TableCell>
         <TableCell className={cn("font-mono text-xs text-muted-foreground", cellClass)}>
           <div className="flex items-center gap-1.5">
@@ -1392,17 +1406,21 @@ function TicketRow({
                   View details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/support/$ticketId/edit" params={{ ticketId: ticket.id }}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/support/$ticketId/edit" params={{ ticketId: ticket.id }}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

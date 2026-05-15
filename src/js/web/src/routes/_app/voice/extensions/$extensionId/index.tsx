@@ -26,7 +26,6 @@ import {
   Voicemail,
 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { toast } from "sonner"
 import { z } from "zod"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -341,7 +340,7 @@ function ExtensionDetailPage() {
                       <p className="text-muted-foreground">Active</p>
                       <div className="mt-0.5 flex items-center gap-2">
                         <p>{data.isActive ? "Yes" : "No"}</p>
-                        <Switch checked={data.isActive} onCheckedChange={(checked) => updateExtension.mutate({ isActive: checked })} disabled={updateExtension.isPending} />
+                        <Switch checked={data.isActive} onCheckedChange={(checked) => updateExtension.mutate({ isActive: checked })} disabled={updateExtension.isPending || !hasEditPermission} />
                       </div>
                     </div>
                     <div>
@@ -390,7 +389,7 @@ function ExtensionDetailPage() {
 
             {/* Call Forwarding */}
             <SectionErrorBoundary name="Call Forwarding">
-              <CallForwardingCard extensionId={extensionId} extension={data} />
+              <CallForwardingCard extensionId={extensionId} extension={data} hasEditPermission={hasEditPermission} />
             </SectionErrorBoundary>
 
             {/* Assigned Devices */}
@@ -579,7 +578,7 @@ function buildPatch(current: ForwardingState, original: ForwardingState): Record
   return patch
 }
 
-function CallForwardingCard({ extensionId, extension }: { extensionId: string; extension: ExtensionType }) {
+function CallForwardingCard({ extensionId, extension, hasEditPermission = false }: { extensionId: string; extension: ExtensionType; hasEditPermission?: boolean }) {
   const updateExtension = useUpdateExtension(extensionId)
   const [isEditing, setIsEditing] = useState(false)
   const [state, setState] = useState<ForwardingState>(() => stateFromExtension(extension))
@@ -643,9 +642,11 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
             )}
           </div>
           {!isEditing ? (
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit
-            </Button>
+            hasEditPermission && (
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateExtension.isPending}>

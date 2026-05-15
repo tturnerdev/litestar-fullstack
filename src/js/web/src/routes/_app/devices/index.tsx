@@ -61,6 +61,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDeleteDevice, useDevices, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -194,6 +195,8 @@ function loadColumnVisibility(): ColumnVisibility {
 
 function DevicesPage() {
   useDocumentTitle("Devices")
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("DEVICES")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, status: statusParam, type: typeParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -381,73 +384,77 @@ function DevicesPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      {
-        key: "reboot",
-        label: "Reboot Selected",
-        icon: <RefreshCw className="h-4 w-4" />,
-        variant: "outline" as const,
-        confirm: {
-          title: "Reboot selected devices?",
-          description: `This will send a reboot command to ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}. Devices will be temporarily unavailable during restart.`,
-          confirmLabel: `Reboot ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}`,
-        },
-        onExecute: async (ids: string[]) => {
-          const errors: string[] = []
-          for (const id of ids) {
-            try {
-              await rebootDevice({ path: { device_id: id } })
-            } catch {
-              errors.push(id)
-            }
-          }
-          await queryClient.invalidateQueries({ queryKey: ["devices"] })
-          if (errors.length > 0) {
-            toast.error(`Failed to reboot ${errors.length} of ${ids.length} devices`)
-          } else {
-            toast.success(`Reboot command sent to ${ids.length} device${ids.length === 1 ? "" : "s"}`)
-          }
-        },
-      },
-      {
-        key: "reprovision",
-        label: "Reprovision Selected",
-        icon: <RotateCcw className="h-4 w-4" />,
-        variant: "outline" as const,
-        confirm: {
-          title: "Reprovision selected devices?",
-          description: `This will reprovision ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}. Devices will download updated configuration files.`,
-          confirmLabel: `Reprovision ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}`,
-        },
-        onExecute: async (ids: string[]) => {
-          const errors: string[] = []
-          for (const id of ids) {
-            try {
-              await reprovisionDevice({ path: { device_id: id } })
-            } catch {
-              errors.push(id)
-            }
-          }
-          await queryClient.invalidateQueries({ queryKey: ["devices"] })
-          if (errors.length > 0) {
-            toast.error(`Failed to reprovision ${errors.length} of ${ids.length} devices`)
-          } else {
-            toast.success(`Reprovisioning started for ${ids.length} device${ids.length === 1 ? "" : "s"}`)
-          }
-        },
-      },
-      createBulkDeleteAction(
-        async (id) => {
-          await deleteDevice({ path: { device_id: id } })
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["devices"] })
-          setSelectedIds(new Set())
-          deleteMutation.reset()
-        },
-      ),
+      ...(hasEditPermission
+        ? [
+            {
+              key: "reboot",
+              label: "Reboot Selected",
+              icon: <RefreshCw className="h-4 w-4" />,
+              variant: "outline" as const,
+              confirm: {
+                title: "Reboot selected devices?",
+                description: `This will send a reboot command to ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}. Devices will be temporarily unavailable during restart.`,
+                confirmLabel: `Reboot ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}`,
+              },
+              onExecute: async (ids: string[]) => {
+                const errors: string[] = []
+                for (const id of ids) {
+                  try {
+                    await rebootDevice({ path: { device_id: id } })
+                  } catch {
+                    errors.push(id)
+                  }
+                }
+                await queryClient.invalidateQueries({ queryKey: ["devices"] })
+                if (errors.length > 0) {
+                  toast.error(`Failed to reboot ${errors.length} of ${ids.length} devices`)
+                } else {
+                  toast.success(`Reboot command sent to ${ids.length} device${ids.length === 1 ? "" : "s"}`)
+                }
+              },
+            },
+            {
+              key: "reprovision",
+              label: "Reprovision Selected",
+              icon: <RotateCcw className="h-4 w-4" />,
+              variant: "outline" as const,
+              confirm: {
+                title: "Reprovision selected devices?",
+                description: `This will reprovision ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}. Devices will download updated configuration files.`,
+                confirmLabel: `Reprovision ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}`,
+              },
+              onExecute: async (ids: string[]) => {
+                const errors: string[] = []
+                for (const id of ids) {
+                  try {
+                    await reprovisionDevice({ path: { device_id: id } })
+                  } catch {
+                    errors.push(id)
+                  }
+                }
+                await queryClient.invalidateQueries({ queryKey: ["devices"] })
+                if (errors.length > 0) {
+                  toast.error(`Failed to reprovision ${errors.length} of ${ids.length} devices`)
+                } else {
+                  toast.success(`Reprovisioning started for ${ids.length} device${ids.length === 1 ? "" : "s"}`)
+                }
+              },
+            },
+            createBulkDeleteAction(
+              async (id) => {
+                await deleteDevice({ path: { device_id: id } })
+              },
+              () => {
+                queryClient.invalidateQueries({ queryKey: ["devices"] })
+                setSelectedIds(new Set())
+                deleteMutation.reset()
+              },
+            ),
+          ]
+        : []),
       createExportAction<Device>("devices-selected", csvHeaders, (ids) => filteredItems.filter((d) => ids.includes(d.id))),
     ],
-    [filteredItems, deleteMutation, selectedIds.size, queryClient],
+    [filteredItems, deleteMutation, selectedIds.size, queryClient, hasEditPermission],
   )
 
   // Export all visible
@@ -506,7 +513,7 @@ function DevicesPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && hasEditPermission) {
         e.preventDefault()
         navigate({ to: "/devices/new" })
       }
@@ -521,7 +528,7 @@ function DevicesPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages, navigate])
+  }, [page, totalPages, navigate, hasEditPermission])
 
   useEffect(() => {
     if (!isLoading && page > totalPages) {
@@ -582,12 +589,14 @@ function DevicesPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/devices/new">
-                <Plus className="mr-2 h-4 w-4" /> Add device
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {hasEditPermission && (
+              <Button size="sm" asChild>
+                <Link to="/devices/new">
+                  <Plus className="mr-2 h-4 w-4" /> Add device
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -775,11 +784,13 @@ function DevicesPage() {
               title="No devices yet"
               description="Add your first device to start managing phones, ATAs, and other SIP endpoints."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/devices/new">
-                    <Plus className="mr-2 h-4 w-4" /> Add device
-                  </Link>
-                </Button>
+                hasEditPermission ? (
+                  <Button size="sm" asChild>
+                    <Link to="/devices/new">
+                      <Plus className="mr-2 h-4 w-4" /> Add device
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -832,9 +843,11 @@ function DevicesPage() {
                 <Table aria-label="Devices" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all devices" />
-                      </TableHead>
+                      {hasEditPermission && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all devices" />
+                        </TableHead>
+                      )}
                       <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("type") && (
                         <SortableHeader label="Type" sortKey="device_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
@@ -886,6 +899,7 @@ function DevicesPage() {
                         onDelete={() => setDeviceToDelete(device)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={hasEditPermission}
                       />
                     ))}
                   </TableBody>
@@ -1023,6 +1037,7 @@ function DeviceRow({
   onDelete,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   device: Device
   index: number
@@ -1032,6 +1047,7 @@ function DeviceRow({
   onDelete: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const rebootMutation = useRebootDevice(device.id)
   const reprovisionMutation = useReprovisionDevice(device.id)
@@ -1049,16 +1065,18 @@ function DeviceRow({
         onRowClick()
       }}
     >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${device.name}`}
-        />
-      </TableCell>
+      {canEdit && (
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${device.name}`}
+          />
+        </TableCell>
+      )}
       <TableCell className={cellClass}>
         <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-medium group-hover:underline">{device.name}</span>
@@ -1130,30 +1148,34 @@ function DeviceRow({
                 View details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/devices/$deviceId" params={{ deviceId: device.id }} search={{ edit: true }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => rebootMutation.mutate()} disabled={rebootMutation.isPending}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Reboot
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => reprovisionMutation.mutate()} disabled={reprovisionMutation.isPending}>
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Reprovision
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => updateMutation.mutate({ isActive: !device.isActive })} disabled={updateMutation.isPending}>
-              <Power className="mr-2 h-4 w-4" />
-              {device.isActive ? "Disable" : "Enable"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
+            {canEdit && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link to="/devices/$deviceId" params={{ deviceId: device.id }} search={{ edit: true }}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => rebootMutation.mutate()} disabled={rebootMutation.isPending}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Reboot
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => reprovisionMutation.mutate()} disabled={reprovisionMutation.isPending}>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Reprovision
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateMutation.mutate({ isActive: !device.isActive })} disabled={updateMutation.isPending}>
+                  <Power className="mr-2 h-4 w-4" />
+                  {device.isActive ? "Disable" : "Enable"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

@@ -20,11 +20,14 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useCreateFaxEmailRoute, useDeleteFaxEmailRoute, useFaxEmailRoutes } from "@/lib/api/hooks/fax"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
+  const { canEdit } = usePermissions()
+  const canEditEmailRoutes = canEdit("FAX_EMAIL_ROUTES")
   const { data, isLoading, isError, refetch } = useFaxEmailRoutes(faxNumberId)
   const createRoute = useCreateFaxEmailRoute(faxNumberId)
   const deleteRoute = useDeleteFaxEmailRoute(faxNumberId)
@@ -120,34 +123,36 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
               </div>
               <p className="text-sm text-muted-foreground mt-1">Configure where incoming faxes are delivered via email.</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex gap-2 items-center">
-                <div className="relative">
-                  <Input
-                    placeholder="email@example.com"
-                    value={newEmail}
-                    onChange={(e) => {
-                      setNewEmail(e.target.value)
-                      if (emailError) setEmailError(null)
-                    }}
-                    maxLength={320}
-                    className="w-64 pr-8"
-                    onKeyDown={(e) => e.key === "Enter" && handleAddRoute()}
-                    aria-invalid={!!emailError || (emailTouched && (!emailValid || !!emailDuplicate))}
-                  />
-                  {emailTouched && (
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2">
-                      {emailValid && !emailDuplicate ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-destructive" />}
-                    </span>
-                  )}
+            {canEditEmailRoutes && (
+              <div className="flex flex-col gap-1">
+                <div className="flex gap-2 items-center">
+                  <div className="relative">
+                    <Input
+                      placeholder="email@example.com"
+                      value={newEmail}
+                      onChange={(e) => {
+                        setNewEmail(e.target.value)
+                        if (emailError) setEmailError(null)
+                      }}
+                      maxLength={320}
+                      className="w-64 pr-8"
+                      onKeyDown={(e) => e.key === "Enter" && handleAddRoute()}
+                      aria-invalid={!!emailError || (emailTouched && (!emailValid || !!emailDuplicate))}
+                    />
+                    {emailTouched && (
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2">
+                        {emailValid && !emailDuplicate ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-destructive" />}
+                      </span>
+                    )}
+                  </div>
+                  <Button size="sm" onClick={handleAddRoute} disabled={createRoute.isPending || !newEmail.trim()}>
+                    {createRoute.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                    {createRoute.isPending ? "Adding..." : "Add Email"}
+                  </Button>
                 </div>
-                <Button size="sm" onClick={handleAddRoute} disabled={createRoute.isPending || !newEmail.trim()}>
-                  {createRoute.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                  {createRoute.isPending ? "Adding..." : "Add Email"}
-                </Button>
+                {emailError && <p className="text-xs text-destructive">{emailError}</p>}
               </div>
-              {emailError && <p className="text-xs text-destructive">{emailError}</p>}
-            </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -185,6 +190,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                     onDelete={() => setRouteToDelete({ id: route.id, email: route.emailAddress })}
                     isDeleting={deleteRoute.isPending}
                     onTestRoute={() => handleTestRoute(route.emailAddress)}
+                    canEdit={canEditEmailRoutes}
                   />
                 ))}
               </TableBody>
@@ -202,7 +208,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                   <span className="text-muted-foreground">{totalCount - activeCount} inactive</span>
                 </span>
               </div>
-              {totalCount > 1 && <BulkToggleButton faxNumberId={faxNumberId} routes={data.items ?? []} allActive={allActive} allInactive={allInactive} />}
+              {totalCount > 1 && canEditEmailRoutes && <BulkToggleButton faxNumberId={faxNumberId} routes={data.items ?? []} allActive={allActive} allInactive={allInactive} />}
             </div>
           )}
         </CardContent>

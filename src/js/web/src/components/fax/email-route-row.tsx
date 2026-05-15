@@ -18,9 +18,10 @@ interface EmailRouteRowProps {
   onDelete: () => void
   isDeleting: boolean
   onTestRoute: () => void
+  canEdit: boolean
 }
 
-export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTestRoute }: EmailRouteRowProps) {
+export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTestRoute, canEdit }: EmailRouteRowProps) {
   const updateRoute = useUpdateFaxEmailRoute(faxNumberId, route.id)
   const [copied, setCopied] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -80,7 +81,7 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Switch checked={route.isActive ?? false} onCheckedChange={handleToggleActive} disabled={updateRoute.isPending} />
+          <Switch checked={route.isActive ?? false} onCheckedChange={handleToggleActive} disabled={updateRoute.isPending || !canEdit} />
           <span className="text-sm text-muted-foreground">{(route.isActive ?? false) ? "Active" : "Inactive"}</span>
         </div>
       </TableCell>
@@ -89,7 +90,7 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
           <Switch
             checked={route.notifyOnFailure ?? true}
             onCheckedChange={() => updateRoute.mutate({ notifyOnFailure: !(route.notifyOnFailure ?? true) })}
-            disabled={updateRoute.isPending}
+            disabled={updateRoute.isPending || !canEdit}
           />
           <span className="text-sm text-muted-foreground">{(route.notifyOnFailure ?? true) ? "Enabled" : "Disabled"}</span>
         </div>
@@ -104,20 +105,22 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
             </TooltipTrigger>
             <TooltipContent>Send test email</TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={confirmingDelete ? "destructive" : "outline"}
-                size="sm"
-                onClick={handleDeleteClick}
-                disabled={isDeleting}
-                className={confirmingDelete ? "animate-in fade-in duration-150" : "text-destructive hover:text-destructive hover:bg-destructive/10"}
-              >
-                {confirmingDelete ? <span className="text-xs font-medium">Confirm?</span> : <Trash2 className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{confirmingDelete ? "Click again to confirm" : "Remove this email route"}</TooltipContent>
-          </Tooltip>
+          {canEdit && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={confirmingDelete ? "destructive" : "outline"}
+                  size="sm"
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  className={confirmingDelete ? "animate-in fade-in duration-150" : "text-destructive hover:text-destructive hover:bg-destructive/10"}
+                >
+                  {confirmingDelete ? <span className="text-xs font-medium">Confirm?</span> : <Trash2 className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{confirmingDelete ? "Click again to confirm" : "Remove this email route"}</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </TableCell>
     </TableRow>

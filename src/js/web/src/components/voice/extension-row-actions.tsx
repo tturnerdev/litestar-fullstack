@@ -9,9 +9,10 @@ import type { Extension } from "@/lib/api/hooks/voice"
 
 interface ExtensionRowActionsProps {
   extension: Extension
+  canEdit?: boolean
 }
 
-export function ExtensionRowActions({ extension }: ExtensionRowActionsProps) {
+export function ExtensionRowActions({ extension, canEdit = true }: ExtensionRowActionsProps) {
   const navigate = useNavigate()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -37,15 +38,19 @@ export function ExtensionRowActions({ extension }: ExtensionRowActionsProps) {
             <Eye className="mr-2 h-4 w-4" />
             View details
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit extension
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete extension
-          </DropdownMenuItem>
+          {canEdit && (
+            <>
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit extension
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete extension
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

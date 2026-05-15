@@ -64,6 +64,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useConnection, useDeleteConnection, useTestConnection, useUpdateConnection } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -234,6 +235,8 @@ function ConnectionDetailPage() {
   const router = useRouter()
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useConnection(connectionId)
   useDocumentTitle(data?.name ? `${data.name} - Connection` : "Connection")
+  const { canEdit } = usePermissions()
+  const canEditConnections = canEdit("CONNECTIONS")
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)
@@ -536,7 +539,7 @@ function ConnectionDetailPage() {
                     <Switch
                       checked={data.isEnabled}
                       onCheckedChange={(checked) => updateConnection.mutate({ isEnabled: checked })}
-                      disabled={updateConnection.isPending}
+                      disabled={!canEditConnections || updateConnection.isPending}
                       aria-label="Toggle connection enabled"
                       className="h-4 w-7 [&>span]:h-3 [&>span]:w-3"
                     />
@@ -584,20 +587,22 @@ function ConnectionDetailPage() {
               {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
               {testConnection.isPending ? "Testing..." : "Test"}
             </Button>
-            {editing ? (
-              <>
-                <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateConnection.isPending}>
-                  <X className="mr-2 h-4 w-4" /> Cancel
+            {canEditConnections && (
+              editing ? (
+                <>
+                  <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateConnection.isPending}>
+                    <X className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSaveEditing} disabled={!editDirty || updateConnection.isPending}>
+                    {updateConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                    Save
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
                 </Button>
-                <Button size="sm" onClick={handleSaveEditing} disabled={!editDirty || updateConnection.isPending}>
-                  {updateConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                  Save
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" size="sm" onClick={handleStartEditing}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
+              )
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/connections">
@@ -621,11 +626,15 @@ function ConnectionDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Connection ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Connection
-                </DropdownMenuItem>
+                {canEditConnections && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Connection
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -1045,26 +1054,29 @@ function ConnectionDetailPage() {
                       rows={8}
                       className="font-mono text-xs"
                       placeholder='{"key": "value"}'
+                      readOnly={!canEditConnections}
                     />
                     {settingsError && <p className="text-destructive text-sm">{settingsError}</p>}
                   </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setSettingsText(null)
-                        setSettingsError(null)
-                        setSettingsDirty(false)
-                      }}
-                      disabled={!settingsDirty || updateConnection.isPending}
-                    >
-                      Reset
-                    </Button>
-                    <Button onClick={handleSaveSettings} disabled={!settingsDirty || updateConnection.isPending}>
-                      {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save Settings
-                    </Button>
-                  </div>
+                  {canEditConnections && (
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setSettingsText(null)
+                          setSettingsError(null)
+                          setSettingsDirty(false)
+                        }}
+                        disabled={!settingsDirty || updateConnection.isPending}
+                      >
+                        Reset
+                      </Button>
+                      <Button onClick={handleSaveSettings} disabled={!settingsDirty || updateConnection.isPending}>
+                        {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Settings
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </SectionErrorBoundary>
@@ -1168,26 +1180,28 @@ function ConnectionDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.3}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this connection</p>
-                  <p className="text-sm text-muted-foreground">This action cannot be undone. All configuration and credentials will be permanently removed.</p>
+      {canEditConnections && (
+        <PageSection delay={0.3}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this connection</p>
+                    <p className="text-sm text-muted-foreground">This action cannot be undone. All configuration and credentials will be permanently removed.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>

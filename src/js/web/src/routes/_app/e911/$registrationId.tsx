@@ -46,6 +46,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDeleteE911Registration, useE911Registration, useUpdateE911Registration, useValidateE911Registration } from "@/lib/api/hooks/e911"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -183,6 +184,8 @@ function FieldError({ message }: { message?: string }) {
 function E911DetailPage() {
   const { registrationId } = Route.useParams()
   const router = useRouter()
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("E911")
   const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useE911Registration(registrationId)
   useDocumentTitle(data ? `E911 - ${data.addressLine1}` : "E911 Details")
 
@@ -388,13 +391,13 @@ function E911DetailPage() {
                 Pending Validation
               </Badge>
             )}
-            {!data.validated && (
+            {hasEditPermission && !data.validated && (
               <Button variant="outline" size="sm" onClick={() => validateMutation.mutate()} disabled={validateMutation.isPending}>
                 {validateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
                 Validate
               </Button>
             )}
-            {!editing && (
+            {hasEditPermission && !editing && (
               <Button variant="outline" size="sm" onClick={startEditing}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
@@ -416,11 +419,15 @@ function E911DetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Registration ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Registration
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Registration
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -828,29 +835,31 @@ function E911DetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.35}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this E911 registration</p>
-                  <p className="text-sm text-muted-foreground">
-                    This action cannot be undone. Emergency services may not be able to locate callers using the associated phone number.
-                  </p>
+      {hasEditPermission && (
+        <PageSection delay={0.35}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this E911 registration</p>
+                    <p className="text-sm text-muted-foreground">
+                      This action cannot be undone. Emergency services may not be able to locate callers using the associated phone number.
+                    </p>
+                  </div>
+                  <DeleteConfirmDialog address={`${data.addressLine1}, ${data.city}`} onDelete={handleDelete} isPending={deleteMutation.isPending} />
                 </div>
-                <DeleteConfirmDialog address={`${data.addressLine1}, ${data.city}`} onDelete={handleDelete} isPending={deleteMutation.isPending} />
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       <PageSection delay={0.4}>
         <SectionErrorBoundary name="Activity">

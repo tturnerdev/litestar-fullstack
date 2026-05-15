@@ -51,6 +51,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useTimeConditions } from "@/lib/api/hooks/call-routing"
 import {
   type Schedule,
@@ -571,6 +572,8 @@ function ScheduleDetailPage() {
   const { tab = "list", edit: editParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const router = useRouter()
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("SCHEDULES")
 
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useSchedule(scheduleId)
   const updateSchedule = useUpdateSchedule(scheduleId)
@@ -813,7 +816,7 @@ function ScheduleDetailPage() {
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <CurrentStatusBadge scheduleId={scheduleId} />
             {data.isDefault && <Badge className="gap-1 bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400">Default</Badge>}
-            {!editing && (
+            {hasEditPermission && !editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
@@ -840,11 +843,15 @@ function ScheduleDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Schedule ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteFromMenu(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Schedule
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteFromMenu(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Schedule
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -1061,26 +1068,28 @@ function ScheduleDetailPage() {
             )}
 
             {/* Danger Zone */}
-            <SectionErrorBoundary name="Danger Zone">
-              <Card className="border-destructive/30 bg-card/80 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    Danger Zone
-                  </CardTitle>
-                  <CardDescription>Irreversible and destructive actions for this schedule.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                    <div>
-                      <p className="font-medium text-sm">Delete this schedule</p>
-                      <p className="text-xs text-muted-foreground">Once deleted, this schedule and all entries cannot be recovered.</p>
+            {hasEditPermission && (
+              <SectionErrorBoundary name="Danger Zone">
+                <Card className="border-destructive/30 bg-card/80 shadow-md">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      Danger Zone
+                    </CardTitle>
+                    <CardDescription>Irreversible and destructive actions for this schedule.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                      <div>
+                        <p className="font-medium text-sm">Delete this schedule</p>
+                        <p className="text-xs text-muted-foreground">Once deleted, this schedule and all entries cannot be recovered.</p>
+                      </div>
+                      <DeleteScheduleDialog scheduleName={data.name} onDelete={handleDelete} isPending={deleteSchedule.isPending} />
                     </div>
-                    <DeleteScheduleDialog scheduleName={data.name} onDelete={handleDelete} isPending={deleteSchedule.isPending} />
-                  </div>
-                </CardContent>
-              </Card>
-            </SectionErrorBoundary>
+                  </CardContent>
+                </Card>
+              </SectionErrorBoundary>
+            )}
           </div>
 
           {/* Sidebar */}

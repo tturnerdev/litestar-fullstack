@@ -55,6 +55,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import {
   type E911Registration,
   type UnregisteredPhoneNumber,
@@ -162,6 +163,7 @@ function E911Row({
   onDelete,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   reg: E911Registration
   index: number
@@ -171,6 +173,7 @@ function E911Row({
   onDelete: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const validateMutation = useValidateE911Registration(reg.id)
 
@@ -186,16 +189,18 @@ function E911Row({
         onRowClick()
       }}
     >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${reg.phoneNumberDisplay ?? reg.id}`}
-        />
-      </TableCell>
+      {canEdit && (
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${reg.phoneNumberDisplay ?? reg.id}`}
+          />
+        </TableCell>
+      )}
       <TableCell className={cellClass}>
         <Link to="/e911/$registrationId" params={{ registrationId: reg.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-medium group-hover:underline font-mono text-sm">{reg.phoneNumberDisplay ?? "No number"}</span>
@@ -266,28 +271,32 @@ function E911Row({
                 View details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/e911/$registrationId" params={{ registrationId: reg.id }} search={{ edit: true }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            {!reg.validated && (
-              <DropdownMenuItem
-                disabled={validateMutation.isPending}
-                onClick={() =>
-                  validateMutation.mutate()
-                }
-              >
-                {validateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                Validate
-              </DropdownMenuItem>
+            {canEdit && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link to="/e911/$registrationId" params={{ registrationId: reg.id }} search={{ edit: true }}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+                {!reg.validated && (
+                  <DropdownMenuItem
+                    disabled={validateMutation.isPending}
+                    onClick={() =>
+                      validateMutation.mutate()
+                    }
+                  >
+                    {validateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                    Validate
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={onDelete}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -301,6 +310,8 @@ function E911Row({
 
 function E911Page() {
   useDocumentTitle("E911 Addresses")
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("E911")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
@@ -450,18 +461,22 @@ function E911Page() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        async (id) => {
-          await deleteMutation.mutateAsync(id)
-        },
-        () => {
-          setSelectedIds(new Set())
-          deleteMutation.reset()
-        },
-      ),
+      ...(hasEditPermission
+        ? [
+            createBulkDeleteAction(
+              async (id) => {
+                await deleteMutation.mutateAsync(id)
+              },
+              () => {
+                setSelectedIds(new Set())
+                deleteMutation.reset()
+              },
+            ),
+          ]
+        : []),
       createExportAction<E911Registration>("e911-registrations-selected", csvHeaders, (ids) => filteredItems.filter((r) => ids.includes(r.id))),
     ],
-    [filteredItems, deleteMutation],
+    [filteredItems, deleteMutation, hasEditPermission],
   )
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
@@ -474,7 +489,7 @@ function E911Page() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && hasEditPermission) {
         e.preventDefault()
         navigate({ to: "/e911/new" })
       }
@@ -489,7 +504,7 @@ function E911Page() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate, page, totalPages])
+  }, [navigate, page, totalPages, hasEditPermission])
 
   useEffect(() => {
     if (!isLoading && page > totalPages) {
@@ -573,7 +588,7 @@ function E911Page() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            {teamId && (
+            {teamId && hasEditPermission && (
               <Button size="sm" asChild>
                 <Link to="/e911/new">
                   <Plus className="mr-2 h-4 w-4" /> Register Address
@@ -737,7 +752,7 @@ function E911Page() {
               title="No E911 registrations"
               description="Register E911 addresses for your phone numbers to ensure emergency services can locate callers."
               action={
-                teamId ? (
+                teamId && hasEditPermission ? (
                   <Button size="sm" asChild>
                     <Link to="/e911/new">
                       <Plus className="mr-2 h-4 w-4" /> Register Address
@@ -791,9 +806,11 @@ function E911Page() {
                 <Table aria-label="E911 Registrations" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all registrations" />
-                      </TableHead>
+                      {hasEditPermission && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all registrations" />
+                        </TableHead>
+                      )}
                       <SortableHeader label="Phone Number" sortKey="phone_number_display" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("address") && (
                         <SortableHeader label="Address" sortKey="address_line1" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
@@ -830,6 +847,7 @@ function E911Page() {
                         onDelete={() => setRegistrationToDelete(reg)}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={hasEditPermission}
                       />
                     ))}
                   </TableBody>

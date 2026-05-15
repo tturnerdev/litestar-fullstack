@@ -40,6 +40,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type FaxMessage, useDeleteFaxMessage, useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -207,6 +208,8 @@ function formatPages(count: number): string {
 
 function FaxMessagesPage() {
   useDocumentTitle("Fax Messages")
+  const { canEdit } = usePermissions()
+  const canEditFaxMessages = canEdit("FAX_MESSAGES")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, direction: directionParam, status: statusParam, from: fromParam, to: toParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -418,15 +421,19 @@ function FaxMessagesPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        (id) => deleteMessage.mutateAsync(id),
-        () => {
-          setSelectedIds(new Set())
-        },
-      ),
+      ...(canEditFaxMessages
+        ? [
+            createBulkDeleteAction(
+              (id) => deleteMessage.mutateAsync(id),
+              () => {
+                setSelectedIds(new Set())
+              },
+            ),
+          ]
+        : []),
       createExportAction<FaxMessage>("fax-messages-selected", csvHeaders, (ids) => filteredItems.filter((m) => ids.includes(m.id))),
     ],
-    [filteredItems, deleteMessage],
+    [filteredItems, deleteMessage, canEditFaxMessages],
   )
 
   // Row click handler
@@ -524,11 +531,13 @@ function FaxMessagesPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button asChild size="sm">
-              <Link to="/fax/send">
-                <Send className="mr-2 h-4 w-4" /> Send Fax
-              </Link>
-            </Button>
+            {canEditFaxMessages && (
+              <Button asChild size="sm">
+                <Link to="/fax/send">
+                  <Send className="mr-2 h-4 w-4" /> Send Fax
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -654,11 +663,13 @@ function FaxMessagesPage() {
               title="No fax messages yet"
               description="Your fax history will appear here once you send or receive a fax."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/fax/send">
-                    <Send className="mr-2 h-4 w-4" /> Send your first fax
-                  </Link>
-                </Button>
+                canEditFaxMessages ? (
+                  <Button size="sm" asChild>
+                    <Link to="/fax/send">
+                      <Send className="mr-2 h-4 w-4" /> Send your first fax
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -697,9 +708,11 @@ function FaxMessagesPage() {
                 <Table aria-label="Fax messages" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all messages" />
-                      </TableHead>
+                      {canEditFaxMessages && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all messages" />
+                        </TableHead>
+                      )}
                       {isColumnVisible("created") && (
                         <SortableHeader label="Date" sortKey="received_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                       )}
@@ -736,6 +749,7 @@ function FaxMessagesPage() {
                         isDeleting={deleteMessage.isPending}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={canEditFaxMessages}
                       />
                     ))}
                   </TableBody>
@@ -817,6 +831,7 @@ function FaxMessageRow({
   isDeleting,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   msg: FaxMessage
   index: number
@@ -828,6 +843,7 @@ function FaxMessageRow({
   isDeleting: boolean
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -844,16 +860,18 @@ function FaxMessageRow({
           onRowClick()
         }}
       >
-        <TableCell className={cellClass}>
-          <Checkbox
-            checked={selected}
-            onChange={(e) => {
-              e.stopPropagation()
-              onToggle()
-            }}
-            aria-label={`Select message from ${msg.remoteNumber}`}
-          />
-        </TableCell>
+        {canEdit && (
+          <TableCell className={cellClass}>
+            <Checkbox
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation()
+                onToggle()
+              }}
+              aria-label={`Select message from ${msg.remoteNumber}`}
+            />
+          </TableCell>
+        )}
         {isColumnVisible("created") && (
           <TableCell className={cn("hidden md:table-cell", cellClass)}>
             <Tooltip>
@@ -925,11 +943,15 @@ function FaxMessageRow({
                   Download
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

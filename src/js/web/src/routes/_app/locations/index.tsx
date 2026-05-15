@@ -12,6 +12,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import type { Location } from "@/lib/api/hooks/locations"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { useSettingsStore } from "@/lib/settings-store"
@@ -70,6 +71,8 @@ const csvHeaders: CsvHeader<Location>[] = [
 
 function LocationsPage() {
   useDocumentTitle("Locations")
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("LOCATIONS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
@@ -123,14 +126,14 @@ function LocationsPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && hasEditPermission) {
         e.preventDefault()
         navigate({ to: "/locations/new" })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate])
+  }, [navigate, hasEditPermission])
 
   // Resolved search params for the child component
   const resolvedSearchParams = useMemo(
@@ -206,12 +209,14 @@ function LocationsPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/locations/new">
-                <Plus className="mr-2 h-4 w-4" /> Add location
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {hasEditPermission && (
+              <Button size="sm" asChild>
+                <Link to="/locations/new">
+                  <Plus className="mr-2 h-4 w-4" /> Add location
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -303,6 +308,7 @@ function LocationsPage() {
             onSearchInputChange={setSearchInput}
             onFreshnessChange={setFreshness}
             onLocationsChange={setLocations}
+            canEdit={hasEditPermission}
           />
         </SectionErrorBoundary>
       </PageSection>

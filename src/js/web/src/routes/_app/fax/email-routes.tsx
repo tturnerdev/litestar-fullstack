@@ -42,6 +42,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type FaxEmailRouteWithNumber, useAllFaxEmailRoutes, useCreateFaxEmailRoute, useDeleteFaxEmailRoute, useFaxNumbers, useUpdateFaxEmailRoute } from "@/lib/api/hooks/fax"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
@@ -395,6 +396,8 @@ function DeleteEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteW
 
 function FaxEmailRoutesPage() {
   useDocumentTitle("Fax Email Routes")
+  const { canEdit } = usePermissions()
+  const canEditEmailRoutes = canEdit("FAX_EMAIL_ROUTES")
   const { q: searchParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const { data: routes, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAllFaxEmailRoutes()
@@ -539,19 +542,23 @@ function FaxEmailRoutesPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        async (id) => {
-          const route = routes?.find((r) => r.id === id)
-          if (!route) return
-          await deleteFaxEmailRouteApi({ path: { fax_number_id: route.faxNumberId, route_id: id } })
-        },
-        () => {
-          setSelectedIds(new Set())
-        },
-      ),
+      ...(canEditEmailRoutes
+        ? [
+            createBulkDeleteAction(
+              async (id) => {
+                const route = routes?.find((r) => r.id === id)
+                if (!route) return
+                await deleteFaxEmailRouteApi({ path: { fax_number_id: route.faxNumberId, route_id: id } })
+              },
+              () => {
+                setSelectedIds(new Set())
+              },
+            ),
+          ]
+        : []),
       createExportAction<FaxEmailRouteWithNumber>("fax-email-routes-selected", csvHeaders, (ids) => (routes ?? []).filter((r) => ids.includes(r.id))),
     ],
-    [routes],
+    [routes, canEditEmailRoutes],
   )
 
   const hasData = (routes ?? []).length > 0
@@ -609,9 +616,11 @@ function FaxEmailRoutesPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-              <MailPlus className="mr-2 h-4 w-4" /> New Route
-            </Button>
+            {canEditEmailRoutes && (
+              <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                <MailPlus className="mr-2 h-4 w-4" /> New Route
+              </Button>
+            )}
           </div>
         }
       />
@@ -699,9 +708,11 @@ function FaxEmailRoutesPage() {
                   <Table aria-label="Email routes" aria-busy={isLoading || isRefetching}>
                     <TableHeader className="sticky top-0 z-10 bg-background">
                       <TableRow>
-                        <TableHead className="w-10">
-                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all email routes" />
-                        </TableHead>
+                        {canEditEmailRoutes && (
+                          <TableHead className="w-10">
+                            <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all email routes" />
+                          </TableHead>
+                        )}
                         <SortableHeader label="Email Address" sortKey="email" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                         {isColumnVisible("faxNumber") && (
                           <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
@@ -723,19 +734,21 @@ function FaxEmailRoutesPage() {
                             if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
                               return
                             }
-                            setEditRoute(route)
+                            if (canEditEmailRoutes) setEditRoute(route)
                           }}
                         >
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedIds.has(route.id)}
-                              onChange={(e) => {
-                                e.stopPropagation()
-                                toggleOne(route.id)
-                              }}
-                              aria-label={`Select route for ${route.emailAddress}`}
-                            />
-                          </TableCell>
+                          {canEditEmailRoutes && (
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedIds.has(route.id)}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  toggleOne(route.id)
+                                }}
+                                aria-label={`Select route for ${route.emailAddress}`}
+                              />
+                            </TableCell>
+                          )}
                           <TableCell className="font-mono text-sm">
                             <span className="inline-flex items-center gap-1">
                               {route.emailAddress}
@@ -806,15 +819,21 @@ function FaxEmailRoutesPage() {
                                     View fax number
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setEditRoute(route)}>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteRoute(route)}>
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
+                                {canEditEmailRoutes && (
+                                  <DropdownMenuItem onClick={() => setEditRoute(route)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                )}
+                                {canEditEmailRoutes && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteRoute(route)}>
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -831,9 +850,11 @@ function FaxEmailRoutesPage() {
               title="No email routes configured"
               description="Email routes deliver incoming faxes to an email address. Add your first route to get started."
               action={
-                <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-                  <MailPlus className="mr-2 h-4 w-4" /> New Route
-                </Button>
+                canEditEmailRoutes ? (
+                  <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                    <MailPlus className="mr-2 h-4 w-4" /> New Route
+                  </Button>
+                ) : undefined
               }
             />
           )}

@@ -56,6 +56,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type ConnectionList, useConnections, useDeleteConnection, useTestAnyConnection, useUpdateAnyConnection } from "@/lib/api/hooks/connections"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -205,6 +206,8 @@ function StatusIndicator({ status }: { status: string }) {
 
 function ConnectionsPage() {
   useDocumentTitle("Connections")
+  const { canEdit } = usePermissions()
+  const canEditConnections = canEdit("CONNECTIONS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, type: typeParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -442,7 +445,7 @@ function ConnectionsPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && canEditConnections) {
         e.preventDefault()
         navigate({ to: "/connections/new" })
       }
@@ -457,7 +460,7 @@ function ConnectionsPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate, page, totalPages])
+  }, [navigate, page, totalPages, canEditConnections])
 
   useEffect(() => {
     if (!isLoading && page > totalPages) {
@@ -518,12 +521,14 @@ function ConnectionsPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/connections/new">
-                <Plus className="mr-2 h-4 w-4" /> Add connection
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {canEditConnections && (
+              <Button size="sm" asChild>
+                <Link to="/connections/new">
+                  <Plus className="mr-2 h-4 w-4" /> Add connection
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -677,11 +682,13 @@ function ConnectionsPage() {
               title="No connections yet"
               description="Add your first connection to integrate with an external data source."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/connections/new">
-                    <Plus className="mr-2 h-4 w-4" /> Add connection
-                  </Link>
-                </Button>
+                canEditConnections ? (
+                  <Button size="sm" asChild>
+                    <Link to="/connections/new">
+                      <Plus className="mr-2 h-4 w-4" /> Add connection
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -733,7 +740,7 @@ function ConnectionsPage() {
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all connections" />
+                        {canEditConnections && <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all connections" />}
                       </TableHead>
                       <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("type") && (
@@ -785,6 +792,7 @@ function ConnectionsPage() {
                         isTestPending={testConnection.isPending && testConnection.variables === conn.id}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={canEditConnections}
                       />
                     ))}
                   </TableBody>
@@ -851,7 +859,9 @@ function ConnectionsPage() {
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+      {canEditConnections && (
+        <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+      )}
 
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent>
@@ -887,6 +897,7 @@ function ConnectionRow({
   isTestPending,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   conn: ConnectionList
   index: number
@@ -898,6 +909,7 @@ function ConnectionRow({
   isTestPending: boolean
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   return (
     <TableRow
@@ -912,14 +924,16 @@ function ConnectionRow({
       }}
     >
       <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${conn.name}`}
-        />
+        {canEdit && (
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${conn.name}`}
+          />
+        )}
       </TableCell>
       <TableCell className={cellClass}>
         <Link to="/connections/$connectionId" params={{ connectionId: conn.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
@@ -991,21 +1005,27 @@ function ConnectionRow({
                 View details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/connections/$connectionId/edit" params={{ connectionId: conn.id }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
+            {canEdit && (
+              <DropdownMenuItem asChild>
+                <Link to="/connections/$connectionId/edit" params={{ connectionId: conn.id }}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={onTest} disabled={isTestPending}>
               {isTestPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
               Test connection
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
+            {canEdit && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

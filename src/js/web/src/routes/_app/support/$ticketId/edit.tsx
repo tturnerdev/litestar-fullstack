@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, Link, useBlocker, useParams, useRouter } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, ArrowLeft, Loader2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, ArrowLeft, Loader2, ShieldAlert } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -19,12 +19,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { useTicket, useUpdateTicket } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
@@ -431,5 +432,22 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
 function EditTicketPage() {
   useDocumentTitle("Edit Ticket")
   const { ticketId } = useParams({ from: "/_app/support/$ticketId/edit" as const })
+  const { canEdit } = usePermissions()
+
+  if (!canEdit("SUPPORT_TICKETS")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Helpdesk" title="Edit Ticket" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
+
   return <EditTicketForm ticketId={ticketId} />
 }

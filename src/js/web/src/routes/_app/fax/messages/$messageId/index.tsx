@@ -51,6 +51,7 @@ import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { TimestampField } from "@/components/ui/timestamp-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatBytes } from "@/lib/format-utils"
@@ -281,6 +282,8 @@ function FaxMessageTimeline({ message }: { message: FaxMessage }) {
 function FaxMessageDetailPage() {
   const { messageId } = Route.useParams()
   const router = useRouter()
+  const { canEdit } = usePermissions()
+  const canEditFaxMessages = canEdit("FAX_MESSAGES")
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxMessage(messageId)
   useDocumentTitle(data ? `Fax ${data.direction === "inbound" ? "from" : "to"} ${data.remoteNumber}` : "Fax Message")
   const deleteMutation = useDeleteFaxMessage()
@@ -406,11 +409,15 @@ function FaxMessageDetailPage() {
                     Download Document
                   </a>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Message
-                </DropdownMenuItem>
+                {canEditFaxMessages && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Message
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -639,26 +646,28 @@ function FaxMessageDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.28}>
-        <SectionErrorBoundary name="Danger Zone">
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this fax message</p>
-                  <p className="text-sm text-muted-foreground">This will permanently delete this fax message and its associated document. This action cannot be undone.</p>
+      {canEditFaxMessages && (
+        <PageSection delay={0.28}>
+          <SectionErrorBoundary name="Danger Zone">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this fax message</p>
+                    <p className="text-sm text-muted-foreground">This will permanently delete this fax message and its associated document. This action cannot be undone.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)} disabled={deleteMutation.isPending}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)} disabled={deleteMutation.isPending}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+      )}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>

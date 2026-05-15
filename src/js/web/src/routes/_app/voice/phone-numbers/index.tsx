@@ -48,6 +48,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type PhoneNumber, useDeletePhoneNumber, usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -233,6 +234,7 @@ function PhoneNumberRow({
   onRowClick,
   cellClass,
   isColumnVisible,
+  canEdit = true,
 }: {
   pn: PhoneNumber
   selected: boolean
@@ -241,6 +243,7 @@ function PhoneNumberRow({
   onRowClick: () => void
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit?: boolean
 }) {
   return (
     <TableRow
@@ -254,16 +257,18 @@ function PhoneNumberRow({
         onRowClick()
       }}
     >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${pn.number}`}
-        />
-      </TableCell>
+      {canEdit && (
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${pn.number}`}
+          />
+        </TableCell>
+      )}
       <TableCell className={cellClass}>
         <span className="font-mono text-sm">{formatPhoneNumber(pn.number)}</span>
       </TableCell>
@@ -318,17 +323,21 @@ function PhoneNumberRow({
                   View details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/voice/phone-numbers/$phoneNumberId" params={{ phoneNumberId: pn.id }} search={{ edit: true }}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onEdit()}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/voice/phone-numbers/$phoneNumberId" params={{ phoneNumberId: pn.id }} search={{ edit: true }}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onEdit()}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -341,6 +350,8 @@ function PhoneNumberRow({
 
 function PhoneNumbersPage() {
   useDocumentTitle("Phone Numbers")
+  const { canEdit } = usePermissions()
+  const hasEditPermission = canEdit("VOICE_PHONE_NUMBERS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, type: typeParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -543,15 +554,19 @@ function PhoneNumbersPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
-      createBulkDeleteAction(
-        (id) => deletePhoneNumber.mutateAsync(id),
-        () => {
-          setSelectedIds(new Set())
-        },
-      ),
+      ...(hasEditPermission
+        ? [
+            createBulkDeleteAction(
+              (id) => deletePhoneNumber.mutateAsync(id),
+              () => {
+                setSelectedIds(new Set())
+              },
+            ),
+          ]
+        : []),
       createExportAction<PhoneNumber>("phone-numbers-selected", csvHeaders, (ids) => filteredItems.filter((pn) => ids.includes(pn.id))),
     ],
-    [deletePhoneNumber, filteredItems],
+    [deletePhoneNumber, filteredItems, hasEditPermission],
   )
 
   // Export all visible
@@ -582,7 +597,7 @@ function PhoneNumbersPage() {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && hasEditPermission) {
         e.preventDefault()
         navigate({ to: "/voice/phone-numbers/new" })
       }
@@ -654,13 +669,15 @@ function PhoneNumbersPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/voice/phone-numbers/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Phone Number
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {hasEditPermission && (
+              <Button size="sm" asChild>
+                <Link to="/voice/phone-numbers/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Phone Number
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -818,12 +835,14 @@ function PhoneNumbersPage() {
               title="No phone numbers yet"
               description="Add your first phone number to start routing calls to your extensions."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/voice/phone-numbers/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Phone Number
-                  </Link>
-                </Button>
+                hasEditPermission ? (
+                  <Button size="sm" asChild>
+                    <Link to="/voice/phone-numbers/new">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Phone Number
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -878,9 +897,11 @@ function PhoneNumbersPage() {
                 <Table aria-label="Phone numbers" aria-busy={isLoading || isRefetching}>
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all phone numbers" />
-                      </TableHead>
+                      {hasEditPermission && (
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all phone numbers" />
+                        </TableHead>
+                      )}
                       <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       <SortableHeader label="Label" sortKey="label" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                       {isColumnVisible("type") && (
@@ -922,6 +943,7 @@ function PhoneNumbersPage() {
                         onRowClick={() => navigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId: pn.id } })}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={hasEditPermission}
                       />
                     ))}
                   </TableBody>

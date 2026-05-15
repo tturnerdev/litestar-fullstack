@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ChevronRight, Monitor, Phone, Radio, Settings } from "lucide-react"
+import { ChevronRight, Monitor, Phone, Radio, Settings, ShieldAlert } from "lucide-react"
 import { CreateDeviceForm } from "@/components/devices/device-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 
 export const Route = createFileRoute("/_app/devices/new")({
   component: NewDevicePage,
@@ -36,6 +37,23 @@ const tips = [
 
 function NewDevicePage() {
   useDocumentTitle("New Device")
+  const { canEdit } = usePermissions()
+
+  if (!canEdit("DEVICES")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Devices" title="Add New Device" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader

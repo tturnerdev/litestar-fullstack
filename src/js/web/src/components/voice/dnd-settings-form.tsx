@@ -155,7 +155,7 @@ export function DndSettingsForm({ extensionId, readOnly = false }: { extensionId
             <Label htmlFor="dnd-toggle" className="text-sm text-muted-foreground">
               {data.isEnabled ? "Enabled" : "Disabled"}
             </Label>
-            <Switch id="dnd-toggle" checked={data.isEnabled} onCheckedChange={handleToggle} disabled={toggleMutation.isPending} />
+            <Switch id="dnd-toggle" checked={data.isEnabled} onCheckedChange={handleToggle} disabled={toggleMutation.isPending || readOnly} />
           </div>
         </div>
 

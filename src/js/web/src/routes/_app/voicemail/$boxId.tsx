@@ -245,7 +245,7 @@ function VoicemailBoxDetailPage() {
       {/* Messages */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Voicemail Messages">
-          <BoxMessageList boxId={boxId} />
+          <BoxMessageList boxId={boxId} canEdit={hasEditPermission} />
         </SectionErrorBoundary>
       </PageSection>
 
@@ -887,7 +887,7 @@ function BoxSettingsForm({ boxId, readOnly = false }: { boxId: string; readOnly?
 
 // -- Box Message List ---------------------------------------------------------
 
-function BoxMessageList({ boxId }: { boxId: string }) {
+function BoxMessageList({ boxId, canEdit = false }: { boxId: string; canEdit?: boolean }) {
   const [page, setPage] = useState(1)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -1033,6 +1033,7 @@ function BoxMessageList({ boxId }: { boxId: string }) {
                     isExpanded={expandedId === msg.id}
                     isSelected={selectedIds.has(msg.id)}
                     isEvenRow={index % 2 === 0}
+                    canEdit={canEdit}
                     onExpand={() => handleExpand(msg)}
                     onDelete={() => setSingleDeleteId(msg.id)}
                     onToggleRead={() =>
@@ -1119,6 +1120,7 @@ function BoxMessageRow({
   isExpanded,
   isSelected,
   isEvenRow,
+  canEdit = false,
   onExpand,
   onDelete,
   onToggleRead,
@@ -1130,6 +1132,7 @@ function BoxMessageRow({
   isExpanded: boolean
   isSelected: boolean
   isEvenRow: boolean
+  canEdit?: boolean
   onExpand: () => void
   onDelete: () => void
   onToggleRead: () => void
@@ -1215,16 +1218,18 @@ function BoxMessageRow({
             >
               {message.isRead ? <MailOpen className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete()
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </TableCell>
       </TableRow>

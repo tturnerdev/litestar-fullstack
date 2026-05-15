@@ -38,6 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDeleteTeam, useTeams } from "@/lib/api/hooks/teams"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
@@ -140,6 +141,8 @@ const csvHeaders: CsvHeader<Team>[] = [
 
 function TeamsPage() {
   useDocumentTitle("Teams")
+  const { canEdit } = usePermissions()
+  const canEditTeams = canEdit("TEAMS")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
@@ -324,7 +327,7 @@ function TeamsPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey && canEditTeams) {
         e.preventDefault()
         navigate({ to: "/teams/new" })
       }
@@ -343,7 +346,7 @@ function TeamsPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate, page, totalPages])
+  }, [navigate, page, totalPages, canEditTeams])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -394,12 +397,14 @@ function TeamsPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" asChild>
-              <Link to="/teams/new">
-                <Plus className="mr-2 h-4 w-4" /> New team
-                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
-              </Link>
-            </Button>
+            {canEditTeams && (
+              <Button size="sm" asChild>
+                <Link to="/teams/new">
+                  <Plus className="mr-2 h-4 w-4" /> New team
+                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -500,11 +505,13 @@ function TeamsPage() {
               title="Create your first team"
               description="Teams help you organize members and control access across the app. Get started by creating your first team."
               action={
-                <Button size="sm" asChild>
-                  <Link to="/teams/new">
-                    <Plus className="mr-2 h-4 w-4" /> Create team
-                  </Link>
-                </Button>
+                canEditTeams ? (
+                  <Button size="sm" asChild>
+                    <Link to="/teams/new">
+                      <Plus className="mr-2 h-4 w-4" /> Create team
+                    </Link>
+                  </Button>
+                ) : undefined
               }
             />
           ) : !hasData ? (
@@ -554,7 +561,7 @@ function TeamsPage() {
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all teams" />
+                        {canEditTeams && <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all teams" />}
                       </TableHead>
                       <SortableHeader label="Team" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                       {isColumnVisible("members") && <SortableHeader label="Members" sortKey="member_count" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
@@ -586,6 +593,7 @@ function TeamsPage() {
                         currentUserId={user?.id}
                         cellClass={cellClass}
                         isColumnVisible={isColumnVisible}
+                        canEdit={canEditTeams}
                       />
                     ))}
                   </TableBody>
@@ -673,7 +681,9 @@ function TeamsPage() {
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+      {canEditTeams && (
+        <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
+      )}
     </PageContainer>
   )
 }
@@ -689,6 +699,7 @@ function TeamRow({
   currentUserId,
   cellClass,
   isColumnVisible,
+  canEdit,
 }: {
   team: Team
   selected: boolean
@@ -698,6 +709,7 @@ function TeamRow({
   currentUserId?: string
   cellClass: string
   isColumnVisible: (col: string) => boolean
+  canEdit: boolean
 }) {
   const navigate = Route.useNavigate()
   const deleteTeamMutation = useDeleteTeam()
@@ -724,14 +736,16 @@ function TeamRow({
         }}
       >
         <TableCell className={cellClass}>
-          <Checkbox
-            checked={selected}
-            onChange={(e) => {
-              e.stopPropagation()
-              onToggle()
-            }}
-            aria-label={`Select ${team.name}`}
-          />
+          {canEdit && (
+            <Checkbox
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation()
+                onToggle()
+              }}
+              aria-label={`Select ${team.name}`}
+            />
+          )}
         </TableCell>
         <TableCell className={cellClass}>
           <div className="flex items-center gap-3">
@@ -839,17 +853,21 @@ function TeamRow({
                   View details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/teams/$teamId/edit" params={{ teamId: team.id }}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteConfirm(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/teams/$teamId/edit" params={{ teamId: team.id }}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteConfirm(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

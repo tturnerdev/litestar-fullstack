@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Loader2, ShieldAlert } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type LocationUpdate, useLocation, useUpdateLocation } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { cn } from "@/lib/utils"
@@ -89,6 +90,7 @@ function FieldError({ message }: { message?: string }) {
 
 function EditLocationPage() {
   useDocumentTitle("Edit Location")
+  const { canEdit } = usePermissions()
   const { locationId } = Route.useParams()
   const router = useRouter()
   const { currentTeam } = useAuthStore()
@@ -187,6 +189,21 @@ function EditLocationPage() {
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
+
+  if (!canEdit("LOCATIONS")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Locations" title="Edit Location" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   // ── Submit ──────────────────────────────────────────────────────────
 

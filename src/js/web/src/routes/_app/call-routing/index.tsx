@@ -782,7 +782,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
   )
 }
 
-function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
+function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef, canEdit: canEditProp = true }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -916,9 +916,11 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New
-          </Button>
+          {canEditProp && (
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1039,13 +1041,19 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
                           <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } })}>
                             <Eye className="mr-2 h-4 w-4" /> View details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id }, search: { edit: true } })}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setIvrMenuToDelete({ id: ivr.id, name: ivr.name })}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
+                          {canEditProp && (
+                            <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id }, search: { edit: true } })}>
+                              <Pencil className="mr-2 h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                          )}
+                          {canEditProp && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setIvrMenuToDelete({ id: ivr.id, name: ivr.name })}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -1110,7 +1118,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
   )
 }
 
-function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
+function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef, canEdit: canEditProp = true }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -1244,9 +1252,11 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New
-          </Button>
+          {canEditProp && (
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1374,13 +1384,19 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
                           <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } })}>
                             <Eye className="mr-2 h-4 w-4" /> View details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id }, search: { edit: true } })}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCallQueueToDelete({ id: q.id, name: q.name })}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
+                          {canEditProp && (
+                            <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id }, search: { edit: true } })}>
+                              <Pencil className="mr-2 h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                          )}
+                          {canEditProp && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCallQueueToDelete({ id: q.id, name: q.name })}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -1445,7 +1461,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
   )
 }
 
-function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef }: TabSearchProps) {
+function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessChange, searchInputRef, canEdit: canEditProp = true }: TabSearchProps) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -1579,9 +1595,11 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New
-          </Button>
+          {canEditProp && (
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1709,13 +1727,19 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
                           <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } })}>
                             <Eye className="mr-2 h-4 w-4" /> View details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id }, search: { edit: true } })}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setRingGroupToDelete({ id: rg.id, name: rg.name })}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
+                          {canEditProp && (
+                            <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id }, search: { edit: true } })}>
+                              <Pencil className="mr-2 h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                          )}
+                          {canEditProp && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setRingGroupToDelete({ id: rg.id, name: rg.name })}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

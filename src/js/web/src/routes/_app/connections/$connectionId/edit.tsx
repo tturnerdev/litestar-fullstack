@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, ChevronRight, Globe, Headphones, Info, KeyRound, Loader2, Lock, Network, Phone, Plug, ShieldCheck } from "lucide-react"
+import { AlertCircle, AlertTriangle, ChevronRight, Globe, Headphones, Info, KeyRound, Loader2, Lock, Network, Phone, Plug, ShieldAlert, ShieldCheck } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
@@ -24,6 +24,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type ConnectionUpdate, useConnection, useUpdateConnection } from "@/lib/api/hooks/connections"
 import { cn } from "@/lib/utils"
 
@@ -512,6 +513,22 @@ function EditConnectionPage() {
 
   // Get the icon for the currently selected connection type
   const selectedTypeIcon = connectionTypes.find((t) => t.value === connectionType)?.icon
+
+  const { canEdit: canEditFn } = usePermissions()
+  if (!canEditFn("CONNECTIONS")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Connections" title="Edit Connection" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   if (isLoading) {
     return (

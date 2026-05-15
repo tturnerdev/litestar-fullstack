@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { Calendar, ChevronRight, Clock, Globe, Loader2, SlidersHorizontal, Star } from "lucide-react"
+import { Calendar, ChevronRight, Clock, Globe, Loader2, ShieldAlert, SlidersHorizontal, Star } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import {
   AlertDialog,
@@ -16,11 +16,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { type ScheduleCreate, useCreateSchedule } from "@/lib/api/hooks/schedules"
 import { useAuthStore } from "@/lib/auth"
 import { cn } from "@/lib/utils"
@@ -121,6 +122,7 @@ function FieldError({ message }: { message?: string }) {
 
 function NewSchedulePage() {
   useDocumentTitle("New Schedule")
+  const { canEdit } = usePermissions()
   const router = useRouter()
   const createSchedule = useCreateSchedule()
   const currentTeam = useAuthStore((s) => s.currentTeam)
@@ -165,6 +167,21 @@ function NewSchedulePage() {
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
+
+  if (!canEdit("SCHEDULES")) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Schedules" title="New Schedule" />
+        <PageSection>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Permission Denied</h3>
+            <p className="text-sm text-muted-foreground mt-1">You don't have permission to perform this action. Contact your team administrator.</p>
+          </div>
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

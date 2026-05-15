@@ -29,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useDevicesByLocation } from "@/lib/api/hooks/devices"
 import { useE911Registrations } from "@/lib/api/hooks/e911"
 import { type Location, useDeleteLocation, useLocation, useUpdateLocation } from "@/lib/api/hooks/locations"
@@ -72,6 +73,8 @@ function LocationDetailPage() {
   const { edit: editParam } = Route.useSearch()
   const router = useRouter()
   const navigate = Route.useNavigate()
+  const { canEdit: canEditFn } = usePermissions()
+  const hasEditPermission = canEditFn("LOCATIONS")
   const { currentTeam } = useAuthStore()
   const teamId = currentTeam?.id ?? ""
 
@@ -298,7 +301,7 @@ function LocationDetailPage() {
             <Badge variant="outline" className="uppercase">
               {isAddressed ? "Addressed" : "Physical"}
             </Badge>
-            {!editing && (
+            {hasEditPermission && !editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
@@ -315,11 +318,15 @@ function LocationDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Location ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Location
-                </DropdownMenuItem>
+                {hasEditPermission && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Location
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -608,28 +615,30 @@ function LocationDetailPage() {
             </SectionErrorBoundary>
 
             {/* Danger Zone */}
-            <SectionErrorBoundary name="Danger Zone">
-              <Card className="border-destructive/30 bg-card/80 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    Danger Zone
-                  </CardTitle>
-                  <CardDescription>Irreversible and destructive actions for this location.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                    <div>
-                      <p className="font-medium text-sm">Delete this location</p>
-                      <p className="text-xs text-muted-foreground">
-                        {children.length > 0 ? "This will also delete all sub-locations. This action cannot be undone." : "Once deleted, this location cannot be recovered."}
-                      </p>
+            {hasEditPermission && (
+              <SectionErrorBoundary name="Danger Zone">
+                <Card className="border-destructive/30 bg-card/80 shadow-md">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      Danger Zone
+                    </CardTitle>
+                    <CardDescription>Irreversible and destructive actions for this location.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                      <div>
+                        <p className="font-medium text-sm">Delete this location</p>
+                        <p className="text-xs text-muted-foreground">
+                          {children.length > 0 ? "This will also delete all sub-locations. This action cannot be undone." : "Once deleted, this location cannot be recovered."}
+                        </p>
+                      </div>
+                      <DeleteLocationDialog locationName={data.name} hasChildren={children.length > 0} onDelete={handleDelete} isPending={deleteLocation.isPending} />
                     </div>
-                    <DeleteLocationDialog locationName={data.name} hasChildren={children.length > 0} onDelete={handleDelete} isPending={deleteLocation.isPending} />
-                  </div>
-                </CardContent>
-              </Card>
-            </SectionErrorBoundary>
+                  </CardContent>
+                </Card>
+              </SectionErrorBoundary>
+            )}
           </div>
 
           {/* Sidebar */}
